@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class StartupScreen extends StatefulWidget{
   @override
@@ -106,9 +107,10 @@ class StaggerAnimation extends StatelessWidget {
           Spacer(),
           Padding(
             padding: EdgeInsets.only(bottom: 20),
-            child: Icon(
-              Icons.cloud_queue,
-              size: size.value,
+            child: SizedBox(
+              width: size.value,
+              height: size.value,
+              child: SvgPicture.asset('assets/icon-hkgalden.svg'),
             ),
           ),
           Opacity(
