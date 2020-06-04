@@ -38,9 +38,9 @@ class CommentCell extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
-              IconButton(icon: Icon(Icons.format_quote), onPressed: null),
-              IconButton(icon: Icon(Icons.block), onPressed: null),
-              IconButton(icon: Icon(Icons.flag), onPressed: null),
+              IconButton(icon: Icon(Icons.format_quote), onPressed: () => null),
+              IconButton(icon: Icon(Icons.block), onPressed: () => null),
+              IconButton(icon: Icon(Icons.flag), onPressed: () => null),
             ],
           ),
         ],
