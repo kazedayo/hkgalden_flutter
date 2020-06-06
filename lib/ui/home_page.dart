@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'startup_animation.dart';
-import 'comment_cell.dart';
-import 'compose_page.dart';
-import 'thread_cell.dart';
+import 'package:hkgalden_flutter/ui/compose_page.dart';
+import 'package:hkgalden_flutter/ui/thread_cell.dart';
+import 'package:hkgalden_flutter/ui/thread_page.dart';
 
-class MyHomePage extends StatelessWidget {
+class HomePage extends StatelessWidget {
   final String title;
 
-  MyHomePage({Key key, this.title}) : super(key: key);
+  HomePage({Key key, this.title}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +55,7 @@ class MyHomePage extends StatelessWidget {
                         height: 10,
                       ),
                       RaisedButton(
-                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => StartupScreen())),
+                        onPressed: () => null,
                         child: Text('Logout'),
                         color: Colors.redAccent[400],
                       ),
@@ -103,18 +102,3 @@ Route _createRoute() => PageRouteBuilder(
     return SlideTransition(position: offsetAnimation, child: child);
   },
 );
-
-class ThreadPage extends StatelessWidget {
-  @override Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: Text('Thread'),
-    ),
-    body: ListView(
-      children: List.generate(30, (index) => CommentCell()),
-    ),
-    floatingActionButton: FloatingActionButton(
-      child: Icon(Icons.reply),
-      onPressed: null,
-    ),
-  );
-}

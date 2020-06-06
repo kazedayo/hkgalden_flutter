@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'ui_mock.dart';
+import 'package:hkgalden_flutter/routes.dart';
 
 void main() => runApp(MyApp());
 
@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: appTitle,
-      home: MyHomePage(title: appTitle),
+      initialRoute: '/Splash',
       theme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.grey,
@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
           foregroundColor: Colors.white,
         ),
       ),
+      routes: routes,
     );
   }
 }

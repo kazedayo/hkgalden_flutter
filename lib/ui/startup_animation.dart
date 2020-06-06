@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'dart:async';
 
 class StartupScreen extends StatefulWidget{
   @override
@@ -8,7 +9,6 @@ class StartupScreen extends StatefulWidget{
 
 class _StartupScreenState extends State<StartupScreen> with TickerProviderStateMixin {
   AnimationController _controller;
-  bool _isPlaying;
 
   @override
   void initState() {
@@ -17,7 +17,8 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
       duration: const Duration(milliseconds: 2000),
       vsync: this
     );
-    _isPlaying = false;
+    _startTime();
+    _controller.forward();
   }
 
   @override
@@ -26,40 +27,23 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
     super.dispose();
   }
 
-  void _playAnimation() {
-    if (!_isPlaying) {
-      setState(() {
-        _isPlaying = true;
-      });
-    } else {
-      setState(() {
-        _controller.dispose();
-        _controller = AnimationController(
-          duration: const Duration(milliseconds: 2000),
-          vsync: this
-        );
-      });
-    }
-    _controller.forward();
+  //hardcode animation duration
+  _startTime() async {
+    var _duration = Duration(milliseconds: 3000);
+    return new Timer(_duration, navigationPage);
   }
 
+  void navigationPage() {
+    Navigator.of(context).pushReplacementNamed('/Home');
+  }
+ 
   @override
   Widget build(BuildContext context) => Scaffold(
     body: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Container(
-            width: 300,
-            height: 300,
-            child: StaggerAnimation(controller: _controller),
-          ),
-          RaisedButton(
-            onPressed: () => _playAnimation(),
-            child: _isPlaying ? Text('Replay Animation') : Text('Play Animation'),
-          ),
-          RaisedButton(onPressed: () => Navigator.pop(context), child: Text('Go Back'),)
-        ],
+      child: Container(
+        width: 300,
+        height: 300,
+        child: StaggerAnimation(controller: _controller),
       ),
     ),
   );
