@@ -5,7 +5,7 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
-
+import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/viewmodels/startup_animation_view_model.dart';
 
 class StartupScreen extends StatefulWidget{
@@ -24,6 +24,11 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
       vsync: this
     );
     _controller.forward();
+    _controller.addStatusListener((status) { 
+      if (status == AnimationStatus.completed) {
+        store.dispatch(RequestThreadAction());
+      }
+    });
   }
 
   @override
@@ -36,12 +41,8 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
   Widget build(BuildContext context) => Scaffold(
     body: StoreConnector<AppState, StartupAnimationViewModel>(
       distinct: true,
-      onInit: (store) => store.dispatch(RequestThreadAction()),
       onDidChange: (viewModel) {
-        Timer(
-          Duration(seconds: 1), 
-          () => Navigator.of(context).pushReplacementNamed('/Home'),
-        );
+        Navigator.of(context).pushReplacementNamed('/Home');
       },
       converter: (store) => StartupAnimationViewModel.create(store),
       builder: (BuildContext context, StartupAnimationViewModel viewModel) => Center(
