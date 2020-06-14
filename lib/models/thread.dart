@@ -1,11 +1,11 @@
+import 'package:hkgalden_flutter/models/thread_reply.dart';
 import 'package:meta/meta.dart';
 
 @immutable
 class Thread {
   final int threadId;
   final String title;
-  final String authorName;
-  final Duration lastReply;
+  final List<ThreadReply> replies;
   final int totalReplies;
   final String tagName;
   final String tagColor;
@@ -13,8 +13,7 @@ class Thread {
   Thread({
     this.threadId,
     this.title,
-    this.authorName,
-    this.lastReply,
+    this.replies,
     this.totalReplies,
     this.tagName,
     this.tagColor
@@ -23,8 +22,7 @@ class Thread {
   factory Thread.fromJson(Map<String, dynamic> json) => new Thread(
     threadId: json['id'],
     title: json['title'],
-    authorName: json['replies'][0]['authorNickname'],
-    lastReply: DateTime.parse(json['replies'][0]['date']).difference(DateTime.now()),
+    replies: (json['replies'] as List<dynamic>).map((reply) => ThreadReply.fromJson(reply)).toList(),
     totalReplies: json['totalReplies'],
     tagName: json['tags'][0]['name'],
     tagColor: json['tags'][0]['color'],
@@ -37,8 +35,7 @@ class Thread {
         runtimeType == other.runtimeType && 
         threadId == other.threadId && 
         title == other.title && 
-        authorName == other.authorName && 
-        lastReply == other.lastReply && 
+        replies == other.replies &&
         totalReplies == other.totalReplies && 
         tagName == other.tagName && 
         tagColor == other.tagColor;
@@ -47,8 +44,7 @@ class Thread {
   int get hashCode => 
     threadId.hashCode ^ 
     title.hashCode ^ 
-    authorName.hashCode ^ 
-    lastReply.hashCode ^ 
+    replies.hashCode ^ 
     totalReplies.hashCode ^ 
     tagName.hashCode ^ 
     tagColor.hashCode;

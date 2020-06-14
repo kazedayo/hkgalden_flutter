@@ -33,6 +33,7 @@ dependencies:
   graphql: ^3.0.2
   redux: ^4.0.0
   flutter_redux: ^0.6.0
+  timeago: ^2.0.26
 
 dev_dependencies:
   flutter_test:

@@ -25,9 +25,11 @@ class HomePage extends StatelessWidget {
           itemBuilder: (context, index) => InkWell(
             child: ThreadCell(
               title: viewModel.threads[index].title,
-              authorName: viewModel.threads[index].authorName,
+              authorName: viewModel.threads[index].replies[0].authorNickname,
               totalReplies: viewModel.threads[index].totalReplies,
-              lastReply: viewModel.threads[index].lastReply,
+              lastReply: viewModel.threads[index].replies.length == 2 ? 
+                          viewModel.threads[index].replies[1].date : 
+                          viewModel.threads[index].replies[0].date,
             ),
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ThreadPage())),
           ),
