@@ -1,6 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hkgalden_flutter/redux/app/app_state.dart';
+import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
+
+import 'package:hkgalden_flutter/viewmodels/startup_animation_view_model.dart';
 
 class StartupScreen extends StatefulWidget{
   @override
@@ -17,7 +23,6 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
       duration: const Duration(milliseconds: 2000),
       vsync: this
     );
-    _startTime();
     _controller.forward();
   }
 
@@ -26,24 +31,25 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
     _controller.dispose();
     super.dispose();
   }
-
-  //hardcode animation duration
-  _startTime() async {
-    var _duration = Duration(milliseconds: 3000);
-    return new Timer(_duration, navigationPage);
-  }
-
-  void navigationPage() {
-    Navigator.of(context).pushReplacementNamed('/Home');
-  }
  
   @override
   Widget build(BuildContext context) => Scaffold(
-    body: Center(
-      child: Container(
-        width: 300,
-        height: 300,
-        child: StaggerAnimation(controller: _controller),
+    body: StoreConnector<AppState, StartupAnimationViewModel>(
+      distinct: true,
+      onInit: (store) => store.dispatch(RequestThreadAction()),
+      onDidChange: (viewModel) {
+        Timer(
+          Duration(seconds: 1), 
+          () => Navigator.of(context).pushReplacementNamed('/Home'),
+        );
+      },
+      converter: (store) => StartupAnimationViewModel.create(store),
+      builder: (BuildContext context, StartupAnimationViewModel viewModel) => Center(
+        child: Container(
+          width: 300,
+          height: 300,
+          child: StaggerAnimation(controller: _controller),
+        ),
       ),
     ),
   );

@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 
 class ThreadCell extends StatelessWidget {
-final String _title;
+final String title;
+final String authorName;
+final int totalReplies;
+final Duration lastReply;
 
-ThreadCell(this._title);
+ThreadCell({
+  this.title,
+  this.authorName,
+  this.totalReplies,
+  this.lastReply,
+});
 
   @override
   Widget build(BuildContext context) => Container(
@@ -11,22 +19,22 @@ ThreadCell(this._title);
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(_title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),),
+          Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),),
           SizedBox(height: 10),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Icon(Icons.face, size: 15),
               SizedBox(width: 5),
-              Text('user1'),
+              Text(authorName),
               SizedBox(width: 10),
               Icon(Icons.reply, size: 15),
               SizedBox(width: 5),
-              Text('xx'),
+              Text(totalReplies.toString()),
               SizedBox(width: 10),
               Icon(Icons.access_time, size: 15),
               SizedBox(width: 5),
-              Text('xx minutes'),
+              Text(lastReply.toString()),
             ],
           ),
         ],

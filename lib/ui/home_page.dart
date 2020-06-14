@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/ui/compose_page.dart';
 import 'package:hkgalden_flutter/ui/thread_cell.dart';
 import 'package:hkgalden_flutter/ui/thread_page.dart';
+import 'package:hkgalden_flutter/viewmodels/home_page_view_model.dart';
 
 class HomePage extends StatelessWidget {
   final String title;
@@ -14,14 +17,20 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
       ),
-      body: ListView.separated(
-        separatorBuilder: (context, index) => Divider(indent: 8,height: 1,thickness: 1,),
-        itemCount: 30,
-        itemBuilder: (context, index) => InkWell(
-          child: ThreadCell(
-            'Thread #$index'
+      body: StoreConnector<AppState, HomePageViewModel>(
+        converter: (store) => HomePageViewModel.create(store),
+        builder: (BuildContext context, HomePageViewModel viewModel) => ListView.separated(
+          separatorBuilder: (context, index) => Divider(indent: 8,height: 1,thickness: 1,),
+          itemCount: viewModel.threads.length,
+          itemBuilder: (context, index) => InkWell(
+            child: ThreadCell(
+              title: viewModel.threads[index].title,
+              authorName: viewModel.threads[index].authorName,
+              totalReplies: viewModel.threads[index].totalReplies,
+              lastReply: viewModel.threads[index].lastReply,
+            ),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ThreadPage())),
           ),
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ThreadPage())),
         ),
       ),
       drawer: Container(
@@ -37,10 +46,19 @@ class HomePage extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Icon(
-                        Icons.account_circle,
-                        color: Colors.white,
-                        size: 50,
+                      Container(
+                        width: 50,
+                        height: 50,
+                        alignment: Alignment.center,
+                        child: Icon(Icons.account_circle, size: 50,),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xff7435a0),Color(0xff4a72d3)],
+                          ),
+                        ),
                       ),
                       SizedBox(
                         height: 10,

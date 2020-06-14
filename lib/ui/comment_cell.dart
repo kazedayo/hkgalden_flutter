@@ -13,17 +13,23 @@ class CommentCell extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Icon(Icons.account_circle, size: 40),
+              Container(
+                width: 40,
+                height: 40,
+                child: Icon(Icons.account_circle, size: 40),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xff7435a0),Color(0xff4a72d3)],
+                  ),
+                ),
+              ),
               SizedBox(
                 width: 5,
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text('username'),
-                  Text('usergroup')
-                ],
-              ),
+              Text('username'),
               Spacer(),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
