@@ -9,6 +9,7 @@ class HomePageViewModel {
   final Function(String) onRefresh;
   final String selectedChannelId;
   final bool isThreadLoading;
+  final bool isRefresh;
 
   HomePageViewModel({
     this.threads,
@@ -16,6 +17,7 @@ class HomePageViewModel {
     this.onRefresh,
     this.selectedChannelId,
     this.isThreadLoading,
+    this.isRefresh,
   });
 
   factory HomePageViewModel.create(Store<AppState> store) {
@@ -24,9 +26,10 @@ class HomePageViewModel {
       title: store.state.channelState.channels.where(
         (channel) => channel.channelId == store.state.channelState.selectedChannelId)
       .first.channelName,
-      onRefresh: (channelId) => store.dispatch(RequestThreadAction(channelId: channelId)),
+      onRefresh: (channelId) => store.dispatch(RequestThreadAction(channelId: channelId, isRefresh: true)),
       selectedChannelId: store.state.channelState.selectedChannelId,
       isThreadLoading: store.state.threadState.isLoading,
+      isRefresh: store.state.threadState.isRefresh,
     );
   }
 }

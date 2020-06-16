@@ -2,9 +2,11 @@ import 'package:hkgalden_flutter/models/thread.dart';
 
 class RequestThreadAction {
   final String channelId;
+  final bool isRefresh;
 
   RequestThreadAction({
-    this.channelId
+    this.channelId,
+    this.isRefresh
   });
 }
 

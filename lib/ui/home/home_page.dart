@@ -20,7 +20,7 @@ class HomePage extends StatelessWidget {
         appBar: AppBar(
           title: Text(viewModel.title),
         ),
-        body: viewModel.isThreadLoading ? 
+        body: viewModel.isThreadLoading && viewModel.isRefresh == false ? 
           Center(
             child: CircularProgressIndicator(),
           ) : 

@@ -9,13 +9,13 @@ final Reducer<ThreadState> threadReducer = combineReducers([
 ]);
 
 ThreadState requestThreadReducer(ThreadState state, RequestThreadAction action) {
-  return state.copyWith(isLoading: true);
+  return state.copyWith(isLoading: true, isRefresh: action.isRefresh);
 }
 
 ThreadState updateThreadReducer(ThreadState state, UpdateThreadAction action) {
-  return state.copyWith(isLoading: false, threads: action.threads);
+  return state.copyWith(isLoading: false, isRefresh: false, threads: action.threads);
 }
 
 ThreadState requestThreadErrorReducer(ThreadState state, RequestThreadErrorAction action) {
-  return state.copyWith(isLoading: false);
+  return state.copyWith(isLoading: false, isRefresh: false);
 }
