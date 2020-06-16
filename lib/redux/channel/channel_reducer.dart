@@ -19,3 +19,7 @@ ChannelState updateChannelReducer(ChannelState state, UpdateChannelAction action
 ChannelState requestChannelErrorReducer(ChannelState state, RequestChannelErrorAction action) {
   return state.copyWith(isLoading: false);
 }
+
+ChannelState setSelectedChannelIdReducer(ChannelState state, SetSelectedChannelId action) {
+  return state.copyWith(selectedChannelId: action.channelId);
+}

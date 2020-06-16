@@ -5,17 +5,25 @@ import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 
 class HomePageViewModel {
   final List<Thread> threads;
-  final Function onRefresh;
+  final String title;
+  final String selectedChannelId;
+  final Function(String) onRefresh;
 
   HomePageViewModel({
     this.threads,
+    this.title,
     this.onRefresh,
+    this.selectedChannelId,
   });
 
   factory HomePageViewModel.create(Store<AppState> store) {
     return HomePageViewModel(
       threads: store.state.threadState.threads,
-      onRefresh: () => store.dispatch(RequestThreadAction()),
+      title: store.state.channelState.channels.where(
+        (channel) => channel.channelId == store.state.channelState.selectedChannelId)
+      .first.channelName,
+      selectedChannelId: store.state.channelState.selectedChannelId,
+      onRefresh: (channelId) => store.dispatch(RequestThreadAction(channelId: channelId)),
     );
   }
 }

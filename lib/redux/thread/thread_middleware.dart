@@ -11,14 +11,14 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
   @override
   void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
     if (action is RequestThreadAction) {
-      List<Thread> threads = await _getThreadsQuery();
+      List<Thread> threads = await _getThreadsQuery(action.channelId);
       next(UpdateThreadAction(threads: threads));
     } else {
       next(action);
     }
   }
 
-  Future<List<Thread>> _getThreadsQuery() async {
+  Future<List<Thread>> _getThreadsQuery(String channelId) async {
     final client = HKGaldenApi().client;
 
     const String query = r'''
@@ -43,7 +43,7 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
       documentNode: gql(query),
       variables: <String, dynamic>{
         //hardcoded value for now
-        'channelId': 'bw',
+        'channelId': channelId,
         'page': 1
       },
     );

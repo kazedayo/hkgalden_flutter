@@ -11,3 +11,11 @@ class UpdateChannelAction {
 }
 
 class RequestChannelErrorAction {}
+
+class SetSelectedChannelId {
+  final String channelId;
+
+  SetSelectedChannelId({
+    this.channelId
+  });
+}

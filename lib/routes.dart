@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/ui/home/home_page.dart';
 import 'package:hkgalden_flutter/ui/startup_animation.dart';
 
-String appTitle = 'hkGalden UI Mockup';
-
 Map<String, WidgetBuilder> routes = {
-  '/Home': (BuildContext context) => new HomePage(title: appTitle),
+  '/Home': (BuildContext context) => new HomePage(),
   '/Splash': (BuildContext context) => new StartupScreen(),
 };

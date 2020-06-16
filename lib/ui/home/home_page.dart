@@ -6,7 +6,6 @@ import 'package:hkgalden_flutter/ui/home/home_drawer.dart';
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
 import 'package:hkgalden_flutter/viewmodels/home_page_view_model.dart';
-
 class HomePage extends StatelessWidget {
   final String title;
 
@@ -14,14 +13,16 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
-      body: StoreConnector<AppState, HomePageViewModel>(
-        converter: (store) => HomePageViewModel.create(store),
-        builder: (BuildContext context, HomePageViewModel viewModel) => RefreshIndicator(
-          onRefresh: () => viewModel.onRefresh(),
+    return StoreConnector<AppState, HomePageViewModel>(
+      converter: (store) => HomePageViewModel.create(store),
+      onDidChange: (viewModel) => print(viewModel.title),
+      distinct: true,
+      builder: (BuildContext context, HomePageViewModel viewModel) => Scaffold(
+        appBar: AppBar(
+          title: Text(viewModel.title),
+        ),
+        body: RefreshIndicator(
+          onRefresh: () => viewModel.onRefresh(viewModel.selectedChannelId),
           child: ListView.separated(
             separatorBuilder: (context, index) => Divider(indent: 8,height: 1,thickness: 1,),
             itemCount: viewModel.threads.length,
@@ -38,11 +39,11 @@ class HomePage extends StatelessWidget {
             ),
           ),
         ),
-      ),
-      drawer: HomeDrawer(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context).push(_createRoute()),
-        child: Icon(Icons.create),
+        drawer: HomeDrawer(),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => Navigator.of(context).push(_createRoute()),
+          child: Icon(Icons.create),
+        ),
       ),
     );
   }

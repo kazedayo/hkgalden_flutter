@@ -6,14 +6,12 @@ import 'package:hkgalden_flutter/redux/store.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  final appTitle = 'UI Mockup';
 
   @override
   Widget build(BuildContext context) {
     return StoreProvider(
       store: store,
       child: MaterialApp(
-        title: appTitle,
         initialRoute: '/Splash',
         theme: ThemeData(
           brightness: Brightness.dark,

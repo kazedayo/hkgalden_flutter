@@ -74,6 +74,10 @@ class HomeDrawer extends StatelessWidget {
                       shape: BoxShape.circle,
                     ),
                   ),
+                  onTap: () {
+                    viewModel.onTap(viewModel.channels[index].channelId);
+                    Navigator.pop(context);
+                  } ,
                 ),
               ),
             ),

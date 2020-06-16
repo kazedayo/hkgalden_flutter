@@ -16,7 +16,7 @@ class ChannelState {
   factory ChannelState.initial() => ChannelState(
     isLoading: false,
     channels: const [],
-    selectedChannelId: 'bw',
+    selectedChannelId: 'bw'
   );
 
   ChannelState copyWith({
