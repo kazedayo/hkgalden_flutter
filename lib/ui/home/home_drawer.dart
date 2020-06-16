@@ -60,24 +60,26 @@ class HomeDrawer extends StatelessWidget {
               ),
             ),
             Expanded(
-              flex: 1,
-              child: ListView.builder(
-                padding: EdgeInsets.only(top: 0),
-                itemCount: viewModel.channels.length,
-                itemBuilder: (context, index) => ListTile(
-                  title: Text(viewModel.channels[index].channelName),
-                  trailing: Container(
-                    width: 15,
-                    height: 15,
-                    decoration: BoxDecoration(
-                      color: viewModel.channels[index].channelColor,
-                      shape: BoxShape.circle,
+              child: SafeArea(
+                top: false,
+                child: ListView.builder(
+                  padding: EdgeInsets.only(top: 0),
+                  itemCount: viewModel.channels.length,
+                  itemBuilder: (context, index) => ListTile(
+                    title: Text(viewModel.channels[index].channelName),
+                    trailing: Container(
+                      width: 15,
+                      height: 15,
+                      decoration: BoxDecoration(
+                        color: viewModel.channels[index].channelColor,
+                        shape: BoxShape.circle,
+                      ),
                     ),
+                    onTap: () {
+                      viewModel.onTap(viewModel.channels[index].channelId);
+                      Navigator.pop(context);
+                    } ,
                   ),
-                  onTap: () {
-                    viewModel.onTap(viewModel.channels[index].channelId);
-                    Navigator.pop(context);
-                  } ,
                 ),
               ),
             ),
