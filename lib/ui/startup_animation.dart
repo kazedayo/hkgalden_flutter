@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
+import 'package:hkgalden_flutter/redux/channel/channel_action.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/viewmodels/startup_animation_view_model.dart';
@@ -27,6 +28,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
     _controller.addStatusListener((status) { 
       if (status == AnimationStatus.completed) {
         store.dispatch(RequestThreadAction());
+        store.dispatch(RequestChannelAction());
       }
     });
   }
@@ -42,7 +44,9 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
     body: StoreConnector<AppState, StartupAnimationViewModel>(
       distinct: true,
       onDidChange: (viewModel) {
-        Navigator.of(context).pushReplacementNamed('/Home');
+        if (viewModel.threadIsLoading == false && viewModel.channelIsLoading == false) {
+          Navigator.of(context).pushReplacementNamed('/Home');
+        }
       },
       converter: (store) => StartupAnimationViewModel.create(store),
       builder: (BuildContext context, StartupAnimationViewModel viewModel) => Center(

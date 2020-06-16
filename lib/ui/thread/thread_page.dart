@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hkgalden_flutter/ui/comment_cell.dart';
+import 'package:hkgalden_flutter/ui/thread/comment_cell.dart';
 
 class ThreadPage extends StatelessWidget {
   @override Widget build(BuildContext context) => Scaffold(

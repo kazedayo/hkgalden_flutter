@@ -4,7 +4,7 @@ import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/ui/home/compose_page.dart';
 import 'package:hkgalden_flutter/ui/home/home_drawer.dart';
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
-import 'package:hkgalden_flutter/ui/thread_page.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
 import 'package:hkgalden_flutter/viewmodels/home_page_view_model.dart';
 
 class HomePage extends StatelessWidget {
