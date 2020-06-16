@@ -12,7 +12,7 @@ class ThreadState {
   });
 
   factory ThreadState.initial() => ThreadState(
-    isLoading: false,
+    isLoading: true,
     threads: const []
   );
 

@@ -6,19 +6,22 @@ import 'package:redux/redux.dart';
 
 class HomeDrawerViewModel {
   final List<Channel> channels;
+  final String selectedChannelId;
   final Function(String) onTap;
 
   HomeDrawerViewModel({
     this.channels,
+    this.selectedChannelId,
     this.onTap,
   });
 
   factory HomeDrawerViewModel.create(Store<AppState> store) {
     return HomeDrawerViewModel(
       channels: store.state.channelState.channels,
+      selectedChannelId: 'bw',
       onTap: (channelId) {
-        store.dispatch(RequestThreadAction(channelId: channelId));
         store.dispatch(SetSelectedChannelId(channelId: channelId));
+        store.dispatch(RequestThreadAction(channelId: channelId));
       },
     );
   }

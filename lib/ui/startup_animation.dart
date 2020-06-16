@@ -43,7 +43,6 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
   @override
   Widget build(BuildContext context) => Scaffold(
     body: StoreConnector<AppState, StartupAnimationViewModel>(
-      distinct: true,
       onDidChange: (viewModel) {
         if (viewModel.threadIsLoading == false && viewModel.channelIsLoading == false) {
           Navigator.of(context).pushReplacementNamed('/Home');

@@ -15,13 +15,16 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return StoreConnector<AppState, HomePageViewModel>(
       converter: (store) => HomePageViewModel.create(store),
-      onDidChange: (viewModel) => print(viewModel.title),
       distinct: true,
       builder: (BuildContext context, HomePageViewModel viewModel) => Scaffold(
         appBar: AppBar(
           title: Text(viewModel.title),
         ),
-        body: RefreshIndicator(
+        body: viewModel.isThreadLoading ? 
+          Center(
+            child: CircularProgressIndicator(),
+          ) : 
+          RefreshIndicator(
           onRefresh: () => viewModel.onRefresh(viewModel.selectedChannelId),
           child: ListView.separated(
             separatorBuilder: (context, index) => Divider(indent: 8,height: 1,thickness: 1,),

@@ -6,14 +6,16 @@ import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 class HomePageViewModel {
   final List<Thread> threads;
   final String title;
-  final String selectedChannelId;
   final Function(String) onRefresh;
+  final String selectedChannelId;
+  final bool isThreadLoading;
 
   HomePageViewModel({
     this.threads,
     this.title,
     this.onRefresh,
     this.selectedChannelId,
+    this.isThreadLoading,
   });
 
   factory HomePageViewModel.create(Store<AppState> store) {
@@ -22,8 +24,9 @@ class HomePageViewModel {
       title: store.state.channelState.channels.where(
         (channel) => channel.channelId == store.state.channelState.selectedChannelId)
       .first.channelName,
-      selectedChannelId: store.state.channelState.selectedChannelId,
       onRefresh: (channelId) => store.dispatch(RequestThreadAction(channelId: channelId)),
+      selectedChannelId: store.state.channelState.selectedChannelId,
+      isThreadLoading: store.state.threadState.isLoading,
     );
   }
 }

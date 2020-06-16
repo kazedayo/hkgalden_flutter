@@ -11,6 +11,7 @@ class ChannelMiddleware extends MiddlewareClass<AppState> {
   @override
   void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
     if (action is RequestChannelAction) {
+      next(action);
       List<Channel> channels = await _getChannelsQuery();
       next(UpdateChannelAction(channels: channels));
     } else {

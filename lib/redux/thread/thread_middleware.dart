@@ -11,6 +11,7 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
   @override
   void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
     if (action is RequestThreadAction) {
+      next(action);
       List<Thread> threads = await _getThreadsQuery(action.channelId);
       next(UpdateThreadAction(threads: threads));
     } else {

@@ -6,6 +6,7 @@ final Reducer<ChannelState> channelReducer = combineReducers([
   TypedReducer<ChannelState, RequestChannelAction>(requestChannelReducer),
   TypedReducer<ChannelState, UpdateChannelAction>(updateChannelReducer),
   TypedReducer<ChannelState, RequestChannelErrorAction>(requestChannelErrorReducer),
+  TypedReducer<ChannelState, SetSelectedChannelId>(setSelectedChannelIdReducer),
 ]);
 
 ChannelState requestChannelReducer(ChannelState state, RequestChannelAction action) {
