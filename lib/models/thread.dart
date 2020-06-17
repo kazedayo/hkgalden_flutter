@@ -1,5 +1,6 @@
 import 'package:hkgalden_flutter/models/thread_reply.dart';
 import 'package:meta/meta.dart';
+import 'package:equatable/equatable.dart';
 
 @immutable
 class Thread {
@@ -28,24 +29,5 @@ class Thread {
     tagColor: json['tags'][0]['color'],
   );
 
-  @override
-  bool operator ==(Object other) =>
-    identical(this, other) ||
-      other is Thread && 
-        runtimeType == other.runtimeType && 
-        threadId == other.threadId && 
-        title == other.title && 
-        replies == other.replies &&
-        totalReplies == other.totalReplies && 
-        tagName == other.tagName && 
-        tagColor == other.tagColor;
-  
-  @override
-  int get hashCode => 
-    threadId.hashCode ^ 
-    title.hashCode ^ 
-    replies.hashCode ^ 
-    totalReplies.hashCode ^ 
-    tagName.hashCode ^ 
-    tagColor.hashCode;
+  List<Object> get props => [threadId, title, replies, totalReplies, tagName, tagColor];
 }

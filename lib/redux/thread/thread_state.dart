@@ -1,11 +1,12 @@
+import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 
 @immutable
-class ThreadState {
+class ThreadState extends Equatable{
   final bool isLoading;
   final List<Thread> threads;
-  final isRefresh;
+  final bool isRefresh;
 
   ThreadState({
     this.isLoading,
@@ -30,4 +31,6 @@ class ThreadState {
       isRefresh: isRefresh ?? this.isRefresh,
     );
   }
+
+  List<Object> get props => [isLoading, threads, isRefresh];
 }

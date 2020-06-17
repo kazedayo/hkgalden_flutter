@@ -1,7 +1,8 @@
 import 'package:meta/meta.dart';
+import 'package:equatable/equatable.dart';
 
 @immutable
-class ThreadReply {
+class ThreadReply extends Equatable {
   final String authorNickname;
   final DateTime date;
 
@@ -15,16 +16,5 @@ class ThreadReply {
     date: DateTime.parse(json['date']),
   );
 
- @override
-  bool operator ==(Object other) =>
-    identical(this, other) ||
-      other is ThreadReply && 
-        runtimeType == other.runtimeType && 
-        authorNickname == other.authorNickname && 
-        date == other.date;
-  
-  @override
-  int get hashCode => 
-    authorNickname.hashCode ^ 
-    date.hashCode;
+ List<Object> get props => [authorNickname, date];
 }

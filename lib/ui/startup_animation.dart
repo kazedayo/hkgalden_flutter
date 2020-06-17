@@ -3,8 +3,10 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/channel/channel_action.dart';
+import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 import 'package:hkgalden_flutter/redux/store.dart';
+import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/home/home_page.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/viewmodels/startup_animation_view_model.dart';
@@ -16,10 +18,12 @@ class StartupScreen extends StatefulWidget{
 
 class _StartupScreenState extends State<StartupScreen> with TickerProviderStateMixin {
   AnimationController _controller;
+  String token;
 
   @override
   void initState() {
     super.initState();
+    _getToken();
     _controller = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this
@@ -30,7 +34,18 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
         //Hardcode default to 'bw' channel
         store.dispatch(RequestThreadAction(channelId: 'bw'));
         store.dispatch(RequestChannelAction());
+        if (token != null) {
+          store.dispatch(RequestSessionUserAction());
+        }
       }
+    });
+  }
+
+  Future<void> _getToken() async {
+    await tokenSecureStorage.read(key: 'token').then((value) {
+      setState(() {
+        token = value;
+      });
     });
   }
 
@@ -44,7 +59,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
   Widget build(BuildContext context) => Scaffold(
     body: StoreConnector<AppState, StartupAnimationViewModel>(
       onDidChange: (viewModel) {
-        if (viewModel.threadIsLoading == false && viewModel.channelIsLoading == false) {
+        if (viewModel.threadIsLoading == false && viewModel.channelIsLoading == false && viewModel.sessionUserIsLoading == false) {
           Navigator.of(context).pushReplacement(FadeRoute(page: HomePage()));
         }
       },

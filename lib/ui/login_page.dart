@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
+import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/redux/store.dart';
@@ -38,6 +39,7 @@ class LoginPage extends StatelessWidget {
   Future<void> _saveToken(BuildContext context, String token) async {
     await tokenSecureStorage.write(key: 'token', value: token).then((value) {
       onLoginSuccess();
+      store.dispatch(RequestSessionUserAction());
       Navigator.pop(context);
     });
   }
