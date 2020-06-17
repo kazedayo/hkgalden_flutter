@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hkgalden_flutter/ui/login_page.dart';
+import 'package:hkgalden_flutter/ui/page_transitions.dart';
 
 class HomeDrawerHeader extends StatelessWidget {
   @override
@@ -26,7 +28,7 @@ class HomeDrawerHeader extends StatelessWidget {
             height: 10,
           ),
           Text(
-            'User Name',
+            '未登入',
             style: TextStyle(
               color: Colors.white,
             ),
@@ -35,9 +37,9 @@ class HomeDrawerHeader extends StatelessWidget {
             height: 10,
           ),
           RaisedButton(
-            onPressed: () => null,
-            child: Text('Logout'),
-            color: Colors.redAccent[400],
+            onPressed: () => Navigator.push(context, SlideInFromBottomRoute(page: LoginPage())),
+            child: Text('登入'),
+            color: Colors.green[700],
           ),
         ],
       ),
