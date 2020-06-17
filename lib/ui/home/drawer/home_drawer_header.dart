@@ -58,7 +58,11 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
               child: Container(
                 child: Padding(
                   padding: const EdgeInsets.all(6.0),
-                  child: viewModel.sessionUserAvatar,
+                  child: Container(
+                    width: 33,
+                    height: 33,
+                    child: viewModel.sessionUserAvatar
+                  ),
                 ),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,

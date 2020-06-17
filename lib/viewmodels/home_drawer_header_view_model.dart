@@ -17,7 +17,7 @@ class HomeDrawerHeaderViewModel {
   factory HomeDrawerHeaderViewModel.create(Store<AppState> store) {
     return HomeDrawerHeaderViewModel(
       sessionUserName: store.state.sessionUserState.sessionUser.nickName,
-      sessionUserAvatar: store.state.sessionUserState.sessionUser.avatar.isEmpty ? Image.asset('assets/default-icon.png') : Image.network(store.state.sessionUserState.sessionUser.avatar),
+      sessionUserAvatar: store.state.sessionUserState.sessionUser.avatar == '' ? Image.asset('assets/default-icon.png') : Image.network(store.state.sessionUserState.sessionUser.avatar),
       sessionUserGroup: store.state.sessionUserState.sessionUser.userGroup,
     );
   }
