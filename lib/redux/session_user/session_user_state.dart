@@ -14,7 +14,12 @@ class SessionUserState extends Equatable{
 
   factory SessionUserState.initial() => SessionUserState(
     isLoading: false,
-    sessionUser: null,
+    sessionUser: SessionUser(
+      userId: '',
+      nickName: '',
+      avatar: '',
+      userGroup: [],
+    ),
   );
 
   SessionUserState copyWith({

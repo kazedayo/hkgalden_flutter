@@ -1,3 +1,4 @@
+import 'package:hkgalden_flutter/models/session_user.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_state.dart';
 import 'package:redux/redux.dart';
@@ -22,5 +23,10 @@ SessionUserState requestSessionUserErrorReducer(SessionUserState state, RequestS
 }
 
 SessionUserState removeSessionUserReducer(SessionUserState state, RemoveSessionUserAction action) {
-  return state.copyWith(isLoading: false, sessionUser: null);
+  return state.copyWith(isLoading: false, sessionUser: SessionUser(
+    userId: '',
+    nickName: '',
+    avatar: '',
+    userGroup: [],
+  ));
 }

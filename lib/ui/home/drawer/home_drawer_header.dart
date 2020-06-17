@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
+import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
+import 'package:hkgalden_flutter/redux/store.dart';
+import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/login_page.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
@@ -29,16 +32,19 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
   }
 
   Future<void> _deleteToken() async {
-    await tokenSecureStorage.delete(key: 'token').then((value) {
+    await tokenSecureStorage.write(key: 'token', value: '').then((value) {
       setState(() {
-        token = null;
+        token = '';
       });
+      store.dispatch(RemoveSessionUserAction());
+      store.dispatch(RequestThreadAction(channelId: store.state.channelState.selectedChannelId, isRefresh: false));
     });
   }
 
   @override
   Widget build(BuildContext context) => StoreConnector<AppState, HomeDrawerHeaderViewModel>(
     converter: (store) => HomeDrawerHeaderViewModel.create(store),
+    onInitialBuild: (viewModel) => precacheImage(viewModel.sessionUserAvatar.image, context),
     builder: (BuildContext context, HomeDrawerHeaderViewModel viewModel) => Container(
       height: 250,
       child: DrawerHeader(
@@ -49,13 +55,24 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
               width: 50,
               height: 50,
               alignment: Alignment.center,
-              child: Icon(Icons.account_circle, size: 50,),
+              child: Container(
+                child: Padding(
+                  padding: const EdgeInsets.all(6.0),
+                  child: viewModel.sessionUserAvatar,
+                ),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.grey[850],
+                ),
+              ),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
+                color: viewModel.sessionUserGroup.isEmpty ? Colors.grey[700] : null,
+                gradient: viewModel.sessionUserGroup.isEmpty ? null : LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Color(0xff7435a0),Color(0xff4a72d3)],
+                  colors: [viewModel.sessionUserGroup.first.groupId == 'ADMIN' ? Color(0xff7435a0) : Color(0xffe0561d),
+                            viewModel.sessionUserGroup.first.groupId == 'ADMIN' ? Color(0xff4a72d3) : Color(0xffd8529a)],
                 ),
               ),
             ),
@@ -63,7 +80,7 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
               height: 10,
             ),
             Text(
-              token == null ? '未登入' : viewModel.sessionUserName,
+              token == '' ? '未登入' : viewModel.sessionUserName,
               style: TextStyle(
                 color: Colors.white,
               ),
@@ -72,9 +89,9 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
               height: 10,
             ),
             RaisedButton(
-              onPressed: () => token == null ? Navigator.push(context, SlideInFromBottomRoute(page: LoginPage(onLoginSuccess: () => _retrieveToken(),))) : _deleteToken(),
-              child: Text(token == null ? '登入' : '登出'),
-              color: token == null ? Colors.green[700] : Colors.redAccent[400],
+              onPressed: () => token == '' ? Navigator.push(context, SlideInFromBottomRoute(page: LoginPage(onLoginSuccess: () => _retrieveToken(),))) : _deleteToken(),
+              child: Text(token == '' ? '登入' : '登出'),
+              color: token == '' ? Colors.green[700] : Colors.redAccent[400],
             ),
           ],
         ),

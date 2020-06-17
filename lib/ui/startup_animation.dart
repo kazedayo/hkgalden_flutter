@@ -34,7 +34,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
         //Hardcode default to 'bw' channel
         store.dispatch(RequestThreadAction(channelId: 'bw'));
         store.dispatch(RequestChannelAction());
-        if (token != null) {
+        if (token != '') {
           store.dispatch(RequestSessionUserAction());
         }
       }
@@ -43,11 +43,23 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
 
   Future<void> _getToken() async {
     await tokenSecureStorage.read(key: 'token').then((value) {
-      setState(() {
-        token = value;
-      });
+      if (value == null) {
+        _initToken();
+      } else {
+        setState(() {
+          token = value;
+        });
+      }
     });
   }
+
+  Future<void> _initToken() async {
+    await tokenSecureStorage.write(key: 'token', value: '').then((value) {
+      setState(() {
+        token = '';
+      });
+    });
+  } 
 
   @override
   void dispose() {
