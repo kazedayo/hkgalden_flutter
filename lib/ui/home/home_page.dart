@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/ui/home/compose_page.dart';
-import 'package:hkgalden_flutter/ui/home/home_drawer.dart';
+import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
+import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
 import 'package:hkgalden_flutter/viewmodels/home_page_view_model.dart';
 class HomePage extends StatelessWidget {
@@ -18,7 +20,18 @@ class HomePage extends StatelessWidget {
       distinct: true,
       builder: (BuildContext context, HomePageViewModel viewModel) => Scaffold(
         appBar: AppBar(
-          title: Text(viewModel.title),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Spacer(flex: 1),
+              Hero(tag: 'logo', child: SizedBox(child: SvgPicture.asset('assets/icon-hkgalden.svg'), width: 30, height: 30)),
+              SizedBox(width: 5),
+              Text(viewModel.title),
+              Spacer(flex: 2),
+            ],
+          ),
+          //leading: SvgPicture.asset('assets/icon-hkgalden.svg'),
         ),
         body: viewModel.isThreadLoading && viewModel.isRefresh == false ? 
           Center(
@@ -44,22 +57,10 @@ class HomePage extends StatelessWidget {
         ),
         drawer: HomeDrawer(),
         floatingActionButton: FloatingActionButton(
-          onPressed: () => Navigator.of(context).push(_createRoute()),
+          onPressed: () => Navigator.of(context).push(SlideInFromBottomRoute(page: ComposePage())),
           child: Icon(Icons.create),
         ),
       ),
     );
   }
 }
-
-Route _createRoute() => PageRouteBuilder(
-  pageBuilder: (context, animation, secondaryAnimation) => ComposePage(),
-  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-    var begin = Offset(0.0,1.0);
-    var end = Offset.zero;
-    var curve = Curves.easeOut;
-    var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-    var offsetAnimation = animation.drive(tween);
-    return SlideTransition(position: offsetAnimation, child: child);
-  },
-);
