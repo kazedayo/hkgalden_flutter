@@ -1,8 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/login_page.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 
-class HomeDrawerHeader extends StatelessWidget {
+class HomeDrawerHeader extends StatefulWidget {
+  @override
+  _HomeDrawerHeaderState createState() => _HomeDrawerHeaderState();
+}
+
+class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
+  String token;
+
+  @override
+  void initState() {
+    //token = null;
+    _retrieveToken();
+  }
+
+  Future<void> _retrieveToken() async {
+    await tokenSecureStorage.read(key: 'token').then((value) {
+      setState(() {
+        token = value;
+      });
+    });
+  }
+
+  Future<void> _deleteToken() async {
+    await tokenSecureStorage.delete(key: 'token').then((value) {
+      setState(() {
+        token = null;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) => Container(
     height: 250,
@@ -28,7 +58,7 @@ class HomeDrawerHeader extends StatelessWidget {
             height: 10,
           ),
           Text(
-            '未登入',
+            token == null ? '未登入' : '已登入',
             style: TextStyle(
               color: Colors.white,
             ),
@@ -37,9 +67,9 @@ class HomeDrawerHeader extends StatelessWidget {
             height: 10,
           ),
           RaisedButton(
-            onPressed: () => Navigator.push(context, SlideInFromBottomRoute(page: LoginPage())),
-            child: Text('登入'),
-            color: Colors.green[700],
+            onPressed: () => token == null ? Navigator.push(context, SlideInFromBottomRoute(page: LoginPage(onLoginSuccess: () => _retrieveToken(),))) : _deleteToken(),
+            child: Text(token == null ? '登入' : '登出'),
+            color: token == null ? Colors.green[700] : Colors.redAccent[400],
           ),
         ],
       ),
