@@ -1,3 +1,17 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-final tokenSecureStorage = new FlutterSecureStorage();
+class TokenSecureStorage {
+  final storage = new FlutterSecureStorage();
+
+  Future<void> writeToken(String value, {Function onFinish}) async {
+    await storage.write(key: 'token', value: value).then((value) {
+      onFinish(value);
+    });
+  }
+
+  Future<void> readToken({Function onFinish}) async {
+    await storage.read(key: 'token').then((value) {
+      onFinish(value);
+    });
+  }
+}

@@ -32,8 +32,12 @@ class LoginPage extends StatelessWidget {
       onWebViewCreated: (controller) => this._controller = controller,
       navigationDelegate: (NavigationRequest request) {
         if (request.url.startsWith('http://localhost/callback')) {
-          print('token: ${request.url.substring(32)}');
-          _saveToken(context, request.url.substring(32));
+          TokenSecureStorage().writeToken(request.url.substring(32), onFinish: (_) {
+            onLoginSuccess();
+            store.dispatch(RequestSessionUserAction());
+            store.dispatch(RequestThreadAction(channelId: store.state.channelState.selectedChannelId, isRefresh: false));
+            Navigator.pop(context);
+          });
           return NavigationDecision.prevent;
         }
         return NavigationDecision.navigate;
@@ -51,16 +55,7 @@ class LoginPage extends StatelessWidget {
       javascriptChannels: <JavascriptChannel>[_alertJavascriptChannel(context)].toSet(),
     ),
   );
-
-  Future<void> _saveToken(BuildContext context, String token) async {
-    await tokenSecureStorage.write(key: 'token', value: token).then((value) {
-      onLoginSuccess();
-      store.dispatch(RequestSessionUserAction());
-      store.dispatch(RequestThreadAction(channelId: store.state.channelState.selectedChannelId, isRefresh: false));
-      Navigator.pop(context);
-    });
-  }
-
+  
   JavascriptChannel _alertJavascriptChannel(BuildContext context) {
     return JavascriptChannel(name: 'Alert', onMessageReceived: (JavascriptMessage message) {
         showDialog(

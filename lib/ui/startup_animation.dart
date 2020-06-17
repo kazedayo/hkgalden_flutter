@@ -23,7 +23,15 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _getToken();
+    TokenSecureStorage().readToken(onFinish: (value) {
+      if (value == null) {
+        TokenSecureStorage().writeToken('', onFinish: (_) {
+          token = '';
+        });
+      } else {
+        token = value;
+      }
+    });
     _controller = AnimationController(
       duration: const Duration(milliseconds: 2000),
       vsync: this
@@ -40,26 +48,6 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
       }
     });
   }
-
-  Future<void> _getToken() async {
-    await tokenSecureStorage.read(key: 'token').then((value) {
-      if (value == null) {
-        _initToken();
-      } else {
-        setState(() {
-          token = value;
-        });
-      }
-    });
-  }
-
-  Future<void> _initToken() async {
-    await tokenSecureStorage.write(key: 'token', value: '').then((value) {
-      setState(() {
-        token = '';
-      });
-    });
-  } 
 
   @override
   void dispose() {

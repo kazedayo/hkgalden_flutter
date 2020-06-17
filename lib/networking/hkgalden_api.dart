@@ -5,7 +5,7 @@ class HKGaldenApi {
   static final HttpLink api = HttpLink(uri: 'https://hkgalden.org/_');
 
    static final AuthLink bearerToken = AuthLink(
-    getToken: () async => 'Bearer ' + await tokenSecureStorage.read(key: 'token'),
+    getToken: () async => 'Bearer ' + await TokenSecureStorage().storage.read(key: 'token'),
   );
 
   static final Link link = bearerToken.concat(api);

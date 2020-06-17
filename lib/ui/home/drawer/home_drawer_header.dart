@@ -20,24 +20,8 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
   @override
   void initState() {
     //token = null;
-    _retrieveToken();
-  }
-
-  Future<void> _retrieveToken() async {
-    await tokenSecureStorage.read(key: 'token').then((value) {
-      setState(() {
-        token = value;
-      });
-    });
-  }
-
-  Future<void> _deleteToken() async {
-    await tokenSecureStorage.write(key: 'token', value: '').then((value) {
-      setState(() {
-        token = '';
-      });
-      store.dispatch(RemoveSessionUserAction());
-      store.dispatch(RequestThreadAction(channelId: store.state.channelState.selectedChannelId, isRefresh: false));
+    TokenSecureStorage().readToken(onFinish: (value) {
+      token = value;
     });
   }
 
@@ -93,7 +77,27 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
               height: 10,
             ),
             RaisedButton(
-              onPressed: () => token == '' ? Navigator.push(context, SlideInFromBottomRoute(page: LoginPage(onLoginSuccess: () => _retrieveToken(),))) : _deleteToken(),
+              onPressed: () => token == '' ? 
+                Navigator.push(
+                  context,
+                  SlideInFromBottomRoute(
+                    page: LoginPage(onLoginSuccess: () => TokenSecureStorage().readToken(onFinish: (value) {
+                      setState(() {
+                        token = value;
+                      });
+                    }))
+                  )
+                ) : TokenSecureStorage().writeToken('', onFinish: (_) {
+                  setState(() {
+                    token = '';
+                    store.dispatch(RemoveSessionUserAction());
+                    store.dispatch(RequestThreadAction(
+                      channelId: store.state.channelState.selectedChannelId, 
+                      isRefresh: false
+                    ));
+                  });
+
+                }),
               child: Text(token == '' ? '登入' : '登出'),
               color: token == '' ? Colors.green[700] : Colors.redAccent[400],
             ),

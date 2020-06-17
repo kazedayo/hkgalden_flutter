@@ -27,7 +27,7 @@ class HomePage extends StatelessWidget {
               Spacer(flex: 1),
               Hero(tag: 'logo', child: SizedBox(child: SvgPicture.asset('assets/icon-hkgalden.svg'), width: 30, height: 30)),
               SizedBox(width: 5),
-              Text(viewModel.title),
+              Text(viewModel.title, style: TextStyle(fontWeight: FontWeight.w700)),
               Spacer(flex: 2),
             ],
           ),
@@ -51,7 +51,14 @@ class HomePage extends StatelessWidget {
                             viewModel.threads[index].replies[1].date : 
                             viewModel.threads[index].replies[0].date,
               ),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ThreadPage())),
+              onTap: () => Navigator.push(
+                context, 
+                MaterialPageRoute(
+                  builder: (context) => ThreadPage(
+                    title: viewModel.threads[index].title
+                  )
+                )
+              ),
             ),
           ),
         ),
