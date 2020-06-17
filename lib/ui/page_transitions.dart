@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-class FadeRoute extends PageRouteBuilder {
+class SizeRoute extends PageRouteBuilder {
   final Widget page;
-  FadeRoute({this.page})
+  SizeRoute({this.page})
     : super(
       transitionDuration: Duration(milliseconds: 650),
       pageBuilder: (
@@ -15,9 +15,11 @@ class FadeRoute extends PageRouteBuilder {
         Animation<double> animation,
         Animation<double> secondaryAnimation,
         Widget child,
-      ) => FadeTransition(
-        opacity: animation,
-        child: child,
+      ) => Align(
+        child: SizeTransition(
+          sizeFactor: animation,
+          child: child,
+        ),
       ),
     );
 }

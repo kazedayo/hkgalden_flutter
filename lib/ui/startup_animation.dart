@@ -60,7 +60,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
     body: StoreConnector<AppState, StartupAnimationViewModel>(
       onDidChange: (viewModel) {
         if (viewModel.threadIsLoading == false && viewModel.channelIsLoading == false && viewModel.sessionUserIsLoading == false) {
-          Navigator.of(context).pushReplacement(FadeRoute(page: HomePage()));
+          Navigator.of(context).pushReplacement(SizeRoute(page: HomePage()));
         }
       },
       converter: (store) => StartupAnimationViewModel.create(store),
