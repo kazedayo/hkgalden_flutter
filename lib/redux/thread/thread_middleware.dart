@@ -12,7 +12,7 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
   void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
     if (action is RequestThreadListAction) {
       next(action);
-      List<Thread> threads = await _getThreadListQuery(action.channelId);
+      List<Thread> threads = await _getThreadListQuery(action.channelId, action.page);
       next(UpdateThreadListAction(threads: threads));
     } else if (action is RequestThreadAction) {
       next(action);
@@ -23,7 +23,7 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
     }
   }
 
-  Future<List<Thread>> _getThreadListQuery(String channelId) async {
+  Future<List<Thread>> _getThreadListQuery(String channelId, int page) async {
     final client = HKGaldenApi().client;
 
     const String query = r'''
@@ -58,7 +58,7 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
       variables: <String, dynamic>{
         //hardcoded value for now
         'channelId': channelId,
-        'page': 1
+        'page': page,
       },
     );
 

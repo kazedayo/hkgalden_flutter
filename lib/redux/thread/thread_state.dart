@@ -9,21 +9,27 @@ class ThreadState extends Equatable{
   final List<Thread> threads;
   final Thread thread;
   final bool isRefresh;
+  final String currentChannelId;
+  final int currentPage;
 
   ThreadState({
     this.threadListIsLoading,
     this.threadIsLoading,
     this.threads,
     this.thread,
-    this.isRefresh
+    this.isRefresh,
+    this.currentChannelId,
+    this.currentPage,
   });
 
   factory ThreadState.initial() => ThreadState(
     threadListIsLoading: true,
     threadIsLoading: true,
-    threads: const [],
+    threads: [],
     thread: Thread(),
-    isRefresh: false
+    isRefresh: false,
+    currentChannelId: '',
+    currentPage: 1,
   );
 
   ThreadState copyWith({
@@ -32,6 +38,8 @@ class ThreadState extends Equatable{
     List<Thread> threads,
     Thread thread,
     bool isRefresh,
+    String currentChannelId,
+    int currentPage,
   }) {
     return ThreadState(
       threadListIsLoading: threadListIsLoading ?? this.threadListIsLoading,
@@ -39,8 +47,10 @@ class ThreadState extends Equatable{
       threads: threads ?? this.threads,
       thread: thread ?? this.thread,
       isRefresh: isRefresh ?? this.isRefresh,
+      currentChannelId: currentChannelId ?? this.currentChannelId,
+      currentPage: currentPage ?? this.currentPage,
     );
   }
 
-  List<Object> get props => [threadListIsLoading, threadIsLoading, threads, thread, isRefresh];
+  List<Object> get props => [threadListIsLoading, threadIsLoading, threads, thread, isRefresh, currentChannelId, currentPage];
 }

@@ -35,7 +35,7 @@ class LoginPage extends StatelessWidget {
           TokenSecureStorage().writeToken(request.url.substring(32), onFinish: (_) {
             onLoginSuccess();
             store.dispatch(RequestSessionUserAction());
-            store.dispatch(RequestThreadListAction(channelId: store.state.channelState.selectedChannelId, isRefresh: false));
+            store.dispatch(RequestThreadListAction(channelId: store.state.channelState.selectedChannelId, page: 1, isRefresh: false));
             Navigator.pop(context);
           });
           return NavigationDecision.prevent;

@@ -12,11 +12,15 @@ final Reducer<ThreadState> threadReducer = combineReducers([
 ]);
 
 ThreadState requestThreadListReducer(ThreadState state, RequestThreadListAction action) {
-  return state.copyWith(threadListIsLoading: true, isRefresh: action.isRefresh);
+  if (action.page == 1 || action.channelId != state.currentChannelId) {
+    return state.copyWith(threadListIsLoading: true, isRefresh: action.isRefresh, threads: [], currentPage: action.page, currentChannelId: action.channelId);
+  } else {
+    return state.copyWith(threadListIsLoading: true, isRefresh: action.isRefresh, currentPage: action.page, currentChannelId: action.channelId);
+  }
 }
 
 ThreadState updateThreadListReducer(ThreadState state, UpdateThreadListAction action) {
-  return state.copyWith(threadListIsLoading: false, isRefresh: false, threads: action.threads);
+  return state.copyWith(threadListIsLoading: false, isRefresh: false, threads: state.threads..addAll(action.threads));
 }
 
 ThreadState requestThreadReducer(ThreadState state, RequestThreadAction action) {

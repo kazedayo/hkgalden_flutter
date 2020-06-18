@@ -44,7 +44,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
     _controller.addStatusListener((status) { 
       if (status == AnimationStatus.completed) {
         //Hardcode default to 'bw' channel
-        store.dispatch(RequestThreadListAction(channelId: 'bw'));
+        store.dispatch(RequestThreadListAction(channelId: 'bw', page: 1));
         store.dispatch(RequestChannelAction());
         if (token != '') {
           store.dispatch(RequestSessionUserAction());

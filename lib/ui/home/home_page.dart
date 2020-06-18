@@ -12,11 +12,25 @@ import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
 import 'package:hkgalden_flutter/viewmodels/home_page_view_model.dart';
 class HomePage extends StatelessWidget {
   final String title;
+  ScrollController _scrollController = ScrollController();
 
   HomePage({Key key, this.title}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    _scrollController.addListener(() {
+      var triggerFetchMoreSize = 0.9 * _scrollController.position.maxScrollExtent;
+      if (_scrollController.position.pixels > triggerFetchMoreSize) {
+        store.dispatch(
+          RequestThreadListAction(
+            channelId: store.state.threadState.currentChannelId, 
+            page: store.state.threadState.currentPage + 1, 
+            isRefresh: true
+          )
+        );
+      }
+    });
+
     return StoreConnector<AppState, HomePageViewModel>(
       converter: (store) => HomePageViewModel.create(store),
       distinct: true,
@@ -42,6 +56,7 @@ class HomePage extends StatelessWidget {
           RefreshIndicator(
           onRefresh: () => viewModel.onRefresh(viewModel.selectedChannelId),
           child: ListView.separated(
+            controller: _scrollController,
             separatorBuilder: (context, index) => Divider(indent: 8,height: 1,thickness: 1,),
             itemCount: viewModel.threads.length,
             itemBuilder: (context, index) => InkWell(
