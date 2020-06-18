@@ -23,7 +23,7 @@ class ThreadPage extends StatelessWidget {
             backDuration: Duration(seconds: 5),
             pauseDuration: Duration(seconds: 1),
             directionMarguee: DirectionMarguee.TwoDirection,
-          )
+          ),
         ),
       ),
       body: viewModel.isLoading ? 

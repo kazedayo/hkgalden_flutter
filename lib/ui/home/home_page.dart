@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/svg.dart';
@@ -70,15 +71,10 @@ class HomePage extends StatelessWidget {
               ),
               onTap: () {
                 store.dispatch(RequestThreadAction(threadId: viewModel.threads[index].threadId));
-                Navigator.push(
-                  context, 
-                  MaterialPageRoute(
-                    builder: (context) => ThreadPage(
-                      title: viewModel.threads[index].title,
-                      threadId: viewModel.threads[index].threadId,
-                    )
-                  )
-                );
+                Navigator.of(context).push(SlideInFromRightRoute(page: ThreadPage(
+                  title: viewModel.threads[index].title,
+                  threadId: viewModel.threads[index].threadId,
+                )));
               }
             ),
           ),
