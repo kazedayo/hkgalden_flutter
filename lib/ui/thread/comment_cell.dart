@@ -44,7 +44,7 @@ class CommentCell extends StatelessWidget {
           Html(
             data: reply.content,
             style: {
-              "html" : Style(backgroundColor: Colors.transparent, fontSize: FontSize.medium)
+              "html" : Style(backgroundColor: Colors.transparent, fontSize: FontSize.large)
             },
           ),
           Row(
