@@ -68,12 +68,7 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
                 ) : TokenSecureStorage().writeToken('', onFinish: (_) {
                   setState(() {
                     token = '';
-                    store.dispatch(RemoveSessionUserAction());
-                    store.dispatch(RequestThreadListAction(
-                      channelId: store.state.channelState.selectedChannelId,
-                      page: 1, 
-                      isRefresh: false
-                    ));
+                    viewModel.onLogout();
                   });
 
                 }),

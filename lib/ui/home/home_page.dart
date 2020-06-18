@@ -20,8 +20,8 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _scrollController.addListener(() {
-      var triggerFetchMoreSize = 0.9 * _scrollController.position.maxScrollExtent;
-      if (_scrollController.position.pixels > triggerFetchMoreSize) {
+      var triggerFetchMoreSize = _scrollController.position.maxScrollExtent;
+      if (_scrollController.position.pixels == triggerFetchMoreSize) {
         store.dispatch(
           RequestThreadListAction(
             channelId: store.state.threadState.currentChannelId, 
@@ -70,7 +70,7 @@ class HomePage extends StatelessWidget {
                             viewModel.threads[index].replies[0].date,
               ),
               onTap: () {
-                store.dispatch(RequestThreadAction(threadId: viewModel.threads[index].threadId));
+                viewModel.onThreadCellTap(viewModel.threads[index].threadId);
                 Navigator.of(context).push(SlideInFromRightRoute(page: ThreadPage(
                   title: viewModel.threads[index].title,
                   threadId: viewModel.threads[index].threadId,
