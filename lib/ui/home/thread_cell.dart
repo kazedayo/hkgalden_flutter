@@ -1,5 +1,5 @@
+import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 class ThreadCell extends StatelessWidget {
   final String title;
@@ -22,21 +22,25 @@ class ThreadCell extends StatelessWidget {
       children: <Widget>[
         Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),),
         SizedBox(height: 10),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Icon(Icons.face, size: 15),
-            SizedBox(width: 5),
-            Text(authorName),
-            SizedBox(width: 10),
-            Icon(Icons.reply, size: 15),
-            SizedBox(width: 5),
-            Text(totalReplies.toString()),
-            SizedBox(width: 10),
-            Icon(Icons.access_time, size: 15),
-            SizedBox(width: 5),
-            Text(timeago.format(lastReply, locale: 'en_short')),
-          ],
+        Container(
+          constraints: BoxConstraints.expand(height: 20),
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Icon(Icons.face, size: 15),
+              SizedBox(width: 5),
+              Text(authorName, style: TextStyle(height: 1.2)),
+              SizedBox(width: 10),
+              Icon(Icons.reply, size: 15),
+              SizedBox(width: 5),
+              Text(totalReplies.toString()),
+              SizedBox(width: 10),
+              Icon(Icons.access_time, size: 15),
+              SizedBox(width: 5),
+              Text(DateTimeFormat.relative(lastReply, abbr: true)),
+            ],
+          ),
         ),
       ],
     ),

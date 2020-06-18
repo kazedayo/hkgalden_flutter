@@ -21,7 +21,7 @@ class HomeDrawerViewModel {
       selectedChannelId: 'bw',
       onTap: (channelId) {
         store.dispatch(SetSelectedChannelId(channelId: channelId));
-        store.dispatch(RequestThreadAction(channelId: channelId));
+        store.dispatch(RequestThreadListAction(channelId: channelId));
       },
     );
   }

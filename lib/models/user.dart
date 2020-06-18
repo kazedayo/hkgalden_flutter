@@ -4,20 +4,20 @@ import 'package:hkgalden_flutter/models/user_group.dart';
 import 'package:meta/meta.dart';
 
 @immutable
-class SessionUser extends Equatable {
+class User extends Equatable {
   final String userId;
   final String nickName;
   final String avatar;
   final List<UserGroup> userGroup;
 
-  SessionUser({
+  User({
     this.userId,
     this.nickName,
     this.avatar,
     this.userGroup,
   });
 
-  factory SessionUser.fromJson(Map<String, dynamic> json) => SessionUser(
+  factory User.fromJson(Map<String, dynamic> json) => User(
     userId: json['id'],
     nickName: json['nickname'],
     avatar: json['avatar'] == null ? '' : json['avatar'],

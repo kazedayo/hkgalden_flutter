@@ -1,12 +1,12 @@
-import 'package:hkgalden_flutter/models/thread_reply.dart';
+import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
 
 @immutable
-class Thread {
+class Thread extends Equatable{
   final int threadId;
   final String title;
-  final List<ThreadReply> replies;
+  final List<Reply> replies;
   final int totalReplies;
   final String tagName;
   final String tagColor;
@@ -23,7 +23,7 @@ class Thread {
   factory Thread.fromJson(Map<String, dynamic> json) => new Thread(
     threadId: json['id'],
     title: json['title'],
-    replies: (json['replies'] as List<dynamic>).map((reply) => ThreadReply.fromJson(reply)).toList(),
+    replies: (json['replies'] as List<dynamic>).map((reply) => Reply.fromJson(reply)).toList(),
     totalReplies: json['totalReplies'],
     tagName: json['tags'][0]['name'],
     tagColor: json['tags'][0]['color'],

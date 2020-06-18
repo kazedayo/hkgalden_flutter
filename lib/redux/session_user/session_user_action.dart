@@ -1,9 +1,9 @@
-import 'package:hkgalden_flutter/models/session_user.dart';
+import 'package:hkgalden_flutter/models/user.dart';
 
 class RequestSessionUserAction {}
 
 class UpdateSessionUserAction {
-  final SessionUser sessionUser;
+  final User sessionUser;
 
   UpdateSessionUserAction({
     this.sessionUser,

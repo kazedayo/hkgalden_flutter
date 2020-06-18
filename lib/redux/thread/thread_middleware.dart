@@ -10,24 +10,37 @@ import 'package:redux/redux.dart';
 class ThreadMiddleware extends MiddlewareClass<AppState> {
   @override
   void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
-    if (action is RequestThreadAction) {
+    if (action is RequestThreadListAction) {
       next(action);
-      List<Thread> threads = await _getThreadsQuery(action.channelId);
-      next(UpdateThreadAction(threads: threads));
+      List<Thread> threads = await _getThreadListQuery(action.channelId);
+      next(UpdateThreadListAction(threads: threads));
+    } else if (action is RequestThreadAction) {
+      next(action);
+      Thread thread = await _getThreadQuery(action.threadId);
+      next(UpdateThreadAction(thread: thread));
     } else {
       next(action);
     }
   }
 
-  Future<List<Thread>> _getThreadsQuery(String channelId) async {
+  Future<List<Thread>> _getThreadListQuery(String channelId) async {
     final client = HKGaldenApi().client;
 
     const String query = r'''
-      query ThreadsQuery($channelId: String!, $page: Int!) {
+      query GetThreadListQuery($channelId: String!, $page: Int!) {
         threadsByChannel(channelId: $channelId, page: $page) {
           id
           title
           replies {
+            author {
+              id
+              nickname
+              avatar
+              groups {
+                id
+                name
+              }
+            }
             authorNickname
             date
           }
@@ -60,5 +73,57 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
     final List<Thread> threads = result.map((thread) => Thread.fromJson(thread)).toList();
 
     return threads;
+  }
+
+  Future<Thread> _getThreadQuery(int threadId) async {
+    final client = HKGaldenApi().client;
+
+    const String query = r'''
+      query GetThreadQuery($threadId: Int!, $page: Int!) {
+        thread(id: $threadId, sorting: date_asc, page: $page) {
+          id
+          title
+          replies {
+            id
+            floor
+            author {
+              id
+              nickname
+              avatar
+              groups {
+                id
+                name
+              }
+            }
+            authorNickname
+            content
+            date
+          }
+          tags {
+            name
+          }
+        }
+      }
+    ''';
+
+    final QueryOptions options = QueryOptions(
+      documentNode: gql(query),
+      variables: <String, dynamic>{
+        'threadId' : threadId,
+        'page': 1,
+      },
+    );
+
+    final QueryResult queryResult = await client.query(options);
+
+    if (queryResult.hasException) {
+      print(queryResult.exception.toString());
+    }
+
+    final dynamic result = queryResult.data['thread'] as dynamic;
+
+    final Thread thread = Thread.fromJson(result);
+
+    return thread;
   }
 }

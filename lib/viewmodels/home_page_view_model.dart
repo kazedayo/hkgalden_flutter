@@ -26,9 +26,9 @@ class HomePageViewModel {
       title: store.state.channelState.channels.where(
         (channel) => channel.channelId == store.state.channelState.selectedChannelId)
       .first.channelName,
-      onRefresh: (channelId) => store.dispatch(RequestThreadAction(channelId: channelId, isRefresh: true)),
+      onRefresh: (channelId) => store.dispatch(RequestThreadListAction(channelId: channelId, isRefresh: true)),
       selectedChannelId: store.state.channelState.selectedChannelId,
-      isThreadLoading: store.state.threadState.isLoading,
+      isThreadLoading: store.state.threadState.threadListIsLoading,
       isRefresh: store.state.threadState.isRefresh,
     );
   }

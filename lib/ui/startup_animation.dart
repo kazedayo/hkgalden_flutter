@@ -26,10 +26,14 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
     TokenSecureStorage().readToken(onFinish: (value) {
       if (value == null) {
         TokenSecureStorage().writeToken('', onFinish: (_) {
-          token = '';
+          setState(() {
+            token = '';
+          });
         });
       } else {
-        token = value;
+        setState(() {
+          token = value;
+        });
       }
     });
     _controller = AnimationController(
@@ -40,7 +44,7 @@ class _StartupScreenState extends State<StartupScreen> with TickerProviderStateM
     _controller.addStatusListener((status) { 
       if (status == AnimationStatus.completed) {
         //Hardcode default to 'bw' channel
-        store.dispatch(RequestThreadAction(channelId: 'bw'));
+        store.dispatch(RequestThreadListAction(channelId: 'bw'));
         store.dispatch(RequestChannelAction());
         if (token != '') {
           store.dispatch(RequestSessionUserAction());

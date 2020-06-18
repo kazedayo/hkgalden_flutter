@@ -4,33 +4,43 @@ import 'package:hkgalden_flutter/models/thread.dart';
 
 @immutable
 class ThreadState extends Equatable{
-  final bool isLoading;
+  final bool threadListIsLoading;
+  final bool threadIsLoading;
   final List<Thread> threads;
+  final Thread thread;
   final bool isRefresh;
 
   ThreadState({
-    this.isLoading,
+    this.threadListIsLoading,
+    this.threadIsLoading,
     this.threads,
+    this.thread,
     this.isRefresh
   });
 
   factory ThreadState.initial() => ThreadState(
-    isLoading: true,
+    threadListIsLoading: true,
+    threadIsLoading: true,
     threads: const [],
+    thread: Thread(),
     isRefresh: false
   );
 
   ThreadState copyWith({
-    bool isLoading,
+    bool threadListIsLoading,
+    bool threadIsLoading,
     List<Thread> threads,
+    Thread thread,
     bool isRefresh,
   }) {
     return ThreadState(
-      isLoading: isLoading ?? this.isLoading,
+      threadListIsLoading: threadListIsLoading ?? this.threadListIsLoading,
+      threadIsLoading: threadIsLoading ?? this.threadIsLoading,
       threads: threads ?? this.threads,
+      thread: thread ?? this.thread,
       isRefresh: isRefresh ?? this.isRefresh,
     );
   }
 
-  List<Object> get props => [isLoading, threads, isRefresh];
+  List<Object> get props => [threadListIsLoading, threadIsLoading, threads, thread, isRefresh];
 }

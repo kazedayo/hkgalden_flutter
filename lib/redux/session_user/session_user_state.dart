@@ -1,11 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-import 'package:hkgalden_flutter/models/session_user.dart';
+import 'package:hkgalden_flutter/models/user.dart';
 
 @immutable
 class SessionUserState extends Equatable{
   final bool isLoading;
-  final SessionUser sessionUser;
+  final User sessionUser;
 
   SessionUserState({
     this.isLoading,
@@ -14,17 +14,17 @@ class SessionUserState extends Equatable{
 
   factory SessionUserState.initial() => SessionUserState(
     isLoading: false,
-    sessionUser: SessionUser(
+    sessionUser: User(
       userId: '',
       nickName: '',
       avatar: '',
-      userGroup: [],
+      userGroup: null,
     ),
   );
 
   SessionUserState copyWith({
     bool isLoading,
-    SessionUser sessionUser,
+    User sessionUser,
   }) {
     return SessionUserState(
       isLoading: isLoading ?? this.isLoading,

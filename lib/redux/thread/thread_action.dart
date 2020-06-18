@@ -1,21 +1,39 @@
 import 'package:hkgalden_flutter/models/thread.dart';
 
-class RequestThreadAction {
+class RequestThreadListAction {
   final String channelId;
   final bool isRefresh;
 
-  RequestThreadAction({
+  RequestThreadListAction({
     this.channelId,
     this.isRefresh
   });
 }
 
-class UpdateThreadAction {
+class RequestThreadAction {
+  final int threadId;
+
+  RequestThreadAction({
+    this.threadId,
+  });
+}
+
+class UpdateThreadListAction {
   final List<Thread> threads;
 
-  UpdateThreadAction({
+  UpdateThreadListAction({
     this.threads
   });
 }
+
+class UpdateThreadAction {
+  final Thread thread;
+
+  UpdateThreadAction({
+    this.thread
+  });
+}
+
+class RequestThreadListErrorAction {}
 
 class RequestThreadErrorAction {}

@@ -1,11 +1,20 @@
+import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html/style.dart';
+import 'package:hkgalden_flutter/models/reply.dart';
+import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 
 class CommentCell extends StatelessWidget {
+  final Reply reply;
+
+  CommentCell({this.reply});
+
   @override
   Widget build(BuildContext context) => Card(
     child: Container(
       padding: EdgeInsets.only(top: 16, left: 16, right: 16),
-      height: 200,
+      //height: 200,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -13,34 +22,31 @@ class CommentCell extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Container(
-                width: 40,
-                height: 40,
-                child: Icon(Icons.account_circle, size: 40),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xff7435a0),Color(0xff4a72d3)],
-                  ),
-                ),
+              AvatarWidget(
+                avatarImage: reply.author.avatar == '' ? 
+                  Image.asset('assets/default-icon.png', width: 30,height: 30,) : 
+                  Image.network(reply.author.avatar, width: 30,height: 30,),
               ),
               SizedBox(
                 width: 5,
               ),
-              Text('username'),
+              Text(reply.authorNickname),
               Spacer(),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
-                  Text('Floor #'),
-                  Text('Date'),
+                  Text('#${reply.floor}'),
+                  Text(DateTimeFormat.format(reply.date.toLocal(), format: 'Y-m-j g:iA')),
                 ],
               ),
             ],
           ),
-          Text('This is a comment.'),
+          Html(
+            data: reply.content,
+            style: {
+              "html" : Style(backgroundColor: Colors.transparent, fontSize: FontSize.medium)
+            },
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
