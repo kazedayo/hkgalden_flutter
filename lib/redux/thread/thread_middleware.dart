@@ -13,7 +13,7 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
     if (action is RequestThreadListAction) {
       next(action);
       List<Thread> threads = await _getThreadListQuery(action.channelId, action.page);
-      next(UpdateThreadListAction(threads: threads));
+      next(UpdateThreadListAction(threads: threads, isRefresh: action.isRefresh, page: action.page));
     } else if (action is RequestThreadAction) {
       next(action);
       Thread thread = await _getThreadQuery(action.threadId);

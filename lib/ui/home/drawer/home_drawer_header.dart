@@ -33,7 +33,7 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
     converter: (store) => HomeDrawerHeaderViewModel.create(store),
     onInitialBuild: (viewModel) => precacheImage(viewModel.sessionUserAvatar.image, context),
     builder: (BuildContext context, HomeDrawerHeaderViewModel viewModel) => Container(
-      height: 250,
+      //height: 250,
       child: DrawerHeader(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -42,18 +42,14 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
               avatarImage: viewModel.sessionUserAvatar, 
               userGroup: viewModel.sessionUserGroup, 
             ),
-            SizedBox(
-              height: 10,
-            ),
+            SizedBox(height: 7),
             Text(
               token == '' ? '未登入' : viewModel.sessionUserName,
               style: TextStyle(
                 color: Colors.white,
               ),
             ),
-            SizedBox(
-              height: 10,
-            ),
+            Spacer(),
             RaisedButton(
               onPressed: () => token == '' ? 
                 Navigator.push(

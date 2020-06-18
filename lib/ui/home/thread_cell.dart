@@ -25,20 +25,31 @@ class ThreadCell extends StatelessWidget {
         Container(
           constraints: BoxConstraints.expand(height: 20),
           child: Row(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            //crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Icon(Icons.face, size: 15),
               SizedBox(width: 5),
-              Text(authorName, style: TextStyle(height: 1.2)),
+              Text(
+                authorName, 
+                style: Theme.of(context).textTheme.caption, 
+                strutStyle: StrutStyle(height: 1.25),
+              ),
               SizedBox(width: 10),
               Icon(Icons.reply, size: 15),
               SizedBox(width: 5),
-              Text(totalReplies.toString()),
+              Text(
+                totalReplies.toString(), 
+                style: Theme.of(context).textTheme.caption, 
+                strutStyle: StrutStyle(height: 1.25),
+              ),
               SizedBox(width: 10),
               Icon(Icons.access_time, size: 15),
               SizedBox(width: 5),
-              Text(DateTimeFormat.relative(lastReply, abbr: true)),
+              Text(
+                DateTimeFormat.relative(lastReply.toLocal(), abbr: true), 
+                style: Theme.of(context).textTheme.caption, 
+                strutStyle: StrutStyle(height: 1.25),
+              ),
             ],
           ),
         ),

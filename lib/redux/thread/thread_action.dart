@@ -22,9 +22,13 @@ class RequestThreadAction {
 
 class UpdateThreadListAction {
   final List<Thread> threads;
+  final int page;
+  final bool isRefresh;
 
   UpdateThreadListAction({
-    this.threads
+    this.threads,
+    this.page,
+    this.isRefresh,
   });
 }
 

@@ -36,7 +36,7 @@ class CommentCell extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
                   Text('#${reply.floor}'),
-                  Text(DateTimeFormat.format(reply.date.toLocal(), format: 'Y-m-j g:iA')),
+                  Text(DateTimeFormat.format(reply.date.toLocal(), format: 'Y/m/d h:i A')),
                 ],
               ),
             ],

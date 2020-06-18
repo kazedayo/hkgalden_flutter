@@ -12,7 +12,7 @@ class HomeDrawer extends StatelessWidget {
       width: 200,
       child: Drawer(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             HomeDrawerHeader(),
