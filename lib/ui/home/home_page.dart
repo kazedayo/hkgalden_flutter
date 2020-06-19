@@ -67,7 +67,7 @@ class HomePage extends StatelessWidget {
                               thread.replies[0].date,
                   onTap: () {
                     viewModel.onThreadCellTap(thread.threadId);
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => ThreadPage(
+                    Navigator.of(context).push(CupertinoPageRoute(builder: (context) => ThreadPage(
                       title: thread.title,
                       threadId: thread.threadId,
                     )));

@@ -22,7 +22,7 @@ class _ComposePageState extends State<ComposePage> {
   @override 
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: Text('Compose'),
+      title: Text('開post'),
       automaticallyImplyLeading: false,
       actions: <Widget>[
         IconButton(

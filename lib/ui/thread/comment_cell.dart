@@ -5,6 +5,7 @@ import 'package:flutter_html/style.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CommentCell extends StatelessWidget {
   final Reply reply;
@@ -49,6 +50,7 @@ class CommentCell extends StatelessWidget {
               "html" : Style(backgroundColor: Colors.transparent, fontSize: FontSize.large),
               "blockquote" : Style(border: Border(left: BorderSide(color: Colors.grey)), padding: EdgeInsets.only(left: 4), margin: EdgeInsets.only(left: 10)),
             },
+            onLinkTap: (url) => _launchURL(url),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -62,4 +64,12 @@ class CommentCell extends StatelessWidget {
       ),
     ),
   );
+
+  _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url, forceSafariVC: true);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
 }

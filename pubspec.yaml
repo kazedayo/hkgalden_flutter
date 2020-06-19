@@ -40,6 +40,7 @@ dependencies:
   flutter_html: ^1.0.0
   date_time_format: ^1.0.0+4
   universal_html: ^1.2.3
+  url_launcher: ^5.4.11
 
 dev_dependencies:
   flutter_test:

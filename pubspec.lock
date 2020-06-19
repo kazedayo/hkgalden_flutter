@@ -400,12 +400,12 @@ packages:
     source: hosted
     version: "1.0.1"
   url_launcher:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: url_launcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.4.10"
+    version: "5.4.11"
   url_launcher_macos:
     dependency: transitive
     description:
