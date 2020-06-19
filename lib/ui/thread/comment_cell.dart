@@ -26,6 +26,7 @@ class CommentCell extends StatelessWidget {
                 avatarImage: reply.author.avatar == '' ? 
                   Image.asset('assets/default-icon.png', width: 30,height: 30,) : 
                   Image.network(reply.author.avatar, width: 30,height: 30,),
+                  userGroup: reply.author.userGroup == null ? [] : reply.author.userGroup,
               ),
               SizedBox(
                 width: 5,

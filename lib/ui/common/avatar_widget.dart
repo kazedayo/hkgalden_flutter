@@ -23,7 +23,7 @@ class AvatarWidget extends StatelessWidget {
     decoration: BoxDecoration(
       shape: BoxShape.circle,
       color:Colors.grey[700],
-      gradient: userGroup == null ? null : LinearGradient(
+      gradient: userGroup.isEmpty ? null : LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [userGroup.first.groupId == 'ADMIN' ? Color(0xff7435a0) : Color(0xffe0561d),
