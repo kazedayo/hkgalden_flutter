@@ -25,7 +25,7 @@ class ThreadCell extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),),
+              Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
               SizedBox(height: 10),
               Container(
                 constraints: BoxConstraints.expand(height: 20),
