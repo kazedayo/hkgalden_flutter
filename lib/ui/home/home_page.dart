@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
@@ -13,25 +14,22 @@ import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
 import 'package:hkgalden_flutter/viewmodels/home_page_view_model.dart';
 class HomePage extends StatelessWidget {
   final String title;
-  ScrollController _scrollController = ScrollController();
-
-  HomePage({Key key, this.title}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    _scrollController.addListener(() {
-      var triggerFetchMoreSize = _scrollController.position.maxScrollExtent;
-      if (_scrollController.position.pixels == triggerFetchMoreSize) {
+  static final ScrollController _scrollController = new ScrollController()..addListener(() {
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
         store.dispatch(
-          RequestThreadListAction(
+        RequestThreadListAction(
             channelId: store.state.threadState.currentChannelId, 
             page: store.state.threadState.currentPage + 1, 
             isRefresh: true
           )
         );
-      }
-    });
+    }
+  });
 
+  HomePage({Key key, this.title}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return StoreConnector<AppState, HomePageViewModel>(
       converter: (store) => HomePageViewModel.create(store),
       distinct: true,
@@ -56,27 +54,36 @@ class HomePage extends StatelessWidget {
           ) : 
           RefreshIndicator(
           onRefresh: () => viewModel.onRefresh(viewModel.selectedChannelId),
-          child: ListView.separated(
+          child: ListView(
             controller: _scrollController,
-            separatorBuilder: (context, index) => Divider(indent: 8,height: 1,thickness: 1,),
-            itemCount: viewModel.threads.length,
-            itemBuilder: (context, index) => InkWell(
-              child: ThreadCell(
-                title: viewModel.threads[index].title,
-                authorName: viewModel.threads[index].replies[0].authorNickname,
-                totalReplies: viewModel.threads[index].totalReplies,
-                lastReply: viewModel.threads[index].replies.length == 2 ? 
-                            viewModel.threads[index].replies[1].date : 
-                            viewModel.threads[index].replies[0].date,
+            children: <Widget>[
+              for (Thread thread in viewModel.threads)
+                ThreadCell(
+                  title: thread.title,
+                  authorName: thread.replies[0].authorNickname,
+                  totalReplies: thread.totalReplies,
+                  lastReply: thread.replies.length == 2 ? 
+                              thread.replies[1].date : 
+                              thread.replies[0].date,
+                  onTap: () {
+                    viewModel.onThreadCellTap(thread.threadId);
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => ThreadPage(
+                      title: thread.title,
+                      threadId: thread.threadId,
+                    )));
+                  },
+                ),
+              Container(
+                height: 40,
+                child: Center(
+                  child: SizedBox(
+                    width: 15,
+                    height: 15,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
               ),
-              onTap: () {
-                viewModel.onThreadCellTap(viewModel.threads[index].threadId);
-                Navigator.of(context).push(SlideInFromRightRoute(page: ThreadPage(
-                  title: viewModel.threads[index].title,
-                  threadId: viewModel.threads[index].threadId,
-                )));
-              }
-            ),
+            ],
           ),
         ),
         drawer: HomeDrawer(),

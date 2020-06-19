@@ -1,4 +1,5 @@
 import 'package:hkgalden_flutter/models/user.dart';
+import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
 
@@ -10,6 +11,7 @@ class Reply extends Equatable {
   final User author;
   final String authorNickname;
   final DateTime date;
+  final Reply parent;
 
   Reply({
     this.replyId,
@@ -18,16 +20,18 @@ class Reply extends Equatable {
     this.author,
     this.authorNickname,
     this.date,
+    this.parent
   });
 
   factory Reply.fromJson(json) => new Reply(
     replyId: json['id'],
     floor: json['floor'],
-    content: json['content'],
+    content: json['content'] == null ? null : HKGaldenHtmlParser().parse(json['content']),
     author: User.fromJson(json['author']),
     authorNickname: json['authorNickname'],
     date: DateTime.parse(json['date']),
+    parent: json['parent'] == null ? null : Reply.fromJson(json['parent']),
   );
 
- List<Object> get props => [replyId, floor, content, author, authorNickname, date];
+ List<Object> get props => [replyId, floor, content, author, authorNickname, date, parent];
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/style.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
+import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 
 class CommentCell extends StatelessWidget {
@@ -43,9 +44,10 @@ class CommentCell extends StatelessWidget {
             ],
           ),
           Html(
-            data: reply.content,
+            data: HKGaldenHtmlParser().commentWithQuotes(reply),
             style: {
-              "html" : Style(backgroundColor: Colors.transparent, fontSize: FontSize.large)
+              "html" : Style(backgroundColor: Colors.transparent, fontSize: FontSize.large),
+              "blockquote" : Style(border: Border(left: BorderSide(color: Colors.grey)), padding: EdgeInsets.only(left: 4), margin: EdgeInsets.only(left: 10)),
             },
           ),
           Row(

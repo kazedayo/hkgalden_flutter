@@ -39,6 +39,7 @@ dependencies:
   marquee_widget: ^0.8.0
   flutter_html: ^1.0.0
   date_time_format: ^1.0.0+4
+  universal_html: ^1.2.3
 
 dev_dependencies:
   flutter_test:

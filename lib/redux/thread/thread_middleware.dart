@@ -79,37 +79,60 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
     final client = HKGaldenApi().client;
 
     const String query = r'''
-      query GetThreadQuery($threadId: Int!, $page: Int!) {
-        thread(id: $threadId, sorting: date_asc, page: $page) {
+      query GetThreadContent($id: Int!, $page: Int!) {
+        thread(id: $id,sorting: date_asc,page: $page) {
           id
-          title
-          replies {
-            id
-            floor
-            author {
-              id
-              nickname
-              avatar
-              groups {
-                id
-                name
+            title
+            totalReplies
+            replies {
+              ...CommentsRecursive
+            }
+            tags {
+              name
+              color
+            }
+        }
+      }
+
+      fragment CommentsRecursive on Reply {
+        ...CommentFields
+        parent {
+          ...CommentFields
+          parent {
+            ...CommentFields
+            parent {
+              ...CommentFields
+              parent {
+                ...CommentFields
               }
             }
-            authorNickname
-            content
-            date
           }
-          tags {
+        }
+      }
+
+      fragment CommentFields on Reply {
+        id
+        floor
+        author {
+          id
+          avatar
+          nickname
+          gender
+          groups {
+            id
             name
           }
         }
+        authorNickname
+        content
+        date
       }
     ''';
 
     final QueryOptions options = QueryOptions(
       documentNode: gql(query),
       variables: <String, dynamic>{
-        'threadId' : threadId,
+        'id' : threadId,
         'page': 1,
       },
     );
