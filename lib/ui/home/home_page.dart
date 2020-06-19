@@ -54,36 +54,38 @@ class HomePage extends StatelessWidget {
           ) : 
           RefreshIndicator(
           onRefresh: () => viewModel.onRefresh(viewModel.selectedChannelId),
-          child: ListView(
-            controller: _scrollController,
-            children: <Widget>[
-              for (Thread thread in viewModel.threads)
-                ThreadCell(
-                  title: thread.title,
-                  authorName: thread.replies[0].authorNickname,
-                  totalReplies: thread.totalReplies,
-                  lastReply: thread.replies.length == 2 ? 
-                              thread.replies[1].date : 
-                              thread.replies[0].date,
-                  onTap: () {
-                    viewModel.onThreadCellTap(thread.threadId);
-                    Navigator.of(context).push(CupertinoPageRoute(builder: (context) => ThreadPage(
-                      title: thread.title,
-                      threadId: thread.threadId,
-                    )));
-                  },
-                ),
-              Container(
-                height: 40,
-                child: Center(
-                  child: SizedBox(
-                    width: 15,
-                    height: 15,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+          child: Scrollbar(
+            child: ListView(
+              controller: _scrollController,
+              children: <Widget>[
+                for (Thread thread in viewModel.threads)
+                  ThreadCell(
+                    title: thread.title,
+                    authorName: thread.replies[0].authorNickname,
+                    totalReplies: thread.totalReplies,
+                    lastReply: thread.replies.length == 2 ? 
+                                thread.replies[1].date : 
+                                thread.replies[0].date,
+                    onTap: () {
+                      viewModel.onThreadCellTap(thread.threadId);
+                      Navigator.of(context).push(CupertinoPageRoute(builder: (context) => ThreadPage(
+                        title: thread.title,
+                        threadId: thread.threadId,
+                      )));
+                    },
+                  ),
+                Container(
+                  height: 40,
+                  child: Center(
+                    child: SizedBox(
+                      width: 15,
+                      height: 15,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         drawer: HomeDrawer(),

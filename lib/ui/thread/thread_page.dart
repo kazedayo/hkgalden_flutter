@@ -30,9 +30,11 @@ class ThreadPage extends StatelessWidget {
       Center(
         child: CircularProgressIndicator(),
       ) : 
-      ListView.builder(
-        itemCount: viewModel.replies.length,
-        itemBuilder: (context, index) => CommentCell(reply: viewModel.replies[index]),
+      Scrollbar(
+          child: ListView.builder(
+          itemCount: viewModel.replies.length,
+          itemBuilder: (context, index) => CommentCell(reply: viewModel.replies[index]),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.reply),
