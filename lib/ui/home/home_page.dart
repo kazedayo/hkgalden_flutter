@@ -55,8 +55,9 @@ class HomePage extends StatelessWidget {
           RefreshIndicator(
           onRefresh: () => viewModel.onRefresh(viewModel.selectedChannelId),
           child: Scrollbar(
+            controller: _scrollController,
             child: ListView(
-              controller: _scrollController,
+              //controller: _scrollController,
               children: <Widget>[
                 for (Thread thread in viewModel.threads)
                   ThreadCell(
