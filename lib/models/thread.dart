@@ -29,5 +29,23 @@ class Thread extends Equatable{
     tagColor: json['tags'][0]['color'],
   );
 
+  Thread copyWith({
+    int threadId,
+    String title,
+    List<Reply> replies,
+    int totalReplies,
+    String tagName,
+    String tagColor,
+  }) {
+    return Thread(
+      threadId: threadId ?? this.threadId,
+      title: title ?? this.title,
+      replies: replies ?? this.replies,
+      totalReplies: totalReplies ?? this.totalReplies,
+      tagName: tagName ?? this.tagName,
+      tagColor: tagColor ?? this.tagColor,
+    );
+  }
+
   List<Object> get props => [threadId, title, replies, totalReplies, tagName, tagColor];
 }

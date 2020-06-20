@@ -1,45 +1,27 @@
 import 'package:hkgalden_flutter/models/thread.dart';
 
-class RequestThreadListAction {
-  final String channelId;
-  final int page;
-  final bool isRefresh;
-
-  RequestThreadListAction({
-    this.channelId,
-    this.page,
-    this.isRefresh
-  });
-}
-
 class RequestThreadAction {
   final int threadId;
+  final int page;
+  final bool isInitialLoad;
 
   RequestThreadAction({
     this.threadId,
-  });
-}
-
-class UpdateThreadListAction {
-  final List<Thread> threads;
-  final int page;
-  final bool isRefresh;
-
-  UpdateThreadListAction({
-    this.threads,
-    this.page,
-    this.isRefresh,
+    this.page, 
+    this.isInitialLoad, 
   });
 }
 
 class UpdateThreadAction {
   final Thread thread;
+  final int page;
+  final bool isInitialLoad;
 
   UpdateThreadAction({
-    this.thread
+    this.thread,
+    this.page,
+    this.isInitialLoad,
   });
 }
-
-class RequestThreadListErrorAction {}
 
 class RequestThreadErrorAction {}

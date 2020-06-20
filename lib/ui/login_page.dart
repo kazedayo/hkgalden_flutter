@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
-import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
+import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/redux/store.dart';

@@ -14,7 +14,7 @@ class StartupAnimationViewModel {
 
   factory StartupAnimationViewModel.create(Store<AppState> store) {
     return StartupAnimationViewModel(
-      threadIsLoading: store.state.threadState.threadListIsLoading,
+      threadIsLoading: store.state.threadListState.threadListIsLoading,
       channelIsLoading: store.state.channelState.isLoading,
       sessionUserIsLoading: store.state.sessionUserState.isLoading,
     );

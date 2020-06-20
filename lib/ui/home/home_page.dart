@@ -5,20 +5,21 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/store.dart';
-import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
+import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:hkgalden_flutter/ui/home/compose_page.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
 import 'package:hkgalden_flutter/viewmodels/home_page_view_model.dart';
+
 class HomePage extends StatelessWidget {
   final String title;
-  static final ScrollController _scrollController = new ScrollController()..addListener(() {
+  static final ScrollController _scrollController = ScrollController()..addListener(() {
     if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
         store.dispatch(
         RequestThreadListAction(
-            channelId: store.state.threadState.currentChannelId, 
+            channelId: store.state.threadListState.currentChannelId, 
             page: store.state.threadState.currentPage + 1, 
             isRefresh: true
           )
@@ -67,7 +68,7 @@ class HomePage extends StatelessWidget {
                               thread.replies[0].date,
                   onTap: () {
                     viewModel.onThreadCellTap(thread.threadId);
-                    Navigator.of(context).push(CupertinoPageRoute(builder: (context) => ThreadPage(
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => ThreadPage(
                       title: thread.title,
                       threadId: thread.threadId,
                     )));

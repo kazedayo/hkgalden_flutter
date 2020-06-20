@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
-import 'package:hkgalden_flutter/ui/thread/comment_cell.dart';
 import 'package:hkgalden_flutter/viewmodels/thread_page_view_model.dart';
 import 'package:marquee_widget/marquee_widget.dart';
 
 class ThreadPage extends StatelessWidget {
   final String title;
   final int threadId;
+  static final _scrollController = ScrollController()
+    ..addListener(() {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+        print('scroll view hit bottom!');
+      }
+    });
 
   const ThreadPage({Key key, this.title, this.threadId}) : super(key: key);
 
@@ -30,11 +35,9 @@ class ThreadPage extends StatelessWidget {
       Center(
         child: CircularProgressIndicator(),
       ) : 
-      ListView.builder(
-        itemCount: viewModel.replies.length,
-        itemBuilder: (context, index) => viewModel.blockedUserIds.contains(viewModel.replies[index].author.userId) ? 
-        SizedBox() : 
-        CommentCell(reply: viewModel.replies[index]),
+      ListView(
+        controller: _scrollController,
+        children: viewModel.onLoadReplies(),
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.reply),
