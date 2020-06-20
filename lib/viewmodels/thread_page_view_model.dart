@@ -7,15 +7,17 @@ import 'package:redux/redux.dart';
 class ThreadPageViewModel {
   final List<Reply> replies;
   final bool isLoading;
+  final bool isInitialLoad;
   final List<String> blockedUserIds;
   final Function() onLoadReplies;
 
-  ThreadPageViewModel({this.replies, this.isLoading, this.blockedUserIds, this.onLoadReplies});
+  ThreadPageViewModel({this.replies, this.isLoading, this.isInitialLoad, this.blockedUserIds, this.onLoadReplies});
   
   factory ThreadPageViewModel.create(Store<AppState> store) {
     return ThreadPageViewModel(
       replies: store.state.threadState.thread.replies,
       isLoading: store.state.threadState.threadIsLoading,
+      isInitialLoad: store.state.threadState.isInitialLoad,
       blockedUserIds: store.state.sessionUserState.sessionUser.blockedUsers,
       onLoadReplies: () {
         List<Widget> repliesWidgets = [];
@@ -24,7 +26,7 @@ class ThreadPageViewModel {
             repliesWidgets.add(Container(
               height: 50,
               child: Center(
-                child: Text(reply.floor == 1 ? '第 1 頁' : '第 ${(reply.floor + 49) / 50} 頁'),
+                child: Text(reply.floor == 1 ? '第 1 頁' : '第 ${((reply.floor + 49) ~/ 50)} 頁'),
               ),
             ));
           }
@@ -33,7 +35,7 @@ class ThreadPageViewModel {
             repliesWidgets.add(CommentCell(reply: reply));
         }
         return repliesWidgets;
-      }
+      },
     );
   }
 }

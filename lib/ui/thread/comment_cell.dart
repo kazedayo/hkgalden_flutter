@@ -27,7 +27,8 @@ class CommentCell extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               AvatarWidget(
-                avatarImage: reply.author.avatar == '' ? 
+                //舊膠登icon死link會炒async #dead#
+                avatarImage: reply.author.avatar == '' || reply.author.avatar.contains('476.gif') ? 
                   SvgPicture.asset('assets/icon-hkgalden.svg', width: 30,height: 30) : 
                   CachedNetworkImage(
                     imageUrl: reply.author.avatar, 
