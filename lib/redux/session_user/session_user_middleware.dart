@@ -32,6 +32,7 @@ class SessionUserMiddleware extends MiddlewareClass<AppState> {
             id
             name
           }
+          blockedUserIds
         }
       }
     ''';

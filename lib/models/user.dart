@@ -9,12 +9,14 @@ class User extends Equatable {
   final String nickName;
   final String avatar;
   final List<UserGroup> userGroup;
+  final List<String> blockedUsers;
 
   User({
     this.userId,
     this.nickName,
     this.avatar,
     this.userGroup,
+    this.blockedUsers,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
@@ -22,6 +24,7 @@ class User extends Equatable {
     nickName: json['nickname'],
     avatar: json['avatar'] == null ? '' : json['avatar'],
     userGroup: json['groups'] == null ? [] : (json['groups'] as List<dynamic>).map((group) => UserGroup.fromJson(group)).toList(),
+    blockedUsers: json['blockedUserIds'] == null ? [] : (json['blockedUserIds'] as List<dynamic>).map((id) => id.toString()).toList(),
   );
 
   List<Object> get props => [userId, nickName, avatar, /*userGroup*/];

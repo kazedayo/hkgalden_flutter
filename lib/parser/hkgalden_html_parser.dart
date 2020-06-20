@@ -1,8 +1,15 @@
 import 'package:hkgalden_flutter/models/reply.dart';
+import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:universal_html/parsing.dart';
 import 'package:universal_html/html.dart';
 
 class HKGaldenHtmlParser {
+  static final NodeValidator validator = NodeValidatorBuilder.common()
+      ..allowImages(_AllowAllUriPolicy())
+      ..allowNavigation(_AllowAllUriPolicy())
+      ..allowCustomElement('color', attributes: ['hex'])
+      ..allowCustomElement('icon', attributes: ['src']);
+
   String parse(String htmlString) {
     final htmlDocument = parseHtmlDocument(htmlString);
 
@@ -12,9 +19,9 @@ class HKGaldenHtmlParser {
         //parse icon
         case 'smiley':
           element.replaceWith(
-            Element.img()..setAttribute(
+            Element.tag('icon')..setAttribute(
               'src', 'https://s.hkgalden.org/smilies/${element.getAttribute('data-pack-id')}/${element.getAttribute('data-id')}.gif',
-            )..setAttribute('width', element.getAttribute('data-sx'))..setAttribute('height', element.getAttribute('data-sy'))
+            )
           );
           break;
         //parse image
@@ -33,6 +40,18 @@ class HKGaldenHtmlParser {
             )..setInnerHtml(element.getAttribute('data-href'))
           );
           break;
+        //parse color
+        case 'color': 
+          element.replaceWith(
+            Element.html('<color hex="${element.getAttribute('data-value')}">${element.text}</color>', validator: validator)
+          );
+          break;
+        //parse strikethrough
+        case 's':
+          element.replaceWith(
+            Element.tag('s')..setInnerHtml(element.text)
+          ); 
+          break;
         default:
       }
     }
@@ -43,13 +62,12 @@ class HKGaldenHtmlParser {
   //dumb method, may change to recursive function
   String commentWithQuotes(Reply reply) {
     final Reply rootParent = reply.parent;
-    NodeValidator validator = NodeValidatorBuilder.common()..allowImages(_AllowAllUriPolicy())..allowNavigation(_AllowAllUriPolicy());
 
     final htmlDoc = parseHtmlDocument(reply.content);
 
-    if (rootParent != null) {
-      if (rootParent.parent != null) {
-        if (rootParent.parent.parent != null) {
+    if (rootParent != null && !store.state.sessionUserState.sessionUser.blockedUsers.contains(rootParent.author.userId)) {
+      if (rootParent.parent != null && !store.state.sessionUserState.sessionUser.blockedUsers.contains(rootParent.parent.author.userId)) {
+        if (rootParent.parent.parent != null && !store.state.sessionUserState.sessionUser.blockedUsers.contains(rootParent.parent.parent.author.userId)) {
           htmlDoc.body.setInnerHtml('<blockquote><blockquote><blockquote>${rootParent.parent.parent.content}</blockquote>${rootParent.parent.content}</blockquote>${rootParent.content}</blockquote>${htmlDoc.body.innerHtml}', validator: validator);
         return htmlDoc.body.innerHtml;
         }

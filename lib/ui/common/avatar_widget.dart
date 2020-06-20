@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/models/user_group.dart';
 
 class AvatarWidget extends StatelessWidget {
-  final Image avatarImage;
+  final Widget avatarImage;
   final List<UserGroup> userGroup;
 
   const AvatarWidget({Key key, this.avatarImage, this.userGroup}) : super(key: key);

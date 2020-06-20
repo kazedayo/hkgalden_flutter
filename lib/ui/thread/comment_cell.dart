@@ -2,10 +2,12 @@ import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/style.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CommentCell extends StatelessWidget {
   final Reply reply;
@@ -26,8 +28,8 @@ class CommentCell extends StatelessWidget {
             children: <Widget>[
               AvatarWidget(
                 avatarImage: reply.author.avatar == '' ? 
-                  Image.asset('assets/default-icon.png', width: 30,height: 30,) : 
-                  Image.network(reply.author.avatar, width: 30,height: 30,),
+                  SvgPicture.asset('assets/icon-hkgalden.svg', width: 30,height: 30) : 
+                  CachedNetworkImage(imageUrl: reply.author.avatar, width: 30,height: 30),
                   userGroup: reply.author.userGroup == null ? [] : reply.author.userGroup,
               ),
               SizedBox(
@@ -46,6 +48,30 @@ class CommentCell extends StatelessWidget {
           ),
           Html(
             data: HKGaldenHtmlParser().commentWithQuotes(reply),
+            customRender: {
+              'img': (context, child, attributes, node) {
+                return CachedNetworkImage(
+                  imageUrl: attributes['src'],
+                  placeholder: (context, url) => Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
+                );
+              },
+              'color': (context, child, attributes, node) {
+                return Text(
+                  node.text, 
+                  style: ThemeData.dark().textTheme.bodyText2.copyWith(
+                    color: Color(int.parse('FF${attributes['hex']}', radix: 16)),
+                    fontSize: FontSize.large.size
+                  ),
+                );
+              },
+              'icon': (context, child, attributes, node) {
+                return CachedNetworkImage(imageUrl: attributes['src']);
+              }
+            },
             style: {
               "html" : Style(backgroundColor: Colors.transparent, fontSize: FontSize.large),
               "blockquote" : Style(border: Border(left: BorderSide(color: Colors.grey)), padding: EdgeInsets.only(left: 4), margin: EdgeInsets.only(left: 10)),

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
-import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
-import 'package:hkgalden_flutter/redux/store.dart';
-import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/ui/login_page.dart';
@@ -31,7 +28,6 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
   @override
   Widget build(BuildContext context) => StoreConnector<AppState, HomeDrawerHeaderViewModel>(
     converter: (store) => HomeDrawerHeaderViewModel.create(store),
-    onInitialBuild: (viewModel) => precacheImage(viewModel.sessionUserAvatar.image, context),
     builder: (BuildContext context, HomeDrawerHeaderViewModel viewModel) => Container(
       //height: 250,
       child: DrawerHeader(

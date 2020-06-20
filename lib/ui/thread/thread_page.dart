@@ -32,7 +32,9 @@ class ThreadPage extends StatelessWidget {
       ) : 
       ListView.builder(
         itemCount: viewModel.replies.length,
-        itemBuilder: (context, index) => CommentCell(reply: viewModel.replies[index]),
+        itemBuilder: (context, index) => viewModel.blockedUserIds.contains(viewModel.replies[index].author.userId) ? 
+        SizedBox() : 
+        CommentCell(reply: viewModel.replies[index]),
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.reply),
