@@ -42,7 +42,8 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
             Text(
               token == '' ? '未登入' : viewModel.sessionUserName,
               style: TextStyle(
-                color: Colors.white,
+                color: token == '' ? Colors.white : 
+                  (viewModel.sessionUserGender == 'M' ? Color(0xff22c1fe) : Color(0xffff7aab)),
               ),
             ),
             Spacer(),

@@ -29,13 +29,24 @@ class CommentCell extends StatelessWidget {
               AvatarWidget(
                 avatarImage: reply.author.avatar == '' ? 
                   SvgPicture.asset('assets/icon-hkgalden.svg', width: 30,height: 30) : 
-                  CachedNetworkImage(imageUrl: reply.author.avatar, width: 30,height: 30),
+                  CachedNetworkImage(
+                    imageUrl: reply.author.avatar, 
+                    width: 30,
+                    height: 30,
+                    fadeInDuration: Duration(milliseconds: 300),
+                    fadeOutDuration: Duration(milliseconds: 300),
+                  ),
                   userGroup: reply.author.userGroup == null ? [] : reply.author.userGroup,
               ),
               SizedBox(
                 width: 5,
               ),
-              Text(reply.authorNickname),
+              Text(
+                reply.authorNickname, 
+                style: TextStyle(
+                  color: reply.author.gender == 'M' ? Color(0xff22c1fe) : Color(0xffff7aab),
+                ),
+              ),
               Spacer(),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -53,10 +64,18 @@ class CommentCell extends StatelessWidget {
                 return CachedNetworkImage(
                   imageUrl: attributes['src'],
                   placeholder: (context, url) => Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(child: CircularProgressIndicator()),
+                    padding: const EdgeInsets.all(16.0),
+                    child: Center(
+                      child: SizedBox(
+                        width: 20, 
+                        height: 20, 
+                        child: CircularProgressIndicator(strokeWidth: 2)
+                      ),
+                    ),
                   ),
                   errorWidget: (context, url, error) => Icon(Icons.error),
+                  fadeInDuration: Duration(milliseconds: 300),
+                  fadeOutDuration: Duration(milliseconds: 300),
                 );
               },
               'color': (context, child, attributes, node) {
@@ -69,7 +88,11 @@ class CommentCell extends StatelessWidget {
                 );
               },
               'icon': (context, child, attributes, node) {
-                return CachedNetworkImage(imageUrl: attributes['src']);
+                return CachedNetworkImage(
+                  imageUrl: attributes['src'],
+                  fadeInDuration: Duration(milliseconds: 300),
+                  fadeOutDuration: Duration(milliseconds: 300),
+                );
               }
             },
             style: {

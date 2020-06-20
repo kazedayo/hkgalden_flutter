@@ -19,6 +19,7 @@ class SessionUserState extends Equatable{
       nickName: '',
       avatar: '',
       userGroup: [],
+      blockedUsers: [],
     ),
   );
 

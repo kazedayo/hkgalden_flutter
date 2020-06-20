@@ -9,6 +9,7 @@ class User extends Equatable {
   final String nickName;
   final String avatar;
   final List<UserGroup> userGroup;
+  final String gender;
   final List<String> blockedUsers;
 
   User({
@@ -16,6 +17,7 @@ class User extends Equatable {
     this.nickName,
     this.avatar,
     this.userGroup,
+    this.gender,
     this.blockedUsers,
   });
 
@@ -24,6 +26,7 @@ class User extends Equatable {
     nickName: json['nickname'],
     avatar: json['avatar'] == null ? '' : json['avatar'],
     userGroup: json['groups'] == null ? [] : (json['groups'] as List<dynamic>).map((group) => UserGroup.fromJson(group)).toList(),
+    gender: json['gender'],
     blockedUsers: json['blockedUserIds'] == null ? [] : (json['blockedUserIds'] as List<dynamic>).map((id) => id.toString()).toList(),
   );
 

@@ -10,12 +10,14 @@ import 'package:redux/redux.dart';
 class HomeDrawerHeaderViewModel {
   final String sessionUserName;
   final Widget sessionUserAvatar;
+  final String sessionUserGender;
   final List<UserGroup> sessionUserGroup;
   final Function onLogout;
 
   HomeDrawerHeaderViewModel({
     this.sessionUserName,
     this.sessionUserAvatar,
+    this.sessionUserGender,
     this.sessionUserGroup,
     this.onLogout,
   });
@@ -25,7 +27,14 @@ class HomeDrawerHeaderViewModel {
       sessionUserName: store.state.sessionUserState.sessionUser.nickName,
       sessionUserAvatar: store.state.sessionUserState.sessionUser.avatar == '' ? 
         SvgPicture.asset('assets/icon-hkgalden.svg', width: 30, height: 30) : 
-        CachedNetworkImage(imageUrl: store.state.sessionUserState.sessionUser.avatar, width: 30,height: 30),
+        CachedNetworkImage(
+          imageUrl: store.state.sessionUserState.sessionUser.avatar, 
+          width: 30,
+          height: 30,
+          fadeInDuration: Duration(milliseconds: 300),
+          fadeOutDuration: Duration(milliseconds: 300),
+        ),
+      sessionUserGender: store.state.sessionUserState.sessionUser.gender,
       sessionUserGroup: store.state.sessionUserState.sessionUser.userGroup,
       onLogout: () {
         store.dispatch(RemoveSessionUserAction());

@@ -27,6 +27,7 @@ SessionUserState removeSessionUserReducer(SessionUserState state, RemoveSessionU
     userId: '',
     nickName: '',
     avatar: '',
-    userGroup: null,
+    userGroup: [],
+    blockedUsers: [],
   ));
 }

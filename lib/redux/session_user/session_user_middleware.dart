@@ -28,6 +28,7 @@ class SessionUserMiddleware extends MiddlewareClass<AppState> {
           id
           nickname
           avatar
+          gender
           groups {
             id
             name
