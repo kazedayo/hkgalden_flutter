@@ -8,7 +8,8 @@ class HKGaldenHtmlParser {
       ..allowImages(_AllowAllUriPolicy())
       ..allowNavigation(_AllowAllUriPolicy())
       ..allowCustomElement('color', attributes: ['hex'])
-      ..allowCustomElement('icon', attributes: ['src']);
+      ..allowCustomElement('icon', attributes: ['src'])
+      ..allowCustomElement('span', attributes: ['data-nodetype', 'data-id', 'data-src', 'data-value', 'data-href', 'data-pack-id', 'data-sx', 'data-sy', 'data-alt']);
 
   String parse(String htmlString) {
     final htmlDocument = parseHtmlDocument(htmlString);
@@ -37,20 +38,68 @@ class HKGaldenHtmlParser {
           element.replaceWith(
             Element.a()..setAttribute(
               'href', element.getAttribute('data-href'),
-            )..setInnerHtml(element.getAttribute('data-href'))
+            )..setInnerHtml(element.getAttribute('data-href'), validator: validator)
           );
           break;
         //parse color
         case 'color': 
           element.replaceWith(
-            Element.html('<color hex="${element.getAttribute('data-value')}">${element.text}</color>', validator: validator)
+            Element.html('<color hex="${element.getAttribute('data-value')}">${element.innerHtml}</color>', validator: validator)
+          );
+          break;
+        //parse bold
+        case 'b':
+          element.replaceWith(
+            Element.tag('b')..setInnerHtml(element.innerHtml, validator: validator)
+          );
+          break;
+        //parse italic
+        case 'i': 
+          element.replaceWith(
+            Element.tag('i')..setInnerHtml(element.innerHtml, validator: validator)
+          );
+          break;
+        //parse underline
+        case 'u':
+          element.replaceWith(
+            Element.tag('u')..setInnerHtml(element.innerHtml, validator: validator)
           );
           break;
         //parse strikethrough
         case 's':
           element.replaceWith(
-            Element.tag('s')..setInnerHtml(element.text)
+            Element.tag('s')..setInnerHtml(element.innerHtml, validator: validator)
           ); 
+          break;
+        //parse center alignment
+        case 'center':
+          element.replaceWith(
+            Element.div()..setAttribute('align', 'center')..setInnerHtml(element.innerHtml, validator: validator)
+          );
+          break;
+        //parse right alignment
+        case 'right':
+          element.replaceWith(
+            Element.div()..setAttribute('align', 'right')..setInnerHtml(element.innerHtml, validator: validator)
+          );
+          break;
+        //parse h1
+        case 'h1':
+          element.replaceWith(
+            Element.tag('h1')..setInnerHtml(element.innerHtml, validator: validator)
+          );
+          break;
+        //parse h2
+        case 'h2':
+          element.replaceWith(
+            Element.tag('h2')..setInnerHtml(element.innerHtml, validator: validator)
+          );
+          break;
+        //parse h3
+        case 'h3':
+          element.replaceWith(
+            Element.tag('h3')..setInnerHtml(element.innerHtml, validator: validator)
+          );
           break;
         default:
       }
