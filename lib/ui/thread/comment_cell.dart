@@ -58,49 +58,83 @@ class CommentCell extends StatelessWidget {
               ),
             ],
           ),
-          Html(
-            data: HKGaldenHtmlParser().commentWithQuotes(reply),
-            customRender: {
-              'img': (context, child, attributes, node) {
-                return CachedNetworkImage(
-                  imageUrl: attributes['src'],
-                  placeholder: (context, url) => Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Center(
-                      child: SizedBox(
-                        width: 20, 
-                        height: 20, 
-                        child: CircularProgressIndicator(strokeWidth: 2)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(6, 10, 0, 10),
+            child: Html(
+              shrinkWrap: true,
+              data: HKGaldenHtmlParser().commentWithQuotes(reply),
+              customRender: {
+                'img': (context, child, attributes, node) {
+                  return CachedNetworkImage(
+                    imageUrl: attributes['src'],
+                    placeholder: (context, url) => Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Center(
+                        child: SizedBox(
+                          width: 20, 
+                          height: 20, 
+                          child: CircularProgressIndicator(strokeWidth: 2)
+                        ),
                       ),
                     ),
-                  ),
-                  errorWidget: (context, url, error) => Icon(Icons.error),
-                  fadeInDuration: Duration(milliseconds: 300),
-                  fadeOutDuration: Duration(milliseconds: 300),
-                );
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                    fadeInDuration: Duration(milliseconds: 300),
+                    fadeOutDuration: Duration(milliseconds: 300),
+                  );
+                },
+                'color': (context, child, attributes, node) {
+                  return Text(
+                    node.text, 
+                    style: ThemeData.dark().textTheme.bodyText2.copyWith(
+                      color: Color(int.parse('FF${attributes['hex']}', radix: 16)),
+                      fontSize: FontSize(18).size
+                    ),
+                  );
+                },
+                'icon': (context, child, attributes, node) {
+                  return CachedNetworkImage(
+                    imageUrl: attributes['src'],
+                    fadeInDuration: Duration(milliseconds: 300),
+                    fadeOutDuration: Duration(milliseconds: 300),
+                  );
+                }
               },
-              'color': (context, child, attributes, node) {
-                return Text(
-                  node.text, 
-                  style: ThemeData.dark().textTheme.bodyText2.copyWith(
-                    color: Color(int.parse('FF${attributes['hex']}', radix: 16)),
-                    fontSize: FontSize.large.size
-                  ),
-                );
+              style: {
+                "html" : Style(
+                  backgroundColor: Colors.transparent, 
+                  fontSize: FontSize(18),
+                  margin: EdgeInsets.zero,
+                  padding: EdgeInsets.zero,
+                ),
+                "body": Style(
+                  margin: EdgeInsets.zero,
+                  padding: EdgeInsets.zero
+                ),
+                "a": Style(
+                  color: Colors.blueAccent
+                ),
+                "blockquote" : Style(
+                  border: Border(left: BorderSide(color: Colors.grey)), 
+                  padding: EdgeInsets.only(left: 8), 
+                  margin: EdgeInsets.only(left: 10, right: 0, bottom: 20)
+                ),
+                "div.quoteName": Style(
+                  fontSize: FontSize.smaller,
+                  color: Colors.grey
+                ),
+                "div.center": Style(
+                  alignment: Alignment.center
+                ),
+                "div.right": Style(
+                  alignment: Alignment.centerRight
+                ),
+                "h1, h2, h3": Style(
+                  margin: EdgeInsets.zero,
+                  padding: EdgeInsets.zero,
+                ),
               },
-              'icon': (context, child, attributes, node) {
-                return CachedNetworkImage(
-                  imageUrl: attributes['src'],
-                  fadeInDuration: Duration(milliseconds: 300),
-                  fadeOutDuration: Duration(milliseconds: 300),
-                );
-              }
-            },
-            style: {
-              "html" : Style(backgroundColor: Colors.transparent, fontSize: FontSize.large),
-              "blockquote" : Style(border: Border(left: BorderSide(color: Colors.grey)), padding: EdgeInsets.only(left: 4), margin: EdgeInsets.only(left: 10)),
-            },
-            onLinkTap: (url) => _launchURL(url),
+              onLinkTap: (url) => _launchURL(url),
+            ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,

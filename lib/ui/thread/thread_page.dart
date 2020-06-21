@@ -43,7 +43,7 @@ class ThreadPage extends StatelessWidget {
         ),
         bottom: PreferredSize(
           child: SizedBox(
-            height: 1, 
+            height: 3, 
             child: viewModel.isLoading && !viewModel.isInitialLoad ? LinearProgressIndicator() : SizedBox(),
           ), 
           preferredSize: Size(double.infinity,3),
