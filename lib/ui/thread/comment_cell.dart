@@ -67,15 +67,10 @@ class CommentCell extends StatelessWidget {
                 'img': (context, child, attributes, node) {
                   return CachedNetworkImage(
                     imageUrl: attributes['src'],
-                    placeholder: (context, url) => Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Center(
-                        child: SizedBox(
-                          width: 20, 
-                          height: 20, 
-                          child: CircularProgressIndicator(strokeWidth: 2)
-                        ),
-                      ),
+                    placeholder: (context, url) => SizedBox(
+                      width: 20, 
+                      height: 20, 
+                      child: CircularProgressIndicator(strokeWidth: 2)
                     ),
                     errorWidget: (context, url, error) => Icon(Icons.error),
                     fadeInDuration: Duration(milliseconds: 300),
