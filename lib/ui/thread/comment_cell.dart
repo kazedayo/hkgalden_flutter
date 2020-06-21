@@ -59,7 +59,7 @@ class CommentCell extends StatelessWidget {
             ],
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(6, 10, 0, 10),
+            padding: const EdgeInsets.fromLTRB(6, 20, 0, 0),
             child: Html(
               shrinkWrap: true,
               data: HKGaldenHtmlParser().commentWithQuotes(reply),

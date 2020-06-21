@@ -34,7 +34,7 @@ class HKGaldenHtmlParser {
     switch (element.getAttribute('data-nodetype')) {
       //parse icon
       case 'smiley':
-        return Element.img()..setAttribute(
+        return Element.tag('icon')..setAttribute(
           'src', 'https://s.hkgalden.org/smilies/${element.getAttribute('data-pack-id')}/${element.getAttribute('data-id')}.gif',
         );
         break;
