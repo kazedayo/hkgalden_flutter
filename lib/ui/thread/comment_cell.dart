@@ -1,6 +1,7 @@
 import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_html/html_parser.dart';
 import 'package:flutter_html/style.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
@@ -59,7 +60,7 @@ class CommentCell extends StatelessWidget {
             ],
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(6, 20, 0, 0),
+            padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
             child: Html(
               shrinkWrap: true,
               data: HKGaldenHtmlParser().commentWithQuotes(reply),
@@ -75,15 +76,6 @@ class CommentCell extends StatelessWidget {
                     errorWidget: (context, url, error) => Icon(Icons.error),
                     fadeInDuration: Duration(milliseconds: 300),
                     fadeOutDuration: Duration(milliseconds: 300),
-                  );
-                },
-                'color': (context, child, attributes, node) {
-                  return Text(
-                    node.text, 
-                    style: ThemeData.dark().textTheme.bodyText2.copyWith(
-                      color: Color(int.parse('FF${attributes['hex']}', radix: 16)),
-                      fontSize: FontSize(18).size
-                    ),
                   );
                 },
                 'icon': (context, child, attributes, node) {
@@ -111,7 +103,7 @@ class CommentCell extends StatelessWidget {
                 "blockquote" : Style(
                   border: Border(left: BorderSide(color: Colors.grey)), 
                   padding: EdgeInsets.only(left: 8), 
-                  margin: EdgeInsets.only(left: 10, right: 0, bottom: 20)
+                  margin: EdgeInsets.only(left: 10, right: 0, bottom: 10, top: 10)
                 ),
                 "div.quoteName": Style(
                   fontSize: FontSize.smaller,

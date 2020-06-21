@@ -8,7 +8,7 @@ class HKGaldenHtmlParser {
       ..allowInlineStyles()
       ..allowImages(_AllowAllUriPolicy())
       ..allowNavigation(_AllowAllUriPolicy())
-      ..allowCustomElement('color', attributes: ['hex'])
+      ..allowCustomElement('div', attributes: ['hex'])
       ..allowCustomElement('icon', attributes: ['src'])
       ..allowCustomElement('span', attributes: ['data-nodetype', 'data-id', 'data-src', 'data-value', 'data-href', 'data-pack-id', 'data-sx', 'data-sy', 'data-alt']);
 
@@ -52,7 +52,8 @@ class HKGaldenHtmlParser {
         break;
       //parse color
       case 'color': 
-        return Element.tag('color')
+        return Element.div()
+          ..setAttribute('class', 'color')
           ..setAttribute('hex', element.getAttribute('data-value'))
           ..setInnerHtml(parse(element.innerHtml), validator: validator);
         break;
