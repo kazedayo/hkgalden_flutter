@@ -24,6 +24,28 @@ class SizeRoute extends PageRouteBuilder {
     );
 }
 
+class FadeRoute extends PageRouteBuilder {
+  final Widget page;
+  FadeRoute({this.page})
+    : super(
+      transitionDuration: Duration(milliseconds: 300),
+      pageBuilder: (
+        BuildContext context, 
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+      ) => page,
+      transitionsBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+        Widget child,
+      ) => FadeTransition(
+        opacity: animation,
+        child: child,
+      ),
+    );
+}
+
 class SlideInFromBottomRoute extends PageRouteBuilder {
   final Widget page;
   SlideInFromBottomRoute({this.page})
