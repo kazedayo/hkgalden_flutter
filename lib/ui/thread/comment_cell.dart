@@ -109,7 +109,8 @@ class CommentCell extends StatelessWidget {
                   padding: EdgeInsets.zero
                 ),
                 "a": Style(
-                  color: Colors.blueAccent
+                  color: Colors.blueAccent,
+                  textDecoration: TextDecoration.none
                 ),
                 "blockquote" : Style(
                   border: Border(left: BorderSide(color: Colors.grey, width: 2.3)), 
