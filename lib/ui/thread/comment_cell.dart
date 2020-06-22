@@ -69,9 +69,9 @@ class CommentCell extends StatelessWidget {
               customRender: {
                 'img': (context, child, attributes, node) {
                   return GestureDetector(
-                    onTap: () => _showImageView(context.buildContext, attributes['src'], 'image ${attributes['src']}'),
+                    onTap: () => _showImageView(context.buildContext, attributes['src'], '${reply.floor}_${attributes['src']}'),
                     child: Hero(
-                      tag: 'image ${attributes['src']}',
+                      tag: '${reply.floor}_${attributes['src']}',
                       child: CachedNetworkImage(
                         imageUrl: attributes['src'],
                         placeholder: (context, url) => Container(
