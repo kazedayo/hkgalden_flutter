@@ -3,16 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
-import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
 import 'package:hkgalden_flutter/ui/home/compose_page.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
-import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
-import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
 import 'package:hkgalden_flutter/viewmodels/home_page_view_model.dart';
 
 class HomePage extends StatefulWidget {
@@ -90,25 +86,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           onRefresh: () => viewModel.onRefresh(viewModel.selectedChannelId),
           child: ListView(
             controller: _scrollController,
-            children: <Widget>[
-              for (Thread thread in viewModel.threads)
-                ThreadCell(
-                  title: thread.title,
-                  authorName: thread.replies[0].authorNickname,
-                  totalReplies: thread.totalReplies,
-                  lastReply: thread.replies.length == 2 ? 
-                              thread.replies[1].date : 
-                              thread.replies[0].date,
-                  onTap: () {
-                    viewModel.onThreadCellTap(thread.threadId);
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => ThreadPage(
-                      title: thread.title,
-                      threadId: thread.threadId,
-                    )));
-                  },
-                ),
-              PageEndLoadingInidicator(),
-            ],
+            children: viewModel.onLoadThreadList(context),
           ),
         ),
         drawer: HomeDrawer(),
