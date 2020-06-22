@@ -23,6 +23,7 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
         token = value;
       });
     });
+    super.initState();
   }
 
   @override

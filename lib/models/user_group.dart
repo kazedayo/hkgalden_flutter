@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
 
+@immutable
 class UserGroup extends Equatable {
   final String groupId;
   final String groupName;

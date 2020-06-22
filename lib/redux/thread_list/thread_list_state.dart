@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 
+@immutable
 class ThreadListState extends Equatable {
   final bool threadListIsLoading;
   final List<Thread> threads;

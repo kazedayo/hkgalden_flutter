@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
+import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
 import 'package:hkgalden_flutter/ui/thread/comment_cell.dart';
 import 'package:redux/redux.dart';
 
@@ -30,10 +31,22 @@ class ThreadPageViewModel {
               ),
             ));
           }
-          store.state.sessionUserState.sessionUser.blockedUsers.contains(reply.author.userId) ? 
-            repliesWidgets.add(SizedBox()) : 
-            repliesWidgets.add(CommentCell(reply: reply));
+          repliesWidgets.add(
+            Visibility(
+              visible: !store.state.sessionUserState.sessionUser.blockedUsers.contains(reply.author.userId),
+              child: CommentCell(reply: reply)
+            ),
+          );
         }
+        repliesWidgets.add((store.state.threadState.thread.totalReplies.toDouble() / 50.0).ceil() > store.state.threadState.currentPage ? 
+          PageEndLoadingInidicator(): 
+          Container(
+            height: 50,
+            child: Center(
+              child: Text('已到post底', style: TextStyle(color: Colors.grey))
+            ),
+          )
+        );
         return repliesWidgets;
       },
     );

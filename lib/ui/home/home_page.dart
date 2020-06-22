@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
+import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
 import 'package:hkgalden_flutter/ui/home/compose_page.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
@@ -13,9 +15,22 @@ import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
 import 'package:hkgalden_flutter/viewmodels/home_page_view_model.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final String title;
-  static final ScrollController _scrollController = ScrollController()..addListener(() {
+
+  HomePage({Key key, this.title}) : super(key: key);
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+  ScrollController _scrollController;
+  AnimationController _fabAnimationController;
+
+  @override
+  void initState() {
+    _scrollController = ScrollController()..addListener(() {
     if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
         store.dispatch(
         RequestThreadListAction(
@@ -24,10 +39,28 @@ class HomePage extends StatelessWidget {
             isRefresh: true
           )
         );
-    }
-  });
+      }
+    })..addListener(() {
+      if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
+        _fabAnimationController.reverse();
+      } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
+        _fabAnimationController.forward();
+      }
+    });
+    _fabAnimationController = AnimationController(
+      duration: Duration(milliseconds: 100),
+      value: 1,
+      vsync: this,
+    );
+    super.initState();
+  }
 
-  HomePage({Key key, this.title}) : super(key: key);
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _fabAnimationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,24 +107,21 @@ class HomePage extends StatelessWidget {
                     )));
                   },
                 ),
-              Container(
-                height: 40,
-                child: Center(
-                  child: SizedBox(
-                    width: 15,
-                    height: 15,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-              ),
+              PageEndLoadingInidicator(),
             ],
           ),
         ),
         drawer: HomeDrawer(),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => Navigator.of(context).push(SlideInFromBottomRoute(page: ComposePage())),
-          child: Icon(Icons.create),
-        ),
+        floatingActionButton: FadeTransition(
+          opacity: _fabAnimationController,
+          child: ScaleTransition(
+            scale: _fabAnimationController,
+            child: FloatingActionButton(
+              onPressed: () => Navigator.of(context).push(SlideInFromBottomRoute(page: ComposePage())),
+              child: Icon(Icons.create),
+            ),
+          ),
+        )
       ),
     );
   }

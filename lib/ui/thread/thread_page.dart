@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/store.dart';
@@ -6,13 +7,27 @@ import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 import 'package:hkgalden_flutter/viewmodels/thread_page_view_model.dart';
 import 'package:marquee_widget/marquee_widget.dart';
 
-class ThreadPage extends StatelessWidget {
+class ThreadPage extends StatefulWidget {
   final String title;
   final int threadId;
-  static final ScrollController _scrollController = ScrollController()..addListener(() {
+
+  const ThreadPage({Key key, this.title, this.threadId}) : super(key: key);
+
+  @override
+  _ThreadPageState createState() => _ThreadPageState();
+}
+
+class _ThreadPageState extends State<ThreadPage> with SingleTickerProviderStateMixin {
+  ScrollController _scrollController;
+  AnimationController _fabAnimationController;
+
+  @override
+  void initState() {
+    _scrollController = ScrollController()..addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
         print('scroll view hit bottom!');
         if ((store.state.threadState.thread.totalReplies.toDouble() / 50.0).ceil() > store.state.threadState.currentPage) {
+          print('loading page ${store.state.threadState.currentPage + 1}');
           store.dispatch(
             RequestThreadAction(
               threadId: store.state.threadState.thread.threadId,
@@ -24,9 +39,26 @@ class ThreadPage extends StatelessWidget {
           print('This is the last page of this thread!');
         }
       }
+    })..addListener(() {
+      if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
+        _fabAnimationController.reverse();
+      } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
+        _fabAnimationController.forward();
+      }
     });
+    _fabAnimationController = AnimationController(
+      duration: Duration(milliseconds: 100),
+      value: 1,
+      vsync: this,
+    );
+    super.initState();
+  }
 
-  const ThreadPage({Key key, this.title, this.threadId}) : super(key: key);
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override Widget build(BuildContext context) => StoreConnector<AppState, ThreadPageViewModel>(
     converter: (store) => ThreadPageViewModel.create(store),
@@ -34,7 +66,7 @@ class ThreadPage extends StatelessWidget {
       appBar: AppBar(
         title: Container(
           child: Marquee(
-            child: Text(title, style: TextStyle(fontWeight: FontWeight.w700)),
+            child: Text(widget.title, style: TextStyle(fontWeight: FontWeight.w700)),
             animationDuration: Duration(seconds: 5),
             backDuration: Duration(seconds: 5),
             pauseDuration: Duration(seconds: 1),
@@ -44,7 +76,10 @@ class ThreadPage extends StatelessWidget {
         bottom: PreferredSize(
           child: SizedBox(
             height: 3, 
-            child: viewModel.isLoading && !viewModel.isInitialLoad ? LinearProgressIndicator() : SizedBox(),
+            child: Visibility(
+              visible: viewModel.isLoading && !viewModel.isInitialLoad,
+              child: LinearProgressIndicator()
+            ),
           ), 
           preferredSize: Size(double.infinity,3),
         )
@@ -57,9 +92,15 @@ class ThreadPage extends StatelessWidget {
         controller: _scrollController,
         children: viewModel.onLoadReplies(),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.reply),
-        onPressed: null,
+      floatingActionButton: FadeTransition(
+        opacity: _fabAnimationController,
+        child: ScaleTransition(
+          scale: _fabAnimationController,
+          child: FloatingActionButton(
+            child: Icon(Icons.reply),
+            onPressed: null,
+          ),
+        ),
       ),
     ),
   );

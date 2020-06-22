@@ -1,9 +1,8 @@
 import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_html/html_parser.dart';
 import 'package:flutter_html/style.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
@@ -30,7 +29,7 @@ class CommentCell extends StatelessWidget {
               AvatarWidget(
                 //舊膠登icon死link會炒async #dead#
                 avatarImage: reply.author.avatar == '' || reply.author.avatar.contains('476.gif') ? 
-                  SvgPicture.asset('assets/icon-hkgalden.svg', width: 30,height: 30) : 
+                  SvgPicture.asset('assets/icon-hkgalden.svg', width: 30,height: 30, color: Colors.grey) : 
                   CachedNetworkImage(
                     imageUrl: reply.author.avatar, 
                     width: 30,
@@ -68,10 +67,13 @@ class CommentCell extends StatelessWidget {
                 'img': (context, child, attributes, node) {
                   return CachedNetworkImage(
                     imageUrl: attributes['src'],
-                    placeholder: (context, url) => SizedBox(
-                      width: 20, 
-                      height: 20, 
-                      child: CircularProgressIndicator(strokeWidth: 2)
+                    placeholder: (context, url) => Container(
+                      margin: EdgeInsets.all(10),
+                      child: SizedBox(
+                        width: 25,
+                        height: 25,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
                     ),
                     errorWidget: (context, url, error) => Icon(Icons.error),
                     fadeInDuration: Duration(milliseconds: 300),
@@ -101,9 +103,9 @@ class CommentCell extends StatelessWidget {
                   color: Colors.blueAccent
                 ),
                 "blockquote" : Style(
-                  border: Border(left: BorderSide(color: Colors.grey)), 
+                  border: Border(left: BorderSide(color: Colors.grey, width: 2.3)), 
                   padding: EdgeInsets.only(left: 8), 
-                  margin: EdgeInsets.only(left: 10, right: 0, bottom: 10, top: 10)
+                  margin: EdgeInsets.only(left: 10, right: 0, bottom: 10, top: 15)
                 ),
                 "div.quoteName": Style(
                   fontSize: FontSize.smaller,

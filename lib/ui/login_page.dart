@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
@@ -8,11 +6,17 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/redux/store.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   final Function onLoginSuccess;
-  WebViewController _controller;
 
   LoginPage({this.onLoginSuccess});
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  WebViewController _controller;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -33,7 +37,7 @@ class LoginPage extends StatelessWidget {
       navigationDelegate: (NavigationRequest request) {
         if (request.url.startsWith('http://localhost/callback')) {
           TokenSecureStorage().writeToken(request.url.substring(32), onFinish: (_) {
-            onLoginSuccess();
+            widget.onLoginSuccess();
             store.dispatch(RequestSessionUserAction());
             store.dispatch(RequestThreadListAction(channelId: store.state.channelState.selectedChannelId, page: 1, isRefresh: false));
             Navigator.pop(context);
@@ -55,7 +59,7 @@ class LoginPage extends StatelessWidget {
       javascriptChannels: <JavascriptChannel>[_alertJavascriptChannel(context)].toSet(),
     ),
   );
-  
+
   JavascriptChannel _alertJavascriptChannel(BuildContext context) {
     return JavascriptChannel(name: 'Alert', onMessageReceived: (JavascriptMessage message) {
         showDialog(
