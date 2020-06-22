@@ -32,6 +32,7 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
     builder: (BuildContext context, HomeDrawerHeaderViewModel viewModel) => Container(
       //height: 250,
       child: DrawerHeader(
+        margin: EdgeInsets.zero,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[

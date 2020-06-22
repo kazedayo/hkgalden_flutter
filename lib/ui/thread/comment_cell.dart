@@ -158,7 +158,7 @@ class CommentCell extends StatelessWidget {
   _showImageView(BuildContext context, String url, String heroTag) {
     Navigator.of(context).push(
       FadeRoute(page: FullScreenPhotoView(
-        imageProvider: NetworkImage(url),
+        imageUrl: url,
         heroTag: heroTag
       ))
     );
