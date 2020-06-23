@@ -1,12 +1,27 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_downloader/image_downloader.dart';
 import 'package:photo_view/photo_view.dart';
 
-class FullScreenPhotoView extends StatelessWidget {
+class FullScreenPhotoView extends StatefulWidget {
   final String imageUrl;
   final String heroTag;
 
   const FullScreenPhotoView({Key key, this.imageUrl, this.heroTag}) : super(key: key);
+
+  @override
+  _FullScreenPhotoViewState createState() => _FullScreenPhotoViewState();
+}
+
+class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
+  bool _isDownloadingImage;
+
+  @override
+  void initState() {
+    super.initState();
+    _isDownloadingImage = false;
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -16,7 +31,7 @@ class FullScreenPhotoView extends StatelessWidget {
       backgroundColor: Color(0x88000000),
       elevation: 0,
       actions: <Widget>[
-        IconButton(icon: Icon(Icons.save_alt), onPressed: () => null),
+        Builder(builder: (context) => IconButton(icon: Icon(Icons.save_alt), onPressed: () =>_isDownloadingImage ? null : _downloadImage(context, widget.imageUrl)),),
         IconButton(icon: Icon(Icons.close), onPressed: () => Navigator.of(context).pop())
       ],
     ),
@@ -26,8 +41,11 @@ class FullScreenPhotoView extends StatelessWidget {
       ),
       child: PhotoView.customChild(
         child: Hero(
-          tag: heroTag,
-          child: CachedNetworkImage(imageUrl: imageUrl),
+          tag: widget.heroTag,
+          child: CachedNetworkImage(
+            imageUrl: widget.imageUrl,
+            filterQuality: FilterQuality.high,
+          ),
         ),
         //heroAttributes: PhotoViewHeroAttributes(tag: heroTag, transitionOnUserGestures: true),
         minScale: PhotoViewComputedScale.contained,
@@ -35,4 +53,32 @@ class FullScreenPhotoView extends StatelessWidget {
       ),
     ),
   );
+
+  _downloadImage(BuildContext context, String url) async {
+    setState(() {
+      _isDownloadingImage = true;
+    });
+    try {
+      // Saved with this method.
+      await ImageDownloader.downloadImage(url, destination: AndroidDestinationType.directoryPictures).then((value) {
+        if (value == null) {
+          setState(() {
+            _isDownloadingImage = false;
+          });
+          Scaffold.of(context).showSnackBar(
+            SnackBar(content: Text('圖片下載失敗!'))
+          );
+          return;
+        }
+        setState(() {
+            _isDownloadingImage = false;
+          });
+        Scaffold.of(context).showSnackBar(
+          SnackBar(content: Text('圖片下載成功!'))
+        );
+      });
+    } on PlatformException catch (error) {
+      print(error);
+    }
+  }
 }

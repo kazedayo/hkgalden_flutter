@@ -32,7 +32,7 @@ class CommentCell extends StatelessWidget {
             children: <Widget>[
               AvatarWidget(
                 //舊膠登icon死link會炒async #dead#
-                avatarImage: reply.author.avatar == '' || reply.author.avatar.contains('476.gif') ? 
+                avatarImage: reply.author.avatar == '' ? 
                   SvgPicture.asset('assets/icon-hkgalden.svg', width: 30,height: 30, color: Colors.grey) : 
                   CachedNetworkImage(
                     imageUrl: reply.author.avatar, 
@@ -98,9 +98,10 @@ class CommentCell extends StatelessWidget {
                   );
                 },
                 'span': (context, child, attributes, element) {
-                  if (attributes.containsKey('color')) {
+                  if (element.className == ('color')) {
+                    print('color span detected!');
                     Style newStyle = context.style.copyWith(
-                      color: Color(int.parse('FF${attributes['hex']}'))
+                      color: Color(int.parse('FF${attributes['hex']}',radix: 16))
                     );
                     return ContainerSpan(
                       newContext: RenderContext(buildContext: context.buildContext, style: newStyle, parser: context.parser),
