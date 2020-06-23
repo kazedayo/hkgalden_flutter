@@ -19,8 +19,8 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
 
   @override
   void initState() {
-    super.initState();
     _isDownloadingImage = false;
+    super.initState();
   }
 
   @override
@@ -31,7 +31,12 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
       backgroundColor: Color(0x88000000),
       elevation: 0,
       actions: <Widget>[
-        Builder(builder: (context) => IconButton(icon: Icon(Icons.save_alt), onPressed: () =>_isDownloadingImage ? null : _downloadImage(context, widget.imageUrl)),),
+        Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.save_alt), 
+            onPressed: _isDownloadingImage ? null : () => _downloadImage(context, widget.imageUrl)
+          ),
+        ),
         IconButton(icon: Icon(Icons.close), onPressed: () => Navigator.of(context).pop())
       ],
     ),
@@ -55,24 +60,21 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
   );
 
   _downloadImage(BuildContext context, String url) async {
-    setState(() {
-      _isDownloadingImage = true;
-    });
     try {
+      setState(() {
+        _isDownloadingImage = true;
+      });
       // Saved with this method.
       await ImageDownloader.downloadImage(url, destination: AndroidDestinationType.directoryPictures).then((value) {
-        if (value == null) {
-          setState(() {
+        setState(() {
             _isDownloadingImage = false;
           });
+        if (value == null) {
           Scaffold.of(context).showSnackBar(
             SnackBar(content: Text('圖片下載失敗!'))
           );
           return;
         }
-        setState(() {
-            _isDownloadingImage = false;
-          });
         Scaffold.of(context).showSnackBar(
           SnackBar(content: Text('圖片下載成功!'))
         );
