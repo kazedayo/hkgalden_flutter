@@ -20,6 +20,9 @@ class ThreadPage extends StatefulWidget {
 class _ThreadPageState extends State<ThreadPage> with SingleTickerProviderStateMixin {
   ScrollController _scrollController;
   AnimationController _fabAnimationController;
+  AnimationController _appBarElevationAnimationController;
+  Animation<double> _appBarElevationAnimation;
+  AnimationController _linearProgressIndicatorAnimationController;
 
   @override
   void initState() {
@@ -45,8 +48,24 @@ class _ThreadPageState extends State<ThreadPage> with SingleTickerProviderStateM
       } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
         _fabAnimationController.forward();
       }
+    })..addListener(() {
+      if (_scrollController.position.pixels > _scrollController.position.minScrollExtent) {
+        _appBarElevationAnimationController.forward();
+      } else if (_scrollController.position.pixels == _scrollController.position.minScrollExtent) {
+        _appBarElevationAnimationController.reverse();
+      }
     });
     _fabAnimationController = AnimationController(
+      duration: Duration(milliseconds: 100),
+      value: 1,
+      vsync: this,
+    );
+    _appBarElevationAnimationController = AnimationController(
+      duration: Duration(milliseconds: 100),
+      vsync: this,
+    );
+    _appBarElevationAnimation = Tween<double>(begin: 0, end: Theme.of(context).appBarTheme.elevation).animate(_appBarElevationAnimationController);
+    _linearProgressIndicatorAnimationController = AnimationController(
       duration: Duration(milliseconds: 100),
       value: 1,
       vsync: this,
@@ -57,11 +76,17 @@ class _ThreadPageState extends State<ThreadPage> with SingleTickerProviderStateM
   @override
   void dispose() {
     _scrollController.dispose();
+    _fabAnimationController.dispose();
+    _appBarElevationAnimationController.dispose();
     super.dispose();
   }
 
   @override Widget build(BuildContext context) => StoreConnector<AppState, ThreadPageViewModel>(
     converter: (store) => ThreadPageViewModel.create(store),
+    onDidChange: (viewModel) => 
+      viewModel.isLoading && !viewModel.isInitialLoad ? 
+        _linearProgressIndicatorAnimationController.forward() : 
+        _linearProgressIndicatorAnimationController.reverse(),
     builder: (BuildContext context, ThreadPageViewModel viewModel) => Scaffold(
       appBar: AppBar(
         title: Container(
@@ -76,13 +101,16 @@ class _ThreadPageState extends State<ThreadPage> with SingleTickerProviderStateM
         bottom: PreferredSize(
           child: SizedBox(
             height: 3, 
-            child: Visibility(
-              visible: viewModel.isLoading && !viewModel.isInitialLoad,
-              child: LinearProgressIndicator()
+            child: FadeTransition(
+              opacity: _linearProgressIndicatorAnimationController,
+              child: LinearProgressIndicator(
+                backgroundColor: Colors.greenAccent[900],
+              ),
             ),
           ), 
           preferredSize: Size(double.infinity,3),
-        )
+        ),
+        elevation: _appBarElevationAnimation.value,
       ),
       body: viewModel.isLoading && viewModel.isInitialLoad ? 
       Center(

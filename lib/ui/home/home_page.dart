@@ -23,6 +23,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   ScrollController _scrollController;
   AnimationController _fabAnimationController;
+  AnimationController _appBarElevationAnimationController;
+  Animation<double> _appBarElevationAnimation;
 
   @override
   void initState() {
@@ -42,12 +44,28 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
         _fabAnimationController.forward();
       }
+    })..addListener(() {
+      if (_scrollController.position.pixels > _scrollController.position.minScrollExtent) {
+        _appBarElevationAnimationController.forward();
+      } else if (_scrollController.position.pixels == _scrollController.position.minScrollExtent) {
+        _appBarElevationAnimationController.reverse();
+      }
     });
     _fabAnimationController = AnimationController(
       duration: Duration(milliseconds: 100),
       value: 1,
       vsync: this,
     );
+    _appBarElevationAnimationController = AnimationController(
+      duration: Duration(milliseconds: 100),
+      vsync: this,
+    );
+    _appBarElevationAnimation = Tween<double>(begin: 0, end: Theme.of(context).appBarTheme.elevation).animate(_appBarElevationAnimationController)
+      ..addListener(() {
+        setState(() {
+          
+        });
+      });
     super.initState();
   }
 
@@ -55,6 +73,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   void dispose() {
     _scrollController.dispose();
     _fabAnimationController.dispose();
+    _appBarElevationAnimationController.dispose();
     super.dispose();
   }
 
@@ -69,13 +88,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              Spacer(flex: 1),
+              Visibility(
+                visible: Theme.of(context).platform == TargetPlatform.iOS,
+                child: Spacer(flex: 1),
+              ),
               Hero(tag: 'logo', child: SizedBox(child: SvgPicture.asset('assets/icon-hkgalden.svg'), width: 27, height: 27)),
               SizedBox(width: 5),
               Text(viewModel.title, style: TextStyle(fontWeight: FontWeight.w700), strutStyle: StrutStyle(height:1.25)),
               Spacer(flex: 2),
             ],
           ),
+          elevation: _appBarElevationAnimation.value,
           //leading: SvgPicture.asset('assets/icon-hkgalden.svg'),
         ),
         body: viewModel.isThreadLoading && viewModel.isRefresh == false ? 

@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
@@ -62,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
 
   JavascriptChannel _alertJavascriptChannel(BuildContext context) {
     return JavascriptChannel(name: 'Alert', onMessageReceived: (JavascriptMessage message) {
-        showDialog(
+        showModal<void>(
           context: context,
           builder: (BuildContext context) {
             // return object of type Dialog
