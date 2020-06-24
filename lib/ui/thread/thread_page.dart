@@ -72,9 +72,8 @@ class _ThreadPageState extends State<ThreadPage> with SingleTickerProviderStateM
       body: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
-            title: Text(widget.title, style: TextStyle(fontWeight: FontWeight.w700),maxLines: 3),
+            title: Text(widget.title, style: TextStyle(fontWeight: FontWeight.w700)),
             pinned: true,
-            expandedHeight: 200,
             bottom: PreferredSize(
               child: SizedBox(
                 height: 3, 
