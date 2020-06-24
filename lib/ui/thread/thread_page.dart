@@ -72,9 +72,9 @@ class _ThreadPageState extends State<ThreadPage> with SingleTickerProviderStateM
       appBar: AppBar(
         title: Marquee(
           child: Text(widget.title, style: TextStyle(fontWeight: FontWeight.w700)),
-          animationDuration: Duration(seconds: 3),
-          pauseDuration: Duration(seconds: 1),
-          backDuration: Duration(seconds: 3),
+          animationDuration: Duration(seconds: 5),
+          pauseDuration: Duration(seconds: 2),
+          backDuration: Duration(seconds: 5),
         ),
         bottom: PreferredSize(
           child: SizedBox(
