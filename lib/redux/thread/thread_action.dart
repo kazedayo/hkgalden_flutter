@@ -24,4 +24,10 @@ class UpdateThreadAction {
   });
 }
 
-class RequestThreadErrorAction {}
+class RequestThreadErrorAction {
+  final int threadId;
+  final int page;
+  final bool isInitialLoad;
+
+  RequestThreadErrorAction(this.threadId, this.page, this.isInitialLoad);
+}

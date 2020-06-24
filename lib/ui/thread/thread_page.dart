@@ -69,29 +69,35 @@ class _ThreadPageState extends State<ThreadPage> with SingleTickerProviderStateM
   @override Widget build(BuildContext context) => StoreConnector<AppState, ThreadPageViewModel>(
     converter: (store) => ThreadPageViewModel.create(store),
     builder: (BuildContext context, ThreadPageViewModel viewModel) => Scaffold(
-      appBar: AppBar(
-        title: SizedBox(
-          height: 30,
-          child: Text(widget.title, style: TextStyle(fontWeight: FontWeight.w700))
-        ),
-        bottom: PreferredSize(
-          child: SizedBox(
-            height: 3, 
-            child: Visibility(
-              visible: viewModel.isLoading && !viewModel.isInitialLoad,
-              child: LinearProgressIndicator()
+      body: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            title: Text(widget.title, style: TextStyle(fontWeight: FontWeight.w700),maxLines: 3),
+            pinned: true,
+            expandedHeight: 200,
+            bottom: PreferredSize(
+              child: SizedBox(
+                height: 3, 
+                child: Visibility(
+                  visible: viewModel.isLoading && !viewModel.isInitialLoad,
+                  child: LinearProgressIndicator()
+                ),
+              ), 
+              preferredSize: Size(double.infinity,3),
             ),
-          ), 
-          preferredSize: Size(double.infinity,3),
-        )
-      ),
-      body: viewModel.isLoading && viewModel.isInitialLoad ? 
-      Center(
-        child: CircularProgressIndicator(),
-      ) : 
-      ListView(
-        controller: _scrollController,
-        children: _generateReplies(viewModel),
+          ),
+          viewModel.isLoading && viewModel.isInitialLoad ? 
+            SliverFillRemaining(
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ) : 
+            SliverList(
+              delegate: SliverChildListDelegate(
+                _generateReplies(viewModel)
+              ),
+            ), 
+        ],
       ),
       floatingActionButton: FadeTransition(
         opacity: _fabAnimationController,

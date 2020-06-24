@@ -12,14 +12,16 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
   void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
     if (action is RequestThreadAction) {
       next(action);
-      Thread thread = await _getThreadQuery(action.threadId, action.page);
+      Thread thread = await _getThreadQuery(action.threadId, action.page, action.isInitialLoad, next);
       next(UpdateThreadAction(thread: thread, page: action.page, isInitialLoad: action.isInitialLoad));
+    } else if (action is RequestThreadErrorAction) {
+      next(RequestThreadAction(threadId: action.threadId, page: action.page, isInitialLoad: action.isInitialLoad));
     } else {
       next(action);
     }
   }
 
-  Future<Thread> _getThreadQuery(int threadId, int page) async {
+  Future<Thread> _getThreadQuery(int threadId, int page, bool isInitialLoad, NextDispatcher next) async {
     final client = HKGaldenApi().client;
 
     const String query = r'''
@@ -84,7 +86,7 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
     final QueryResult queryResult = await client.query(options);
 
     if (queryResult.hasException) {
-      print(queryResult.exception.toString());
+      next(RequestThreadAction(threadId: threadId, page: page, isInitialLoad: isInitialLoad));
     }
 
     final dynamic result = queryResult.data['thread'] as dynamic;

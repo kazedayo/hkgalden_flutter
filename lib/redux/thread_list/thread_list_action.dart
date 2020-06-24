@@ -24,4 +24,10 @@ class UpdateThreadListAction {
   });
 }
 
-class RequestThreadListErrorAction {}
+class RequestThreadListErrorAction {
+  final String channelId;
+  final int page;
+  final bool isRefresh;
+
+  RequestThreadListErrorAction(this.channelId, this.page, this.isRefresh);
+}

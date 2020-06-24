@@ -12,14 +12,16 @@ class SessionUserMiddleware extends MiddlewareClass<AppState> {
   void call (Store<AppState> store, dynamic action, NextDispatcher next) async {
     if (action is RequestSessionUserAction) {
       next(action);
-      User sessionUser = await _getSessionUserQuery();
+      User sessionUser = await _getSessionUserQuery(next);
       next(UpdateSessionUserAction(sessionUser: sessionUser));
+    } else if (action is RequestSessionUserErrorAction) {
+      next(RequestSessionUserAction());
     } else {
       next(action);
     }
   }
 
-  Future<User> _getSessionUserQuery() async {
+  Future<User> _getSessionUserQuery(NextDispatcher next) async {
     final client = HKGaldenApi().client;
 
     const String query = r'''
@@ -45,7 +47,7 @@ class SessionUserMiddleware extends MiddlewareClass<AppState> {
     final QueryResult queryResult = await client.query(options);
 
     if (queryResult.hasException) {
-      print(queryResult.exception.toString());
+      next(RequestSessionUserAction());
     }
 
     final dynamic result = queryResult.data['sessionUser'] as dynamic;

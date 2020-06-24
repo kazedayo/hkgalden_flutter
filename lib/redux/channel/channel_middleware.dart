@@ -12,14 +12,16 @@ class ChannelMiddleware extends MiddlewareClass<AppState> {
   void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
     if (action is RequestChannelAction) {
       next(action);
-      List<Channel> channels = await _getChannelsQuery();
+      List<Channel> channels = await _getChannelsQuery(next);
       next(UpdateChannelAction(channels: channels));
+    } else if (action is RequestChannelErrorAction) {
+      next(RequestChannelAction());
     } else {
       next(action);
     }
   }
 
-  Future<List<Channel>> _getChannelsQuery() async {
+  Future<List<Channel>> _getChannelsQuery(NextDispatcher next) async {
     final client = HKGaldenApi().client;
 
     const String query = r'''
@@ -42,7 +44,7 @@ class ChannelMiddleware extends MiddlewareClass<AppState> {
     final QueryResult queryResult = await client.query(options);
 
     if (queryResult.hasException) {
-      print(queryResult.exception.toString());
+      next(RequestChannelErrorAction());
     }
 
     final List<dynamic> result = queryResult.data['channels'] as List<dynamic>;

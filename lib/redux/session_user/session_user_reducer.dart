@@ -6,7 +6,6 @@ import 'package:redux/redux.dart';
 final Reducer<SessionUserState> sessionUserReducer = combineReducers([
   TypedReducer<SessionUserState, RequestSessionUserAction>(requestSessionUserReducer),
   TypedReducer<SessionUserState, UpdateSessionUserAction>(updateSessionUserReducer),
-  TypedReducer<SessionUserState, RequestSessionUserErrorAction>(requestSessionUserErrorReducer),
   TypedReducer<SessionUserState, RemoveSessionUserAction>(removeSessionUserReducer),
 ]);
 
@@ -16,10 +15,6 @@ SessionUserState requestSessionUserReducer(SessionUserState state, RequestSessio
 
 SessionUserState updateSessionUserReducer(SessionUserState state, UpdateSessionUserAction action) {
   return state.copyWith(isLoading: false, sessionUser: action.sessionUser);
-}
-
-SessionUserState requestSessionUserErrorReducer(SessionUserState state, RequestSessionUserErrorAction action) {
-  return state.copyWith(isLoading: false);
 }
 
 SessionUserState removeSessionUserReducer(SessionUserState state, RemoveSessionUserAction action) {

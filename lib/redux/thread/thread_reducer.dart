@@ -5,7 +5,6 @@ import 'package:redux/redux.dart';
 final Reducer<ThreadState> threadReducer = combineReducers([
   TypedReducer<ThreadState, RequestThreadAction>(requestThreadReducer),
   TypedReducer<ThreadState, UpdateThreadAction>(updateThreadReducer),
-  TypedReducer<ThreadState, RequestThreadErrorAction>(requestThreadErrorReducer),
 ]);
 
 ThreadState requestThreadReducer(ThreadState state, RequestThreadAction action) {
@@ -18,8 +17,4 @@ ThreadState updateThreadReducer(ThreadState state, UpdateThreadAction action) {
   } else {
     return state.copyWith(threadIsLoading: false, thread: state.thread.copyWith(replies: state.thread.replies..addAll(action.thread.replies), totalReplies: action.thread.totalReplies), isInitialLoad: false, currentPage: action.page);
   }
-}
-
-ThreadState requestThreadErrorReducer(ThreadState state, RequestThreadErrorAction action) {
-  return state.copyWith(threadIsLoading: false, isInitialLoad: false);
 }
