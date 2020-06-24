@@ -69,35 +69,32 @@ class _ThreadPageState extends State<ThreadPage> with SingleTickerProviderStateM
   @override Widget build(BuildContext context) => StoreConnector<AppState, ThreadPageViewModel>(
     converter: (store) => ThreadPageViewModel.create(store),
     builder: (BuildContext context, ThreadPageViewModel viewModel) => Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-            title: Text(widget.title, style: TextStyle(fontWeight: FontWeight.w700)),
-            pinned: true,
-            bottom: PreferredSize(
-              child: SizedBox(
-                height: 3, 
-                child: Visibility(
-                  visible: viewModel.isLoading && !viewModel.isInitialLoad,
-                  child: LinearProgressIndicator()
-                ),
-              ), 
-              preferredSize: Size(double.infinity,3),
+      appBar: AppBar(
+        title: Marquee(
+          child: Text(widget.title, style: TextStyle(fontWeight: FontWeight.w700)),
+          animationDuration: Duration(seconds: 3),
+          pauseDuration: Duration(seconds: 1),
+          backDuration: Duration(seconds: 3),
+        ),
+        bottom: PreferredSize(
+          child: SizedBox(
+            height: 3, 
+            child: Visibility(
+              visible: viewModel.isLoading && !viewModel.isInitialLoad,
+              child: LinearProgressIndicator()
             ),
-          ),
-          viewModel.isLoading && viewModel.isInitialLoad ? 
-            SliverFillRemaining(
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ) : 
-            SliverList(
-              delegate: SliverChildListDelegate(
-                _generateReplies(viewModel)
-              ),
-            ), 
-        ],
+          ), 
+          preferredSize: Size(double.infinity,3),
+        ),
       ),
+      body: viewModel.isLoading && viewModel.isInitialLoad ? 
+        Center(
+          child: CircularProgressIndicator(),
+        ) : 
+        ListView(
+          controller: _scrollController,
+          children: _generateReplies(viewModel),
+        ),
       floatingActionButton: FadeTransition(
         opacity: _fabAnimationController,
         child: ScaleTransition(
