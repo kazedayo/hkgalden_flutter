@@ -39,6 +39,7 @@ class ThreadListMiddleware extends MiddlewareClass<AppState> {
             }
             authorNickname
             date
+            floor
           }
           totalReplies
           tags{

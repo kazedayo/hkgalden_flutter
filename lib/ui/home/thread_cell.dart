@@ -7,13 +7,15 @@ class ThreadCell extends StatelessWidget {
   final int totalReplies;
   final DateTime lastReply;
   final Function onTap;
+  final Function onLongPress;
 
   ThreadCell({
     this.title,
     this.authorName,
     this.totalReplies,
     this.lastReply,
-    this.onTap
+    this.onTap,
+    this.onLongPress,
   });
 
   @override
@@ -62,6 +64,7 @@ class ThreadCell extends StatelessWidget {
           ),
         ),
         onTap: () => onTap(),
+        onLongPress: () => onLongPress(),
       ),
       Divider(indent: 8,height: 1,thickness: 1),
     ],

@@ -1,14 +1,20 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/store.dart';
+import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
+import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
 import 'package:hkgalden_flutter/ui/home/compose_page.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
+import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
 import 'package:hkgalden_flutter/viewmodels/home_page_view_model.dart';
 
 class HomePage extends StatefulWidget {
@@ -79,7 +85,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               Spacer(flex: 2),
             ],
           ),
-          //leading: SvgPicture.asset('assets/icon-hkgalden.svg'),
         ),
         body: viewModel.isThreadLoading && viewModel.isRefresh == false ? 
           Center(
@@ -89,7 +94,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           onRefresh: () => viewModel.onRefresh(viewModel.selectedChannelId),
           child: ListView(
             controller: _scrollController,
-            children: viewModel.onLoadThreadList(context),
+            children: _generateThreads(viewModel),
           ),
         ),
         drawer: HomeDrawer(),
@@ -105,5 +110,49 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         )
       ),
     );
+  }
+
+  List<Widget> _generateThreads(HomePageViewModel viewModel) {
+    List<Widget> threadCells = [];
+    for (Thread thread in store.state.threadListState.threads)
+      threadCells.add(ThreadCell(
+        title: thread.title,
+        authorName: thread.replies[0].authorNickname,
+        totalReplies: thread.totalReplies,
+        lastReply: thread.replies.length == 2 ? 
+                    thread.replies[1].date : 
+                    thread.replies[0].date,
+        onTap: () {
+          store.dispatch(RequestThreadAction(threadId: thread.threadId, page: 1, isInitialLoad: true));
+          Navigator.of(context).push(MaterialPageRoute(builder: (context) => ThreadPage(
+            title: thread.title,
+            threadId: thread.threadId,
+          )));
+        },
+        onLongPress: () {
+          showModal<void>(
+            context: context,
+            builder: (context) => SimpleDialog(
+              title: const Text('跳到頁數'),
+              children: List.generate((thread.replies.last.floor.toDouble() / 50.0).ceil(), (index) => SimpleDialogOption(
+                onPressed: () {
+                  store.dispatch(RequestThreadAction(threadId: thread.threadId, page: index + 1, isInitialLoad: true));
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => ThreadPage(
+                    title: thread.title,
+                    threadId: thread.threadId,
+                  )));
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text('第 ${index + 1} 頁'),
+                ),
+              )),
+            ),
+          );
+        },
+      ));
+    threadCells.add(PageEndLoadingInidicator());
+    return threadCells;
   }
 }
