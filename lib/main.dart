@@ -16,8 +16,11 @@ class MyApp extends StatelessWidget {
         home: StartupScreen(),
         theme: ThemeData(
           brightness: Brightness.dark,
-          primarySwatch: Colors.grey,
-          accentColor: Colors.greenAccent[700],
+          splashColor: Color(0xff2c3632),
+          primaryColor: Color(0xff2e3533),
+          scaffoldBackgroundColor: Color(0xff1b1f1e),
+          appBarTheme: AppBarTheme(color: Color(0xff323d3a)),
+          accentColor: Color(0xff45c17c),
           floatingActionButtonTheme: FloatingActionButtonThemeData(
             foregroundColor: Colors.white,
           ),

@@ -31,51 +31,49 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
     converter: (store) => HomeDrawerHeaderViewModel.create(store),
     builder: (BuildContext context, HomeDrawerHeaderViewModel viewModel) => Container(
       //height: 250,
-      child: DrawerHeader(
-        margin: EdgeInsets.zero,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            AvatarWidget(
-              avatarImage: viewModel.sessionUserAvatar, 
-              userGroup: viewModel.sessionUserGroup, 
-            ),
-            SizedBox(height: 7),
-            Text(
-              token == '' ? '未登入' : viewModel.sessionUserName,
-              style: TextStyle(
-                color: token == '' ? Colors.white : 
-                  (viewModel.sessionUserGender == 'M' ? Color(0xff22c1fe) : Color(0xffff7aab)),
-              ),
-            ),
-            Spacer(),
-            RaisedButton(
-              onPressed: () => token == '' ? 
-                Navigator.push(
-                  context,
-                  SlideInFromBottomRoute(
-                    page: LoginPage(onLoginSuccess: () => TokenSecureStorage().readToken(onFinish: (value) {
-                      setState(() {
-                        token = value;
-                      });
-                    }))
-                  )
-                ) : TokenSecureStorage().writeToken('', onFinish: (_) {
-                  setState(() {
-                    token = '';
-                    viewModel.onLogout();
-                  });
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: DividerTheme(
+        data: DividerThemeData(color: Colors.transparent),
+        child: DrawerHeader(
+          margin: EdgeInsets.zero,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Spacer(),
+              AvatarWidget(
+                avatarImage: viewModel.sessionUserAvatar, 
+                userGroup: viewModel.sessionUserGroup, 
+                onTap: () => token == '' ? 
+                  Navigator.push(
+                    context,
+                    SlideInFromBottomRoute(
+                      page: LoginPage(onLoginSuccess: () => TokenSecureStorage().readToken(onFinish: (value) {
+                        setState(() {
+                          token = value;
+                        });
+                      }))
+                    )
+                  ) : TokenSecureStorage().writeToken('', onFinish: (_) {
+                    setState(() {
+                      token = '';
+                      viewModel.onLogout();
+                    });
 
-                }),
-              child: Text(token == '' ? '登入' : '登出'),
-              color: token == '' ? Colors.green[700] : Colors.redAccent[400],
-            ),
-          ],
+                  }),
+              ),
+              SizedBox(height: 7),
+              Text(
+                token == '' ? '未登入' : viewModel.sessionUserName,
+                style: TextStyle(
+                  color: token == '' ? Colors.white : 
+                    (viewModel.sessionUserGender == 'M' ? Color(0xff22c1fe) : Color(0xffff7aab)),
+                ),
+              ),
+              Spacer(),
+            ],
+          ),
         ),
-        decoration: BoxDecoration(
-          color: Colors.black87,
-        ),
-      ),
+      )
     ),
   );
 }

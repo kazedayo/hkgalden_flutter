@@ -20,6 +20,7 @@ class CommentCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
+    color: Theme.of(context).primaryColor,
     child: Container(
       padding: EdgeInsets.only(top: 16, left: 16, right: 16),
       //height: 200,

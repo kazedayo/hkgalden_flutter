@@ -28,7 +28,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
     extendBodyBehindAppBar: true,
     appBar: AppBar(
       automaticallyImplyLeading: false,
-      backgroundColor: Color(0x88000000),
+      backgroundColor: Colors.transparent,
       elevation: 0,
       actions: <Widget>[
         Builder(
@@ -45,6 +45,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
         height: MediaQuery.of(context).size.height,
       ),
       child: PhotoView.customChild(
+        backgroundDecoration: BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor),
         child: Hero(
           tag: widget.heroTag,
           child: CachedNetworkImage(

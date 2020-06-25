@@ -18,7 +18,7 @@ class HomeDrawerViewModel {
   factory HomeDrawerViewModel.create(Store<AppState> store) {
     return HomeDrawerViewModel(
       channels: store.state.channelState.channels,
-      selectedChannelId: 'bw',
+      selectedChannelId: store.state.channelState.selectedChannelId,
       onTap: (channelId) {
         store.dispatch(SetSelectedChannelId(channelId: channelId));
         store.dispatch(RequestThreadListAction(channelId: channelId, page: 1, isRefresh: false));
