@@ -50,7 +50,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       }
     });
     _fabAnimationController = AnimationController(
-      duration: Duration(milliseconds: 100),
+      duration: Duration(milliseconds: 150),
+      reverseDuration: Duration(milliseconds: 75),
       value: 1,
       vsync: this,
     );
@@ -98,14 +99,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           ),
         ),
         drawer: HomeDrawer(),
-        floatingActionButton: FadeTransition(
-          opacity: _fabAnimationController,
-          child: ScaleTransition(
-            scale: _fabAnimationController,
-            child: FloatingActionButton(
-              onPressed: () => Navigator.of(context).push(SlideInFromBottomRoute(page: ComposePage())),
-              child: Icon(Icons.create),
-            ),
+        floatingActionButton: AnimatedBuilder(
+          animation: _fabAnimationController,
+          builder: (BuildContext context, Widget child) => FadeScaleTransition(
+            animation: _fabAnimationController,
+            child: child,
+          ),
+          child: FloatingActionButton(
+            onPressed: () => Navigator.of(context).push(SlideInFromBottomRoute(page: ComposePage())),
+            child: Icon(Icons.create),
           ),
         )
       ),

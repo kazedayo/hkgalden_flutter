@@ -1,5 +1,4 @@
-import 'dart:async';
-
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -52,7 +51,8 @@ class _ThreadPageState extends State<ThreadPage> with SingleTickerProviderStateM
       }
     });
     _fabAnimationController = AnimationController(
-      duration: Duration(milliseconds: 100),
+      duration: Duration(milliseconds: 150),
+      reverseDuration: Duration(milliseconds: 75),
       value: 1,
       vsync: this,
     );
@@ -95,16 +95,17 @@ class _ThreadPageState extends State<ThreadPage> with SingleTickerProviderStateM
           controller: _scrollController,
           children: _generateReplies(viewModel),
         ),
-      floatingActionButton: FadeTransition(
-        opacity: _fabAnimationController,
-        child: ScaleTransition(
-          scale: _fabAnimationController,
-          child: FloatingActionButton(
-            child: Icon(Icons.reply),
-            onPressed: null,
-          ),
+      floatingActionButton: AnimatedBuilder(
+        animation: _fabAnimationController,
+        builder: (context, child) => FadeScaleTransition(
+          animation: _fabAnimationController,
+          child: child,
         ),
-      ),
+        child: FloatingActionButton(
+          child: Icon(Icons.reply),
+          onPressed: null,
+        ),
+      )
     ),
   );
 
