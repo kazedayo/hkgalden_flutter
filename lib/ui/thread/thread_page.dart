@@ -7,6 +7,7 @@ import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
+import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
@@ -27,6 +28,7 @@ class ThreadPage extends StatefulWidget {
 class _ThreadPageState extends State<ThreadPage> with SingleTickerProviderStateMixin {
   ScrollController _scrollController;
   AnimationController _fabAnimationController;
+  String _token;
 
   @override
   void initState() {
@@ -59,6 +61,12 @@ class _ThreadPageState extends State<ThreadPage> with SingleTickerProviderStateM
       value: 1,
       vsync: this,
     );
+    //get token
+    TokenSecureStorage().readToken(onFinish: (value) {
+      setState(() {
+        _token = value;
+      });
+    });
     super.initState();
   }
 
@@ -106,7 +114,21 @@ class _ThreadPageState extends State<ThreadPage> with SingleTickerProviderStateM
         ),
         child: FloatingActionButton(
           child: Icon(Icons.reply),
-          onPressed: () => Navigator.of(context).push(
+          onPressed: () => _token == '' ? 
+            showModal<void>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text('未登入'),
+                content: Text('請先登入'),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('OK'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ) :  
+            Navigator.of(context).push(
             SlideInFromBottomRoute(
               page: ComposePage(
                 composeMode: ComposeMode.reply,

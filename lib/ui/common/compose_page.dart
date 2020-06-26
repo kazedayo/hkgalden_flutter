@@ -32,7 +32,7 @@ class _ComposePageState extends State<ComposePage> {
       actions: <Widget>[
         IconButton(
           icon: const Icon(Icons.send),
-          onPressed: () => null,
+          onPressed: () => print(_getZefyrEditorContent()),
         ),
       ],
     ),
@@ -54,6 +54,11 @@ class _ComposePageState extends State<ComposePage> {
   NotusDocument _loadDocument() {
     final Delta delta = Delta()..insert('\n');
     return NotusDocument.fromDelta(delta);
+  }
+
+  Delta _getZefyrEditorContent() {
+    final content = _controller.document.toDelta();
+    return content;
   }
 }
 
