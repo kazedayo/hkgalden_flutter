@@ -10,14 +10,12 @@ import 'package:redux/redux.dart';
 class ThreadListMiddleware extends MiddlewareClass<AppState> {
   @override
   void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
+    next(action);
     if (action is RequestThreadListAction) {
-      next(action);
       List<Thread> threads = await _getThreadListQuery(action.channelId, action.page, action.isRefresh, next);
       next(UpdateThreadListAction(threads: threads, isRefresh: action.isRefresh, page: action.page));
     } else if (action is RequestThreadListErrorAction) {
       next(RequestThreadListAction());
-    } else {
-      next(action);
     }
   }
 

@@ -10,14 +10,12 @@ import 'package:redux/redux.dart';
 class ThreadMiddleware extends MiddlewareClass<AppState> {
   @override
   void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
+    next(action);
     if (action is RequestThreadAction) {
-      next(action);
       Thread thread = await _getThreadQuery(action.threadId, action.page, action.isInitialLoad, next);
       next(UpdateThreadAction(thread: thread, page: action.page, isInitialLoad: action.isInitialLoad));
     } else if (action is RequestThreadErrorAction) {
       next(RequestThreadAction(threadId: action.threadId, page: action.page, isInitialLoad: action.isInitialLoad));
-    } else {
-      next(action);
     }
   }
 

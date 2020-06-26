@@ -10,14 +10,12 @@ import 'package:redux/redux.dart';
 class SessionUserMiddleware extends MiddlewareClass<AppState> {
   @override
   void call (Store<AppState> store, dynamic action, NextDispatcher next) async {
+    next(action);
     if (action is RequestSessionUserAction) {
-      next(action);
       User sessionUser = await _getSessionUserQuery(next);
       next(UpdateSessionUserAction(sessionUser: sessionUser));
     } else if (action is RequestSessionUserErrorAction) {
       next(RequestSessionUserAction());
-    } else {
-      next(action);
     }
   }
 
