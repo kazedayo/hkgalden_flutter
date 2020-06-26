@@ -2,11 +2,14 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
+import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
+import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/ui/thread/comment_cell.dart';
 import 'package:hkgalden_flutter/viewmodels/thread_page_view_model.dart';
 import 'package:marquee_widget/marquee_widget.dart';
@@ -103,7 +106,13 @@ class _ThreadPageState extends State<ThreadPage> with SingleTickerProviderStateM
         ),
         child: FloatingActionButton(
           child: Icon(Icons.reply),
-          onPressed: null,
+          onPressed: () => Navigator.of(context).push(
+            SlideInFromBottomRoute(
+              page: ComposePage(
+                composeMode: ComposeMode.reply,
+              )
+            )
+          ),
         ),
       )
     ),

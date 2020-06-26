@@ -10,10 +10,8 @@ import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
-import 'package:hkgalden_flutter/ui/home/compose_page.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
-import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
 import 'package:hkgalden_flutter/viewmodels/home_page_view_model.dart';
 
@@ -106,7 +104,19 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             child: child,
           ),
           child: FloatingActionButton(
-            onPressed: () => Navigator.of(context).push(SlideInFromBottomRoute(page: ComposePage())),
+            onPressed: () => showModal<void>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text('Sorry!'),
+                content: Text('此功能尚未開放!'),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('OK'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
             child: Icon(Icons.create),
           ),
         )

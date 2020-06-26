@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:zefyr/zefyr.dart';
 import 'package:quill_delta/quill_delta.dart';
 
 class ComposePage extends StatefulWidget {
+  final ComposeMode composeMode;
+
+  const ComposePage({Key key, this.composeMode}) : super(key: key);
+
   @override
   _ComposePageState createState() => _ComposePageState();
 }
@@ -22,18 +27,28 @@ class _ComposePageState extends State<ComposePage> {
   @override 
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: Text('開post'),
-      automaticallyImplyLeading: false,
+      title: widget.composeMode == ComposeMode.newPost ? Text('開post') : Text('回覆主題'),
+      //automaticallyImplyLeading: false,
       actions: <Widget>[
         IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.send),
+          onPressed: () => null,
         ),
       ],
     ),
-    body: ZefyrScaffold(
-      child: ZefyrEditor(controller: _controller, focusNode: _focusNode),
-    ),
+    body: ZefyrTheme(
+      data: ZefyrThemeData(
+        toolbarTheme: ToolbarTheme.fallback(context).copyWith(
+          color: Theme.of(context).primaryColor,
+        )
+      ),
+      child: ZefyrScaffold(
+        child: ZefyrEditor(
+          controller: _controller, 
+          focusNode: _focusNode,
+        ),
+      ),
+    )
   );
 
   NotusDocument _loadDocument() {
@@ -41,3 +56,4 @@ class _ComposePageState extends State<ComposePage> {
     return NotusDocument.fromDelta(delta);
   }
 }
+

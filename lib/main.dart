@@ -21,7 +21,10 @@ class MyApp extends StatelessWidget {
           scaffoldBackgroundColor: Color(0xff1b1f1e),
           appBarTheme: AppBarTheme(color: Color(0xff323d3a)),
           accentColor: Color(0xff45c17c),
+          cursorColor: Color(0xff45c17c),
+          textSelectionColor: Color(0xff2d8052),
           floatingActionButtonTheme: FloatingActionButtonThemeData(
+            splashColor: Color(0xff4fe090),
             foregroundColor: Colors.white,
           ),
         ),
