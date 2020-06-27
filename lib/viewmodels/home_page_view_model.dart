@@ -10,6 +10,7 @@ class HomePageViewModel {
   final bool isThreadLoading;
   final bool isRefresh;
   final Function(String) onRefresh;
+  final List<String> blockedUserIds;
 
   HomePageViewModel({
     this.threads,
@@ -18,18 +19,23 @@ class HomePageViewModel {
     this.isThreadLoading,
     this.isRefresh,
     this.onRefresh,
+    this.blockedUserIds
   });
 
   factory HomePageViewModel.create(Store<AppState> store) {
     return HomePageViewModel(
       threads: store.state.threadListState.threads,
-      title: store.state.channelState.channels.where(
-        (channel) => channel.channelId == store.state.channelState.selectedChannelId)
-      .first.channelName,
+      title: store.state.channelState.channels
+          .where((channel) =>
+              channel.channelId == store.state.channelState.selectedChannelId)
+          .first
+          .channelName,
       selectedChannelId: store.state.channelState.selectedChannelId,
       isThreadLoading: store.state.threadListState.threadListIsLoading,
       isRefresh: store.state.threadListState.isRefresh,
-      onRefresh: (channelId) => store.dispatch(RequestThreadListAction(channelId: channelId, page: 1,isRefresh: true)),
+      onRefresh: (channelId) => store.dispatch(RequestThreadListAction(
+          channelId: channelId, page: 1, isRefresh: true)),
+          blockedUserIds: store.state.sessionUserState.sessionUser.blockedUsers,
     );
   }
 }

@@ -27,7 +27,9 @@ class _ComposePageState extends State<ComposePage> {
   @override 
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: widget.composeMode == ComposeMode.newPost ? Text('開post') : Text('回覆主題'),
+      title: widget.composeMode == ComposeMode.newPost ? 
+        Text('開post') 
+        : Text('回覆主題'),
       //automaticallyImplyLeading: false,
       actions: <Widget>[
         IconButton(
@@ -57,7 +59,7 @@ class _ComposePageState extends State<ComposePage> {
   }
 
   Delta _getZefyrEditorContent() {
-    final content = _controller.document.toDelta();
+    final content = _controller.document.toJson();
     return content;
   }
 }

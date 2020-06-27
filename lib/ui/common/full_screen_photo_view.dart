@@ -34,10 +34,14 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
         Builder(
           builder: (context) => IconButton(
             icon: Icon(Icons.save_alt), 
-            onPressed: _isDownloadingImage ? null : () => _downloadImage(context, widget.imageUrl)
+            onPressed: _isDownloadingImage ? 
+              null : 
+              () => _downloadImage(context, widget.imageUrl)
           ),
         ),
-        IconButton(icon: Icon(Icons.close), onPressed: () => Navigator.of(context).pop())
+        IconButton(
+          icon: Icon(Icons.close), 
+          onPressed: () => Navigator.of(context).pop())
       ],
     ),
     body: Container(
@@ -45,7 +49,9 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
         height: MediaQuery.of(context).size.height,
       ),
       child: PhotoView.customChild(
-        backgroundDecoration: BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor),
+        backgroundDecoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor
+        ),
         child: Hero(
           tag: widget.heroTag,
           child: CachedNetworkImage(
@@ -66,7 +72,10 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
         _isDownloadingImage = true;
       });
       // Saved with this method.
-      await ImageDownloader.downloadImage(url, destination: AndroidDestinationType.directoryPictures).then((value) {
+      await ImageDownloader.downloadImage(
+        url, 
+        destination: AndroidDestinationType.directoryPictures
+      ).then((value) {
         setState(() {
             _isDownloadingImage = false;
           });

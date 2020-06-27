@@ -78,9 +78,20 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 visible: Theme.of(context).platform == TargetPlatform.iOS,
                 child: Spacer(flex: 1),
               ),
-              Hero(tag: 'logo', child: SizedBox(child: SvgPicture.asset('assets/icon-hkgalden.svg'), width: 27, height: 27)),
+              Hero(
+                tag: 'logo', 
+                child: SizedBox(
+                  child: SvgPicture.asset('assets/icon-hkgalden.svg'), 
+                  width: 27, 
+                  height: 27
+                )
+              ),
               SizedBox(width: 5),
-              Text(viewModel.title, style: TextStyle(fontWeight: FontWeight.w700), strutStyle: StrutStyle(height:1.25)),
+              Text(
+                viewModel.title, 
+                style: TextStyle(fontWeight: FontWeight.w700), 
+                strutStyle: StrutStyle(height:1.25)
+              ),
               Spacer(flex: 2),
             ],
           ),
@@ -127,42 +138,61 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   List<Widget> _generateThreads(HomePageViewModel viewModel) {
     List<Widget> threadCells = [];
     for (Thread thread in store.state.threadListState.threads)
-      threadCells.add(ThreadCell(
-        title: thread.title,
-        authorName: thread.replies[0].authorNickname,
-        totalReplies: thread.totalReplies,
-        lastReply: thread.replies.length == 2 ? 
-                    thread.replies[1].date : 
-                    thread.replies[0].date,
-        onTap: () {
-          store.dispatch(RequestThreadAction(threadId: thread.threadId, page: 1, isInitialLoad: true));
-          Navigator.of(context).push(MaterialPageRoute(builder: (context) => ThreadPage(
-            title: thread.title,
-            threadId: thread.threadId,
-          )));
-        },
-        onLongPress: () {
-          showModal<void>(
-            context: context,
-            builder: (context) => SimpleDialog(
-              title: const Text('跳到頁數'),
-              children: List.generate((thread.replies.last.floor.toDouble() / 50.0).ceil(), (index) => SimpleDialogOption(
-                onPressed: () {
-                  store.dispatch(RequestThreadAction(threadId: thread.threadId, page: index + 1, isInitialLoad: true));
-                  Navigator.of(context).pop();
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => ThreadPage(
-                    title: thread.title,
-                    threadId: thread.threadId,
-                  )));
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text('第 ${index + 1} 頁'),
-                ),
-              )),
-            ),
-          );
-        },
+      threadCells.add(Visibility(
+        visible: !viewModel.blockedUserIds.contains(thread.replies[0].author.userId),
+        child: ThreadCell(
+          title: thread.title,
+          authorName: thread.replies[0].authorNickname,
+          totalReplies: thread.totalReplies,
+          lastReply: thread.replies.length == 2 ? 
+                      thread.replies[1].date : 
+                      thread.replies[0].date,
+          onTap: () {
+            store.dispatch(
+              RequestThreadAction(
+                threadId: thread.threadId, 
+                page: 1, 
+                isInitialLoad: true
+              )
+            );
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => ThreadPage(
+                title: thread.title,
+                threadId: thread.threadId,
+            )));
+          },
+          onLongPress: () {
+            showModal<void>(
+              context: context,
+              builder: (context) => SimpleDialog(
+                title: const Text('跳到頁數'),
+                children: List.generate(
+                  (thread.replies.last.floor.toDouble() / 50.0).ceil(), 
+                  (index) => SimpleDialogOption(
+                  onPressed: () {
+                    store.dispatch(
+                      RequestThreadAction(
+                        threadId: thread.threadId, 
+                        page: index + 1, 
+                        isInitialLoad: true
+                      )
+                    );
+                    Navigator.of(context).pop();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => ThreadPage(
+                        title: thread.title,
+                        threadId: thread.threadId,
+                    )));
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text('第 ${index + 1} 頁'),
+                  ),
+                )),
+              ),
+            );
+          },
+        ),
       ));
     threadCells.add(PageEndLoadingInidicator());
     return threadCells;
