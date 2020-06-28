@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
+import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
 import 'package:zefyr/zefyr.dart';
 import 'package:quill_delta/quill_delta.dart';
 
@@ -34,7 +37,7 @@ class _ComposePageState extends State<ComposePage> {
       actions: <Widget>[
         IconButton(
           icon: const Icon(Icons.send),
-          onPressed: () => print(_getZefyrEditorContent()),
+          onPressed: () => DeltaJsonParser().toGaldenHtml(json.decode(_getZefyrEditorContent())),
         ),
       ],
     ),
@@ -58,9 +61,9 @@ class _ComposePageState extends State<ComposePage> {
     return NotusDocument.fromDelta(delta);
   }
 
-  Delta _getZefyrEditorContent() {
-    final content = _controller.document.toJson();
-    return content;
+  String _getZefyrEditorContent() {
+    final content = _controller.document.toDelta();
+    return json.encode(content);
   }
 }
 
