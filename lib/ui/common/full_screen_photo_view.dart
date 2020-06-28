@@ -15,12 +15,70 @@ class FullScreenPhotoView extends StatefulWidget {
 }
 
 class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
+  //drag to dismiss code: https://github.com/Furkankyl/full_screen_image/blob/master/lib/full_screen_image.dart
   bool _isDownloadingImage;
+  double _initialPositionY = 0;
+  double _currentPositionY = 0;
+  double _positionYDelta = 0;
+  double _opacity = 1;
+  double _disposeLimit = 150;
+  Duration _animationDuration = Duration.zero;
 
   @override
   void initState() {
     _isDownloadingImage = false;
     super.initState();
+  }
+
+  void _startVerticalDrag(details) {
+    setState(() {
+      _initialPositionY = details.globalPosition.dy;
+    });
+  }
+
+  void _whileVerticalDrag(details) {
+    setState(() {
+      _currentPositionY = details.globalPosition.dy;
+      _positionYDelta = _currentPositionY - _initialPositionY;
+      setOpacity();
+    });
+  }
+
+  setOpacity() {
+    double tmp = _positionYDelta < 0
+        ? 1 - ((_positionYDelta / 1000) * -1)
+        : 1 - (_positionYDelta / 1000);
+    //print(tmp);
+
+    if (tmp > 1)
+      _opacity = 1;
+    else if (tmp < 0)
+      _opacity = 0;
+    else
+      _opacity = tmp;
+
+    if (_positionYDelta > _disposeLimit || _positionYDelta < -_disposeLimit) {
+      _opacity = 0.5;
+    }
+  }
+
+  _endVerticalDrag(DragEndDetails details) {
+    if (_positionYDelta > _disposeLimit || _positionYDelta < -_disposeLimit) {
+      Navigator.of(context).pop();
+    } else {
+      setState(() {
+        _animationDuration = Duration(milliseconds: 300);
+        _opacity = 1;
+        _positionYDelta = 0;
+      });
+
+      Future.delayed(_animationDuration).then((_){
+        setState(() {
+          _animationDuration = Duration.zero;
+        });
+      });
+    }
+
   }
 
   @override
@@ -44,24 +102,41 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
           onPressed: () => Navigator.of(context).pop())
       ],
     ),
-    body: Container(
-      constraints: BoxConstraints.expand(
-        height: MediaQuery.of(context).size.height,
-      ),
-      child: PhotoView.customChild(
-        backgroundDecoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor
+    body: GestureDetector(
+      onVerticalDragStart: (details) => _startVerticalDrag(details),
+      onVerticalDragUpdate: (details) => _whileVerticalDrag(details),
+      onVerticalDragEnd: (details) => _endVerticalDrag(details),
+      child: Container(
+        constraints: BoxConstraints.expand(
+          height: MediaQuery.of(context).size.height,
         ),
-        child: Hero(
-          tag: widget.heroTag,
-          child: CachedNetworkImage(
-            imageUrl: widget.imageUrl,
-            filterQuality: FilterQuality.high,
+        child: PhotoView.customChild(
+          backgroundDecoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(_opacity)
           ),
+          child: Stack(
+            children: <Widget>[
+              AnimatedPositioned(
+                duration: _animationDuration,
+                curve: Curves.fastOutSlowIn,
+                top: 0 + _positionYDelta,
+                bottom: 0 - _positionYDelta,
+                left: 0,
+                right: 0,
+                child: Hero(
+                  tag: widget.heroTag,
+                  child: CachedNetworkImage(
+                    imageUrl: widget.imageUrl,
+                    filterQuality: FilterQuality.high,
+                  ),
+                ),
+              ),
+            ],
+          ), 
+          //heroAttributes: PhotoViewHeroAttributes(tag: heroTag, transitionOnUserGestures: true),
+          minScale: PhotoViewComputedScale.contained,
+          maxScale: PhotoViewComputedScale.covered * 3,
         ),
-        //heroAttributes: PhotoViewHeroAttributes(tag: heroTag, transitionOnUserGestures: true),
-        minScale: PhotoViewComputedScale.contained,
-        maxScale: PhotoViewComputedScale.covered * 3,
       ),
     ),
   );
