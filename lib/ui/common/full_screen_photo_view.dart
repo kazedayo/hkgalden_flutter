@@ -20,7 +20,6 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
   double _initialPositionY = 0;
   double _currentPositionY = 0;
   double _positionYDelta = 0;
-  double _opacity = 1;
   double _disposeLimit = 150;
   Duration _animationDuration = Duration.zero;
 
@@ -40,26 +39,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
     setState(() {
       _currentPositionY = details.globalPosition.dy;
       _positionYDelta = _currentPositionY - _initialPositionY;
-      setOpacity();
     });
-  }
-
-  setOpacity() {
-    double tmp = _positionYDelta < 0
-        ? 1 - ((_positionYDelta / 1000) * -1)
-        : 1 - (_positionYDelta / 1000);
-    //print(tmp);
-
-    if (tmp > 1)
-      _opacity = 1;
-    else if (tmp < 0)
-      _opacity = 0;
-    else
-      _opacity = tmp;
-
-    if (_positionYDelta > _disposeLimit || _positionYDelta < -_disposeLimit) {
-      _opacity = 0.5;
-    }
   }
 
   _endVerticalDrag(DragEndDetails details) {
@@ -68,7 +48,6 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
     } else {
       setState(() {
         _animationDuration = Duration(milliseconds: 300);
-        _opacity = 1;
         _positionYDelta = 0;
       });
 
@@ -112,7 +91,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
         ),
         child: PhotoView.customChild(
           backgroundDecoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor.withOpacity(_opacity)
+            color: Theme.of(context).scaffoldBackgroundColor
           ),
           child: Stack(
             children: <Widget>[
