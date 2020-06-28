@@ -17,7 +17,7 @@ class ThreadState extends Equatable {
   });
 
   factory ThreadState.initial() => ThreadState(
-    threadIsLoading: true,
+    threadIsLoading: false,
     thread: Thread(),
     currentPage: 1,
     isInitialLoad: true,

@@ -15,7 +15,7 @@ class ChannelState extends Equatable {
   });
 
   factory ChannelState.initial() => ChannelState(
-    isLoading: true,
+    isLoading: false,
     channels: const [],
     selectedChannelId: 'bw',
   );

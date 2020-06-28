@@ -20,7 +20,7 @@ class ThreadListState extends Equatable {
 
   factory ThreadListState.initial() {
     return ThreadListState(
-      threadListIsLoading: true,
+      threadListIsLoading: false,
       threads: [],
       isRefresh: false,
       currentChannelId: '',
