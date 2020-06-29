@@ -27,34 +27,36 @@ class _ComposePageState extends State<ComposePage> {
     _focusNode = FocusNode();
   }
 
-  @override 
+  @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: widget.composeMode == ComposeMode.newPost ? 
-        Text('開post') 
-        : Text('回覆主題'),
-      //automaticallyImplyLeading: false,
-      actions: <Widget>[
-        IconButton(
-          icon: const Icon(Icons.send),
-          onPressed: () => DeltaJsonParser().toGaldenHtml(json.decode(_getZefyrEditorContent())),
-        ),
-      ],
-    ),
-    body: ZefyrTheme(
-      data: ZefyrThemeData(
-        toolbarTheme: ToolbarTheme.fallback(context).copyWith(
+      appBar: AppBar(
+        title: widget.composeMode == ComposeMode.newPost
+            ? Text('開post')
+            : Text('回覆主題'),
+        //automaticallyImplyLeading: false,
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.send),
+            onPressed: () {
+              DeltaJsonParser()
+                .toGaldenHtml(json.decode(_getZefyrEditorContent()));
+              
+            },
+          ),
+        ],
+      ),
+      body: ZefyrTheme(
+        data: ZefyrThemeData(
+            toolbarTheme: ToolbarTheme.fallback(context).copyWith(
           color: Theme.of(context).primaryColor,
-        )
-      ),
-      child: ZefyrScaffold(
-        child: ZefyrEditor(
-          controller: _controller, 
-          focusNode: _focusNode,
+        )),
+        child: ZefyrScaffold(
+          child: ZefyrEditor(
+            controller: _controller,
+            focusNode: _focusNode,
+          ),
         ),
-      ),
-    )
-  );
+      ));
 
   NotusDocument _loadDocument() {
     final Delta delta = Delta()..insert('\n');
@@ -66,4 +68,3 @@ class _ComposePageState extends State<ComposePage> {
     return json.encode(content);
   }
 }
-

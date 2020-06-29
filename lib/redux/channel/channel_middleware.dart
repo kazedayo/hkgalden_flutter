@@ -12,47 +12,12 @@ class ChannelMiddleware extends MiddlewareClass<AppState> {
   void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
     next(action);
     if (action is RequestChannelAction) {
-      List<Channel> channels = await _getChannelsQuery(next);
+      List<Channel> channels = await HKGaldenApi().getChannelsQuery();
       channels == null
           ? next(RequestChannelErrorAction())
           : next(UpdateChannelAction(channels: channels));
     } else if (action is RequestChannelErrorAction) {
       next(RequestChannelAction());
-    }
-  }
-
-  Future<List<Channel>> _getChannelsQuery(NextDispatcher next) async {
-    final client = HKGaldenApi().client;
-
-    const String query = r'''
-      query GetChannels {
-        channels {
-          id
-          name
-          tags {
-            name
-            color
-          }
-        }
-      }
-    ''';
-
-    final QueryOptions options = QueryOptions(
-      documentNode: gql(query),
-    );
-
-    final QueryResult queryResult = await client.query(options);
-
-    if (queryResult.hasException) {
-      return null;
-    } else {
-      final List<dynamic> result =
-          queryResult.data['channels'] as List<dynamic>;
-
-      final List<Channel> threads =
-          result.map((thread) => Channel.fromJson(thread)).toList();
-
-      return threads;
     }
   }
 }

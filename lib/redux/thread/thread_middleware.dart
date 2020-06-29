@@ -12,8 +12,8 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
   void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
     next(action);
     if (action is RequestThreadAction) {
-      Thread thread = await _getThreadQuery(
-          action.threadId, action.page, action.isInitialLoad, next);
+      Thread thread = await HKGaldenApi().getThreadQuery(
+          action.threadId, action.page, action.isInitialLoad);
       thread == null
           ? next(RequestThreadErrorAction(
               action.threadId, action.page, action.isInitialLoad))
@@ -26,82 +26,6 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
           threadId: action.threadId,
           page: action.page,
           isInitialLoad: action.isInitialLoad));
-    }
-  }
-
-  Future<Thread> _getThreadQuery(
-      int threadId, int page, bool isInitialLoad, NextDispatcher next) async {
-    final client = HKGaldenApi().client;
-
-    const String query = r'''
-      query GetThreadContent($id: Int!, $page: Int!) {
-        thread(id: $id,sorting: date_asc,page: $page) {
-          id
-            title
-            totalReplies
-            replies {
-              ...CommentsRecursive
-            }
-            tags {
-              name
-              color
-            }
-        }
-      }
-
-      fragment CommentsRecursive on Reply {
-        ...CommentFields
-        parent {
-          ...CommentFields
-          parent {
-            ...CommentFields
-            parent {
-              ...CommentFields
-              parent {
-                ...CommentFields
-              }
-            }
-          }
-        }
-      }
-
-      fragment CommentFields on Reply {
-        id
-        floor
-        author {
-          id
-          avatar
-          nickname
-          gender
-          groups {
-            id
-            name
-          }
-        }
-        authorNickname
-        content
-        date
-      }
-    ''';
-
-    final QueryOptions options = QueryOptions(
-      documentNode: gql(query),
-      variables: <String, dynamic>{
-        'id': threadId,
-        'page': page,
-      },
-    );
-
-    final QueryResult queryResult = await client.query(options);
-
-    if (queryResult.hasException) {
-      return null;
-    } else {
-      final dynamic result = queryResult.data['thread'] as dynamic;
-
-      final Thread thread = Thread.fromJson(result);
-
-      return thread;
     }
   }
 }

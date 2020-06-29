@@ -12,8 +12,8 @@ class ThreadListMiddleware extends MiddlewareClass<AppState> {
   void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
     next(action);
     if (action is RequestThreadListAction) {
-      List<Thread> threads = await _getThreadListQuery(
-          action.channelId, action.page, action.isRefresh, next);
+      List<Thread> threads = await HKGaldenApi().getThreadListQuery(
+          action.channelId, action.page, action.isRefresh);
       threads == null
           ? next(RequestThreadListErrorAction(
               action.channelId, action.page, action.isRefresh))
@@ -23,62 +23,6 @@ class ThreadListMiddleware extends MiddlewareClass<AppState> {
               page: action.page));
     } else if (action is RequestThreadListErrorAction) {
       next(RequestThreadListAction());
-    }
-  }
-
-  Future<List<Thread>> _getThreadListQuery(
-      String channelId, int page, bool isRefresh, NextDispatcher next) async {
-    final client = HKGaldenApi().client;
-
-    const String query = r'''
-      query GetThreadListQuery($channelId: String!, $page: Int!) {
-        threadsByChannel(channelId: $channelId, page: $page) {
-          id
-          title
-          replies {
-            author {
-              id
-              nickname
-              avatar
-              groups {
-                id
-                name
-              }
-            }
-            authorNickname
-            date
-            floor
-          }
-          totalReplies
-          tags{
-            name
-            color
-          }
-        }
-      }
-    ''';
-
-    final QueryOptions options = QueryOptions(
-      documentNode: gql(query),
-      variables: <String, dynamic>{
-        //hardcoded value for now
-        'channelId': channelId,
-        'page': page,
-      },
-    );
-
-    final QueryResult queryResult = await client.query(options);
-
-    if (queryResult.hasException) {
-      return null;
-    } else {
-      final List<dynamic> result =
-          queryResult.data['threadsByChannel'] as List<dynamic>;
-
-      final List<Thread> threads =
-          result.map((thread) => Thread.fromJson(thread)).toList();
-
-      return threads;
     }
   }
 }

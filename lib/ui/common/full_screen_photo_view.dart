@@ -68,6 +68,16 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
       backgroundColor: Colors.transparent,
       elevation: 0,
       actions: <Widget>[
+        Container(
+          width: 20,
+          padding: EdgeInsets.symmetric(vertical: 18),
+          child: Visibility(
+            visible: _isDownloadingImage,
+            child: CircularProgressIndicator(
+              strokeWidth: 1,
+            ),
+          ),
+        ),
         Builder(
           builder: (context) => IconButton(
             icon: Icon(Icons.save_alt), 
