@@ -1,5 +1,5 @@
 class DeltaJsonParser {
-  void toGaldenHtml(List<dynamic> json) {
+  String toGaldenHtml(List<dynamic> json) {
     String result = '';
     json.forEach((element) {
       //print(element);
@@ -11,5 +11,6 @@ class DeltaJsonParser {
       }
     });
     print('<div id="pmc">${result.substring(0, result.length - 7)}</div>');
+    return '<div id="pmc">${result.substring(0, result.length - 7)}</div>';
   }
 }

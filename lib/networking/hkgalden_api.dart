@@ -23,7 +23,6 @@ class HKGaldenApi {
   );
 
   Future<List<Channel>> getChannelsQuery() async {
-
     const String query = r'''
       query GetChannels {
         channels {
@@ -218,8 +217,7 @@ class HKGaldenApi {
     }
   }
 
-  Future<Reply> sendReply(int threadId, String html, String parentId) async {
-
+  Future<bool> sendReply(int threadId, String html, {String parentId}) async {
     final String mutation = r'''
       mutation SendReply($threadId: Int!, $parentId: String, $html: String!) {
         replyThread(threadId: $threadId, parentId: $parentId, html: $html) {
@@ -263,24 +261,20 @@ class HKGaldenApi {
     ''';
 
     final MutationOptions options = MutationOptions(
-      documentNode: gql(mutation),
-      variables: <String, dynamic> {
-        'threadId': threadId,
-        'parentId': parentId,
-        'html': html,
-      }
-    );
+        documentNode: gql(mutation),
+        variables: <String, dynamic>{
+          'threadId': threadId,
+          'parentId': parentId,
+          'html': html,
+        });
 
     final QueryResult result = await _client.mutate(options);
 
     if (result.hasException) {
       print(result.exception.toString());
+      return false;
+    } else {
+      return true;
     }
-
-    final dynamic resultJson = result.data['reply'] as dynamic;
-
-    final Reply sentReply = Reply.fromJson(resultJson);
-
-    return sentReply;
   }
 }

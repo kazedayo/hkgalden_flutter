@@ -138,6 +138,7 @@ class _ThreadPageState extends State<ThreadPage>
                         : Navigator.of(context).push(SlideInFromBottomRoute(
                             page: ComposePage(
                             composeMode: ComposeMode.reply,
+                            threadId: viewModel.threadId,
                           ))),
                   ),
                 )),
