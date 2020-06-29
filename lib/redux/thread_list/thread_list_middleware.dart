@@ -12,14 +12,22 @@ class ThreadListMiddleware extends MiddlewareClass<AppState> {
   void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
     next(action);
     if (action is RequestThreadListAction) {
-      List<Thread> threads = await _getThreadListQuery(action.channelId, action.page, action.isRefresh, next);
-      next(UpdateThreadListAction(threads: threads, isRefresh: action.isRefresh, page: action.page));
+      List<Thread> threads = await _getThreadListQuery(
+          action.channelId, action.page, action.isRefresh, next);
+      threads == null
+          ? next(RequestThreadListErrorAction(
+              action.channelId, action.page, action.isRefresh))
+          : next(UpdateThreadListAction(
+              threads: threads,
+              isRefresh: action.isRefresh,
+              page: action.page));
     } else if (action is RequestThreadListErrorAction) {
       next(RequestThreadListAction());
     }
   }
 
-  Future<List<Thread>> _getThreadListQuery(String channelId, int page, bool isRefresh, NextDispatcher next) async {
+  Future<List<Thread>> _getThreadListQuery(
+      String channelId, int page, bool isRefresh, NextDispatcher next) async {
     final client = HKGaldenApi().client;
 
     const String query = r'''
@@ -62,13 +70,15 @@ class ThreadListMiddleware extends MiddlewareClass<AppState> {
     final QueryResult queryResult = await client.query(options);
 
     if (queryResult.hasException) {
-      next(RequestThreadListErrorAction(channelId, page, isRefresh));
+      return null;
+    } else {
+      final List<dynamic> result =
+          queryResult.data['threadsByChannel'] as List<dynamic>;
+
+      final List<Thread> threads =
+          result.map((thread) => Thread.fromJson(thread)).toList();
+
+      return threads;
     }
-
-    final List<dynamic> result = queryResult.data['threadsByChannel'] as List<dynamic>;
-
-    final List<Thread> threads = result.map((thread) => Thread.fromJson(thread)).toList();
-
-    return threads;
   }
 }

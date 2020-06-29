@@ -13,7 +13,9 @@ class ChannelMiddleware extends MiddlewareClass<AppState> {
     next(action);
     if (action is RequestChannelAction) {
       List<Channel> channels = await _getChannelsQuery(next);
-      next(UpdateChannelAction(channels: channels));
+      channels == null
+          ? next(RequestChannelErrorAction())
+          : next(UpdateChannelAction(channels: channels));
     } else if (action is RequestChannelErrorAction) {
       next(RequestChannelAction());
     }
@@ -42,13 +44,15 @@ class ChannelMiddleware extends MiddlewareClass<AppState> {
     final QueryResult queryResult = await client.query(options);
 
     if (queryResult.hasException) {
-      next(RequestChannelErrorAction());
+      return null;
+    } else {
+      final List<dynamic> result =
+          queryResult.data['channels'] as List<dynamic>;
+
+      final List<Channel> threads =
+          result.map((thread) => Channel.fromJson(thread)).toList();
+
+      return threads;
     }
-
-    final List<dynamic> result = queryResult.data['channels'] as List<dynamic>;
-
-    final List<Channel> threads = result.map((thread) => Channel.fromJson(thread)).toList();
-
-    return threads;
   }
 }

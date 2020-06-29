@@ -9,11 +9,13 @@ import 'package:redux/redux.dart';
 
 class SessionUserMiddleware extends MiddlewareClass<AppState> {
   @override
-  void call (Store<AppState> store, dynamic action, NextDispatcher next) async {
+  void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
     next(action);
     if (action is RequestSessionUserAction) {
       User sessionUser = await _getSessionUserQuery(next);
-      next(UpdateSessionUserAction(sessionUser: sessionUser));
+      sessionUser == null
+          ? next(RequestSessionUserErrorAction())
+          : next(UpdateSessionUserAction(sessionUser: sessionUser));
     } else if (action is RequestSessionUserErrorAction) {
       next(RequestSessionUserAction());
     }
@@ -45,13 +47,13 @@ class SessionUserMiddleware extends MiddlewareClass<AppState> {
     final QueryResult queryResult = await client.query(options);
 
     if (queryResult.hasException) {
-      next(RequestSessionUserAction());
+      return null;
+    } else {
+      final dynamic result = queryResult.data['sessionUser'] as dynamic;
+
+      final User sessionUser = User.fromJson(result);
+
+      return sessionUser;
     }
-
-    final dynamic result = queryResult.data['sessionUser'] as dynamic;
-
-    final User sessionUser = User.fromJson(result);
-
-    return sessionUser;
   }
 }

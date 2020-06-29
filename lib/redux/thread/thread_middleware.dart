@@ -12,14 +12,25 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
   void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
     next(action);
     if (action is RequestThreadAction) {
-      Thread thread = await _getThreadQuery(action.threadId, action.page, action.isInitialLoad, next);
-      next(UpdateThreadAction(thread: thread, page: action.page, isInitialLoad: action.isInitialLoad));
+      Thread thread = await _getThreadQuery(
+          action.threadId, action.page, action.isInitialLoad, next);
+      thread == null
+          ? next(RequestThreadErrorAction(
+              action.threadId, action.page, action.isInitialLoad))
+          : next(UpdateThreadAction(
+              thread: thread,
+              page: action.page,
+              isInitialLoad: action.isInitialLoad));
     } else if (action is RequestThreadErrorAction) {
-      next(RequestThreadAction(threadId: action.threadId, page: action.page, isInitialLoad: action.isInitialLoad));
+      next(RequestThreadAction(
+          threadId: action.threadId,
+          page: action.page,
+          isInitialLoad: action.isInitialLoad));
     }
   }
 
-  Future<Thread> _getThreadQuery(int threadId, int page, bool isInitialLoad, NextDispatcher next) async {
+  Future<Thread> _getThreadQuery(
+      int threadId, int page, bool isInitialLoad, NextDispatcher next) async {
     final client = HKGaldenApi().client;
 
     const String query = r'''
@@ -76,7 +87,7 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
     final QueryOptions options = QueryOptions(
       documentNode: gql(query),
       variables: <String, dynamic>{
-        'id' : threadId,
+        'id': threadId,
         'page': page,
       },
     );
@@ -84,13 +95,13 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
     final QueryResult queryResult = await client.query(options);
 
     if (queryResult.hasException) {
-      next(RequestThreadAction(threadId: threadId, page: page, isInitialLoad: isInitialLoad));
+      return null;
+    } else {
+      final dynamic result = queryResult.data['thread'] as dynamic;
+
+      final Thread thread = Thread.fromJson(result);
+
+      return thread;
     }
-
-    final dynamic result = queryResult.data['thread'] as dynamic;
-
-    final Thread thread = Thread.fromJson(result);
-
-    return thread;
   }
 }
