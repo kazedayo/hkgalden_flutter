@@ -80,12 +80,19 @@ class _ComposePageState extends State<ComposePage> {
             child: Column(
               children: <Widget>[
                 widget.composeMode == ComposeMode.quotedReply
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                        child: StyledHtmlView(
-                          htmlString: HKGaldenHtmlParser()
-                              .replyWithQuotes(widget.parentReply),
-                          floor: widget.parentReply.floor,
+                    ? ConstrainedBox(
+                        constraints: BoxConstraints(
+                            maxHeight:
+                                MediaQuery.of(context).size.height * 0.3),
+                        child: SingleChildScrollView(
+                          reverse: true,
+                          scrollDirection: Axis.vertical,
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          child: StyledHtmlView(
+                            htmlString: HKGaldenHtmlParser()
+                                .replyWithQuotes(widget.parentReply),
+                            floor: widget.parentReply.floor,
+                          ),
                         ),
                       )
                     : SizedBox(),
