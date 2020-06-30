@@ -65,6 +65,7 @@ class _ComposePageState extends State<ComposePage> {
                         setState(() {
                           _isSendingReply = true;
                         });
+                        //_sendReply(context);
                         _sendReply(context);
                       },
               ),
@@ -123,7 +124,9 @@ class _ComposePageState extends State<ComposePage> {
         .sendReply(
       widget.threadId,
       DeltaJsonParser().toGaldenHtml(json.decode(_getZefyrEditorContent())),
-      parentId: widget.parentReply.replyId,
+      parentId: widget.composeMode == ComposeMode.quotedReply
+          ? widget.parentReply.replyId
+          : '',
     )
         .then((sentReply) {
       setState(() {

@@ -29,6 +29,7 @@ class _ThreadPageState extends State<ThreadPage>
   ScrollController _scrollController;
   AnimationController _fabAnimationController;
   String _token;
+  GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -93,6 +94,7 @@ class _ThreadPageState extends State<ThreadPage>
         converter: (store) => ThreadPageViewModel.create(store),
         builder: (BuildContext context, ThreadPageViewModel viewModel) =>
             Scaffold(
+              key: scaffoldKey,
                 appBar: AppBar(
                   title: Marquee(
                     child: Text(widget.title.trim(),
@@ -146,7 +148,7 @@ class _ThreadPageState extends State<ThreadPage>
                             page: ComposePage(
                             composeMode: ComposeMode.reply,
                             threadId: viewModel.threadId,
-                            onSent: () => Scaffold.of(context).showSnackBar(
+                            onSent: () => scaffoldKey.currentState.showSnackBar(
                                 SnackBar(content: Text('回覆發送成功!'))),
                           ))),
                   ),
