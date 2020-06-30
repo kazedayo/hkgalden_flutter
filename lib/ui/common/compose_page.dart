@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
-import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:zefyr/zefyr.dart';
 import 'package:quill_delta/quill_delta.dart';
@@ -58,22 +57,7 @@ class _ComposePageState extends State<ComposePage> {
                       setState(() {
                         _isSendingReply = true;
                       });
-                      HKGaldenApi()
-                          .sendReply(
-                              widget.threadId,
-                              DeltaJsonParser().toGaldenHtml(
-                                  json.decode(_getZefyrEditorContent())))
-                          .then((isSuccess) {
-                        setState(() {
-                          _isSendingReply = false;
-                          if (isSuccess) {
-                            Navigator.pop(context);
-                          } else {
-                            Scaffold.of(context).showSnackBar(
-                                  SnackBar(content: Text('回覆發送失敗!')));
-                          }
-                        });
-                      });
+                      _sendReply(context);
                     },
             ),
           ),
@@ -100,5 +84,23 @@ class _ComposePageState extends State<ComposePage> {
   String _getZefyrEditorContent() {
     final content = _controller.document.toDelta();
     return json.encode(content);
+  }
+
+  void _sendReply(BuildContext context) {
+    HKGaldenApi()
+        .sendReply(
+            widget.threadId,
+            DeltaJsonParser()
+                .toGaldenHtml(json.decode(_getZefyrEditorContent())))
+        .then((sentReply) {
+      setState(() {
+        _isSendingReply = false;
+        if (sentReply != null) {
+          Navigator.pop(context);
+        } else {
+          Scaffold.of(context).showSnackBar(SnackBar(content: Text('回覆發送失敗!')));
+        }
+      });
+    });
   }
 }

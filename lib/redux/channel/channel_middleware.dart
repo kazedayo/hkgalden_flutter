@@ -1,6 +1,3 @@
-import 'dart:async';
-
-import 'package:graphql/client.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/channel/channel_action.dart';

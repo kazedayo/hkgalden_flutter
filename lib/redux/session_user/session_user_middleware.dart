@@ -1,6 +1,3 @@
-import 'dart:async';
-
-import 'package:graphql/client.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';

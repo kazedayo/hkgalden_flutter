@@ -1,6 +1,3 @@
-import 'package:graphql/client.dart';
-import 'package:hkgalden_flutter/models/reply.dart';
-import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/reply/reply_action.dart';
 import 'package:redux/redux.dart';

@@ -217,7 +217,7 @@ class HKGaldenApi {
     }
   }
 
-  Future<bool> sendReply(int threadId, String html, {String parentId}) async {
+  Future<Reply> sendReply(int threadId, String html, {String parentId}) async {
     final String mutation = r'''
       mutation SendReply($threadId: Int!, $parentId: String, $html: String!) {
         replyThread(threadId: $threadId, parentId: $parentId, html: $html) {
@@ -272,9 +272,11 @@ class HKGaldenApi {
 
     if (result.hasException) {
       print(result.exception.toString());
-      return false;
+      return null;
     } else {
-      return true;
+      dynamic resultJson = result.data['replyThread'] as dynamic;
+      Reply sentReply = Reply.fromJson(resultJson);
+      return sentReply;
     }
   }
 }

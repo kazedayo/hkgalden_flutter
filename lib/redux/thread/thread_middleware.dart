@@ -1,6 +1,3 @@
-import 'dart:async';
-
-import 'package:graphql/client.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
@@ -12,8 +9,8 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
   void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
     next(action);
     if (action is RequestThreadAction) {
-      Thread thread = await HKGaldenApi().getThreadQuery(
-          action.threadId, action.page, action.isInitialLoad);
+      Thread thread = await HKGaldenApi()
+          .getThreadQuery(action.threadId, action.page, action.isInitialLoad);
       thread == null
           ? next(RequestThreadErrorAction(
               action.threadId, action.page, action.isInitialLoad))
