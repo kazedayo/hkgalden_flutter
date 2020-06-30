@@ -59,29 +59,36 @@ class _ThreadPageState extends State<ThreadPage>
   Widget build(BuildContext context) =>
       StoreConnector<AppState, ThreadPageViewModel>(
         onInit: (store) {
-          _scrollController..addListener(() {
-            if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-              print('scroll view hit bottom!');
-              if ((store.state.threadState.thread.totalReplies.toDouble() / 50.0).ceil() > store.state.threadState.currentPage) {
-                print('loading page ${store.state.threadState.currentPage + 1}');
-                store.dispatch(
-                  RequestThreadAction(
+          _scrollController
+            ..addListener(() {
+              if (_scrollController.position.pixels ==
+                  _scrollController.position.maxScrollExtent) {
+                print('scroll view hit bottom!');
+                if ((store.state.threadState.thread.totalReplies.toDouble() /
+                            50.0)
+                        .ceil() >
+                    store.state.threadState.currentPage) {
+                  print(
+                      'loading page ${store.state.threadState.currentPage + 1}');
+                  store.dispatch(RequestThreadAction(
                     threadId: store.state.threadState.thread.threadId,
                     page: store.state.threadState.currentPage + 1,
                     isInitialLoad: false,
-                  )
-                );
-              } else {
-                print('This is the last page of this thread!');
+                  ));
+                } else {
+                  print('This is the last page of this thread!');
+                }
               }
-            }
-          })..addListener(() {
-            if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
-              _fabAnimationController.reverse();
-            } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
-              _fabAnimationController.forward();
-            }
-          });
+            })
+            ..addListener(() {
+              if (_scrollController.position.userScrollDirection ==
+                  ScrollDirection.reverse) {
+                _fabAnimationController.reverse();
+              } else if (_scrollController.position.userScrollDirection ==
+                  ScrollDirection.forward) {
+                _fabAnimationController.forward();
+              }
+            });
         },
         converter: (store) => ThreadPageViewModel.create(store),
         builder: (BuildContext context, ThreadPageViewModel viewModel) =>
@@ -139,6 +146,8 @@ class _ThreadPageState extends State<ThreadPage>
                             page: ComposePage(
                             composeMode: ComposeMode.reply,
                             threadId: viewModel.threadId,
+                            onSent: () => Scaffold.of(context).showSnackBar(
+                                SnackBar(content: Text('回覆發送成功!'))),
                           ))),
                   ),
                 )),
@@ -160,7 +169,7 @@ class _ThreadPageState extends State<ThreadPage>
       repliesWidgets.add(
         Visibility(
             visible: !viewModel.blockedUserIds.contains(reply.author.userId),
-            child: CommentCell(reply: reply)),
+            child: CommentCell(threadId: viewModel.threadId, reply: reply)),
       );
     }
     repliesWidgets.add((viewModel.totalReplies.toDouble() / 50.0).ceil() >
