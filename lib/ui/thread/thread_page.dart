@@ -95,7 +95,7 @@ class _ThreadPageState extends State<ThreadPage>
             Scaffold(
                 appBar: AppBar(
                   title: Marquee(
-                    child: Text(widget.title,
+                    child: Text(widget.title.trim(),
                         style: TextStyle(fontWeight: FontWeight.w700)),
                     animationDuration: Duration(seconds: 5),
                     pauseDuration: Duration(seconds: 2),
