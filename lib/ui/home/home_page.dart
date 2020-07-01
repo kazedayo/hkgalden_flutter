@@ -159,13 +159,10 @@ class _HomePageState extends State<HomePage>
   }
 
   void _loadThread(Thread thread) {
-    Navigator.of(context).push(
-      CupertinoPageRoute(
-        builder: (context) => ThreadPage(
-          title: thread.title, threadId: thread.threadId, page: 1
-        )
-      )
-    );
+    Navigator.of(context).push(CupertinoPageRoute(
+        builder: (context) =>
+            ThreadPage(title: thread.title, threadId: thread.threadId, page: 1),
+        maintainState: false));
   }
 
   void _jumpToPage(Thread thread) {
@@ -178,13 +175,11 @@ class _HomePageState extends State<HomePage>
             (index) => SimpleDialogOption(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    Navigator.of(context).push(
-                      CupertinoPageRoute(
+                    Navigator.of(context).push(CupertinoPageRoute(
                         builder: (context) => ThreadPage(
-                          title: thread.title, threadId: thread.threadId, page: index + 1
-                        )
-                      )
-                    );
+                            title: thread.title,
+                            threadId: thread.threadId,
+                            page: index + 1)));
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),

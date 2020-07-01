@@ -40,3 +40,5 @@ class RequestThreadErrorAction {
 
   RequestThreadErrorAction(this.threadId, this.page, this.isInitialLoad);
 }
+
+class ClearThreadStateAction {}

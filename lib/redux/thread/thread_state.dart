@@ -6,36 +6,52 @@ import 'package:hkgalden_flutter/models/thread.dart';
 class ThreadState extends Equatable {
   final bool threadIsLoading;
   final Thread thread;
+  final Thread previousPages;
   final int currentPage;
+  final int endPage;
   final bool isInitialLoad;
 
-  ThreadState({
-    this.threadIsLoading,
-    this.thread,
-    this.currentPage,
-    this.isInitialLoad
-  });
+  ThreadState(
+      {this.threadIsLoading,
+      this.thread,
+      this.previousPages,
+      this.currentPage,
+      this.endPage,
+      this.isInitialLoad});
 
   factory ThreadState.initial() => ThreadState(
-    threadIsLoading: false,
-    thread: Thread(),
-    currentPage: 1,
-    isInitialLoad: true,
-  );
+        threadIsLoading: false,
+        thread: Thread(),
+        previousPages: Thread(),
+        currentPage: 1,
+        endPage: 1,
+        isInitialLoad: true,
+      );
 
   ThreadState copyWith({
     bool threadIsLoading,
     Thread thread,
+    Thread previousPages,
     int currentPage,
+    int endPage,
     bool isInitialLoad,
   }) {
     return ThreadState(
       threadIsLoading: threadIsLoading ?? this.threadIsLoading,
       thread: thread ?? this.thread,
+      previousPages: previousPages ?? this.previousPages,
       currentPage: currentPage ?? this.currentPage,
+      endPage: endPage ?? this.endPage,
       isInitialLoad: isInitialLoad ?? this.isInitialLoad,
     );
   }
 
-  List<Object> get props => [threadIsLoading, thread, currentPage, isInitialLoad];
+  List<Object> get props => [
+        threadIsLoading,
+        thread,
+        previousPages,
+        currentPage,
+        endPage,
+        isInitialLoad
+      ];
 }
