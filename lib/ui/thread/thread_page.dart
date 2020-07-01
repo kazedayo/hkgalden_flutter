@@ -1,4 +1,5 @@
 import 'package:animations/animations.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -110,12 +111,12 @@ class _ThreadPageState extends State<ThreadPage>
           Scaffold(
               key: scaffoldKey,
               appBar: AppBar(
-                title: Marquee(
-                  child: Text(widget.title.trim(),
-                      style: TextStyle(fontWeight: FontWeight.w700)),
-                  animationDuration: Duration(seconds: 7),
-                  pauseDuration: Duration(seconds: 1),
-                  backDuration: Duration(seconds: 7),
+                title: AutoSizeText(
+                  widget.title.trim(),
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                  maxLines: 2,
+                  minFontSize: 14,
+                  //overflow: TextOverflow.ellipsis
                 ),
                 bottom: PreferredSize(
                   child: SizedBox(
