@@ -15,46 +15,59 @@ class StyledHtmlView extends StatelessWidget {
       : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Html(
-        shrinkWrap: true,
-        data: htmlString,
-        customRender: {
-          'img': (context, _, attributes, __) {
-            return GestureDetector(
-              onTap: () => _showImageView(context.buildContext,
-                  attributes['src'], '${floor}_${attributes['src']}'),
-              child: Hero(
-                tag: '${floor}_${attributes['src']}',
-                child: CachedNetworkImage(
-                  imageUrl: attributes['src'],
-                  placeholder: (context, url) => Container(
-                    margin: EdgeInsets.all(10),
-                    child: SizedBox(
-                      width: 25,
-                      height: 25,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+  Widget build(BuildContext context) {
+    int heroIndex = 0;
+    return Html(
+      shrinkWrap: true,
+      data: htmlString,
+      customRender: {
+        'img': (context, _, attributes, __) {
+          heroIndex += 1;
+          return GestureDetector(
+              onTap: () => _showImageView(
+                  context.buildContext,
+                  attributes['src'],
+                  '${floor}_${attributes['src']}_$heroIndex'),
+              child: Container(
+                margin: EdgeInsets.symmetric(vertical: 8),
+                child: Hero(
+                  tag: '${floor}_${attributes['src']}_$heroIndex',
+                  child: CachedNetworkImage(
+                    imageUrl: attributes['src'],
+                    placeholder: (context, url) => Container(
+                      margin: EdgeInsets.all(10),
+                      child: SizedBox(
+                        width: 25,
+                        height: 25,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
                     ),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                    fadeInDuration: Duration(milliseconds: 300),
+                    fadeOutDuration: Duration(milliseconds: 300),
                   ),
-                  errorWidget: (context, url, error) => Icon(Icons.error),
-                  fadeInDuration: Duration(milliseconds: 300),
-                  fadeOutDuration: Duration(milliseconds: 300),
                 ),
-              ),
-            );
-          },
-          'icon': (_, __, attributes, ____) {
-            return CachedNetworkImage(
+              ));
+        },
+        'icon': (_, __, attributes, ____) {
+          return Container(
+            margin: EdgeInsets.all(3),
+            child: CachedNetworkImage(
+              alignment: Alignment.center,
               imageUrl: attributes['src'],
               fadeInDuration: Duration(milliseconds: 300),
               fadeOutDuration: Duration(milliseconds: 300),
-            );
-          },
-          'span': (context, child, attributes, element) {
-            if (element.className == ('color')) {
-              print('color span detected!');
-              Style newStyle = context.style.copyWith(
-                  color: Color(int.parse('FF${attributes['hex']}', radix: 16)));
-              return ContainerSpan(
+            ),
+          );
+        },
+        'span': (context, child, attributes, element) {
+          if (element.className == ('color')) {
+            Style newStyle = context.style.copyWith(
+                color: Color(int.parse('FF${attributes['hex']}', radix: 16)),
+                fontSize: FontSize(18));
+            return Container(
+              transform: Matrix4.translationValues(0, 1, 0),
+              child: ContainerSpan(
                 newContext: RenderContext(
                     buildContext: context.buildContext,
                     style: newStyle,
@@ -62,36 +75,41 @@ class StyledHtmlView extends StatelessWidget {
                 style: newStyle,
                 children: (child as ContainerSpan).children,
                 child: (child as ContainerSpan).child,
-              );
-            }
-            return child;
+              ),
+            );
           }
-        },
-        style: {
-          "html": Style(
-            backgroundColor: Colors.transparent,
-            fontSize: FontSize(18),
-            margin: EdgeInsets.zero,
-            padding: EdgeInsets.zero,
-          ),
-          "body": Style(margin: EdgeInsets.zero, padding: EdgeInsets.zero),
-          "a": Style(
-              color: Colors.blueAccent, textDecoration: TextDecoration.none),
-          "blockquote": Style(
-              border: Border(left: BorderSide(color: Colors.grey, width: 2.3)),
-              padding: EdgeInsets.only(left: 8),
-              margin: EdgeInsets.only(left: 10, right: 0, bottom: 10, top: 15)),
-          "div.quoteName":
-              Style(fontSize: FontSize.smaller, color: Colors.grey),
-          "div.center": Style(alignment: Alignment.center),
-          "div.right": Style(alignment: Alignment.centerRight),
-          "h1, h2, h3": Style(
-            margin: EdgeInsets.zero,
-            padding: EdgeInsets.zero,
-          ),
-        },
-        onLinkTap: (url) => _launchURL(url),
-      );
+          return child;
+        }
+      },
+      style: {
+        "html": Style(
+          backgroundColor: Colors.transparent,
+          fontSize: FontSize(18),
+        ),
+        "body": Style(
+            margin: EdgeInsets.symmetric(vertical: 15, horizontal: 3),
+            padding: EdgeInsets.zero),
+        "a": Style(
+            color: Colors.blueAccent, textDecoration: TextDecoration.none),
+        "blockquote": Style(
+            border: Border(left: BorderSide(color: Colors.grey, width: 2.3)),
+            padding: EdgeInsets.only(left: 8),
+            margin: EdgeInsets.only(left: 10, right: 0, bottom: 15, top: 0)),
+        "div.quoteName": Style(
+            fontSize: FontSize.smaller,
+            color: Colors.grey,
+            margin: EdgeInsets.symmetric(vertical: 4)),
+        "div.center": Style(alignment: Alignment.center),
+        "div.right": Style(alignment: Alignment.centerRight),
+        "h1, h2, h3": Style(
+          margin: EdgeInsets.zero,
+          padding: EdgeInsets.zero,
+        ),
+        "p": Style(margin: EdgeInsets.symmetric(vertical: 0)),
+      },
+      onLinkTap: (url) => _launchURL(url),
+    );
+  }
 
   _launchURL(String url) async {
     if (await canLaunch(url)) {
