@@ -10,13 +10,22 @@ import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:hkgalden_flutter/viewmodels/thread_page_view_model.dart';
 
 class CommentCell extends StatelessWidget {
+  final ThreadPageViewModel viewModel;
   final int threadId;
   final Reply reply;
+  final bool onLastPage;
   final FullScreenPhotoView photoView = FullScreenPhotoView();
+  final Function(Reply) onSent;
 
-  CommentCell({this.threadId, this.reply});
+  CommentCell(
+      {this.viewModel,
+      this.threadId,
+      this.reply,
+      this.onLastPage,
+      this.onSent});
 
   @override
   Widget build(BuildContext context) => Card(
@@ -85,9 +94,8 @@ class CommentCell extends StatelessWidget {
                             composeMode: ComposeMode.quotedReply,
                             threadId: threadId,
                             parentReply: reply,
-                            onSent: () {
-                              Scaffold.of(context).showSnackBar(
-                                  SnackBar(content: Text('回覆發送成功!')));
+                            onSent: (reply) {
+                              onSent(reply);
                             },
                           )))),
                   IconButton(icon: Icon(Icons.block), onPressed: () => null),

@@ -1,3 +1,4 @@
+import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 
 class RequestThreadAction {
@@ -7,8 +8,8 @@ class RequestThreadAction {
 
   RequestThreadAction({
     this.threadId,
-    this.page, 
-    this.isInitialLoad, 
+    this.page,
+    this.isInitialLoad,
   });
 }
 
@@ -21,6 +22,14 @@ class UpdateThreadAction {
     this.thread,
     this.page,
     this.isInitialLoad,
+  });
+}
+
+class AppendReplyToThreadAction {
+  final Reply reply;
+
+  AppendReplyToThreadAction({
+    this.reply,
   });
 }
 

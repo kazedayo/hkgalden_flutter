@@ -1,6 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
@@ -11,14 +12,17 @@ import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/ui/thread/comment_cell.dart';
+import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/viewmodels/thread_page_view_model.dart';
 import 'package:marquee_widget/marquee_widget.dart';
 
 class ThreadPage extends StatefulWidget {
   final String title;
   final int threadId;
+  final int page;
 
-  const ThreadPage({Key key, this.title, this.threadId}) : super(key: key);
+  const ThreadPage({Key key, this.title, this.threadId, this.page})
+      : super(key: key);
 
   @override
   _ThreadPageState createState() => _ThreadPageState();
@@ -29,7 +33,7 @@ class _ThreadPageState extends State<ThreadPage>
   ScrollController _scrollController;
   AnimationController _fabAnimationController;
   String _token;
-  GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _onLastPage;
 
   @override
   void initState() {
@@ -46,6 +50,7 @@ class _ThreadPageState extends State<ThreadPage>
         _token = value;
       });
     });
+    _onLastPage = false;
     super.initState();
   }
 
@@ -60,24 +65,20 @@ class _ThreadPageState extends State<ThreadPage>
   Widget build(BuildContext context) =>
       StoreConnector<AppState, ThreadPageViewModel>(
         onInit: (store) {
+          store.dispatch(RequestThreadAction(
+              threadId: widget.threadId,
+              page: widget.page,
+              isInitialLoad: true));
           _scrollController
             ..addListener(() {
               if (_scrollController.position.pixels ==
                   _scrollController.position.maxScrollExtent) {
-                print('scroll view hit bottom!');
-                if ((store.state.threadState.thread.totalReplies.toDouble() /
-                            50.0)
-                        .ceil() >
-                    store.state.threadState.currentPage) {
-                  print(
-                      'loading page ${store.state.threadState.currentPage + 1}');
+                if (!_onLastPage) {
                   store.dispatch(RequestThreadAction(
                     threadId: store.state.threadState.thread.threadId,
                     page: store.state.threadState.currentPage + 1,
                     isInitialLoad: false,
                   ));
-                } else {
-                  print('This is the last page of this thread!');
                 }
               }
             })
@@ -91,17 +92,29 @@ class _ThreadPageState extends State<ThreadPage>
               }
             });
         },
+        onDidChange: (viewModel) {
+          if ((viewModel.totalReplies.toDouble() / 50.0).ceil() >
+              viewModel.currentPage) {
+            setState(() {
+              _onLastPage = false;
+            });
+          } else {
+            setState(() {
+              _onLastPage = true;
+            });
+          }
+        },
         converter: (store) => ThreadPageViewModel.create(store),
         builder: (BuildContext context, ThreadPageViewModel viewModel) =>
             Scaffold(
-              key: scaffoldKey,
+                key: scaffoldKey,
                 appBar: AppBar(
                   title: Marquee(
                     child: Text(widget.title.trim(),
                         style: TextStyle(fontWeight: FontWeight.w700)),
-                    animationDuration: Duration(seconds: 5),
-                    pauseDuration: Duration(seconds: 2),
-                    backDuration: Duration(seconds: 5),
+                    animationDuration: Duration(seconds: 7),
+                    pauseDuration: Duration(seconds: 1),
+                    backDuration: Duration(seconds: 7),
                   ),
                   bottom: PreferredSize(
                     child: SizedBox(
@@ -148,8 +161,9 @@ class _ThreadPageState extends State<ThreadPage>
                             page: ComposePage(
                             composeMode: ComposeMode.reply,
                             threadId: viewModel.threadId,
-                            onSent: () => scaffoldKey.currentState.showSnackBar(
-                                SnackBar(content: Text('回覆發送成功!'))),
+                            onSent: (reply) {
+                              _onReplySuccess(viewModel, reply);
+                            },
                           ))),
                   ),
                 )),
@@ -171,11 +185,18 @@ class _ThreadPageState extends State<ThreadPage>
       repliesWidgets.add(
         Visibility(
             visible: !viewModel.blockedUserIds.contains(reply.author.userId),
-            child: CommentCell(threadId: viewModel.threadId, reply: reply)),
+            child: CommentCell(
+              viewModel: viewModel,
+              threadId: viewModel.threadId,
+              reply: reply,
+              onLastPage: _onLastPage,
+              onSent: (reply) {
+                _onReplySuccess(viewModel, reply);
+              },
+            )),
       );
     }
-    repliesWidgets.add((viewModel.totalReplies.toDouble() / 50.0).ceil() >
-            viewModel.currentPage
+    repliesWidgets.add(!_onLastPage
         ? PageEndLoadingInidicator()
         : Container(
             height: 50,
@@ -184,5 +205,16 @@ class _ThreadPageState extends State<ThreadPage>
             ),
           ));
     return repliesWidgets;
+  }
+
+  void _onReplySuccess(ThreadPageViewModel viewModel, Reply reply) {
+    scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('回覆發送成功!')));
+    if (_onLastPage) {
+      viewModel.appendReply(reply);
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 500), curve: Curves.easeOut);
+      });
+    }
   }
 }

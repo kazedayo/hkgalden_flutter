@@ -1,5 +1,6 @@
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
+import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 import 'package:redux/redux.dart';
 
 class ThreadPageViewModel {
@@ -10,15 +11,17 @@ class ThreadPageViewModel {
   final List<String> blockedUserIds;
   final int totalReplies;
   final int currentPage;
+  final Function(Reply) appendReply;
 
-  ThreadPageViewModel( 
+  ThreadPageViewModel(
       {this.threadId,
       this.replies,
       this.isLoading,
       this.isInitialLoad,
       this.blockedUserIds,
       this.totalReplies,
-      this.currentPage});
+      this.currentPage,
+      this.appendReply});
 
   factory ThreadPageViewModel.create(Store<AppState> store) {
     return ThreadPageViewModel(
@@ -29,6 +32,7 @@ class ThreadPageViewModel {
       blockedUserIds: store.state.sessionUserState.sessionUser.blockedUsers,
       totalReplies: store.state.threadState.thread.totalReplies,
       currentPage: store.state.threadState.currentPage,
+      appendReply: (reply) => store.dispatch(AppendReplyToThreadAction(reply: reply))
     );
   }
 }

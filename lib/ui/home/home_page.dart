@@ -11,6 +11,7 @@ import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
 import 'package:hkgalden_flutter/viewmodels/home_page_view_model.dart';
 
 class HomePage extends StatefulWidget {
@@ -52,23 +53,25 @@ class _HomePageState extends State<HomePage>
       converter: (store) => HomePageViewModel.create(store),
       distinct: true,
       onInit: (store) {
-        _scrollController..addListener(() {
-        if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-            store.dispatch(
-            RequestThreadListAction(
-                channelId: store.state.threadListState.currentChannelId, 
-                page: store.state.threadState.currentPage + 1, 
-                isRefresh: true
-              )
-            );
-          }
-        })..addListener(() {
-          if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
-            _fabAnimationController.reverse();
-          } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
-            _fabAnimationController.forward();
-          }
-        });
+        _scrollController
+          ..addListener(() {
+            if (_scrollController.position.pixels ==
+                _scrollController.position.maxScrollExtent) {
+              store.dispatch(RequestThreadListAction(
+                  channelId: store.state.threadListState.currentChannelId,
+                  page: store.state.threadState.currentPage + 1,
+                  isRefresh: true));
+            }
+          })
+          ..addListener(() {
+            if (_scrollController.position.userScrollDirection ==
+                ScrollDirection.reverse) {
+              _fabAnimationController.reverse();
+            } else if (_scrollController.position.userScrollDirection ==
+                ScrollDirection.forward) {
+              _fabAnimationController.forward();
+            }
+          });
       },
       builder: (BuildContext context, HomePageViewModel viewModel) => Scaffold(
           appBar: AppBar(
@@ -147,11 +150,48 @@ class _HomePageState extends State<HomePage>
           lastReply: thread.replies.length == 2
               ? thread.replies[1].date
               : thread.replies[0].date,
-          onTap: () => viewModel.loadThread(context, thread),
-          onLongPress: () => viewModel.jumpToPage(context, thread),
+          onTap: () => _loadThread(thread),
+          onLongPress: () => _jumpToPage(thread),
         ),
       ));
     threadCells.add(PageEndLoadingInidicator());
     return threadCells;
+  }
+
+  void _loadThread(Thread thread) {
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (context) => ThreadPage(
+          title: thread.title, threadId: thread.threadId, page: 1
+        )
+      )
+    );
+  }
+
+  void _jumpToPage(Thread thread) {
+    showModal<void>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('跳到頁數'),
+        children: List.generate(
+            (thread.replies.last.floor.toDouble() / 50.0).ceil(),
+            (index) => SimpleDialogOption(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).push(
+                      CupertinoPageRoute(
+                        builder: (context) => ThreadPage(
+                          title: thread.title, threadId: thread.threadId, page: index + 1
+                        )
+                      )
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text('第 ${index + 1} 頁'),
+                  ),
+                )),
+      ),
+    );
   }
 }

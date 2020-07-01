@@ -15,7 +15,7 @@ class ComposePage extends StatefulWidget {
   final ComposeMode composeMode;
   final int threadId;
   final Reply parentReply;
-  final Function onSent;
+  final Function(Reply) onSent;
 
   const ComposePage(
       {Key key, this.composeMode, this.threadId, this.parentReply, this.onSent})
@@ -41,6 +41,8 @@ class _ComposePageState extends State<ComposePage> {
 
   @override
   void dispose() {
+    _focusNode.unfocus();
+    _focusNode.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -133,7 +135,7 @@ class _ComposePageState extends State<ComposePage> {
         _isSendingReply = false;
         if (sentReply != null) {
           Navigator.pop(context);
-          widget.onSent();
+          widget.onSent(sentReply);
         } else {
           Scaffold.of(context).showSnackBar(SnackBar(content: Text('回覆發送失敗!')));
         }
