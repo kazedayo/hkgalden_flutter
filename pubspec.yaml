@@ -36,7 +36,6 @@ dependencies:
   webview_flutter: ^0.3.22+1
   flutter_secure_storage: ^3.3.3
   equatable: ^1.2.0
-  marquee_widget: ^0.8.0
   flutter_html: ^1.0.0
   date_time_format: ^1.0.0+4
   universal_html: ^1.2.3

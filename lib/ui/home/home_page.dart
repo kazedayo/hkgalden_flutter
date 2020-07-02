@@ -160,9 +160,8 @@ class _HomePageState extends State<HomePage>
 
   void _loadThread(Thread thread) {
     Navigator.of(context).push(CupertinoPageRoute(
-        builder: (context) =>
-            ThreadPage(title: thread.title, threadId: thread.threadId, page: 1),
-        maintainState: false));
+        builder: (context) => ThreadPage(
+            title: thread.title, threadId: thread.threadId, page: 1)));
   }
 
   void _jumpToPage(Thread thread) {

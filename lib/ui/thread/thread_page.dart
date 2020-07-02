@@ -7,8 +7,8 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
+import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
-import 'package:hkgalden_flutter/redux/thread/thread_state.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
@@ -16,7 +16,6 @@ import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/ui/thread/comment_cell.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/viewmodels/thread_page_view_model.dart';
-import 'package:marquee_widget/marquee_widget.dart';
 
 class ThreadPage extends StatefulWidget {
   final String title;
@@ -54,6 +53,12 @@ class _ThreadPageState extends State<ThreadPage>
     });
     _onLastPage = false;
     super.initState();
+  }
+
+  @override
+  void deactivate() {
+    store.dispatch(ClearThreadStateAction());
+    super.deactivate();
   }
 
   @override
@@ -111,12 +116,22 @@ class _ThreadPageState extends State<ThreadPage>
           Scaffold(
               key: scaffoldKey,
               appBar: AppBar(
-                title: AutoSizeText(
-                  widget.title.trim(),
-                  style: TextStyle(fontWeight: FontWeight.w700),
-                  maxLines: 2,
-                  minFontSize: 14,
-                  //overflow: TextOverflow.ellipsis
+                title: SizedBox(
+                  height: kToolbarHeight * 0.85,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Expanded(
+                        child: AutoSizeText(
+                          widget.title.trim(),
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                          maxLines: 2,
+                          minFontSize: 14,
+                          //overflow: TextOverflow.ellipsis
+                        ),
+                      )
+                    ],
+                  ),
                 ),
                 bottom: PreferredSize(
                   child: SizedBox(
@@ -137,26 +152,11 @@ class _ThreadPageState extends State<ThreadPage>
                       controller: _scrollController,
                       children: _generateReplies(viewModel),
                     ),*/
-                  viewModel.endPage != 1 && viewModel.currentPage != 1
-                      ? RefreshIndicator(
-                          child: CustomScrollView(
-                            center: centerKey,
-                            controller: _scrollController,
-                            slivers: <Widget>[
-                              SliverList(
-                                delegate: SliverChildListDelegate(
-                                    _generatePreviousReplies(viewModel)),
-                              ),
-                              SliverList(
-                                key: centerKey,
-                                delegate: SliverChildListDelegate(
-                                    _generateReplies(viewModel)),
-                              ),
-                            ],
-                          ),
-                          onRefresh: () => viewModel
-                              .getPreviousPage(viewModel.currentPage - 1))
-                      : CustomScrollView(
+                  RefreshIndicator(
+                      child: SafeArea(
+                        top: false,
+                        maintainBottomViewPadding: true,
+                        child: CustomScrollView(
                           center: centerKey,
                           controller: _scrollController,
                           slivers: <Widget>[
@@ -171,6 +171,11 @@ class _ThreadPageState extends State<ThreadPage>
                             ),
                           ],
                         ),
+                      ),
+                      onRefresh: () => viewModel.currentPage != 1 &&
+                              viewModel.endPage <= widget.page
+                          ? viewModel.getPreviousPage(viewModel.currentPage - 1)
+                          : Future.delayed(Duration.zero)),
               floatingActionButton: AnimatedBuilder(
                 animation: _fabAnimationController,
                 builder: (context, child) => FadeScaleTransition(

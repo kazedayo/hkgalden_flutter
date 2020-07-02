@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:hkgalden_flutter/routes.dart';
@@ -7,7 +8,6 @@ import 'package:hkgalden_flutter/ui/startup_animation.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return StoreProvider(
@@ -27,6 +27,8 @@ class MyApp extends StatelessWidget {
             splashColor: Color(0xff4fe090),
             foregroundColor: Colors.white,
           ),
+          cupertinoOverrideTheme:
+              CupertinoThemeData(primaryColor: Color(0xff45c17c)),
         ),
         routes: routes,
       ),

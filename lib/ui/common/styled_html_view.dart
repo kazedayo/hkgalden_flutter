@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -7,7 +9,7 @@ import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class StyledHtmlView extends StatelessWidget {
+class StyledHtmlView extends StatefulWidget {
   final String htmlString;
   final int floor;
 
@@ -15,23 +17,34 @@ class StyledHtmlView extends StatelessWidget {
       : super(key: key);
 
   @override
+  _StyledHtmlViewState createState() => _StyledHtmlViewState();
+}
+
+class _StyledHtmlViewState extends State<StyledHtmlView> {
+  int _randomHash;
+
+  @override
+  void initState() {
+    _randomHash = Random().nextInt(1000);
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    int heroIndex = 0;
     return Html(
       shrinkWrap: true,
-      data: htmlString,
+      data: widget.htmlString,
       customRender: {
         'img': (context, _, attributes, __) {
-          heroIndex += 1;
           return GestureDetector(
               onTap: () => _showImageView(
                   context.buildContext,
                   attributes['src'],
-                  '${floor}_${attributes['src']}_$heroIndex'),
+                  '${widget.floor}_${attributes['src']}_$_randomHash'),
               child: Container(
                 margin: EdgeInsets.symmetric(vertical: 8),
                 child: Hero(
-                  tag: '${floor}_${attributes['src']}_$heroIndex',
+                  tag: '${widget.floor}_${attributes['src']}_$_randomHash',
                   child: CachedNetworkImage(
                     imageUrl: attributes['src'],
                     placeholder: (context, url) => Container(
