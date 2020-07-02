@@ -150,6 +150,8 @@ class _HomePageState extends State<HomePage>
           lastReply: thread.replies.length == 2
               ? thread.replies[1].date
               : thread.replies[0].date,
+          tagName: thread.tagName,
+          tagColor: thread.tagColor,
           onTap: () => _loadThread(thread),
           onLongPress: () => _jumpToPage(thread),
         ),

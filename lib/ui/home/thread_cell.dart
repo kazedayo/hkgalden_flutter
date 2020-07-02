@@ -6,6 +6,8 @@ class ThreadCell extends StatelessWidget {
   final String authorName;
   final int totalReplies;
   final DateTime lastReply;
+  final String tagName;
+  final Color tagColor;
   final Function onTap;
   final Function onLongPress;
 
@@ -14,6 +16,8 @@ class ThreadCell extends StatelessWidget {
     this.authorName,
     this.totalReplies,
     this.lastReply,
+    this.tagName,
+    this.tagColor,
     this.onTap,
     this.onLongPress,
   });
@@ -60,6 +64,22 @@ class ThreadCell extends StatelessWidget {
                           style: Theme.of(context).textTheme.caption,
                           strutStyle: StrutStyle(height: 1.25),
                         ),
+                        Spacer(),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 4),
+                          child: Text('#$tagName',
+                              strutStyle: StrutStyle(height: 1.25),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .caption
+                                  .copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500)),
+                          decoration: BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(5)),
+                              color: tagColor),
+                        )
                       ],
                     ),
                   ),
