@@ -8,7 +8,7 @@ class HKGaldenHtmlParser {
     ..allowInlineStyles()
     ..allowImages(_AllowAllUriPolicy())
     ..allowNavigation(_AllowAllUriPolicy())
-    ..allowCustomElement('p', attributes: ['hex'])
+    ..allowCustomElement('p', attributes: ['hex', 'data-nodetype'])
     ..allowCustomElement('icon', attributes: ['src'])
     ..allowCustomElement('span', attributes: [
       'data-nodetype',
