@@ -180,16 +180,16 @@ class _CustomZefyrToolbarDelegate implements ZefyrToolbarDelegate {
     ZefyrToolbarAction.confirm: 20.0,
   };
 
-  static const kDefaultButtonTexts = {
+  /*static const kDefaultButtonTexts = {
     ZefyrToolbarAction.headingLevel1: 'H1',
     ZefyrToolbarAction.headingLevel2: 'H2',
     ZefyrToolbarAction.headingLevel3: 'H3',
-  };
+  };*/
 
   @override
   Widget buildButton(BuildContext context, ZefyrToolbarAction action,
       {VoidCallback onPressed}) {
-    final theme = Theme.of(context);
+    //final theme = Theme.of(context);
     if (action == ZefyrToolbarAction.bold ||
         action == ZefyrToolbarAction.italic ||
         action == ZefyrToolbarAction.image ||
