@@ -10,6 +10,7 @@ import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
+import 'package:hkgalden_flutter/ui/home/list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
 import 'package:hkgalden_flutter/viewmodels/home_page_view_model.dart';
@@ -98,9 +99,10 @@ class _HomePageState extends State<HomePage>
             ),
           ),
           body: viewModel.isThreadLoading && viewModel.isRefresh == false
-              ? Center(
+              ? /*Center(
                   child: CircularProgressIndicator(),
-                )
+                )*/
+              ListLoadingSkeleton()
               : RefreshIndicator(
                   onRefresh: () =>
                       viewModel.onRefresh(viewModel.selectedChannelId),

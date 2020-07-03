@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -99,7 +100,22 @@ class CommentCell extends StatelessWidget {
                             },
                           )))),
                   IconButton(icon: Icon(Icons.block), onPressed: () => null),
-                  IconButton(icon: Icon(Icons.flag), onPressed: () => null),
+                  IconButton(
+                      icon: Icon(Icons.flag),
+                      onPressed: () => showModal<void>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text('回報問題'),
+                              content: Text(
+                                  '如有任何關於用戶發表內容問題，請電郵至hkgalden.org@gmail.com'),
+                              actions: <Widget>[
+                                FlatButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
+                                    child: Text('OK'))
+                              ],
+                            ),
+                          )),
                 ],
               ),
             ],

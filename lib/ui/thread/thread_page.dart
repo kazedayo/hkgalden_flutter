@@ -137,17 +137,14 @@ class _ThreadPageState extends State<ThreadPage>
                   child: SizedBox(
                     height: 3,
                     child: Visibility(
-                        visible:
-                            viewModel.isLoading && !viewModel.isInitialLoad,
+                        visible: viewModel.isLoading,
                         child: LinearProgressIndicator()),
                   ),
                   preferredSize: Size(double.infinity, 3),
                 ),
               ),
               body: viewModel.isLoading && viewModel.isInitialLoad
-                  ? Center(
-                      child: CircularProgressIndicator(),
-                    )
+                  ? Center()
                   : /*ListView(
                       controller: _scrollController,
                       children: _generateReplies(viewModel),

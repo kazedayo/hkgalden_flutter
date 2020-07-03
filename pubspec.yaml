@@ -45,6 +45,7 @@ dependencies:
   animations: ^1.1.1
   image_downloader: ^0.20.0
   auto_size_text: ^2.1.0
+  shimmer: ^1.1.1
 
 dev_dependencies:
   flutter_test:
