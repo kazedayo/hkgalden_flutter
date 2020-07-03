@@ -49,13 +49,30 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                     imageUrl: attributes['src'],
                     placeholder: (context, url) => Container(
                       margin: EdgeInsets.all(10),
-                      child: SizedBox(
-                        width: 25,
-                        height: 25,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                      child: Container(
+                        height: MediaQuery.of(context).size.width * 9 / 16,
+                        child: Center(
+                          child: SizedBox(
+                            width: 25,
+                            height: 25,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
                       ),
                     ),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
+                    errorWidget: (context, url, error) => Container(
+                      margin: EdgeInsets.all(10),
+                      child: Container(
+                        height: MediaQuery.of(context).size.width * 9 / 16,
+                        child: Center(
+                          child: SizedBox(
+                            width: 25,
+                            height: 25,
+                            child: Icon(Icons.error),
+                          ),
+                        ),
+                      ),
+                    ),
                     fadeInDuration: Duration(milliseconds: 300),
                     fadeOutDuration: Duration(milliseconds: 300),
                   ),

@@ -1,6 +1,7 @@
 //hacky way to hide button on toolbar before zefyr 1.0 release
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/networking/image_upload_api.dart';
 import 'package:image_picker/image_picker.dart';
@@ -51,6 +52,7 @@ class CustomZefyrToolbarDelegate implements ZefyrToolbarDelegate {
         action == ZefyrToolbarAction.image ||
         action == ZefyrToolbarAction.cameraImage ||
         action == ZefyrToolbarAction.galleryImage ||
+        action == ZefyrToolbarAction.link ||
         action == ZefyrToolbarAction.hideKeyboard) {
       final icon = kDefaultButtonIcons[action];
       final size = kSpecialIconSizes[action];
@@ -73,15 +75,12 @@ class CustomZefyrImageDelegate implements ZefyrImageDelegate {
     final picker = ImagePicker();
     final file = await picker.getImage(source: source);
     if (file == null) return null;
-    ImageUploadApi().uploadImage(file.path);
-    return file.path;
+    return await ImageUploadApi().uploadImage(file.path);
   }
 
   @override
-  Widget buildImage(BuildContext context, String key) {
-    final file = File.fromUri(Uri.parse(key));
-    final image = FileImage(file);
-    return Image(image: image);
+  Widget buildImage(BuildContext context, String url) {
+    return CachedNetworkImage(imageUrl: url);
   }
 
   @override

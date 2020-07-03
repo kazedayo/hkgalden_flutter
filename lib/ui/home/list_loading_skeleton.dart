@@ -13,7 +13,7 @@ class ListLoadingSkeleton extends StatelessWidget {
                     (index) => ListTile(
                           title: Container(
                               margin: EdgeInsets.symmetric(vertical: 4),
-                              color: Colors.grey[900],
+                              color: Colors.grey,
                               height: 25),
                           subtitle: Row(
                             children: <Widget>[
@@ -28,7 +28,7 @@ class ListLoadingSkeleton extends StatelessWidget {
                             ],
                           ),
                         ))),
-            baseColor: Colors.grey[900],
+            baseColor: Theme.of(context).scaffoldBackgroundColor,
             highlightColor: Theme.of(context).splashColor),
       );
 }
