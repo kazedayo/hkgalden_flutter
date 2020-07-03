@@ -7,7 +7,7 @@ class DeltaJsonParser {
       //print(element);
       if (!(element['insert'] as String).contains('\n')) {
         if (element['attributes'] != null) {
-          print(element['insert']);
+          //print(element['insert']);
           String styledInsert = element['insert'];
           (element['attributes'] as Map<String, dynamic>).forEach((key, value) {
             switch (key) {
@@ -30,7 +30,7 @@ class DeltaJsonParser {
         }
       } else {
         List<String> texts = (element['insert'] as String).split('\n');
-        print(texts.length);
+        //print(texts.length);
         if (texts.length == 2) {
           row += texts.first;
           result += '<p>$row</p>';
@@ -39,13 +39,13 @@ class DeltaJsonParser {
             //save old row and start new row
             result += '<p>$row</p>';
             row = '';
-            print(element);
+            //print(element);
             result += '<p>$element</p>';
           });
         }
       }
     });
-    print('<div id="pmc">${result.replaceAll('<p></p>', '')}</div>');
+    //print('<div id="pmc">${result.replaceAll('<p></p>', '')}</div>');
     return '<div id="pmc">${result.replaceAll('<p></p>', '')}</div>';
   }
 }
