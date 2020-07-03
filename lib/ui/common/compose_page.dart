@@ -64,12 +64,12 @@ class _ComposePageState extends State<ComposePage> {
                 onPressed: _isSendingReply
                     ? null
                     : () {
-                        // setState(() {
-                        //   _isSendingReply = true;
-                        // });
-                        DeltaJsonParser().toGaldenHtml(
-                            json.decode(_getZefyrEditorContent()));
-                        //_sendReply(context);
+                        setState(() {
+                          _isSendingReply = true;
+                        });
+                        _sendReply(context);
+                        // DeltaJsonParser().toGaldenHtml(
+                        //     json.decode(_getZefyrEditorContent()));
                       },
               ),
             ),
