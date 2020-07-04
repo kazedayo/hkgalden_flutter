@@ -158,13 +158,166 @@ class _ThreadPageState extends State<ThreadPage>
                           controller: _scrollController,
                           slivers: <Widget>[
                             SliverList(
-                              delegate: SliverChildListDelegate(
-                                  _generatePreviousReplies(viewModel)),
+                              delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                if (viewModel
+                                            .previousPageReplies[viewModel
+                                                    .previousPageReplies
+                                                    .length -
+                                                index -
+                                                1]
+                                            .floor %
+                                        50 ==
+                                    1) {
+                                  return Column(
+                                    children: <Widget>[
+                                      Container(
+                                        height: 50,
+                                        child: Center(
+                                          child: Text(viewModel
+                                                      .previousPageReplies[viewModel
+                                                              .previousPageReplies
+                                                              .length -
+                                                          index -
+                                                          1]
+                                                      .floor ==
+                                                  1
+                                              ? '第 1 頁'
+                                              : '第 ${((viewModel.previousPageReplies[viewModel.previousPageReplies.length - index - 1].floor + 49) ~/ 50)} 頁'),
+                                        ),
+                                      ),
+                                      Visibility(
+                                          visible: !viewModel.blockedUserIds
+                                              .contains(viewModel
+                                                  .previousPageReplies[viewModel
+                                                          .previousPageReplies
+                                                          .length -
+                                                      index -
+                                                      1]
+                                                  .author
+                                                  .userId),
+                                          child: CommentCell(
+                                            viewModel: viewModel,
+                                            threadId: viewModel.threadId,
+                                            reply: viewModel
+                                                .previousPageReplies[viewModel
+                                                    .previousPageReplies
+                                                    .length -
+                                                index -
+                                                1],
+                                            onLastPage: _onLastPage,
+                                            onSent: (reply) {
+                                              _onReplySuccess(viewModel, reply);
+                                            },
+                                          )),
+                                    ],
+                                  );
+                                } else {
+                                  return Visibility(
+                                      visible: !viewModel.blockedUserIds
+                                          .contains(viewModel
+                                              .previousPageReplies[viewModel
+                                                      .previousPageReplies
+                                                      .length -
+                                                  index -
+                                                  1]
+                                              .author
+                                              .userId),
+                                      child: CommentCell(
+                                        viewModel: viewModel,
+                                        threadId: viewModel.threadId,
+                                        reply: viewModel.previousPageReplies[
+                                            viewModel.previousPageReplies
+                                                    .length -
+                                                index -
+                                                1],
+                                        onLastPage: _onLastPage,
+                                        onSent: (reply) {
+                                          _onReplySuccess(viewModel, reply);
+                                        },
+                                      ));
+                                }
+                              },
+                                  childCount:
+                                      viewModel.previousPageReplies.length),
                             ),
                             SliverList(
                               key: centerKey,
-                              delegate: SliverChildListDelegate(
-                                  _generateReplies(viewModel)),
+                              delegate:
+                                  SliverChildBuilderDelegate((context, index) {
+                                if (viewModel.replies[index].floor % 50 == 1) {
+                                  return Column(
+                                    children: <Widget>[
+                                      Container(
+                                        height: 50,
+                                        child: Center(
+                                          child: Text(viewModel
+                                                      .replies[index].floor ==
+                                                  1
+                                              ? '第 1 頁'
+                                              : '第 ${((viewModel.replies[index].floor + 49) ~/ 50)} 頁'),
+                                        ),
+                                      ),
+                                      Visibility(
+                                          visible: !viewModel.blockedUserIds
+                                              .contains(viewModel.replies[index]
+                                                  .author.userId),
+                                          child: CommentCell(
+                                            viewModel: viewModel,
+                                            threadId: viewModel.threadId,
+                                            reply: viewModel.replies[index],
+                                            onLastPage: _onLastPage,
+                                            onSent: (reply) {
+                                              _onReplySuccess(viewModel, reply);
+                                            },
+                                          )),
+                                    ],
+                                  );
+                                } else if (index ==
+                                    viewModel.replies.length - 1) {
+                                  return Column(
+                                    children: <Widget>[
+                                      Visibility(
+                                          visible: !viewModel.blockedUserIds
+                                              .contains(viewModel.replies[index]
+                                                  .author.userId),
+                                          child: CommentCell(
+                                            viewModel: viewModel,
+                                            threadId: viewModel.threadId,
+                                            reply: viewModel.replies[index],
+                                            onLastPage: _onLastPage,
+                                            onSent: (reply) {
+                                              _onReplySuccess(viewModel, reply);
+                                            },
+                                          )),
+                                      !_onLastPage
+                                          ? PageEndLoadingInidicator()
+                                          : Container(
+                                              height: 50,
+                                              child: Center(
+                                                child: Text('已到post底',
+                                                    style: TextStyle(
+                                                        color: Colors.grey)),
+                                              ),
+                                            ),
+                                    ],
+                                  );
+                                } else {
+                                  return Visibility(
+                                      visible: !viewModel.blockedUserIds
+                                          .contains(viewModel
+                                              .replies[index].author.userId),
+                                      child: CommentCell(
+                                        viewModel: viewModel,
+                                        threadId: viewModel.threadId,
+                                        reply: viewModel.replies[index],
+                                        onLastPage: _onLastPage,
+                                        onSent: (reply) {
+                                          _onReplySuccess(viewModel, reply);
+                                        },
+                                      ));
+                                }
+                              }, childCount: viewModel.replies.length),
                             ),
                           ],
                         ),
@@ -206,74 +359,6 @@ class _ThreadPageState extends State<ThreadPage>
                 ),
               )),
     );
-  }
-
-  List<Widget> _generatePreviousReplies(ThreadPageViewModel viewModel) {
-    List<Widget> repliesWidgets = [];
-    for (Reply reply in viewModel.previousPageReplies) {
-      if (reply.floor % 50 == 1) {
-        repliesWidgets.add(Container(
-          height: 50,
-          child: Center(
-            child: Text(reply.floor == 1
-                ? '第 1 頁'
-                : '第 ${((reply.floor + 49) ~/ 50)} 頁'),
-          ),
-        ));
-      }
-      repliesWidgets.add(
-        Visibility(
-            visible: !viewModel.blockedUserIds.contains(reply.author.userId),
-            child: CommentCell(
-              viewModel: viewModel,
-              threadId: viewModel.threadId,
-              reply: reply,
-              onLastPage: _onLastPage,
-              onSent: (reply) {
-                _onReplySuccess(viewModel, reply);
-              },
-            )),
-      );
-    }
-    return repliesWidgets.reversed.toList();
-  }
-
-  List<Widget> _generateReplies(ThreadPageViewModel viewModel) {
-    List<Widget> repliesWidgets = [];
-    for (Reply reply in viewModel.replies) {
-      if (reply.floor % 50 == 1) {
-        repliesWidgets.add(Container(
-          height: 50,
-          child: Center(
-            child: Text(reply.floor == 1
-                ? '第 1 頁'
-                : '第 ${((reply.floor + 49) ~/ 50)} 頁'),
-          ),
-        ));
-      }
-      repliesWidgets.add(
-        Visibility(
-            visible: !viewModel.blockedUserIds.contains(reply.author.userId),
-            child: CommentCell(
-              viewModel: viewModel,
-              threadId: viewModel.threadId,
-              reply: reply,
-              onLastPage: _onLastPage,
-              onSent: (reply) {
-                _onReplySuccess(viewModel, reply);
-              },
-            )),
-      );
-    }
-    repliesWidgets.add(!_onLastPage
-        ? PageEndLoadingInidicator()
-        : Container(
-            height: 50,
-            child: Center(
-              child: Text('已到post底', style: TextStyle(color: Colors.grey)),
-            ),
-          ));
-    return repliesWidgets;
   }
 
   void _onReplySuccess(ThreadPageViewModel viewModel, Reply reply) {

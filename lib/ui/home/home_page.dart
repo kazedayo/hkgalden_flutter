@@ -106,9 +106,34 @@ class _HomePageState extends State<HomePage>
               : RefreshIndicator(
                   onRefresh: () =>
                       viewModel.onRefresh(viewModel.selectedChannelId),
-                  child: ListView(
+                  child: ListView.builder(
                     controller: _scrollController,
-                    children: _generateThreads(viewModel),
+                    itemCount: viewModel.threads.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == viewModel.threads.length) {
+                        return PageEndLoadingInidicator();
+                      } else {
+                        return Visibility(
+                          visible: !viewModel.blockedUserIds.contains(viewModel
+                              .threads[index].replies[0].author.userId),
+                          child: ThreadCell(
+                            title: viewModel.threads[index].title,
+                            authorName: viewModel
+                                .threads[index].replies[0].authorNickname,
+                            totalReplies: viewModel.threads[index].totalReplies,
+                            lastReply:
+                                viewModel.threads[index].replies.length == 2
+                                    ? viewModel.threads[index].replies[1].date
+                                    : viewModel.threads[index].replies[0].date,
+                            tagName: viewModel.threads[index].tagName,
+                            tagColor: viewModel.threads[index].tagColor,
+                            onTap: () => _loadThread(viewModel.threads[index]),
+                            onLongPress: () =>
+                                _jumpToPage(viewModel.threads[index]),
+                          ),
+                        );
+                      }
+                    },
                   ),
                 ),
           drawer: HomeDrawer(),
@@ -137,29 +162,6 @@ class _HomePageState extends State<HomePage>
             ),
           )),
     );
-  }
-
-  List<Widget> _generateThreads(HomePageViewModel viewModel) {
-    List<Widget> threadCells = [];
-    for (Thread thread in store.state.threadListState.threads)
-      threadCells.add(Visibility(
-        visible:
-            !viewModel.blockedUserIds.contains(thread.replies[0].author.userId),
-        child: ThreadCell(
-          title: thread.title,
-          authorName: thread.replies[0].authorNickname,
-          totalReplies: thread.totalReplies,
-          lastReply: thread.replies.length == 2
-              ? thread.replies[1].date
-              : thread.replies[0].date,
-          tagName: thread.tagName,
-          tagColor: thread.tagColor,
-          onTap: () => _loadThread(thread),
-          onLongPress: () => _jumpToPage(thread),
-        ),
-      ));
-    threadCells.add(PageEndLoadingInidicator());
-    return threadCells;
   }
 
   void _loadThread(Thread thread) {
