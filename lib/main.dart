@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
           snackBarTheme: SnackBarThemeData(
               backgroundColor: Color(0xff323d3a),
               contentTextStyle: TextStyle(color: Colors.white),
-              behavior: SnackBarBehavior.floating),
+              behavior: SnackBarBehavior.fixed),
         ),
         routes: routes,
       ),
