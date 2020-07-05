@@ -145,14 +145,15 @@ class _ThreadPageState extends State<ThreadPage>
               ),
               body: viewModel.isLoading && viewModel.isInitialLoad
                   ? Center()
-                  : /*ListView(
-                      controller: _scrollController,
-                      children: _generateReplies(viewModel),
-                    ),*/
+                  : //ListView.builder(
+                  //     controller: _scrollController,
+                  //     itemCount: viewModel.replies.length,
+                  //     itemBuilder: (context, index) =>
+                  //         _generatePageSliver(viewModel, index),
+                  //   ),
                   RefreshIndicator(
                       child: SafeArea(
                         top: false,
-                        maintainBottomViewPadding: true,
                         child: CustomScrollView(
                           center: centerKey,
                           controller: _scrollController,

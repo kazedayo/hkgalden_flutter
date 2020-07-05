@@ -32,7 +32,6 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
   @override
   Widget build(BuildContext context) {
     return Html(
-      shrinkWrap: true,
       data: widget.htmlString,
       customRender: {
         'img': (context, _, attributes, __) {
@@ -73,8 +72,8 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                         ),
                       ),
                     ),
-                    fadeInDuration: Duration(milliseconds: 300),
-                    fadeOutDuration: Duration(milliseconds: 300),
+                    fadeInDuration: Duration(milliseconds: 250),
+                    fadeOutDuration: Duration(milliseconds: 250),
                   ),
                 ),
               ));
@@ -85,8 +84,8 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
             child: CachedNetworkImage(
               alignment: Alignment.center,
               imageUrl: attributes['src'],
-              fadeInDuration: Duration(milliseconds: 300),
-              fadeOutDuration: Duration(milliseconds: 300),
+              fadeInDuration: Duration(milliseconds: 250),
+              fadeOutDuration: Duration(milliseconds: 250),
             ),
           );
         },

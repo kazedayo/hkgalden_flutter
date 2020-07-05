@@ -6,7 +6,6 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
-import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
@@ -60,7 +59,7 @@ class _HomePageState extends State<HomePage>
                 _scrollController.position.maxScrollExtent) {
               store.dispatch(RequestThreadListAction(
                   channelId: store.state.threadListState.currentChannelId,
-                  page: store.state.threadState.currentPage + 1,
+                  page: store.state.threadListState.currentPage + 1,
                   isRefresh: true));
             }
           })
