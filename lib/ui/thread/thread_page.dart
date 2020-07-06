@@ -119,9 +119,12 @@ class _ThreadPageState extends State<ThreadPage>
                 title: SizedBox(
                   height: kToolbarHeight * 0.85,
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      Expanded(
+                      Flexible(
+                        fit: FlexFit.loose,
                         child: AutoSizeText(
                           widget.title.trim(),
                           style: TextStyle(fontWeight: FontWeight.w700),

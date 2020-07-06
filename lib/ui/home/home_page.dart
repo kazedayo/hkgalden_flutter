@@ -78,11 +78,8 @@ class _HomePageState extends State<HomePage>
             title: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Visibility(
-                  visible: Theme.of(context).platform == TargetPlatform.iOS,
-                  child: Spacer(flex: 1),
-                ),
                 Hero(
                     tag: 'logo',
                     child: SizedBox(
@@ -93,7 +90,6 @@ class _HomePageState extends State<HomePage>
                 Text(viewModel.title,
                     style: TextStyle(fontWeight: FontWeight.w700),
                     strutStyle: StrutStyle(height: 1.25)),
-                Spacer(flex: 2),
               ],
             ),
           ),
