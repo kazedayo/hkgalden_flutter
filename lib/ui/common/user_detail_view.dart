@@ -47,8 +47,8 @@ class UserDetailView extends StatelessWidget {
                 Spacer(),
               ],
             ),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(5))),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
             color: Theme.of(context).scaffoldBackgroundColor,
             elevation: 6,
           ),
