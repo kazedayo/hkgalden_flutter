@@ -24,26 +24,25 @@ class HomeDrawerHeaderViewModel {
 
   factory HomeDrawerHeaderViewModel.create(Store<AppState> store) {
     return HomeDrawerHeaderViewModel(
-      sessionUserName: store.state.sessionUserState.sessionUser.nickName,
-      sessionUserAvatar: store.state.sessionUserState.sessionUser.avatar == '' ? 
-        SvgPicture.asset('assets/icon-hkgalden.svg', width: 30, height: 30) : 
-        CachedNetworkImage(
-          imageUrl: store.state.sessionUserState.sessionUser.avatar, 
-          width: 30,
-          height: 30,
-          fadeInDuration: Duration(milliseconds: 300),
-          fadeOutDuration: Duration(milliseconds: 300),
-        ),
-      sessionUserGender: store.state.sessionUserState.sessionUser.gender,
-      sessionUserGroup: store.state.sessionUserState.sessionUser.userGroup,
-      onLogout: () {
-        store.dispatch(RemoveSessionUserAction());
-        store.dispatch(RequestThreadListAction(
-          channelId: store.state.channelState.selectedChannelId,
-          page: 1, 
-          isRefresh: false
-        ));
-      }
-    );
+        sessionUserName: store.state.sessionUserState.sessionUser.nickName,
+        sessionUserAvatar: store.state.sessionUserState.sessionUser.avatar == ''
+            ? SvgPicture.asset('assets/icon-hkgalden.svg',
+                width: 30, height: 30)
+            : CachedNetworkImage(
+                imageUrl: store.state.sessionUserState.sessionUser.avatar,
+                width: 30,
+                height: 30,
+                fadeInDuration: Duration(milliseconds: 250),
+                fadeOutDuration: Duration(milliseconds: 250),
+              ),
+        sessionUserGender: store.state.sessionUserState.sessionUser.gender,
+        sessionUserGroup: store.state.sessionUserState.sessionUser.userGroup,
+        onLogout: () {
+          store.dispatch(RemoveSessionUserAction());
+          store.dispatch(RequestThreadListAction(
+              channelId: store.state.channelState.selectedChannelId,
+              page: 1,
+              isRefresh: false));
+        });
   }
 }
