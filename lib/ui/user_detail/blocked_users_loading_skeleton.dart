@@ -6,11 +6,11 @@ class BlockedUsersLoadingSkeleton extends StatelessWidget {
   Widget build(BuildContext context) => Shimmer.fromColors(
       child: GridView.builder(
           physics: NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.fromLTRB(20, 12, 20, 20),
           itemCount: 20,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              mainAxisSpacing: 20,
+              mainAxisSpacing: 24,
               crossAxisSpacing: 20,
               childAspectRatio: 4),
           itemBuilder: (context, index) => Container(

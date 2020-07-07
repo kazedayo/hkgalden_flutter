@@ -245,6 +245,56 @@ class HKGaldenApi {
     }
   }
 
+  Future<List<Thread>> getUserThreadList(String userId, int page) async {
+    final String query = r'''
+      query GetUserThreadList($userId: String!, $page: Int!) {
+        threadsByUser(userId: $userId, page: $page) {
+          id
+          title
+          replies {
+            author {
+              id
+              nickname
+              avatar
+              groups {
+                id
+                name
+              }
+            }
+            authorNickname
+            date
+            floor
+          }
+          totalReplies
+          tags{
+            name
+            color
+          }
+        }
+      }
+    ''';
+
+    final QueryOptions options =
+        QueryOptions(documentNode: gql(query), variables: <String, dynamic>{
+      'userId': userId,
+      'page': page,
+    });
+
+    final QueryResult queryResult = await _client.query(options);
+
+    if (queryResult.hasException) {
+      return null;
+    } else {
+      final List<dynamic> result =
+          queryResult.data['threadsByUser'] as List<dynamic>;
+
+      final List<Thread> userThreads =
+          result.map((e) => Thread.fromJson(e)).toList();
+
+      return userThreads;
+    }
+  }
+
   Future<Reply> sendReply(int threadId, String html, {String parentId}) async {
     final String mutation = r'''
       mutation SendReply($threadId: Int!, $parentId: String, $html: String!) {

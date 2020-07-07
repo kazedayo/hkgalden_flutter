@@ -4,6 +4,7 @@ import 'package:hkgalden_flutter/redux/channel/channel_state.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_state.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_state.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_state.dart';
+import 'package:hkgalden_flutter/redux/user_thread_list/user_thread_list_state.dart';
 import 'package:meta/meta.dart';
 
 @immutable
@@ -13,6 +14,7 @@ class AppState extends Equatable {
   final ChannelState channelState;
   final SessionUserState sessionUserState;
   final BlockedUsersState blockedUsersState;
+  final UserThreadListState userThreadListState;
 
   AppState({
     @required this.threadListState,
@@ -20,6 +22,7 @@ class AppState extends Equatable {
     @required this.channelState,
     @required this.sessionUserState,
     @required this.blockedUsersState,
+    @required this.userThreadListState,
   });
 
   factory AppState.initial() {
@@ -29,22 +32,24 @@ class AppState extends Equatable {
       channelState: ChannelState.initial(),
       sessionUserState: SessionUserState.initial(),
       blockedUsersState: BlockedUsersState.initial(),
+      userThreadListState: UserThreadListState.initial(),
     );
   }
 
-  AppState copyWith({
-    ThreadListState threadListState,
-    ThreadState threadState,
-    ChannelState channelState,
-    SessionUserState sessionUserState,
-    BlockedUsersState blockedUsersState,
-  }) {
+  AppState copyWith(
+      {ThreadListState threadListState,
+      ThreadState threadState,
+      ChannelState channelState,
+      SessionUserState sessionUserState,
+      BlockedUsersState blockedUsersState,
+      UserThreadListState userThreadListState}) {
     return AppState(
       threadListState: threadListState ?? this.threadListState,
       threadState: threadState ?? this.threadState,
       channelState: channelState ?? this.channelState,
       sessionUserState: sessionUserState ?? this.sessionUserState,
       blockedUsersState: blockedUsersState ?? this.blockedUsersState,
+      userThreadListState: userThreadListState ?? this.userThreadListState,
     );
   }
 
@@ -53,6 +58,7 @@ class AppState extends Equatable {
         threadState,
         channelState,
         sessionUserState,
-        blockedUsersState
+        blockedUsersState,
+        userThreadListState,
       ];
 }
