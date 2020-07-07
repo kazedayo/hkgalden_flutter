@@ -217,6 +217,34 @@ class HKGaldenApi {
     }
   }
 
+  Future<List<User>> getBlockedUser() async {
+    const String query = r'''
+      query GetBlockedUser {
+        blockedUsers {
+          id
+          nickname
+          gender
+        }
+      }
+    ''';
+
+    final QueryOptions options = QueryOptions(documentNode: gql(query));
+
+    final QueryResult queryResult = await _client.query(options);
+
+    if (queryResult.hasException) {
+      return null;
+    } else {
+      final List<dynamic> result =
+          queryResult.data['blockedUsers'] as List<dynamic>;
+
+      final List<User> blockedUsers =
+          result.map((user) => User.fromJson(user)).toList();
+
+      return blockedUsers;
+    }
+  }
+
   Future<Reply> sendReply(int threadId, String html, {String parentId}) async {
     final String mutation = r'''
       mutation SendReply($threadId: Int!, $parentId: String, $html: String!) {
