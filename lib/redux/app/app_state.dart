@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:hkgalden_flutter/redux/blocked_users/blocked_users_state.dart';
 import 'package:hkgalden_flutter/redux/channel/channel_state.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_state.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_state.dart';
@@ -11,12 +12,14 @@ class AppState extends Equatable {
   final ThreadState threadState;
   final ChannelState channelState;
   final SessionUserState sessionUserState;
+  final BlockedUsersState blockedUsersState;
 
   AppState({
     @required this.threadListState,
     @required this.threadState,
     @required this.channelState,
     @required this.sessionUserState,
+    @required this.blockedUsersState,
   });
 
   factory AppState.initial() {
@@ -25,6 +28,7 @@ class AppState extends Equatable {
       threadState: ThreadState.initial(),
       channelState: ChannelState.initial(),
       sessionUserState: SessionUserState.initial(),
+      blockedUsersState: BlockedUsersState.initial(),
     );
   }
 
@@ -33,14 +37,22 @@ class AppState extends Equatable {
     ThreadState threadState,
     ChannelState channelState,
     SessionUserState sessionUserState,
+    BlockedUsersState blockedUsersState,
   }) {
     return AppState(
       threadListState: threadListState ?? this.threadListState,
       threadState: threadState ?? this.threadState,
       channelState: channelState ?? this.channelState,
       sessionUserState: sessionUserState ?? this.sessionUserState,
+      blockedUsersState: blockedUsersState ?? this.blockedUsersState,
     );
   }
 
-  List<Object> get props => [threadListState, threadState, channelState, sessionUserState];
+  List<Object> get props => [
+        threadListState,
+        threadState,
+        channelState,
+        sessionUserState,
+        blockedUsersState
+      ];
 }
