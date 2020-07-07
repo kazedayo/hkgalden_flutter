@@ -2,7 +2,14 @@ import 'package:hkgalden_flutter/redux/blocked_users/blocked_users_action.dart';
 import 'package:hkgalden_flutter/redux/blocked_users/blocked_users_state.dart';
 import 'package:redux/redux.dart';
 
-final Reducer<BlockedUsersState> blockedUsersReducer = combineReducers([]);
+final Reducer<BlockedUsersState> blockedUsersReducer = combineReducers([
+  TypedReducer<BlockedUsersState, RequestBlockedUsersAction>(
+      requestBlockedUsersReducer),
+  TypedReducer<BlockedUsersState, UpdateBlockedUsersAction>(
+      updateBlockedUsersReducer),
+  TypedReducer<BlockedUsersState, RequestBlockedUsersErrorAction>(
+      requestBlockedUsersErrorReducer)
+]);
 
 BlockedUsersState requestBlockedUsersReducer(
         BlockedUsersState state, RequestBlockedUsersAction action) =>

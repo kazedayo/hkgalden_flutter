@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:hkgalden_flutter/models/user.dart';
+import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 
 class BlockedUserCell extends StatefulWidget {
-  final String userName;
+  final User user;
 
-  BlockedUserCell({this.userName});
+  BlockedUserCell({this.user});
 
   @override
   _BlockedUserCellState createState() => _BlockedUserCellState();
@@ -19,17 +21,19 @@ class _BlockedUserCellState extends State<BlockedUserCell> {
   }
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-      onTap: () {
+  Widget build(BuildContext context) => FlatButton(
+      onPressed: () {
         setState(() {
           _unblock = !_unblock;
         });
       },
-      child: Center(
-        child: Text(widget.userName,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headline6.copyWith(
-                decoration: _unblock ? TextDecoration.lineThrough : null,
-                decorationThickness: 2)),
-      ));
+      child: Text(widget.user.nickName,
+          style: Theme.of(context).textTheme.bodyText1.copyWith(
+              decoration:
+                  _unblock ? TextDecoration.lineThrough : TextDecoration.none,
+              decorationThickness: 2.5,
+              decorationColor: Colors.white,
+              color: widget.user.gender == 'M'
+                  ? Theme.of(context).colorScheme.brotherColor
+                  : Theme.of(context).colorScheme.sisterColor)));
 }

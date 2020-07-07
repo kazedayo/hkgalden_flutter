@@ -12,6 +12,7 @@ import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hkgalden_flutter/viewmodels/thread_page_view_model.dart';
+import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 
 class CommentCell extends StatelessWidget {
   final ThreadPageViewModel viewModel;
@@ -64,8 +65,8 @@ class CommentCell extends StatelessWidget {
                     reply.authorNickname,
                     style: TextStyle(
                       color: reply.author.gender == 'M'
-                          ? Color(0xff22c1fe)
-                          : Color(0xffff7aab),
+                          ? Theme.of(context).colorScheme.brotherColor
+                          : Theme.of(context).colorScheme.sisterColor,
                     ),
                   ),
                   Spacer(),

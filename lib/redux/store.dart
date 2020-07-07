@@ -1,5 +1,6 @@
 import 'package:hkgalden_flutter/redux/app/app_reducer.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
+import 'package:hkgalden_flutter/redux/blocked_users/blocked_users_middleware.dart';
 import 'package:hkgalden_flutter/redux/channel/channel_middleware.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_middleware.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_middleware.dart';
@@ -15,5 +16,6 @@ final Store<AppState> store = Store(
     ThreadMiddleware(),
     ChannelMiddleware(),
     SessionUserMiddleware(),
+    BlockedUsersMiddleware(),
   ],
 );

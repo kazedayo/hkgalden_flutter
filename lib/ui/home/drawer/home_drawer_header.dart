@@ -4,10 +4,11 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
-import 'package:hkgalden_flutter/ui/common/user_detail_view.dart';
+import 'package:hkgalden_flutter/ui/user_detail/user_detail_view.dart';
 import 'package:hkgalden_flutter/ui/login_page.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/viewmodels/home_drawer_header_view_model.dart';
+import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 
 class HomeDrawerHeader extends StatefulWidget {
   @override
@@ -81,8 +82,10 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
                             color: token == ''
                                 ? Colors.white
                                 : (viewModel.sessionUserGender == 'M'
-                                    ? Color(0xff22c1fe)
-                                    : Color(0xffff7aab)),
+                                    ? Theme.of(context).colorScheme.brotherColor
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .sisterColor),
                           ),
                         ),
                         Spacer(),

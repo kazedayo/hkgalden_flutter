@@ -1,9 +1,14 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
+import 'package:hkgalden_flutter/redux/blocked_users/blocked_users_action.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/ui/common/blocked_user_cell.dart';
+import 'package:hkgalden_flutter/ui/user_detail/blocked_users_loading_skeleton.dart';
+import 'package:hkgalden_flutter/viewmodels/blocked_users_view_model.dart';
 import 'package:hkgalden_flutter/viewmodels/user_detail_view_model.dart';
+import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 
 class UserDetailView extends StatefulWidget {
   final Function onLogout;
@@ -18,6 +23,10 @@ class _UserDetailViewState extends State<UserDetailView>
     with SingleTickerProviderStateMixin {
   TabController _controller;
   int _selectedTab;
+  List<Widget> _pages = <Widget>[
+    _BlockListPage(),
+    _UserThreadListPage(),
+  ];
 
   @override
   void initState() {
@@ -60,8 +69,12 @@ class _UserDetailViewState extends State<UserDetailView>
                                 .bodyText1
                                 .copyWith(
                                     color: viewModel.userGender == 'M'
-                                        ? Color(0xff22c1fe)
-                                        : Color(0xffff7aab))),
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .brotherColor
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .sisterColor)),
                       ],
                     ),
                     Row(
@@ -92,17 +105,19 @@ class _UserDetailViewState extends State<UserDetailView>
                   },
                 ),
                 Expanded(
-                  child: GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 4,
-                          crossAxisSpacing: 4,
-                          childAspectRatio: 3),
-                      itemCount: 10,
-                      itemBuilder: (context, index) {
-                        return BlockedUserCell(userName: 'user00$index');
-                      }),
-                ),
+                    child: PageTransitionSwitcher(
+                  transitionBuilder: (
+                    Widget child,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) =>
+                      FadeThroughTransition(
+                          fillColor: Theme.of(context).scaffoldBackgroundColor,
+                          animation: animation,
+                          secondaryAnimation: secondaryAnimation,
+                          child: child),
+                  child: _pages[_selectedTab],
+                )),
               ],
             ),
             shape:
@@ -112,4 +127,30 @@ class _UserDetailViewState extends State<UserDetailView>
           ),
         ),
       );
+}
+
+class _BlockListPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) =>
+      StoreConnector<AppState, BlockedUsersViewModel>(
+        onInit: (store) => store.dispatch(RequestBlockedUsersAction()),
+        converter: (store) => BlockedUsersViewModel.create(store),
+        builder: (context, viewModel) => viewModel.isLoading
+            ? BlockedUsersLoadingSkeleton()
+            : GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 4,
+                    crossAxisSpacing: 4,
+                    childAspectRatio: 3),
+                itemCount: viewModel.blockedUsers.length,
+                itemBuilder: (context, index) {
+                  return BlockedUserCell(user: viewModel.blockedUsers[index]);
+                }),
+      );
+}
+
+class _UserThreadListPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Center();
 }

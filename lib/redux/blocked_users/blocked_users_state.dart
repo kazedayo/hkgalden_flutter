@@ -10,7 +10,7 @@ class BlockedUsersState extends Equatable {
   BlockedUsersState({this.isLoading, this.blockedUsers});
 
   factory BlockedUsersState.initial() => BlockedUsersState(
-        isLoading: false,
+        isLoading: true,
         blockedUsers: [],
       );
 
