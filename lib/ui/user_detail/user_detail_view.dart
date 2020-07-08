@@ -8,6 +8,7 @@ import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/ui/common/blocked_user_cell.dart';
 import 'package:hkgalden_flutter/ui/home/list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/user_detail/blocked_users_loading_skeleton.dart';
+import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/viewmodels/blocked_users_view_model.dart';
 import 'package:hkgalden_flutter/viewmodels/user_detail_view_model.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
@@ -166,11 +167,21 @@ class _UserThreadListPage extends StatelessWidget {
             userId: store.state.sessionUserState.sessionUser.userId, page: 1)),
         converter: (store) => UserThreadListViewModel.create(store),
         builder: (context, viewModel) => viewModel.isLoading
-            ? ListLoadingSkeleton()
+            ? UserThreadListLoadingSkeleton()
             : ListView.builder(
                 itemCount: viewModel.userThreads.length,
                 itemBuilder: (context, index) => ListTile(
                       title: Text(viewModel.userThreads[index].title),
+                      trailing: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: viewModel.userThreads[index].tagColor),
+                        child: Text(
+                          '#${viewModel.userThreads[index].tagName}',
+                          strutStyle: StrutStyle(height: 1.25),
+                        ),
+                      ),
                     )),
       );
 }

@@ -2,7 +2,14 @@ import 'package:hkgalden_flutter/redux/user_thread_list/user_thread_list_action.
 import 'package:hkgalden_flutter/redux/user_thread_list/user_thread_list_state.dart';
 import 'package:redux/redux.dart';
 
-final Reducer<UserThreadListState> userThreadListReducer = combineReducers([]);
+final Reducer<UserThreadListState> userThreadListReducer = combineReducers([
+  TypedReducer<UserThreadListState, RequestUserThreadListAction>(
+      requestUserThreadListReducer),
+  TypedReducer<UserThreadListState, UpdateUserThreadListAction>(
+      updateUserThreadListReducer),
+  TypedReducer<UserThreadListState, RequestUserThreadListErrorAction>(
+      requestUserThreadListErrorReducer),
+]);
 
 UserThreadListState requestUserThreadListReducer(
         UserThreadListState state, RequestUserThreadListAction action) =>
