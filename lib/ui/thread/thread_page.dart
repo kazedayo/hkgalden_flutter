@@ -233,12 +233,16 @@ class _ThreadPageState extends State<ThreadPage>
 
   Widget _generatePreviousPageSliver(ThreadPageViewModel viewModel, int index) {
     if (viewModel.previousPageReplies.isEmpty) {
-      return Container(
-        height: 50,
-        child: Center(
-          child: Text('撈緊上一頁...', style: TextStyle(color: Colors.grey)),
-        ),
-      );
+      if (widget.page != 1) {
+        return Container(
+          height: 50,
+          child: Center(
+            child: Text('撈緊上一頁...', style: TextStyle(color: Colors.grey)),
+          ),
+        );
+      } else {
+        return SizedBox();
+      }
     } else {
       if (viewModel
                   .previousPageReplies[
@@ -315,7 +319,8 @@ class _ThreadPageState extends State<ThreadPage>
   }
 
   Widget _generatePageSliver(ThreadPageViewModel viewModel, int index) {
-    if (viewModel.replies[index].floor % 50 == 1) {
+    if (viewModel.replies[index].floor % 50 == 1 &&
+        viewModel.replies.length != 1) {
       return Column(
         children: <Widget>[
           Container(
@@ -339,6 +344,39 @@ class _ThreadPageState extends State<ThreadPage>
                 },
                 canReply: _canReply,
               )),
+        ],
+      );
+    } else if (viewModel.replies[index].floor % 50 == 1 &&
+        viewModel.replies.length == 1) {
+      return Column(
+        children: <Widget>[
+          Container(
+            height: 50,
+            child: Center(
+              child: Text(viewModel.replies[index].floor == 1
+                  ? '第 1 頁'
+                  : '第 ${((viewModel.replies[index].floor + 49) ~/ 50)} 頁'),
+            ),
+          ),
+          Visibility(
+              visible: !viewModel.blockedUserIds
+                  .contains(viewModel.replies[index].author.userId),
+              child: CommentCell(
+                viewModel: viewModel,
+                threadId: viewModel.threadId,
+                reply: viewModel.replies[index],
+                onLastPage: _onLastPage,
+                onSent: (reply) {
+                  _onReplySuccess(viewModel, reply);
+                },
+                canReply: _canReply,
+              )),
+          Container(
+            height: 50,
+            child: Center(
+              child: Text('已到post底', style: TextStyle(color: Colors.grey)),
+            ),
+          ),
         ],
       );
     } else if (index == viewModel.replies.length - 1) {
