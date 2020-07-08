@@ -253,10 +253,19 @@ class _ThreadPageState extends State<ThreadPage>
         return Column(
           children: <Widget>[
             if (viewModel
-                    .previousPageReplies[
-                        viewModel.previousPageReplies.length - index - 1]
-                    .floor !=
-                1)
+                        .previousPageReplies[
+                            viewModel.previousPageReplies.length - index - 1]
+                        .floor !=
+                    1 &&
+                (viewModel
+                                .previousPageReplies[
+                                    viewModel.previousPageReplies.length -
+                                        index -
+                                        1]
+                                .floor /
+                            50.0)
+                        .ceil() ==
+                    viewModel.currentPage)
               Container(
                 height: 50,
                 child: Center(
