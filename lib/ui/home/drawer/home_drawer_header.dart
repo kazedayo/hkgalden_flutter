@@ -7,7 +7,7 @@ import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_detail_view.dart';
 import 'package:hkgalden_flutter/ui/login_page.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
-import 'package:hkgalden_flutter/viewmodels/home_drawer_header_view_model.dart';
+import 'package:hkgalden_flutter/viewmodels/home/drawer/home_drawer_header_view_model.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 
 class HomeDrawerHeader extends StatefulWidget {

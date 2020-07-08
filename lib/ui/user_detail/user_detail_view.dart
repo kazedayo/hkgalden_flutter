@@ -6,13 +6,12 @@ import 'package:hkgalden_flutter/redux/blocked_users/blocked_users_action.dart';
 import 'package:hkgalden_flutter/redux/user_thread_list/user_thread_list_action.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/ui/common/blocked_user_cell.dart';
-import 'package:hkgalden_flutter/ui/home/list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/user_detail/blocked_users_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_loading_skeleton.dart';
-import 'package:hkgalden_flutter/viewmodels/blocked_users_view_model.dart';
-import 'package:hkgalden_flutter/viewmodels/user_detail_view_model.dart';
+import 'package:hkgalden_flutter/viewmodels/user_detail/blocked_users_view_model.dart';
+import 'package:hkgalden_flutter/viewmodels/user_detail/user_detail_view_model.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
-import 'package:hkgalden_flutter/viewmodels/user_thread_list_view_model.dart';
+import 'package:hkgalden_flutter/viewmodels/user_detail/user_thread_list_view_model.dart';
 
 class UserDetailView extends StatefulWidget {
   final Function onLogout;

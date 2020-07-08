@@ -11,6 +11,7 @@ import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page.dart';
+import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/ui/thread/comment_cell.dart';
@@ -33,8 +34,8 @@ class _ThreadPageState extends State<ThreadPage>
     with SingleTickerProviderStateMixin {
   ScrollController _scrollController;
   AnimationController _fabAnimationController;
-  String _token;
   bool _onLastPage;
+  bool _canReply;
 
   @override
   void initState() {
@@ -48,7 +49,7 @@ class _ThreadPageState extends State<ThreadPage>
     //get token
     TokenSecureStorage().readToken(onFinish: (value) {
       setState(() {
-        _token = value;
+        _canReply = value == '' ? false : true;
       });
     });
     _onLastPage = false;
@@ -114,108 +115,93 @@ class _ThreadPageState extends State<ThreadPage>
       converter: (store) => ThreadPageViewModel.create(store),
       builder: (BuildContext context, ThreadPageViewModel viewModel) =>
           Scaffold(
-              key: scaffoldKey,
-              appBar: AppBar(
-                title: SizedBox(
-                  height: kToolbarHeight * 0.85,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Flexible(
-                        fit: FlexFit.loose,
-                        child: AutoSizeText(
-                          widget.title.trim(),
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                          maxLines: 2,
-                          minFontSize: 14,
-                          //overflow: TextOverflow.ellipsis
-                        ),
-                      )
+        key: scaffoldKey,
+        appBar: AppBar(
+          title: SizedBox(
+            height: kToolbarHeight * 0.85,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Flexible(
+                  fit: FlexFit.loose,
+                  child: AutoSizeText(
+                    widget.title.trim(),
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                    maxLines: 2,
+                    minFontSize: 14,
+                    //overflow: TextOverflow.ellipsis
+                  ),
+                )
+              ],
+            ),
+          ),
+          bottom: PreferredSize(
+            child: SizedBox(
+              height: 3,
+              child: Visibility(
+                  visible: viewModel.isLoading,
+                  child: LinearProgressIndicator()),
+            ),
+            preferredSize: Size(double.infinity, 3),
+          ),
+        ),
+        body: viewModel.isLoading && viewModel.isInitialLoad
+            ? Center()
+            : //ListView.builder(
+            //     controller: _scrollController,
+            //     itemCount: viewModel.replies.length,
+            //     itemBuilder: (context, index) =>
+            //         _generatePageSliver(viewModel, index),
+            //   ),
+            RefreshIndicator(
+                child: SafeArea(
+                  top: false,
+                  child: CustomScrollView(
+                    center: centerKey,
+                    controller: _scrollController,
+                    slivers: <Widget>[
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          return _generatePreviousPageSliver(viewModel, index);
+                        }, childCount: viewModel.previousPageReplies.length),
+                      ),
+                      SliverList(
+                        key: centerKey,
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          return _generatePageSliver(viewModel, index);
+                        }, childCount: viewModel.replies.length),
+                      ),
                     ],
                   ),
                 ),
-                bottom: PreferredSize(
-                  child: SizedBox(
-                    height: 3,
-                    child: Visibility(
-                        visible: viewModel.isLoading,
-                        child: LinearProgressIndicator()),
-                  ),
-                  preferredSize: Size(double.infinity, 3),
-                ),
-              ),
-              body: viewModel.isLoading && viewModel.isInitialLoad
-                  ? Center()
-                  : //ListView.builder(
-                  //     controller: _scrollController,
-                  //     itemCount: viewModel.replies.length,
-                  //     itemBuilder: (context, index) =>
-                  //         _generatePageSliver(viewModel, index),
-                  //   ),
-                  RefreshIndicator(
-                      child: SafeArea(
-                        top: false,
-                        child: CustomScrollView(
-                          center: centerKey,
-                          controller: _scrollController,
-                          slivers: <Widget>[
-                            SliverList(
-                              delegate: SliverChildBuilderDelegate(
-                                  (context, index) {
-                                return _generatePreviousPageSliver(
-                                    viewModel, index);
-                              },
-                                  childCount:
-                                      viewModel.previousPageReplies.length),
-                            ),
-                            SliverList(
-                              key: centerKey,
-                              delegate:
-                                  SliverChildBuilderDelegate((context, index) {
-                                return _generatePageSliver(viewModel, index);
-                              }, childCount: viewModel.replies.length),
-                            ),
-                          ],
-                        ),
-                      ),
-                      onRefresh: () => viewModel.currentPage != 1 &&
-                              viewModel.endPage <= widget.page
-                          ? viewModel.getPreviousPage(viewModel.currentPage - 1)
-                          : Future.delayed(Duration.zero)),
-              floatingActionButton: AnimatedBuilder(
-                animation: _fabAnimationController,
-                builder: (context, child) => FadeScaleTransition(
-                  animation: _fabAnimationController,
-                  child: child,
-                ),
-                child: FloatingActionButton(
-                  child: Icon(Icons.reply),
-                  onPressed: () => _token == ''
-                      ? showModal<void>(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('未登入'),
-                            content: Text('請先登入'),
-                            actions: <Widget>[
-                              FlatButton(
-                                child: Text('OK'),
-                                onPressed: () => Navigator.of(context).pop(),
-                              ),
-                            ],
-                          ),
-                        )
-                      : Navigator.of(context).push(SlideInFromBottomRoute(
-                          page: ComposePage(
-                          composeMode: ComposeMode.reply,
-                          threadId: viewModel.threadId,
-                          onSent: (reply) {
-                            _onReplySuccess(viewModel, reply);
-                          },
-                        ))),
-                ),
-              )),
+                onRefresh: () => viewModel.currentPage != 1 &&
+                        viewModel.endPage <= widget.page
+                    ? viewModel.getPreviousPage(viewModel.currentPage - 1)
+                    : Future.delayed(Duration.zero)),
+        floatingActionButton: AnimatedBuilder(
+          animation: _fabAnimationController,
+          builder: (context, child) => FadeScaleTransition(
+            animation: _fabAnimationController,
+            child: child,
+          ),
+          child: FloatingActionButton(
+              child: Icon(Icons.reply),
+              onPressed: () => !_canReply
+                  ? showModal<void>(
+                      context: context,
+                      builder: (context) => LoginCheckDialog())
+                  : Navigator.of(context).push(SlideInFromBottomRoute(
+                      page: ComposePage(
+                      composeMode: ComposeMode.reply,
+                      threadId: viewModel.threadId,
+                      onSent: (reply) {
+                        _onReplySuccess(viewModel, reply);
+                      },
+                    )))),
+        ),
+      ),
     );
   }
 
@@ -266,6 +252,7 @@ class _ThreadPageState extends State<ThreadPage>
                 onSent: (reply) {
                   _onReplySuccess(viewModel, reply);
                 },
+                canReply: _canReply,
               )),
         ],
       );
@@ -285,6 +272,7 @@ class _ThreadPageState extends State<ThreadPage>
             onSent: (reply) {
               _onReplySuccess(viewModel, reply);
             },
+            canReply: _canReply,
           ));
     }
   }
@@ -312,6 +300,7 @@ class _ThreadPageState extends State<ThreadPage>
                 onSent: (reply) {
                   _onReplySuccess(viewModel, reply);
                 },
+                canReply: _canReply,
               )),
         ],
       );
@@ -329,6 +318,7 @@ class _ThreadPageState extends State<ThreadPage>
                 onSent: (reply) {
                   _onReplySuccess(viewModel, reply);
                 },
+                canReply: _canReply,
               )),
           !_onLastPage
               ? PageEndLoadingInidicator()
@@ -353,6 +343,7 @@ class _ThreadPageState extends State<ThreadPage>
             onSent: (reply) {
               _onReplySuccess(viewModel, reply);
             },
+            canReply: _canReply,
           ));
     }
   }

@@ -12,7 +12,7 @@ import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
 import 'package:hkgalden_flutter/ui/home/list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
-import 'package:hkgalden_flutter/viewmodels/home_page_view_model.dart';
+import 'package:hkgalden_flutter/viewmodels/home/home_page_view_model.dart';
 
 class HomePage extends StatefulWidget {
   final String title;

@@ -357,4 +357,46 @@ class HKGaldenApi {
       return sentReply;
     }
   }
+
+  Future<bool> unblockUser(String userId) async {
+    final String mutation = r'''
+      mutation UnblockUser($userId: String!) {
+        unblockUser(id: $userId)
+      }
+    ''';
+
+    final MutationOptions options = MutationOptions(
+        documentNode: gql(mutation),
+        variables: <String, dynamic>{'userId': userId});
+
+    final QueryResult result = await _client.mutate(options);
+
+    if (result.hasException) {
+      return null;
+    } else {
+      bool isSuccess = result.data['unblockUser'] as bool;
+      return isSuccess;
+    }
+  }
+
+  Future<bool> blockUser(String userId) async {
+    final String mutation = r'''
+      mutation BlockUser($userId: String!) {
+        blockUser(id: $userId)
+      }
+    ''';
+
+    final MutationOptions options = MutationOptions(
+        documentNode: gql(mutation),
+        variables: <String, dynamic>{'userId': userId});
+
+    final QueryResult result = await _client.mutate(options);
+
+    if (result.hasException) {
+      return null;
+    } else {
+      bool isSuccess = result.data['blockUser'] as bool;
+      return isSuccess;
+    }
+  }
 }
