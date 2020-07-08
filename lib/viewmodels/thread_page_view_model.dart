@@ -14,28 +14,25 @@ class ThreadPageViewModel {
   final int currentPage;
   final int endPage;
   final Function(Reply) appendReply;
-  final Function(int) getPreviousPage;
 
-  ThreadPageViewModel(
-      {this.threadId,
-      this.previousPageReplies,
-      this.replies,
-      this.isLoading,
-      this.isInitialLoad,
-      this.blockedUserIds,
-      this.totalReplies,
-      this.currentPage,
-      this.endPage,
-      this.appendReply,
-      this.getPreviousPage});
+  ThreadPageViewModel({
+    this.threadId,
+    this.previousPageReplies,
+    this.replies,
+    this.isLoading,
+    this.isInitialLoad,
+    this.blockedUserIds,
+    this.totalReplies,
+    this.currentPage,
+    this.endPage,
+    this.appendReply,
+  });
 
   factory ThreadPageViewModel.create(Store<AppState> store) {
     return ThreadPageViewModel(
         threadId: store.state.threadState.thread.threadId,
         previousPageReplies:
-            store.state.threadState.previousPages.replies == null
-                ? []
-                : store.state.threadState.previousPages.replies,
+            store.state.threadState.previousPages.replies ?? [],
         replies: store.state.threadState.thread.replies,
         isLoading: store.state.threadState.threadIsLoading,
         isInitialLoad: store.state.threadState.isInitialLoad,
@@ -44,10 +41,6 @@ class ThreadPageViewModel {
         currentPage: store.state.threadState.currentPage,
         endPage: store.state.threadState.endPage,
         appendReply: (reply) =>
-            store.dispatch(AppendReplyToThreadAction(reply: reply)),
-        getPreviousPage: (page) => store.dispatch(RequestThreadAction(
-            threadId: store.state.threadState.thread.threadId,
-            page: page,
-            isInitialLoad: false)));
+            store.dispatch(AppendReplyToThreadAction(reply: reply)));
   }
 }

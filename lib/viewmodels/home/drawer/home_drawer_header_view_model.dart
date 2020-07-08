@@ -31,7 +31,7 @@ class HomeDrawerHeaderViewModel {
         sessionUserName: store.state.sessionUserState.sessionUser.nickName,
         sessionUserAvatar: store.state.sessionUserState.sessionUser.avatar == ''
             ? SvgPicture.asset('assets/icon-hkgalden.svg',
-                width: 30, height: 30)
+                width: 30, height: 30, color: Colors.grey)
             : CachedNetworkImage(
                 imageUrl: store.state.sessionUserState.sessionUser.avatar,
                 width: 30,

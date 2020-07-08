@@ -72,6 +72,12 @@ class _ThreadPageState extends State<ThreadPage>
   @override
   Widget build(BuildContext context) {
     const Key centerKey = ValueKey('second-sliver-list');
+    // if (widget.page != 1) {
+    //   SchedulerBinding.instance.addPostFrameCallback((_) {
+    //     _scrollController.animateTo(50,
+    //         duration: Duration(milliseconds: 500), curve: Curves.easeOut);
+    //   });
+    // }
     return StoreConnector<AppState, ThreadPageViewModel>(
       onInit: (store) {
         store.dispatch(RequestThreadAction(
@@ -86,6 +92,17 @@ class _ThreadPageState extends State<ThreadPage>
                   page: store.state.threadState.currentPage + 1,
                   isInitialLoad: false,
                 ));
+              }
+            } else if (_scrollController.position.pixels ==
+                _scrollController.position.minScrollExtent) {
+              if (store.state.threadState.currentPage != 1 &&
+                  store.state.threadState.endPage <= widget.page) {
+                store.dispatch(
+                  RequestThreadAction(
+                      threadId: store.state.threadState.thread.threadId,
+                      page: store.state.threadState.currentPage - 1,
+                      isInitialLoad: false),
+                );
               }
             }
           })
@@ -155,31 +172,29 @@ class _ThreadPageState extends State<ThreadPage>
             //     itemBuilder: (context, index) =>
             //         _generatePageSliver(viewModel, index),
             //   ),
-            RefreshIndicator(
-                child: SafeArea(
-                  top: false,
-                  child: CustomScrollView(
-                    center: centerKey,
-                    controller: _scrollController,
-                    slivers: <Widget>[
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          return _generatePreviousPageSliver(viewModel, index);
-                        }, childCount: viewModel.previousPageReplies.length),
-                      ),
-                      SliverList(
-                        key: centerKey,
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          return _generatePageSliver(viewModel, index);
-                        }, childCount: viewModel.replies.length),
-                      ),
-                    ],
-                  ),
+            SafeArea(
+                top: false,
+                child: CustomScrollView(
+                  center: centerKey,
+                  controller: _scrollController,
+                  slivers: <Widget>[
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return _generatePreviousPageSliver(viewModel, index);
+                      },
+                          childCount: viewModel.previousPageReplies.length == 0
+                              ? 1
+                              : viewModel.previousPageReplies.length),
+                    ),
+                    SliverList(
+                      key: centerKey,
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return _generatePageSliver(viewModel, index);
+                      }, childCount: viewModel.replies.length),
+                    ),
+                  ],
                 ),
-                onRefresh: () => viewModel.currentPage != 1 &&
-                        viewModel.endPage <= widget.page
-                    ? viewModel.getPreviousPage(viewModel.currentPage - 1)
-                    : Future.delayed(Duration.zero)),
+              ),
         floatingActionButton: AnimatedBuilder(
           animation: _fabAnimationController,
           builder: (context, child) => FadeScaleTransition(
@@ -217,63 +232,85 @@ class _ThreadPageState extends State<ThreadPage>
   }
 
   Widget _generatePreviousPageSliver(ThreadPageViewModel viewModel, int index) {
-    if (viewModel
-                .previousPageReplies[
-                    viewModel.previousPageReplies.length - index - 1]
-                .floor %
-            50 ==
-        1) {
-      return Column(
-        children: <Widget>[
-          Container(
-            height: 50,
-            child: Center(
-              child: Text(viewModel
-                          .previousPageReplies[
-                              viewModel.previousPageReplies.length - index - 1]
-                          .floor ==
-                      1
-                  ? '第 1 頁'
-                  : '第 ${((viewModel.previousPageReplies[viewModel.previousPageReplies.length - index - 1].floor + 49) ~/ 50)} 頁'),
-            ),
-          ),
-          Visibility(
-              visible: !viewModel.blockedUserIds.contains(viewModel
-                  .previousPageReplies[
-                      viewModel.previousPageReplies.length - index - 1]
-                  .author
-                  .userId),
-              child: CommentCell(
-                viewModel: viewModel,
-                threadId: viewModel.threadId,
-                reply: viewModel.previousPageReplies[
-                    viewModel.previousPageReplies.length - index - 1],
-                onLastPage: _onLastPage,
-                onSent: (reply) {
-                  _onReplySuccess(viewModel, reply);
-                },
-                canReply: _canReply,
-              )),
-        ],
+    if (viewModel.previousPageReplies.isEmpty) {
+      return Container(
+        height: 50,
+        child: Center(
+          child: Text('撈緊上一頁...', style: TextStyle(color: Colors.grey)),
+        ),
       );
     } else {
-      return Visibility(
-          visible: !viewModel.blockedUserIds.contains(viewModel
-              .previousPageReplies[
-                  viewModel.previousPageReplies.length - index - 1]
-              .author
-              .userId),
-          child: CommentCell(
-            viewModel: viewModel,
-            threadId: viewModel.threadId,
-            reply: viewModel.previousPageReplies[
-                viewModel.previousPageReplies.length - index - 1],
-            onLastPage: _onLastPage,
-            onSent: (reply) {
-              _onReplySuccess(viewModel, reply);
-            },
-            canReply: _canReply,
-          ));
+      if (viewModel
+                  .previousPageReplies[
+                      viewModel.previousPageReplies.length - index - 1]
+                  .floor %
+              50 ==
+          1) {
+        return Column(
+          children: <Widget>[
+            if (viewModel
+                    .previousPageReplies[
+                        viewModel.previousPageReplies.length - index - 1]
+                    .floor !=
+                1)
+              Container(
+                height: 50,
+                child: Center(
+                  child: Text('撈緊上一頁...', style: TextStyle(color: Colors.grey)),
+                ),
+              ),
+            Container(
+              height: 50,
+              child: Center(
+                child: Text(viewModel
+                            .previousPageReplies[
+                                viewModel.previousPageReplies.length -
+                                    index -
+                                    1]
+                            .floor ==
+                        1
+                    ? '第 1 頁'
+                    : '第 ${((viewModel.previousPageReplies[viewModel.previousPageReplies.length - index - 1].floor + 49) ~/ 50)} 頁'),
+              ),
+            ),
+            Visibility(
+                visible: !viewModel.blockedUserIds.contains(viewModel
+                    .previousPageReplies[
+                        viewModel.previousPageReplies.length - index - 1]
+                    .author
+                    .userId),
+                child: CommentCell(
+                  viewModel: viewModel,
+                  threadId: viewModel.threadId,
+                  reply: viewModel.previousPageReplies[
+                      viewModel.previousPageReplies.length - index - 1],
+                  onLastPage: _onLastPage,
+                  onSent: (reply) {
+                    _onReplySuccess(viewModel, reply);
+                  },
+                  canReply: _canReply,
+                )),
+          ],
+        );
+      } else {
+        return Visibility(
+            visible: !viewModel.blockedUserIds.contains(viewModel
+                .previousPageReplies[
+                    viewModel.previousPageReplies.length - index - 1]
+                .author
+                .userId),
+            child: CommentCell(
+              viewModel: viewModel,
+              threadId: viewModel.threadId,
+              reply: viewModel.previousPageReplies[
+                  viewModel.previousPageReplies.length - index - 1],
+              onLastPage: _onLastPage,
+              onSent: (reply) {
+                _onReplySuccess(viewModel, reply);
+              },
+              canReply: _canReply,
+            ));
+      }
     }
   }
 
@@ -321,7 +358,13 @@ class _ThreadPageState extends State<ThreadPage>
                 canReply: _canReply,
               )),
           !_onLastPage
-              ? PageEndLoadingInidicator()
+              ? Container(
+                  height: 50,
+                  child: Center(
+                    child:
+                        Text('撈緊下一頁...', style: TextStyle(color: Colors.grey)),
+                  ),
+                )
               : Container(
                   height: 50,
                   child: Center(

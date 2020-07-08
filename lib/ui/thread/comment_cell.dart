@@ -114,7 +114,6 @@ class CommentCell extends StatelessWidget {
                           : showModal<void>(
                               context: context,
                               builder: (context) => LoginCheckDialog())),
-                  IconButton(icon: Icon(Icons.block), onPressed: () => null),
                   IconButton(
                       icon: Icon(Icons.flag),
                       onPressed: () => showModal<void>(

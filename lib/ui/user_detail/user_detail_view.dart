@@ -74,7 +74,7 @@ class _UserDetailViewState extends State<UserDetailView>
                         AvatarWidget(
                             avatarImage: widget.user.avatar == ''
                                 ? SvgPicture.asset('assets/icon-hkgalden.svg',
-                                    width: 30, height: 30)
+                                    width: 30, height: 30, color: Colors.grey)
                                 : CachedNetworkImage(
                                     imageUrl: widget.user.avatar,
                                     width: 30,
@@ -99,21 +99,32 @@ class _UserDetailViewState extends State<UserDetailView>
                                             .sisterColor)),
                       ],
                     ),
-                    Visibility(
-                      visible: widget.profileType == UserProfile.sessionUser,
-                      child: Row(
-                        children: <Widget>[
-                          IconButton(
-                              icon: Icon(Icons.settings), onPressed: null),
-                          IconButton(
+                    Row(
+                      children: <Widget>[
+                        Visibility(
+                            visible:
+                                widget.profileType == UserProfile.sessionUser,
+                            child: IconButton(
+                                icon: Icon(Icons.settings), onPressed: null)),
+                        Visibility(
+                          visible:
+                              widget.profileType == UserProfile.sessionUser,
+                          child: IconButton(
                               icon: Icon(Icons.exit_to_app),
                               onPressed: () {
                                 Navigator.pop(context);
                                 widget.onLogout();
                               },
                               color: Colors.redAccent[400]),
-                        ],
-                      ),
+                        ),
+                        Visibility(
+                          visible: widget.profileType == UserProfile.otherUser,
+                          child: FlatButton.icon(
+                              onPressed: null,
+                              icon: Icon(Icons.block),
+                              label: Text('封鎖')),
+                        )
+                      ],
                     ),
                   ],
                 ),
@@ -192,18 +203,23 @@ class _UserThreadListPage extends StatelessWidget {
             ? UserThreadListLoadingSkeleton()
             : ListView.builder(
                 itemCount: viewModel.userThreads.length,
-                itemBuilder: (context, index) => ListTile(
-                      title: Text(viewModel.userThreads[index].title),
-                      trailing: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 4),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            color: viewModel.userThreads[index].tagColor),
-                        child: Text(
-                          '#${viewModel.userThreads[index].tagName}',
-                          strutStyle: StrutStyle(height: 1.25),
+                itemBuilder: (context, index) => Column(
+                      children: <Widget>[
+                        ListTile(
+                          title: Text(viewModel.userThreads[index].title),
+                          trailing: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 4),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                color: viewModel.userThreads[index].tagColor),
+                            child: Text(
+                              '#${viewModel.userThreads[index].tagName}',
+                              strutStyle: StrutStyle(height: 1.25),
+                            ),
+                          ),
                         ),
-                      ),
+                        Divider(indent: 8, height: 1, thickness: 1),
+                      ],
                     )),
       );
 }
