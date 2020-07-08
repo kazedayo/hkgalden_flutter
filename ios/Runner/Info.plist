@@ -29,10 +29,10 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>圖片上下載功能</string>
 	<key>NSCameraUsageDescription</key>
 	<string>影相上載功能</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>圖片上下載功能</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
