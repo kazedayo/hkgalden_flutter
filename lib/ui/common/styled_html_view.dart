@@ -46,31 +46,15 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                   tag: '${widget.floor}_${attributes['src']}_$_randomHash',
                   child: CachedNetworkImage(
                     imageUrl: attributes['src'],
-                    placeholder: (context, url) => Container(
-                      margin: EdgeInsets.all(10),
-                      child: Container(
-                        height: MediaQuery.of(context).size.width * 9 / 16,
-                        child: Center(
-                          child: SizedBox(
-                            width: 25,
-                            height: 25,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        ),
-                      ),
+                    placeholder: (context, url) => SizedBox(
+                      width: 25,
+                      height: 25,
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                    errorWidget: (context, url, error) => Container(
-                      margin: EdgeInsets.all(10),
-                      child: Container(
-                        height: MediaQuery.of(context).size.width * 9 / 16,
-                        child: Center(
-                          child: SizedBox(
-                            width: 25,
-                            height: 25,
-                            child: Icon(Icons.error),
-                          ),
-                        ),
-                      ),
+                    errorWidget: (context, url, error) => SizedBox(
+                      width: 25,
+                      height: 25,
+                      child: Icon(Icons.error),
                     ),
                     fadeInDuration: Duration(milliseconds: 250),
                     fadeOutDuration: Duration(milliseconds: 250),

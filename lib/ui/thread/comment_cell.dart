@@ -3,6 +3,7 @@ import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
+import 'package:hkgalden_flutter/enums/user_profile.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
@@ -12,6 +13,7 @@ import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:hkgalden_flutter/ui/user_detail/user_detail_view.dart';
 import 'package:hkgalden_flutter/viewmodels/thread_page_view_model.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 
@@ -61,6 +63,11 @@ class CommentCell extends StatelessWidget {
                     userGroup: reply.author.userGroup == null
                         ? []
                         : reply.author.userGroup,
+                    onTap: () => showModal<void>(
+                        context: context,
+                        builder: (context) => UserDetailView(
+                            profileType: UserProfile.otherUser,
+                            user: reply.author)),
                   ),
                   SizedBox(
                     width: 5,

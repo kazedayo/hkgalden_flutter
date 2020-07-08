@@ -1,0 +1,4 @@
+enum UserProfile {
+  sessionUser,
+  otherUser,
+}

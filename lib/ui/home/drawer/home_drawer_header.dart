@@ -1,6 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:hkgalden_flutter/enums/user_profile.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
@@ -63,6 +64,8 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
                               : showModal<void>(
                                   context: context,
                                   builder: (context) => UserDetailView(
+                                    profileType: UserProfile.sessionUser,
+                                    user: viewModel.sessionUser,
                                     onLogout: () {
                                       TokenSecureStorage().writeToken('',
                                           onFinish: (_) {
