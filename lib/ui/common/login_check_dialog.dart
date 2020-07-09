@@ -1,6 +1,4 @@
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
-import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 
 class LoginCheckDialog extends StatelessWidget {
   @override

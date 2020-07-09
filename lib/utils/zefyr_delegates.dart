@@ -1,5 +1,4 @@
 //hacky way to hide button on toolbar before zefyr 1.0 release
-import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';

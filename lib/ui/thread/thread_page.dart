@@ -12,7 +12,6 @@ import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
-import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/ui/thread/comment_cell.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
