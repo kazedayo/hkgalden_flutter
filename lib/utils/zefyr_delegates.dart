@@ -79,7 +79,11 @@ class CustomZefyrImageDelegate implements ZefyrImageDelegate {
 
   @override
   Widget buildImage(BuildContext context, String url) {
-    return CachedNetworkImage(imageUrl: url);
+    return CachedNetworkImage(
+      imageUrl: url,
+      fadeInDuration: Duration(milliseconds: 250),
+      fadeOutDuration: Duration(milliseconds: 250),
+    );
   }
 
   @override

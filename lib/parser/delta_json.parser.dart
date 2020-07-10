@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 class DeltaJsonParser {
   Future<String> toGaldenHtml(List<dynamic> json) async {
     String result = '';
-    //print(json);
+    print(json);
     String row = '';
     await Future.forEach(json, (element) async {
       //print(element);
@@ -30,9 +30,11 @@ class DeltaJsonParser {
                     '<span data-nodetype="h${entry.value as String}">$styledInsert</span>';
                 break;
               case 'embed':
-                await _getImageDimension(entry.value['source']).then((image) =>
-                    styledInsert =
-                        '<span data-nodetype="img" data-src="${entry.value['source']}" data-sx="${image.width}" data-sy="${image.height}"></span>');
+                if (entry.value['type'] == 'image') {
+                  await _getImageDimension(entry.value['source']).then(
+                      (image) => styledInsert =
+                          '<span data-nodetype="img" data-src="${entry.value['source']}" data-sx="${image.width}" data-sy="${image.height}"></span>');
+                }
                 break;
               default:
             }
@@ -58,7 +60,7 @@ class DeltaJsonParser {
         }
       }
     });
-    //print('<div id="pmc">${result.replaceAll('<p></p>', '')}</div>');
+    print('<div id="pmc">${result.replaceAll('<p></p>', '')}</div>');
     return '<div id="pmc">${result.replaceAll('<p></p>', '')}</div>';
   }
 
