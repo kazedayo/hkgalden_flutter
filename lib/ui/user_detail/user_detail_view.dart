@@ -206,7 +206,9 @@ class _UserThreadListPage extends StatelessWidget {
                 itemBuilder: (context, index) => Column(
                       children: <Widget>[
                         ListTile(
-                          title: Text(viewModel.userThreads[index].title),
+                          title: Text(
+                            viewModel.userThreads[index].title,
+                          ),
                           trailing: Container(
                             padding: EdgeInsets.symmetric(horizontal: 4),
                             decoration: BoxDecoration(
@@ -214,6 +216,12 @@ class _UserThreadListPage extends StatelessWidget {
                                 color: viewModel.userThreads[index].tagColor),
                             child: Text(
                               '#${viewModel.userThreads[index].tagName}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .caption
+                                  .copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700),
                               strutStyle: StrutStyle(height: 1.25),
                             ),
                           ),

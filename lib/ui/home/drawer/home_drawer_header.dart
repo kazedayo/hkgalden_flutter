@@ -45,7 +45,7 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Spacer(),
+                        Spacer(flex: 2),
                         AvatarWidget(
                           avatarImage: viewModel.sessionUserAvatar,
                           userGroup: viewModel.sessionUserGroup,
@@ -91,7 +91,7 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
                                         .sisterColor),
                           ),
                         ),
-                        Spacer(),
+                        Spacer(flex: 1),
                       ],
                     ),
                   ),

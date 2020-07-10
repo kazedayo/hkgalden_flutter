@@ -9,9 +9,11 @@ class ChannelCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        margin: EdgeInsets.symmetric(horizontal: 8),
+        margin: EdgeInsets.symmetric(horizontal: 10),
         child: ListTile(
-          title: Text(viewModel.channels[index].channelName),
+          title: Text(
+            viewModel.channels[index].channelName,
+          ),
           trailing: Container(
             width: 15,
             height: 15,
@@ -25,6 +27,7 @@ class ChannelCell extends StatelessWidget {
             Navigator.pop(context);
           },
           selected: false,
+          dense: true,
         ),
         decoration: BoxDecoration(
             color: viewModel.selectedChannelId ==

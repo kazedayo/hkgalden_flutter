@@ -25,7 +25,8 @@ class HomeDrawer extends StatelessWidget {
                     child: SafeArea(
                       top: false,
                       child: ListView.builder(
-                        padding: EdgeInsets.only(top: 0),
+                        key: PageStorageKey('channelListView'),
+                        padding: EdgeInsets.symmetric(vertical: 10),
                         itemCount: viewModel.channels.length,
                         itemBuilder: (context, index) =>
                             ChannelCell(viewModel: viewModel, index: index),

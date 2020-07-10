@@ -143,7 +143,7 @@ class _ThreadPageState extends State<ThreadPage>
                 Flexible(
                   fit: FlexFit.loose,
                   child: AutoSizeText(
-                    widget.title.trim(),
+                    widget.title,
                     style: TextStyle(fontWeight: FontWeight.w700),
                     maxLines: 2,
                     minFontSize: 14,

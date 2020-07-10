@@ -31,9 +31,9 @@ class ThreadCell extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(title.trim(),
+                  Text(title,
                       style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                          TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
                   SizedBox(height: 10),
                   Container(
                     constraints: BoxConstraints.expand(height: 20),
@@ -74,7 +74,7 @@ class ThreadCell extends StatelessWidget {
                                   .caption
                                   .copyWith(
                                       color: Colors.white,
-                                      fontWeight: FontWeight.w500)),
+                                      fontWeight: FontWeight.w700)),
                           decoration: BoxDecoration(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(5)),
