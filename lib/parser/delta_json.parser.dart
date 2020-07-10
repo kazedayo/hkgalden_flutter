@@ -1,16 +1,24 @@
+import 'dart:async';
+import 'dart:ui' as ui;
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+
 class DeltaJsonParser {
-  String toGaldenHtml(List<dynamic> json) {
+  Future<String> toGaldenHtml(List<dynamic> json) async {
     String result = '';
-    print(json);
+    //print(json);
     String row = '';
-    json.forEach((element) {
+    await Future.forEach(json, (element) async {
       //print(element);
       if (!(element['insert'] as String).contains('\n')) {
         if (element['attributes'] != null) {
           //print(element['insert']);
           String styledInsert = element['insert'];
-          (element['attributes'] as Map<String, dynamic>).forEach((key, value) {
-            switch (key) {
+          await Future.forEach(
+              (element['attributes'] as Map<String, dynamic>).entries,
+              (entry) async {
+            switch (entry.key) {
               case 'b':
                 styledInsert = '<span data-nodetype="b">$styledInsert</span>';
                 break;
@@ -19,7 +27,12 @@ class DeltaJsonParser {
                 break;
               case 'heading':
                 styledInsert =
-                    '<span data-nodetype="h${value as String}">$styledInsert</span>';
+                    '<span data-nodetype="h${entry.value as String}">$styledInsert</span>';
+                break;
+              case 'embed':
+                await _getImageDimension(entry.value['source']).then((image) =>
+                    styledInsert =
+                        '<span data-nodetype="img" data-src="${entry.value['source']}" data-sx="${image.width}" data-sy="${image.height}"></span>');
                 break;
               default:
             }
@@ -47,5 +60,15 @@ class DeltaJsonParser {
     });
     //print('<div id="pmc">${result.replaceAll('<p></p>', '')}</div>');
     return '<div id="pmc">${result.replaceAll('<p></p>', '')}</div>';
+  }
+
+  Future<ui.Image> _getImageDimension(String url) {
+    Completer<ui.Image> imageCompleter = Completer<ui.Image>();
+    CachedNetworkImageProvider(url)
+        .resolve(ImageConfiguration())
+        .addListener(ImageStreamListener((ImageInfo info, bool _) {
+      imageCompleter.complete(info.image);
+    }));
+    return imageCompleter.future;
   }
 }

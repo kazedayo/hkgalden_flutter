@@ -64,12 +64,12 @@ class _ComposePageState extends State<ComposePage> {
                 icon: const Icon(Icons.send),
                 onPressed: _isSendingReply
                     ? null
-                    : () {
+                    : () async {
                         setState(() {
                           _isSendingReply = true;
                         });
                         _sendReply(context);
-                        // DeltaJsonParser().toGaldenHtml(
+                        // await DeltaJsonParser().toGaldenHtml(
                         //     json.decode(_getZefyrEditorContent()));
                       },
               ),
@@ -125,11 +125,12 @@ class _ComposePageState extends State<ComposePage> {
     return json.encode(content);
   }
 
-  void _sendReply(BuildContext context) {
+  Future<void> _sendReply(BuildContext context) async {
     HKGaldenApi()
         .sendReply(
       widget.threadId,
-      DeltaJsonParser().toGaldenHtml(json.decode(_getZefyrEditorContent())),
+      await DeltaJsonParser()
+          .toGaldenHtml(json.decode(_getZefyrEditorContent())),
       parentId: widget.composeMode == ComposeMode.quotedReply
           ? widget.parentReply.replyId
           : '',
