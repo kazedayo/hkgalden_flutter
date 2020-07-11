@@ -149,7 +149,8 @@ class _UserDetailViewState extends State<UserDetailView>
                     Animation<double> animation,
                     Animation<double> secondaryAnimation,
                   ) =>
-                      FadeThroughTransition(
+                      SharedAxisTransition(
+                          transitionType: SharedAxisTransitionType.horizontal,
                           fillColor: Theme.of(context).scaffoldBackgroundColor,
                           animation: animation,
                           secondaryAnimation: secondaryAnimation,

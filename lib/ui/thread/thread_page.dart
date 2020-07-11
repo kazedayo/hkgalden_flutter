@@ -14,6 +14,7 @@ import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/ui/thread/comment_cell.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_page_loading_skeleton.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/viewmodels/thread_page_view_model.dart';
 
@@ -153,18 +154,9 @@ class _ThreadPageState extends State<ThreadPage>
               ],
             ),
           ),
-          bottom: PreferredSize(
-            child: SizedBox(
-              height: 3,
-              child: Visibility(
-                  visible: viewModel.isLoading,
-                  child: LinearProgressIndicator()),
-            ),
-            preferredSize: Size(double.infinity, 3),
-          ),
         ),
         body: viewModel.isLoading && viewModel.isInitialLoad
-            ? Center()
+            ? ThreadPageLoadingSkeleton()
             : //ListView.builder(
             //     controller: _scrollController,
             //     itemCount: viewModel.replies.length,
