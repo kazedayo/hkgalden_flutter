@@ -5,6 +5,7 @@ class ThreadPageLoadingSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Shimmer.fromColors(
       child: ListView.builder(
+        physics: NeverScrollableScrollPhysics(),
         itemCount: 10,
         itemBuilder: (context, index) {
           if (index == 0) {
