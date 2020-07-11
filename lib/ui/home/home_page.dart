@@ -11,7 +11,7 @@ import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
 import 'package:hkgalden_flutter/ui/home/list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
-import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
+import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/viewmodels/home/home_page_view_model.dart';
 
 class HomePage extends StatefulWidget {
@@ -160,9 +160,9 @@ class _HomePageState extends State<HomePage>
   }
 
   void _loadThread(Thread thread) {
-    Navigator.of(context).push(CupertinoPageRoute(
-        builder: (context) => ThreadPage(
-            title: thread.title, threadId: thread.threadId, page: 1)));
+    Navigator.of(context).pushNamed('/Thread',
+        arguments: ThreadPageArguments(
+            threadId: thread.threadId, title: thread.title, page: 1));
   }
 
   void _jumpToPage(Thread thread) {
@@ -175,11 +175,11 @@ class _HomePageState extends State<HomePage>
             (index) => SimpleDialogOption(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    Navigator.of(context).push(CupertinoPageRoute(
-                        builder: (context) => ThreadPage(
-                            title: thread.title,
+                    Navigator.of(context).pushNamed('/Thread',
+                        arguments: ThreadPageArguments(
                             threadId: thread.threadId,
-                            page: index + 1)));
+                            title: thread.title,
+                            page: index + 1));
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),

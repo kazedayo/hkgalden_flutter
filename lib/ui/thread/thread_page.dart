@@ -16,16 +16,10 @@ import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/ui/thread/comment_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page_loading_skeleton.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
+import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/viewmodels/thread_page_view_model.dart';
 
 class ThreadPage extends StatefulWidget {
-  final String title;
-  final int threadId;
-  final int page;
-
-  const ThreadPage({Key key, this.title, this.threadId, this.page})
-      : super(key: key);
-
   @override
   _ThreadPageState createState() => _ThreadPageState();
 }
@@ -72,6 +66,8 @@ class _ThreadPageState extends State<ThreadPage>
   @override
   Widget build(BuildContext context) {
     const Key centerKey = ValueKey('second-sliver-list');
+    final ThreadPageArguments arguments =
+        ModalRoute.of(context).settings.arguments;
     // if (widget.page != 1) {
     //   SchedulerBinding.instance.addPostFrameCallback((_) {
     //     _scrollController.animateTo(50,
@@ -81,7 +77,9 @@ class _ThreadPageState extends State<ThreadPage>
     return StoreConnector<AppState, ThreadPageViewModel>(
       onInit: (store) {
         store.dispatch(RequestThreadAction(
-            threadId: widget.threadId, page: widget.page, isInitialLoad: true));
+            threadId: arguments.threadId,
+            page: arguments.page,
+            isInitialLoad: true));
         _scrollController
           ..addListener(() {
             if (_scrollController.position.pixels ==
@@ -96,7 +94,7 @@ class _ThreadPageState extends State<ThreadPage>
             } else if (_scrollController.position.pixels ==
                 _scrollController.position.minScrollExtent) {
               if (store.state.threadState.currentPage != 1 &&
-                  store.state.threadState.endPage <= widget.page) {
+                  store.state.threadState.endPage <= arguments.page) {
                 store.dispatch(
                   RequestThreadAction(
                       threadId: store.state.threadState.thread.threadId,
@@ -144,7 +142,7 @@ class _ThreadPageState extends State<ThreadPage>
                 Flexible(
                   fit: FlexFit.loose,
                   child: AutoSizeText(
-                    widget.title,
+                    arguments.title,
                     style: TextStyle(fontWeight: FontWeight.w700),
                     maxLines: 2,
                     minFontSize: 14,
@@ -171,7 +169,8 @@ class _ThreadPageState extends State<ThreadPage>
                   slivers: <Widget>[
                     SliverList(
                       delegate: SliverChildBuilderDelegate((context, index) {
-                        return _generatePreviousPageSliver(viewModel, index);
+                        return _generatePreviousPageSliver(
+                            viewModel, index, arguments.page);
                       },
                           childCount: viewModel.previousPageReplies.length == 0
                               ? 1
@@ -222,9 +221,10 @@ class _ThreadPageState extends State<ThreadPage>
     }
   }
 
-  Widget _generatePreviousPageSliver(ThreadPageViewModel viewModel, int index) {
+  Widget _generatePreviousPageSliver(
+      ThreadPageViewModel viewModel, int index, int page) {
     if (viewModel.previousPageReplies.isEmpty) {
-      if (widget.page != 1) {
+      if (page != 1) {
         return Container(
           height: 50,
           child: Center(

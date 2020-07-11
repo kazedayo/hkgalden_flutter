@@ -51,12 +51,15 @@ class _ComposePageState extends State<ComposePage> {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+              icon: Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop()),
           title: Text(widget.composeMode == ComposeMode.newPost
               ? '開post'
               : widget.composeMode == ComposeMode.reply
                   ? '回覆主題'
                   : '引用回覆 (#${widget.parentReply.floor})'),
-          //automaticallyImplyLeading: false,
+          automaticallyImplyLeading: false,
           actions: <Widget>[
             ActionBarSpinner(isVisible: _isSendingReply),
             Builder(
