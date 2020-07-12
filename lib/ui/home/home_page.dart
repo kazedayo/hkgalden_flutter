@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
+import 'package:hkgalden_flutter/ui/common/common_controllers.dart';
 import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
 import 'package:hkgalden_flutter/ui/home/list_loading_skeleton.dart';
@@ -31,12 +32,7 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     _scrollController = ScrollController();
-    _fabAnimationController = AnimationController(
-      duration: Duration(milliseconds: 150),
-      reverseDuration: Duration(milliseconds: 75),
-      value: 1,
-      vsync: this,
-    );
+    _fabAnimationController = getFabAnimationController(this);
     super.initState();
   }
 

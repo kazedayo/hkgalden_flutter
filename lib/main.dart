@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -31,8 +32,11 @@ class MyApp extends StatelessWidget {
               CupertinoThemeData(primaryColor: Color(0xff45c17c)),
           snackBarTheme: SnackBarThemeData(
               backgroundColor: Color(0xff323d3a),
-              contentTextStyle: TextStyle(color: Colors.white),
-              behavior: SnackBarBehavior.fixed),
+              contentTextStyle: TextStyle(color: Colors.white)),
+          pageTransitionsTheme: PageTransitionsTheme(builders: {
+            TargetPlatform.android: SharedAxisPageTransitionsBuilder(
+                transitionType: SharedAxisTransitionType.scaled)
+          }),
         ),
         routes: routes,
       ),

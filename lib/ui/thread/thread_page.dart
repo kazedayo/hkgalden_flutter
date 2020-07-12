@@ -68,12 +68,6 @@ class _ThreadPageState extends State<ThreadPage>
     const Key centerKey = ValueKey('second-sliver-list');
     final ThreadPageArguments arguments =
         ModalRoute.of(context).settings.arguments;
-    // if (widget.page != 1) {
-    //   SchedulerBinding.instance.addPostFrameCallback((_) {
-    //     _scrollController.animateTo(50,
-    //         duration: Duration(milliseconds: 500), curve: Curves.easeOut);
-    //   });
-    // }
     return StoreConnector<AppState, ThreadPageViewModel>(
       onInit: (store) {
         store.dispatch(RequestThreadAction(
