@@ -4,6 +4,7 @@ import 'package:redux/redux.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 
 class HomePageViewModel {
+  final bool isLoggedIn;
   final List<Thread> threads;
   final String title;
   final String selectedChannelId;
@@ -13,6 +14,7 @@ class HomePageViewModel {
   final List<String> blockedUserIds;
 
   HomePageViewModel({
+    this.isLoggedIn,
     this.threads,
     this.title,
     this.selectedChannelId,
@@ -24,6 +26,7 @@ class HomePageViewModel {
 
   factory HomePageViewModel.create(Store<AppState> store) {
     return HomePageViewModel(
+      isLoggedIn: store.state.sessionUserState.isLoggedIn,
       threads: store.state.threadListState.threads,
       title: store.state.channelState.channels
           .where((channel) =>

@@ -11,25 +11,7 @@ import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/viewmodels/home/drawer/home_drawer_header_view_model.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 
-class HomeDrawerHeader extends StatefulWidget {
-  @override
-  _HomeDrawerHeaderState createState() => _HomeDrawerHeaderState();
-}
-
-class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
-  String token;
-
-  @override
-  void initState() {
-    //token = null;
-    TokenSecureStorage().readToken(onFinish: (value) {
-      setState(() {
-        token = value;
-      });
-    });
-    super.initState();
-  }
-
+class HomeDrawerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       StoreConnector<AppState, HomeDrawerHeaderViewModel>(
@@ -49,19 +31,8 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
                         AvatarWidget(
                           avatarImage: viewModel.sessionUserAvatar,
                           userGroup: viewModel.sessionUserGroup,
-                          onTap: () => token == ''
-                              ? Navigator.push(
-                                  context,
-                                  SlideInFromBottomRoute(
-                                      page: LoginPage(
-                                          onLoginSuccess: () =>
-                                              TokenSecureStorage().readToken(
-                                                  onFinish: (value) {
-                                                setState(() {
-                                                  token = value;
-                                                });
-                                              }))))
-                              : showModal<void>(
+                          onTap: () => viewModel.isLoggedIn
+                              ? showModal<void>(
                                   context: context,
                                   builder: (context) => UserDetailView(
                                     profileType: UserProfile.sessionUser,
@@ -69,27 +40,29 @@ class _HomeDrawerHeaderState extends State<HomeDrawerHeader> {
                                     onLogout: () {
                                       TokenSecureStorage().writeToken('',
                                           onFinish: (_) {
-                                        setState(() {
-                                          token = '';
-                                          viewModel.onLogout();
-                                        });
+                                        viewModel.onLogout();
                                       });
                                     },
                                   ),
-                                ),
+                                )
+                              : Navigator.of(context).push(
+                                  SlideInFromBottomRoute(page: LoginPage())),
                         ),
                         SizedBox(height: 7),
                         Text(
-                          token == '' ? '未登入' : viewModel.sessionUserName,
+                          viewModel.isLoggedIn
+                              ? viewModel.sessionUserName
+                              : '未登入',
                           style: TextStyle(
-                            color: token == ''
-                                ? Colors.white
-                                : (viewModel.sessionUserGender == 'M'
-                                    ? Theme.of(context).colorScheme.brotherColor
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .sisterColor),
-                          ),
+                              color: viewModel.isLoggedIn
+                                  ? (viewModel.sessionUserGender == 'M'
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .brotherColor
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .sisterColor)
+                                  : Colors.white),
                         ),
                         Spacer(flex: 1),
                       ],

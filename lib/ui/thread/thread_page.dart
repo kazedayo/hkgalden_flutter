@@ -9,7 +9,6 @@ import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
-import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
@@ -40,12 +39,6 @@ class _ThreadPageState extends State<ThreadPage>
       value: 1,
       vsync: this,
     );
-    //get token
-    TokenSecureStorage().readToken(onFinish: (value) {
-      setState(() {
-        _canReply = value == '' ? false : true;
-      });
-    });
     _onLastPage = false;
     super.initState();
   }
@@ -70,6 +63,7 @@ class _ThreadPageState extends State<ThreadPage>
         ModalRoute.of(context).settings.arguments;
     return StoreConnector<AppState, ThreadPageViewModel>(
       onInit: (store) {
+        _canReply = store.state.sessionUserState.isLoggedIn;
         store.dispatch(RequestThreadAction(
             threadId: arguments.threadId,
             page: arguments.page,

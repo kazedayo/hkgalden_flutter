@@ -9,6 +9,7 @@ import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:redux/redux.dart';
 
 class HomeDrawerHeaderViewModel {
+  final bool isLoggedIn;
   final User sessionUser;
   final String sessionUserName;
   final Widget sessionUserAvatar;
@@ -17,6 +18,7 @@ class HomeDrawerHeaderViewModel {
   final Function onLogout;
 
   HomeDrawerHeaderViewModel({
+    this.isLoggedIn,
     this.sessionUser,
     this.sessionUserName,
     this.sessionUserAvatar,
@@ -27,6 +29,7 @@ class HomeDrawerHeaderViewModel {
 
   factory HomeDrawerHeaderViewModel.create(Store<AppState> store) {
     return HomeDrawerHeaderViewModel(
+        isLoggedIn: store.state.sessionUserState.isLoggedIn,
         sessionUser: store.state.sessionUserState.sessionUser,
         sessionUserName: store.state.sessionUserState.sessionUser.nickName,
         sessionUserAvatar: store.state.sessionUserState.sessionUser.avatar == ''
