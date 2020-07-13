@@ -16,28 +16,30 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         home: StartupScreen(),
         theme: ThemeData(
-          brightness: Brightness.dark,
-          splashColor: Color(0xff2c3632),
-          primaryColor: Color(0xff2e3533),
-          scaffoldBackgroundColor: Color(0xff1b1f1e),
-          appBarTheme: AppBarTheme(color: Color(0xff323d3a)),
-          accentColor: Color(0xff45c17c),
-          cursorColor: Color(0xff45c17c),
-          textSelectionColor: Color(0xff2d8052),
-          floatingActionButtonTheme: FloatingActionButtonThemeData(
-            splashColor: Color(0xff4fe090),
-            foregroundColor: Colors.white,
-          ),
-          cupertinoOverrideTheme:
-              CupertinoThemeData(primaryColor: Color(0xff45c17c)),
-          snackBarTheme: SnackBarThemeData(
-              backgroundColor: Color(0xff323d3a),
-              contentTextStyle: TextStyle(color: Colors.white)),
-          pageTransitionsTheme: PageTransitionsTheme(builders: {
-            TargetPlatform.android: SharedAxisPageTransitionsBuilder(
-                transitionType: SharedAxisTransitionType.scaled)
-          }),
-        ),
+            brightness: Brightness.dark,
+            splashColor: Color(0xff2c3632),
+            primaryColor: Color(0xff2e3533),
+            scaffoldBackgroundColor: Color(0xff1b1f1e),
+            appBarTheme: AppBarTheme(color: Color(0xff323d3a)),
+            accentColor: Color(0xff45c17c),
+            cursorColor: Color(0xff45c17c),
+            textSelectionColor: Color(0xff2d8052),
+            floatingActionButtonTheme: FloatingActionButtonThemeData(
+              splashColor: Color(0xff4fe090),
+              foregroundColor: Colors.white,
+            ),
+            cupertinoOverrideTheme:
+                CupertinoThemeData(primaryColor: Color(0xff45c17c)),
+            snackBarTheme: SnackBarThemeData(
+                backgroundColor: Color(0xff323d3a),
+                contentTextStyle: TextStyle(color: Colors.white)),
+            pageTransitionsTheme: PageTransitionsTheme(builders: {
+              TargetPlatform.android: SharedAxisPageTransitionsBuilder(
+                  transitionType: SharedAxisTransitionType.scaled)
+            }),
+            dialogTheme: DialogTheme(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4)))),
         routes: routes,
       ),
     );

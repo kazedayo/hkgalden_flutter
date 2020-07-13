@@ -212,7 +212,7 @@ class _UserThreadListPage extends StatelessWidget {
                           trailing: Container(
                             padding: EdgeInsets.symmetric(horizontal: 4),
                             decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
+                                borderRadius: BorderRadius.circular(4),
                                 color: viewModel.userThreads[index].tagColor),
                             child: Text(
                               '#${viewModel.userThreads[index].tagName}',
