@@ -104,7 +104,10 @@ class _ThreadPageState extends State<ThreadPage>
             }
           })
           ..addListener(() {
-            double newElevation = _scrollController.offset > 1 ? 4.0 : 0.0;
+            double newElevation = _scrollController.position.pixels >
+                    _scrollController.position.minScrollExtent
+                ? 4.0
+                : 0.0;
             if (newElevation != _elevation) {
               setState(() {
                 _elevation = newElevation;
