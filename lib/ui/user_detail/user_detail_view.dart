@@ -161,7 +161,7 @@ class _UserDetailViewState extends State<UserDetailView>
           ),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
           color: Theme.of(context).scaffoldBackgroundColor,
-          elevation: 6,
+          elevation: 24,
         ),
       );
 }

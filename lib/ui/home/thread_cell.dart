@@ -36,7 +36,7 @@ class ThreadCell extends StatelessWidget {
                           TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
                   SizedBox(height: 10),
                   Container(
-                    constraints: BoxConstraints.expand(height: 20),
+                    //constraints: BoxConstraints.expand(height: 20),
                     child: Row(
                       //crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
@@ -65,9 +65,11 @@ class ThreadCell extends StatelessWidget {
                           strutStyle: StrutStyle(height: 1.25),
                         ),
                         Spacer(),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 4),
-                          child: Text('#$tagName',
+                        Chip(
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          visualDensity: VisualDensity.compact,
+                          label: Text('#$tagName',
                               strutStyle: StrutStyle(height: 1.25),
                               style: Theme.of(context)
                                   .textTheme
@@ -75,10 +77,8 @@ class ThreadCell extends StatelessWidget {
                                   .copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700)),
-                          decoration: BoxDecoration(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(5)),
-                              color: tagColor),
+                          //labelPadding: EdgeInsets.zero,
+                          backgroundColor: tagColor,
                         )
                       ],
                     ),

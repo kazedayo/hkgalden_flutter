@@ -17,8 +17,8 @@ class ListLoadingSkeleton extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(5),
                                   color: Colors.grey,
                                 ),
-                                margin: EdgeInsets.fromLTRB(10, 10, 10, 5),
-                                height: 25),
+                                margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                                height: 30),
                             Row(
                               children: <Widget>[
                                 Flexible(
@@ -29,10 +29,19 @@ class ListLoadingSkeleton extends StatelessWidget {
                                         color: Colors.grey,
                                       ),
                                       margin:
-                                          EdgeInsets.fromLTRB(10, 5, 10, 10),
-                                      height: 20),
+                                          EdgeInsets.fromLTRB(10, 10, 10, 10),
+                                      height: 25),
                                 ),
-                                Spacer()
+                                Spacer(),
+                                Chip(
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  visualDensity: VisualDensity.compact,
+                                  label: Text('#哈哈'),
+                                  //labelPadding: EdgeInsets.zero,
+                                  backgroundColor: Colors.grey,
+                                ),
+                                SizedBox(width: 10),
                               ],
                             ),
                           ],

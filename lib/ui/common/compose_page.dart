@@ -107,7 +107,14 @@ class _ComposePageState extends State<ComposePage> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: <Widget>[
                             InputChip(
-                              label: Text(_tag.name),
+                              label: Text('#${_tag.name}',
+                                  strutStyle: StrutStyle(height: 1.25),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .caption
+                                      .copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700)),
                               backgroundColor: _tag.color,
                               onPressed: () => showModal<void>(
                                   context: context,
@@ -229,7 +236,14 @@ class _TagSelectDialog extends StatelessWidget {
                           spacing: 8,
                           children: channel.tags
                               .map((tag) => InputChip(
-                                    label: Text(tag.name),
+                                    label: Text('#${tag.name}',
+                                        strutStyle: StrutStyle(height: 1.25),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .caption
+                                            .copyWith(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w700)),
                                     backgroundColor: tag.color,
                                     onPressed: () {
                                       Navigator.of(context).pop();
