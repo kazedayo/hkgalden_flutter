@@ -11,32 +11,21 @@ class HomeDrawer extends StatelessWidget {
       StoreConnector<AppState, HomeDrawerViewModel>(
         converter: (store) => HomeDrawerViewModel.create(store),
         builder: (BuildContext context, HomeDrawerViewModel viewModel) =>
-            Container(
-          width: 200,
-          child: Drawer(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                HomeDrawerHeader(),
-                Expanded(
-                  child: Container(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    child: SafeArea(
-                      top: false,
-                      child: ListView.builder(
-                        key: PageStorageKey('channelListView'),
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        itemCount: viewModel.channels.length,
-                        itemBuilder: (context, index) =>
-                            ChannelCell(viewModel: viewModel, index: index),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            HomeDrawerHeader(),
+            GridView.builder(
+              shrinkWrap: true,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3, childAspectRatio: 2.7),
+              itemCount: viewModel.channels.length,
+              itemBuilder: (context, index) =>
+                  ChannelCell(viewModel: viewModel, index: index),
             ),
-          ),
+          ],
         ),
       );
 }

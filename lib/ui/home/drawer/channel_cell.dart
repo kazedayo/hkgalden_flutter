@@ -1,3 +1,4 @@
+import 'package:backdrop/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/viewmodels/home/drawer/home_drawer_view_model.dart';
 
@@ -24,7 +25,8 @@ class ChannelCell extends StatelessWidget {
           ),
           onTap: () {
             viewModel.onTap(viewModel.channels[index].channelId);
-            Navigator.pop(context);
+            //Navigator.pop(context);
+            Backdrop.of(context).concealBackLayer();
           },
           selected: false,
           dense: true,

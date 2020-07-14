@@ -1,11 +1,9 @@
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
-import 'package:hkgalden_flutter/enums/user_profile.dart';
+
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
-import 'package:hkgalden_flutter/ui/user_detail/user_detail_view.dart';
 import 'package:hkgalden_flutter/ui/login_page.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/viewmodels/home/drawer/home_drawer_header_view_model.dart';
@@ -18,37 +16,24 @@ class HomeDrawerHeader extends StatelessWidget {
         converter: (store) => HomeDrawerHeaderViewModel.create(store),
         builder: (BuildContext context, HomeDrawerHeaderViewModel viewModel) =>
             Container(
-                //height: 250,
+                padding: EdgeInsets.symmetric(horizontal: 12),
                 color: Theme.of(context).scaffoldBackgroundColor,
                 child: DividerTheme(
                   data: DividerThemeData(color: Colors.transparent),
-                  child: DrawerHeader(
-                    margin: EdgeInsets.zero,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                  child: Container(
+                    height: 100,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: <Widget>[
-                        Spacer(flex: 2),
                         AvatarWidget(
                           avatarImage: viewModel.sessionUserAvatar,
                           userGroup: viewModel.sessionUserGroup,
                           onTap: () => viewModel.isLoggedIn
-                              ? showModal<void>(
-                                  context: context,
-                                  builder: (context) => UserDetailView(
-                                    profileType: UserProfile.sessionUser,
-                                    user: viewModel.sessionUser,
-                                    onLogout: () {
-                                      TokenSecureStorage().writeToken('',
-                                          onFinish: (_) {
-                                        viewModel.onLogout();
-                                      });
-                                    },
-                                  ),
-                                )
+                              ? null
                               : Navigator.of(context).push(
                                   SlideInFromBottomRoute(page: LoginPage())),
                         ),
-                        SizedBox(height: 7),
+                        SizedBox(width: 10),
                         Text(
                           viewModel.isLoggedIn
                               ? viewModel.sessionUserName
@@ -64,7 +49,21 @@ class HomeDrawerHeader extends StatelessWidget {
                                           .sisterColor)
                                   : Colors.white),
                         ),
-                        Spacer(flex: 1),
+                        Spacer(),
+                        Row(
+                          children: <Widget>[
+                            IconButton(
+                                icon: Icon(Icons.settings), onPressed: null),
+                            IconButton(
+                              icon: Icon(Icons.exit_to_app),
+                              onPressed: () => TokenSecureStorage()
+                                  .writeToken('', onFinish: (_) {
+                                viewModel.onLogout();
+                              }),
+                              color: Colors.redAccent[400],
+                            )
+                          ],
+                        ),
                       ],
                     ),
                   ),

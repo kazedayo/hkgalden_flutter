@@ -1,4 +1,6 @@
 import 'package:animations/animations.dart';
+import 'package:backdrop/button.dart';
+import 'package:backdrop/scaffold.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -73,31 +75,46 @@ class _HomePageState extends State<HomePage>
             }
           });
       },
-      builder: (BuildContext context, HomePageViewModel viewModel) => Scaffold(
-          appBar: AppBar(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Hero(
-                    tag: 'logo',
-                    child: SizedBox(
-                        child: SvgPicture.asset('assets/icon-hkgalden.svg'),
-                        width: 27,
-                        height: 27)),
-                SizedBox(width: 5),
-                Text(viewModel.title,
-                    style: TextStyle(fontWeight: FontWeight.w700),
-                    strutStyle: StrutStyle(height: 1.25)),
-              ],
-            ),
+      builder: (BuildContext context, HomePageViewModel viewModel) =>
+          BackdropScaffold(
+        appBar: AppBar(
+          leading: BackdropToggleButton(icon: AnimatedIcons.close_menu),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          elevation: 0,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Hero(
+                  tag: 'logo',
+                  child: SizedBox(
+                      child: SvgPicture.asset('assets/icon-hkgalden.svg'),
+                      width: 27,
+                      height: 27)),
+              SizedBox(width: 5),
+              Text(viewModel.title,
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                  strutStyle: StrutStyle(height: 1.25)),
+            ],
           ),
-          body: viewModel.isThreadLoading && viewModel.isRefresh == false
-              ? /*Center(
-                  child: CircularProgressIndicator(),
-                )*/
-              ListLoadingSkeleton()
+          actions: <Widget>[
+            IconButton(
+                icon: Icon(Icons.create),
+                onPressed: () => viewModel.isLoggedIn
+                    ? Navigator.of(context).push(SlideInFromBottomRoute(
+                        page: ComposePage(
+                        composeMode: ComposeMode.newPost,
+                      )))
+                    : showModal<void>(
+                        context: context,
+                        builder: (context) => LoginCheckDialog()))
+          ],
+        ),
+        frontLayer: Container(
+          color: Theme.of(context).primaryColor,
+          child: viewModel.isThreadLoading && viewModel.isRefresh == false
+              ? ListLoadingSkeleton()
               : RefreshIndicator(
                   displacement: 10.0,
                   strokeWidth: 2.5,
@@ -133,26 +150,31 @@ class _HomePageState extends State<HomePage>
                     },
                   ),
                 ),
-          drawer: HomeDrawer(),
-          floatingActionButton: AnimatedBuilder(
-            animation: _fabAnimationController,
-            builder: (BuildContext context, Widget child) =>
-                FadeScaleTransition(
-              animation: _fabAnimationController,
-              child: child,
-            ),
-            child: FloatingActionButton(
-              onPressed: () => viewModel.isLoggedIn
-                  ? Navigator.of(context).push(SlideInFromBottomRoute(
-                      page: ComposePage(
-                      composeMode: ComposeMode.newPost,
-                    )))
-                  : showModal<void>(
-                      context: context,
-                      builder: (context) => LoginCheckDialog()),
-              child: Icon(Icons.create),
-            ),
-          )),
+        ),
+        inactiveOverlayColor: Colors.black,
+        stickyFrontLayer: true,
+        backLayer: HomeDrawer(),
+        backLayerBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        // floatingActionButton: AnimatedBuilder(
+        //   animation: _fabAnimationController,
+        //   builder: (BuildContext context, Widget child) =>
+        //       FadeScaleTransition(
+        //     animation: _fabAnimationController,
+        //     child: child,
+        //   ),
+        //   child: FloatingActionButton(
+        //     onPressed: () => viewModel.isLoggedIn
+        //         ? Navigator.of(context).push(SlideInFromBottomRoute(
+        //             page: ComposePage(
+        //             composeMode: ComposeMode.newPost,
+        //           )))
+        //         : showModal<void>(
+        //             context: context,
+        //             builder: (context) => LoginCheckDialog()),
+        //     child: Icon(Icons.create),
+        //   ),
+        // )
+      ),
     );
   }
 
