@@ -29,6 +29,7 @@ class _ThreadPageState extends State<ThreadPage>
   AnimationController _fabAnimationController;
   bool _onLastPage;
   bool _canReply;
+  double _elevation;
 
   @override
   void initState() {
@@ -40,6 +41,7 @@ class _ThreadPageState extends State<ThreadPage>
       vsync: this,
     );
     _onLastPage = false;
+    _elevation = 0.0;
     super.initState();
   }
 
@@ -100,6 +102,14 @@ class _ThreadPageState extends State<ThreadPage>
                 ScrollDirection.forward) {
               _fabAnimationController.forward();
             }
+          })
+          ..addListener(() {
+            double newElevation = _scrollController.offset > 1 ? 4.0 : 0.0;
+            if (newElevation != _elevation) {
+              setState(() {
+                _elevation = newElevation;
+              });
+            }
           });
       },
       onDidChange: (viewModel) {
@@ -120,6 +130,7 @@ class _ThreadPageState extends State<ThreadPage>
           Scaffold(
         key: scaffoldKey,
         appBar: AppBar(
+          elevation: _elevation,
           title: SizedBox(
             height: kToolbarHeight * 0.85,
             child: Row(
@@ -143,13 +154,7 @@ class _ThreadPageState extends State<ThreadPage>
         ),
         body: viewModel.isLoading && viewModel.isInitialLoad
             ? ThreadPageLoadingSkeleton()
-            : //ListView.builder(
-            //     controller: _scrollController,
-            //     itemCount: viewModel.replies.length,
-            //     itemBuilder: (context, index) =>
-            //         _generatePageSliver(viewModel, index),
-            //   ),
-            SafeArea(
+            : SafeArea(
                 top: false,
                 child: CustomScrollView(
                   center: centerKey,

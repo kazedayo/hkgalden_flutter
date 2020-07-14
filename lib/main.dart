@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
             splashColor: Color(0xff2c3632),
             primaryColor: Color(0xff2e3533),
             scaffoldBackgroundColor: Color(0xff1b1f1e),
-            appBarTheme: AppBarTheme(color: Color(0xff323d3a)),
+            appBarTheme: AppBarTheme(color: Color(0xff1b1f1e), elevation: 0),
             accentColor: Color(0xff45c17c),
             cursorColor: Color(0xff45c17c),
             textSelectionColor: Color(0xff2d8052),

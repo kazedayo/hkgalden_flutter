@@ -77,104 +77,97 @@ class _HomePageState extends State<HomePage>
       },
       builder: (BuildContext context, HomePageViewModel viewModel) =>
           BackdropScaffold(
-        appBar: AppBar(
-          leading: BackdropToggleButton(icon: AnimatedIcons.close_menu),
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          elevation: 0,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Hero(
-                  tag: 'logo',
-                  child: SizedBox(
-                      child: SvgPicture.asset('assets/icon-hkgalden.svg'),
-                      width: 27,
-                      height: 27)),
-              SizedBox(width: 5),
-              Text(viewModel.title,
-                  style: TextStyle(fontWeight: FontWeight.w700),
-                  strutStyle: StrutStyle(height: 1.25)),
-            ],
-          ),
-          actions: <Widget>[
-            IconButton(
-                icon: Icon(Icons.create),
-                onPressed: () => viewModel.isLoggedIn
-                    ? Navigator.of(context).push(SlideInFromBottomRoute(
-                        page: ComposePage(
-                        composeMode: ComposeMode.newPost,
-                      )))
-                    : showModal<void>(
-                        context: context,
-                        builder: (context) => LoginCheckDialog()))
-          ],
-        ),
-        frontLayer: Container(
-          color: Theme.of(context).primaryColor,
-          child: viewModel.isThreadLoading && viewModel.isRefresh == false
-              ? ListLoadingSkeleton()
-              : RefreshIndicator(
-                  displacement: 10.0,
-                  strokeWidth: 2.5,
-                  onRefresh: () =>
-                      viewModel.onRefresh(viewModel.selectedChannelId),
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    itemCount: viewModel.threads.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == viewModel.threads.length) {
-                        return PageEndLoadingInidicator();
-                      } else {
-                        return Visibility(
-                          visible: !viewModel.blockedUserIds.contains(viewModel
-                              .threads[index].replies[0].author.userId),
-                          child: ThreadCell(
-                            title: viewModel.threads[index].title,
-                            authorName: viewModel
-                                .threads[index].replies[0].authorNickname,
-                            totalReplies: viewModel.threads[index].totalReplies,
-                            lastReply:
-                                viewModel.threads[index].replies.length == 2
-                                    ? viewModel.threads[index].replies[1].date
-                                    : viewModel.threads[index].replies[0].date,
-                            tagName: viewModel.threads[index].tagName,
-                            tagColor: viewModel.threads[index].tagColor,
-                            onTap: () => _loadThread(viewModel.threads[index]),
-                            onLongPress: () =>
-                                _jumpToPage(viewModel.threads[index]),
-                          ),
-                        );
-                      }
-                    },
-                  ),
+              appBar: AppBar(
+                leading: BackdropToggleButton(icon: AnimatedIcons.close_menu),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Hero(
+                        tag: 'logo',
+                        child: SizedBox(
+                            child: SvgPicture.asset('assets/icon-hkgalden.svg'),
+                            width: 27,
+                            height: 27)),
+                    SizedBox(width: 5),
+                    Text(viewModel.title,
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                        strutStyle: StrutStyle(height: 1.25)),
+                  ],
                 ),
-        ),
-        inactiveOverlayColor: Colors.black,
-        stickyFrontLayer: true,
-        backLayer: HomeDrawer(),
-        backLayerBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        // floatingActionButton: AnimatedBuilder(
-        //   animation: _fabAnimationController,
-        //   builder: (BuildContext context, Widget child) =>
-        //       FadeScaleTransition(
-        //     animation: _fabAnimationController,
-        //     child: child,
-        //   ),
-        //   child: FloatingActionButton(
-        //     onPressed: () => viewModel.isLoggedIn
-        //         ? Navigator.of(context).push(SlideInFromBottomRoute(
-        //             page: ComposePage(
-        //             composeMode: ComposeMode.newPost,
-        //           )))
-        //         : showModal<void>(
-        //             context: context,
-        //             builder: (context) => LoginCheckDialog()),
-        //     child: Icon(Icons.create),
-        //   ),
-        // )
-      ),
+              ),
+              frontLayer: Container(
+                color: Theme.of(context).primaryColor,
+                child: viewModel.isThreadLoading && viewModel.isRefresh == false
+                    ? ListLoadingSkeleton()
+                    : RefreshIndicator(
+                        displacement: 10.0,
+                        strokeWidth: 2.5,
+                        onRefresh: () =>
+                            viewModel.onRefresh(viewModel.selectedChannelId),
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          itemCount: viewModel.threads.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index == viewModel.threads.length) {
+                              return PageEndLoadingInidicator();
+                            } else {
+                              return Visibility(
+                                visible: !viewModel.blockedUserIds.contains(
+                                    viewModel.threads[index].replies[0].author
+                                        .userId),
+                                child: ThreadCell(
+                                  title: viewModel.threads[index].title,
+                                  authorName: viewModel
+                                      .threads[index].replies[0].authorNickname,
+                                  totalReplies:
+                                      viewModel.threads[index].totalReplies,
+                                  lastReply: viewModel
+                                              .threads[index].replies.length ==
+                                          2
+                                      ? viewModel.threads[index].replies[1].date
+                                      : viewModel
+                                          .threads[index].replies[0].date,
+                                  tagName: viewModel.threads[index].tagName,
+                                  tagColor: viewModel.threads[index].tagColor,
+                                  onTap: () =>
+                                      _loadThread(viewModel.threads[index]),
+                                  onLongPress: () =>
+                                      _jumpToPage(viewModel.threads[index]),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+              ),
+              inactiveOverlayColor: Colors.black,
+              stickyFrontLayer: true,
+              backLayer: HomeDrawer(),
+              backLayerBackgroundColor:
+                  Theme.of(context).scaffoldBackgroundColor,
+              onBackLayerRevealed: () => _fabAnimationController.reverse(),
+              onBackLayerConcealed: () => _fabAnimationController.forward(),
+              floatingActionButton: AnimatedBuilder(
+                animation: _fabAnimationController,
+                builder: (BuildContext context, Widget child) =>
+                    FadeScaleTransition(
+                  animation: _fabAnimationController,
+                  child: child,
+                ),
+                child: FloatingActionButton(
+                  onPressed: () => viewModel.isLoggedIn
+                      ? Navigator.of(context).push(SlideInFromBottomRoute(
+                          page: ComposePage(
+                          composeMode: ComposeMode.newPost,
+                        )))
+                      : showModal<void>(
+                          context: context,
+                          builder: (context) => LoginCheckDialog()),
+                  child: Icon(Icons.create),
+                ),
+              )),
     );
   }
 
