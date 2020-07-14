@@ -104,7 +104,6 @@ class _HomePageState extends State<HomePage>
                           viewModel.isRefresh == false
                       ? ListLoadingSkeleton()
                       : RefreshIndicator(
-                          displacement: 10.0,
                           strokeWidth: 2.5,
                           onRefresh: () =>
                               viewModel.onRefresh(viewModel.selectedChannelId),
