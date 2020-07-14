@@ -46,7 +46,7 @@ class ListLoadingSkeleton extends StatelessWidget {
                             ),
                           ],
                         ))),
-            baseColor: Theme.of(context).scaffoldBackgroundColor,
-            highlightColor: Theme.of(context).splashColor),
+            baseColor: Theme.of(context).primaryColor,
+            highlightColor: Theme.of(context).scaffoldBackgroundColor),
       );
 }

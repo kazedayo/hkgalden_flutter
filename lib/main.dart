@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         home: StartupScreen(),
         theme: ThemeData(
             brightness: Brightness.dark,
-            splashColor: Color(0xff2c3632),
+            //splashColor: Color(0xff2c3632),
             primaryColor: Color(0xff2e3533),
             scaffoldBackgroundColor: Color(0xff1b1f1e),
             appBarTheme: AppBarTheme(color: Color(0xff1b1f1e), elevation: 0),
@@ -35,7 +35,8 @@ class MyApp extends StatelessWidget {
                 contentTextStyle: TextStyle(color: Colors.white)),
             pageTransitionsTheme: PageTransitionsTheme(builders: {
               TargetPlatform.android: SharedAxisPageTransitionsBuilder(
-                  transitionType: SharedAxisTransitionType.scaled)
+                  transitionType: SharedAxisTransitionType.scaled),
+              TargetPlatform.iOS: CupertinoPageTransitionsBuilder()
             }),
             dialogTheme: DialogTheme(
                 shape: RoundedRectangleBorder(

@@ -27,7 +27,7 @@ class ThreadPageLoadingSkeleton extends StatelessWidget {
         },
       ),
       baseColor: Theme.of(context).scaffoldBackgroundColor,
-      highlightColor: Theme.of(context).splashColor);
+      highlightColor: Theme.of(context).primaryColor);
 }
 
 class _ThreadCellSkeleton extends StatelessWidget {

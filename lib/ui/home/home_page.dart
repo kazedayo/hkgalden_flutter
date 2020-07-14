@@ -97,50 +97,54 @@ class _HomePageState extends State<HomePage>
                   ],
                 ),
               ),
-              frontLayer: Container(
+              frontLayer: Material(
                 color: Theme.of(context).primaryColor,
-                child: viewModel.isThreadLoading && viewModel.isRefresh == false
-                    ? ListLoadingSkeleton()
-                    : RefreshIndicator(
-                        displacement: 10.0,
-                        strokeWidth: 2.5,
-                        onRefresh: () =>
-                            viewModel.onRefresh(viewModel.selectedChannelId),
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          itemCount: viewModel.threads.length + 1,
-                          itemBuilder: (context, index) {
-                            if (index == viewModel.threads.length) {
-                              return PageEndLoadingInidicator();
-                            } else {
-                              return Visibility(
-                                visible: !viewModel.blockedUserIds.contains(
-                                    viewModel.threads[index].replies[0].author
-                                        .userId),
-                                child: ThreadCell(
-                                  title: viewModel.threads[index].title,
-                                  authorName: viewModel
-                                      .threads[index].replies[0].authorNickname,
-                                  totalReplies:
-                                      viewModel.threads[index].totalReplies,
-                                  lastReply: viewModel
-                                              .threads[index].replies.length ==
-                                          2
-                                      ? viewModel.threads[index].replies[1].date
-                                      : viewModel
-                                          .threads[index].replies[0].date,
-                                  tagName: viewModel.threads[index].tagName,
-                                  tagColor: viewModel.threads[index].tagColor,
-                                  onTap: () =>
-                                      _loadThread(viewModel.threads[index]),
-                                  onLongPress: () =>
-                                      _jumpToPage(viewModel.threads[index]),
-                                ),
-                              );
-                            }
-                          },
+                child: Container(
+                  child: viewModel.isThreadLoading &&
+                          viewModel.isRefresh == false
+                      ? ListLoadingSkeleton()
+                      : RefreshIndicator(
+                          displacement: 10.0,
+                          strokeWidth: 2.5,
+                          onRefresh: () =>
+                              viewModel.onRefresh(viewModel.selectedChannelId),
+                          child: ListView.builder(
+                            controller: _scrollController,
+                            itemCount: viewModel.threads.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index == viewModel.threads.length) {
+                                return PageEndLoadingInidicator();
+                              } else {
+                                return Visibility(
+                                  visible: !viewModel.blockedUserIds.contains(
+                                      viewModel.threads[index].replies[0].author
+                                          .userId),
+                                  child: ThreadCell(
+                                    title: viewModel.threads[index].title,
+                                    authorName: viewModel.threads[index]
+                                        .replies[0].authorNickname,
+                                    totalReplies:
+                                        viewModel.threads[index].totalReplies,
+                                    lastReply: viewModel.threads[index].replies
+                                                .length ==
+                                            2
+                                        ? viewModel
+                                            .threads[index].replies[1].date
+                                        : viewModel
+                                            .threads[index].replies[0].date,
+                                    tagName: viewModel.threads[index].tagName,
+                                    tagColor: viewModel.threads[index].tagColor,
+                                    onTap: () =>
+                                        _loadThread(viewModel.threads[index]),
+                                    onLongPress: () =>
+                                        _jumpToPage(viewModel.threads[index]),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
                         ),
-                      ),
+                ),
               ),
               inactiveOverlayColor: Colors.black,
               stickyFrontLayer: true,
