@@ -12,7 +12,10 @@ class UpdateSessionUserAction {
 
 class RequestSessionUserErrorAction {}
 
-class RemoveSessionUserAction{}
+class AppendUserToBlockListAction {
+  final String userId;
 
+  AppendUserToBlockListAction(this.userId);
+}
 
-
+class RemoveSessionUserAction {}

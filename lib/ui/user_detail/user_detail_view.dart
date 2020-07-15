@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/models/user.dart';
+import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
+import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
+import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/redux/user_thread_list/user_thread_list_action.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
+import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/viewmodels/user_detail/user_thread_list_view_model.dart';
 
 class UserDetailView extends StatefulWidget {
@@ -21,6 +25,14 @@ class UserDetailView extends StatefulWidget {
 }
 
 class _UserDetailViewState extends State<UserDetailView> {
+  bool _blockedButtonPressed;
+
+  @override
+  void initState() {
+    _blockedButtonPressed = false;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) => FractionallySizedBox(
         heightFactor: 0.5,
@@ -68,7 +80,30 @@ class _UserDetailViewState extends State<UserDetailView> {
                       ],
                     ),
                     FlatButton.icon(
-                        onPressed: null,
+                        onPressed: _blockedButtonPressed
+                            ? null
+                            : () {
+                                setState(() {
+                                  _blockedButtonPressed =
+                                      !_blockedButtonPressed;
+                                });
+                                HKGaldenApi()
+                                    .blockUser(widget.user.userId)
+                                    .then((isSuccess) {
+                                  setState(() {
+                                    _blockedButtonPressed =
+                                        !_blockedButtonPressed;
+                                  });
+                                  if (isSuccess) {
+                                    Navigator.of(context).pop();
+                                    store.dispatch(AppendUserToBlockListAction(
+                                        widget.user.userId));
+                                    scaffoldKey.currentState.showSnackBar(SnackBar(
+                                        content: Text(
+                                            '已封鎖會員 ${widget.user.nickName}')));
+                                  } else {}
+                                });
+                              },
                         icon: Icon(Icons.block),
                         label: Text('封鎖')),
                   ],

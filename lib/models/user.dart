@@ -38,6 +38,22 @@ class User extends Equatable {
                 .toList(),
       );
 
+  User copyWith({
+    String userId,
+    String nickName,
+    String avatar,
+    List<UserGroup> userGroup,
+    String gender,
+    List<String> blockedUsers,
+  }) =>
+      User(
+          userId: userId ?? this.userId,
+          nickName: nickName ?? this.nickName,
+          avatar: avatar ?? this.avatar,
+          userGroup: userGroup ?? this.userGroup,
+          gender: gender ?? this.gender,
+          blockedUsers: blockedUsers ?? this.blockedUsers);
+
   List<Object> get props =>
       [userId, nickName, avatar, userGroup, gender, blockedUsers];
 }

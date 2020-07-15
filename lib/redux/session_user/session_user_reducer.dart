@@ -8,6 +8,8 @@ final Reducer<SessionUserState> sessionUserReducer = combineReducers([
       requestSessionUserReducer),
   TypedReducer<SessionUserState, UpdateSessionUserAction>(
       updateSessionUserReducer),
+  TypedReducer<SessionUserState, AppendUserToBlockListAction>(
+      appendUserToBlockListReducer),
   TypedReducer<SessionUserState, RemoveSessionUserAction>(
       removeSessionUserReducer),
 ]);
@@ -21,6 +23,13 @@ SessionUserState updateSessionUserReducer(
     SessionUserState state, UpdateSessionUserAction action) {
   return state.copyWith(
       isLoading: false, isLoggedIn: true, sessionUser: action.sessionUser);
+}
+
+SessionUserState appendUserToBlockListReducer(
+    SessionUserState state, AppendUserToBlockListAction action) {
+  return state.copyWith(
+      sessionUser: state.sessionUser.copyWith(
+          blockedUsers: state.sessionUser.blockedUsers..add(action.userId)));
 }
 
 SessionUserState removeSessionUserReducer(
