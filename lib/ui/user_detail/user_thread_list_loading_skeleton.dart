@@ -33,5 +33,5 @@ class UserThreadListLoadingSkeleton extends StatelessWidget {
                 ],
               )),
       baseColor: Theme.of(context).scaffoldBackgroundColor,
-      highlightColor: Theme.of(context).splashColor);
+      highlightColor: Theme.of(context).primaryColor);
 }

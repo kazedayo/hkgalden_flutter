@@ -80,7 +80,8 @@ class _UserDetailViewState extends State<UserDetailView> {
                       ],
                     ),
                     FlatButton.icon(
-                        onPressed: _blockedButtonPressed
+                        onPressed: _blockedButtonPressed ||
+                                store.state.sessionUserState.isLoggedIn == false
                             ? null
                             : () {
                                 setState(() {

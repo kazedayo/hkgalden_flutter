@@ -50,20 +50,23 @@ class HomeDrawerHeader extends StatelessWidget {
                                   : Colors.white),
                         ),
                         Spacer(),
-                        Row(
-                          children: <Widget>[
-                            IconButton(
-                                icon: Icon(Icons.settings), onPressed: null),
-                            IconButton(
-                              icon: Icon(Icons.exit_to_app),
-                              onPressed: () => TokenSecureStorage()
-                                  .writeToken('', onFinish: (_) {
-                                viewModel.onLogout();
-                              }),
-                              color: Colors.redAccent[400],
-                            )
-                          ],
-                        ),
+                        Visibility(
+                          visible: viewModel.isLoggedIn,
+                          child: Row(
+                            children: <Widget>[
+                              IconButton(
+                                  icon: Icon(Icons.settings), onPressed: null),
+                              IconButton(
+                                icon: Icon(Icons.exit_to_app),
+                                onPressed: () => TokenSecureStorage()
+                                    .writeToken('', onFinish: (_) {
+                                  viewModel.onLogout();
+                                }),
+                                color: Colors.redAccent[400],
+                              )
+                            ],
+                          ),
+                        )
                       ],
                     ),
                   ),
