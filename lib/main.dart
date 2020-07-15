@@ -34,14 +34,12 @@ class MyApp extends StatelessWidget {
                 backgroundColor: Color(0xff323d3a),
                 contentTextStyle: TextStyle(color: Colors.white)),
             pageTransitionsTheme: PageTransitionsTheme(builders: {
-              TargetPlatform.android: SharedAxisPageTransitionsBuilder(
-                  transitionType: SharedAxisTransitionType.scaled),
+              TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
               TargetPlatform.iOS: CupertinoPageTransitionsBuilder()
             }),
             dialogTheme: DialogTheme(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4)))),
-        routes: routes,
       ),
     );
   }

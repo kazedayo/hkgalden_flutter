@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
@@ -8,6 +9,8 @@ import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/home/home_page.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
+import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/viewmodels/startup_animation_view_model.dart';
 
 class StartupScreen extends StatefulWidget {
@@ -17,6 +20,7 @@ class StartupScreen extends StatefulWidget {
 
 class _StartupScreenState extends State<StartupScreen>
     with TickerProviderStateMixin {
+  String _currentRoute = '';
   AnimationController _controller;
   String token;
 
@@ -54,16 +58,42 @@ class _StartupScreenState extends State<StartupScreen>
             if (viewModel.threadIsLoading == false &&
                 viewModel.channelIsLoading == false &&
                 viewModel.sessionUserIsLoading == false) {
-              Navigator.of(context)
-                  .pushReplacement(SizeRoute(page: HomePage()));
+              Navigator.of(context).pushReplacement(SizeRoute(
+                  page: WillPopScope(
+                      child: Navigator(
+                        key: navigatorKey,
+                        //initialRoute: '/',
+                        onGenerateRoute: (settings) {
+                          WidgetBuilder builder;
+                          switch (settings.name) {
+                            case '/':
+                              builder = (context) => HomePage();
+                              break;
+                            case '/Thread':
+                              builder = (context) => ThreadPage();
+                              break;
+                            default:
+                          }
+                          return MaterialPageRoute(
+                              builder: builder, settings: settings);
+                        },
+                      ),
+                      onWillPop: () async {
+                        navigatorKey.currentState.canPop()
+                            ? navigatorKey.currentState.pop()
+                            : SystemNavigator.pop();
+                        //navigatorKey.currentState.pop();
+                        return false;
+                      })));
             }
           },
           onInit: (store) {
             _controller.forward();
-            _controller.addStatusListener((status) { 
+            _controller.addStatusListener((status) {
               if (status == AnimationStatus.completed) {
                 //Hardcode default to 'bw' channel
-                store.dispatch(RequestThreadListAction(channelId: 'bw', page: 1));
+                store.dispatch(
+                    RequestThreadListAction(channelId: 'bw', page: 1));
                 store.dispatch(RequestChannelAction());
                 if (token != '') {
                   store.dispatch(RequestSessionUserAction());
