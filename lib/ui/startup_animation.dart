@@ -62,7 +62,7 @@ class _StartupScreenState extends State<StartupScreen>
                   page: WillPopScope(
                       child: Navigator(
                         key: navigatorKey,
-                        //initialRoute: '/',
+                        observers: [HeroController()],
                         onGenerateRoute: (settings) {
                           WidgetBuilder builder;
                           switch (settings.name) {
