@@ -268,33 +268,7 @@ class _ThreadPageState extends State<ThreadPage>
                     : '第 ${((viewModel.previousPageReplies[viewModel.previousPageReplies.length - index - 1].floor + 49) ~/ 50)} 頁'),
               ),
             ),
-            Visibility(
-                visible: !viewModel.blockedUserIds.contains(viewModel
-                    .previousPageReplies[
-                        viewModel.previousPageReplies.length - index - 1]
-                    .author
-                    .userId),
-                child: CommentCell(
-                  viewModel: viewModel,
-                  threadId: viewModel.threadId,
-                  reply: viewModel.previousPageReplies[
-                      viewModel.previousPageReplies.length - index - 1],
-                  onLastPage: _onLastPage,
-                  onSent: (reply) {
-                    _onReplySuccess(viewModel, reply);
-                  },
-                  canReply: _canReply,
-                )),
-          ],
-        );
-      } else {
-        return Visibility(
-            visible: !viewModel.blockedUserIds.contains(viewModel
-                .previousPageReplies[
-                    viewModel.previousPageReplies.length - index - 1]
-                .author
-                .userId),
-            child: CommentCell(
+            CommentCell(
               viewModel: viewModel,
               threadId: viewModel.threadId,
               reply: viewModel.previousPageReplies[
@@ -304,7 +278,21 @@ class _ThreadPageState extends State<ThreadPage>
                 _onReplySuccess(viewModel, reply);
               },
               canReply: _canReply,
-            ));
+            ),
+          ],
+        );
+      } else {
+        return CommentCell(
+          viewModel: viewModel,
+          threadId: viewModel.threadId,
+          reply: viewModel.previousPageReplies[
+              viewModel.previousPageReplies.length - index - 1],
+          onLastPage: _onLastPage,
+          onSent: (reply) {
+            _onReplySuccess(viewModel, reply);
+          },
+          canReply: _canReply,
+        );
       }
     }
   }
@@ -322,19 +310,16 @@ class _ThreadPageState extends State<ThreadPage>
                   : '第 ${((viewModel.replies[index].floor + 49) ~/ 50)} 頁'),
             ),
           ),
-          Visibility(
-              visible: !viewModel.blockedUserIds
-                  .contains(viewModel.replies[index].author.userId),
-              child: CommentCell(
-                viewModel: viewModel,
-                threadId: viewModel.threadId,
-                reply: viewModel.replies[index],
-                onLastPage: _onLastPage,
-                onSent: (reply) {
-                  _onReplySuccess(viewModel, reply);
-                },
-                canReply: _canReply,
-              )),
+          CommentCell(
+            viewModel: viewModel,
+            threadId: viewModel.threadId,
+            reply: viewModel.replies[index],
+            onLastPage: _onLastPage,
+            onSent: (reply) {
+              _onReplySuccess(viewModel, reply);
+            },
+            canReply: _canReply,
+          ),
         ],
       );
     } else if (viewModel.replies[index].floor % 50 == 1 &&
@@ -349,19 +334,16 @@ class _ThreadPageState extends State<ThreadPage>
                   : '第 ${((viewModel.replies[index].floor + 49) ~/ 50)} 頁'),
             ),
           ),
-          Visibility(
-              visible: !viewModel.blockedUserIds
-                  .contains(viewModel.replies[index].author.userId),
-              child: CommentCell(
-                viewModel: viewModel,
-                threadId: viewModel.threadId,
-                reply: viewModel.replies[index],
-                onLastPage: _onLastPage,
-                onSent: (reply) {
-                  _onReplySuccess(viewModel, reply);
-                },
-                canReply: _canReply,
-              )),
+          CommentCell(
+            viewModel: viewModel,
+            threadId: viewModel.threadId,
+            reply: viewModel.replies[index],
+            onLastPage: _onLastPage,
+            onSent: (reply) {
+              _onReplySuccess(viewModel, reply);
+            },
+            canReply: _canReply,
+          ),
           Container(
             height: 50,
             child: Center(
@@ -373,19 +355,16 @@ class _ThreadPageState extends State<ThreadPage>
     } else if (index == viewModel.replies.length - 1) {
       return Column(
         children: <Widget>[
-          Visibility(
-              visible: !viewModel.blockedUserIds
-                  .contains(viewModel.replies[index].author.userId),
-              child: CommentCell(
-                viewModel: viewModel,
-                threadId: viewModel.threadId,
-                reply: viewModel.replies[index],
-                onLastPage: _onLastPage,
-                onSent: (reply) {
-                  _onReplySuccess(viewModel, reply);
-                },
-                canReply: _canReply,
-              )),
+          CommentCell(
+            viewModel: viewModel,
+            threadId: viewModel.threadId,
+            reply: viewModel.replies[index],
+            onLastPage: _onLastPage,
+            onSent: (reply) {
+              _onReplySuccess(viewModel, reply);
+            },
+            canReply: _canReply,
+          ),
           !_onLastPage
               ? Container(
                   height: 50,
@@ -404,19 +383,16 @@ class _ThreadPageState extends State<ThreadPage>
         ],
       );
     } else {
-      return Visibility(
-          visible: !viewModel.blockedUserIds
-              .contains(viewModel.replies[index].author.userId),
-          child: CommentCell(
-            viewModel: viewModel,
-            threadId: viewModel.threadId,
-            reply: viewModel.replies[index],
-            onLastPage: _onLastPage,
-            onSent: (reply) {
-              _onReplySuccess(viewModel, reply);
-            },
-            canReply: _canReply,
-          ));
+      return CommentCell(
+        viewModel: viewModel,
+        threadId: viewModel.threadId,
+        reply: viewModel.replies[index],
+        onLastPage: _onLastPage,
+        onSent: (reply) {
+          _onReplySuccess(viewModel, reply);
+        },
+        canReply: _canReply,
+      );
     }
   }
 }

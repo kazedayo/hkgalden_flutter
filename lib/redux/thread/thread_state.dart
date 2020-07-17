@@ -21,8 +21,8 @@ class ThreadState extends Equatable {
 
   factory ThreadState.initial() => ThreadState(
         threadIsLoading: false,
-        thread: Thread(),
-        previousPages: Thread(),
+        thread: Thread.initial(),
+        previousPages: Thread.initial(),
         currentPage: 1,
         endPage: 1,
         isInitialLoad: true,

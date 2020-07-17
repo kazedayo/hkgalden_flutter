@@ -22,9 +22,15 @@ class ComposePage extends StatefulWidget {
   final int threadId;
   final Reply parentReply;
   final Function(Reply) onSent;
+  final Function(String) onCreateThread;
 
   const ComposePage(
-      {Key key, this.composeMode, this.threadId, this.parentReply, this.onSent})
+      {Key key,
+      this.composeMode,
+      this.threadId,
+      this.parentReply,
+      this.onSent,
+      this.onCreateThread})
       : super(key: key);
 
   @override
@@ -33,6 +39,7 @@ class ComposePage extends StatefulWidget {
 
 class _ComposePageState extends State<ComposePage> {
   Tag _tag;
+  String _channelId;
   String _title;
   ZefyrController _controller;
   TextEditingController _titleFieldController;
@@ -43,6 +50,8 @@ class _ComposePageState extends State<ComposePage> {
   void initState() {
     //default to tag '吹水'
     _tag = Tag(id: '02NP3MVYm', name: '吹水', color: Color(0xff457cb0));
+    _channelId = '';
+    _title = '';
     final document = _loadDocument();
     _controller = ZefyrController(document);
     _titleFieldController = TextEditingController();
@@ -83,7 +92,22 @@ class _ComposePageState extends State<ComposePage> {
                           _isSending = true;
                         });
                         widget.composeMode == ComposeMode.newPost
-                            ? _sendThread(context)
+                            ? _title == '' ||
+                                    _controller.document.toString() == '/n'
+                                ? showModal(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text('注意!'),
+                                      content: Text('內文/標題不能為空'),
+                                      actions: <Widget>[
+                                        FlatButton(
+                                            onPressed: () =>
+                                                Navigator.of(context).pop(),
+                                            child: Text('OK'))
+                                      ],
+                                    ),
+                                  )
+                                : _createThread(context)
                             : _sendReply(context);
                         // await DeltaJsonParser().toGaldenHtml(
                         //     json.decode(_getZefyrEditorContent()));
@@ -119,9 +143,10 @@ class _ComposePageState extends State<ComposePage> {
                               onPressed: () => showModal<void>(
                                   context: context,
                                   builder: (context) => _TagSelectDialog(
-                                        onTagSelect: (tag) {
+                                        onTagSelect: (tag, channelId) {
                                           setState(() {
                                             _tag = tag;
+                                            _channelId = channelId;
                                           });
                                         },
                                       )),
@@ -186,7 +211,25 @@ class _ComposePageState extends State<ComposePage> {
     return json.encode(content);
   }
 
-  Future<void> _sendThread(BuildContext context) async {}
+  Future<void> _createThread(BuildContext context) async {
+    HKGaldenApi()
+        .createThread(
+            _title,
+            [_tag.id],
+            await DeltaJsonParser()
+                .toGaldenHtml(json.decode(_getZefyrEditorContent())))
+        .then((threadId) {
+      setState(() {
+        _isSending = false;
+        if (threadId != null) {
+          Navigator.pop(context);
+          widget.onCreateThread(_channelId);
+        } else {
+          Scaffold.of(context).showSnackBar(SnackBar(content: Text('回覆發送失敗!')));
+        }
+      });
+    });
+  }
 
   Future<void> _sendReply(BuildContext context) async {
     HKGaldenApi()
@@ -213,13 +256,14 @@ class _ComposePageState extends State<ComposePage> {
 }
 
 class _TagSelectDialog extends StatelessWidget {
-  final Function(Tag) onTagSelect;
+  final Function(Tag, String) onTagSelect;
 
   _TagSelectDialog({this.onTagSelect});
 
   @override
   Widget build(BuildContext context) =>
       StoreConnector<AppState, TagSelectorViewModel>(
+        distinct: true,
         converter: (store) => TagSelectorViewModel.create(store),
         builder: (context, viewModel) => SimpleDialog(
           title: Text('選擇標籤'),
@@ -247,7 +291,7 @@ class _TagSelectDialog extends StatelessWidget {
                                     backgroundColor: tag.color,
                                     onPressed: () {
                                       Navigator.of(context).pop();
-                                      onTagSelect(tag);
+                                      onTagSelect(tag, channel.channelId);
                                     },
                                   ))
                               .toList(),

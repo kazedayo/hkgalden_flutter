@@ -358,6 +358,32 @@ class HKGaldenApi {
     }
   }
 
+  Future<int> createThread(String title, List<String> tags, String html) async {
+    final String mutation = r'''
+      mutation CreateThread($title: String!, $tags: [String!]!, $html: String!) {
+        createThread(title: $title, tags: $tags, html: $html)
+      }
+    ''';
+
+    final MutationOptions options = MutationOptions(
+        documentNode: gql(mutation),
+        variables: <String, dynamic>{
+          'title': title,
+          'tags': tags,
+          'html': html,
+        });
+
+    final QueryResult result = await _client.mutate(options);
+
+    if (result.hasException) {
+      print(result.exception.toString());
+      return null;
+    } else {
+      int threadId = result.data['createThread'] as int;
+      return threadId;
+    }
+  }
+
   Future<bool> unblockUser(String userId) async {
     final String mutation = r'''
       mutation UnblockUser($userId: String!) {

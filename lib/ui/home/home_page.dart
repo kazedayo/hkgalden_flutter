@@ -163,6 +163,8 @@ class _HomePageState extends State<HomePage>
                     ? Navigator.of(context).push(SlideInFromBottomRoute(
                         page: ComposePage(
                         composeMode: ComposeMode.newPost,
+                        onCreateThread: (channelId) =>
+                            viewModel.onCreateThread(channelId),
                       )))
                     : showModal<void>(
                         context: context,

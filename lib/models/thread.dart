@@ -31,6 +31,15 @@ class Thread extends Equatable {
         tagColor: Color(int.parse('FF${json['tags'][0]['color']}', radix: 16)),
       );
 
+  factory Thread.initial() => Thread(
+        threadId: 0,
+        title: '',
+        replies: [],
+        totalReplies: 0,
+        tagName: '',
+        tagColor: Colors.white,
+      );
+
   Thread copyWith({
     int threadId,
     String title,

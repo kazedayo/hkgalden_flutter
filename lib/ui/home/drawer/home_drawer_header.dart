@@ -13,6 +13,7 @@ class HomeDrawerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       StoreConnector<AppState, HomeDrawerHeaderViewModel>(
+        distinct: true,
         converter: (store) => HomeDrawerHeaderViewModel.create(store),
         builder: (BuildContext context, HomeDrawerHeaderViewModel viewModel) =>
             Container(

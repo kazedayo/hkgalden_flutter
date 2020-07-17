@@ -12,6 +12,7 @@ class HomePageViewModel extends Equatable {
   final bool isThreadLoading;
   final bool isRefresh;
   final Function(String) onRefresh;
+  final Function(String) onCreateThread;
   final List<String> blockedUserIds;
 
   HomePageViewModel({
@@ -22,6 +23,7 @@ class HomePageViewModel extends Equatable {
     this.isThreadLoading,
     this.isRefresh,
     this.onRefresh,
+    this.onCreateThread,
     this.blockedUserIds,
   });
 
@@ -39,6 +41,8 @@ class HomePageViewModel extends Equatable {
       isRefresh: store.state.threadListState.isRefresh,
       onRefresh: (channelId) => store.dispatch(RequestThreadListAction(
           channelId: channelId, page: 1, isRefresh: true)),
+      onCreateThread: (channelId) => store.dispatch(RequestThreadListAction(
+          channelId: channelId, page: 1, isRefresh: false)),
       blockedUserIds: store.state.sessionUserState.sessionUser.blockedUsers,
     );
   }

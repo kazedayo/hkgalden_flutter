@@ -152,6 +152,7 @@ class _UserThreadListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       StoreConnector<AppState, UserThreadListViewModel>(
+        distinct: true,
         onInit: (store) => store
             .dispatch(RequestUserThreadListAction(userId: userId, page: 1)),
         converter: (store) => UserThreadListViewModel.create(store),

@@ -9,6 +9,7 @@ class HomeDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       StoreConnector<AppState, HomeDrawerViewModel>(
+        distinct: true,
         converter: (store) => HomeDrawerViewModel.create(store),
         builder: (BuildContext context, HomeDrawerViewModel viewModel) =>
             Column(
