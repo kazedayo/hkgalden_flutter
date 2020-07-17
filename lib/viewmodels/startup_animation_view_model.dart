@@ -1,7 +1,8 @@
+import 'package:equatable/equatable.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:redux/redux.dart';
 
-class StartupAnimationViewModel {
+class StartupAnimationViewModel extends Equatable {
   final bool threadIsLoading;
   final bool channelIsLoading;
   final bool sessionUserIsLoading;
@@ -19,4 +20,7 @@ class StartupAnimationViewModel {
       sessionUserIsLoading: store.state.sessionUserState.isLoading,
     );
   }
+
+  List<Object> get props =>
+      [threadIsLoading, channelIsLoading, sessionUserIsLoading];
 }

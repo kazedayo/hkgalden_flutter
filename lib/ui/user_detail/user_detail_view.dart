@@ -96,9 +96,9 @@ class _UserDetailViewState extends State<UserDetailView> {
                                         !_blockedButtonPressed;
                                   });
                                   if (isSuccess) {
-                                    Navigator.of(context).pop();
                                     store.dispatch(AppendUserToBlockListAction(
                                         widget.user.userId));
+                                    Navigator.of(context).pop();
                                     scaffoldKey.currentState.showSnackBar(SnackBar(
                                         content: Text(
                                             '已封鎖會員 ${widget.user.nickName}')));

@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:redux/redux.dart';
 
-class UserThreadListViewModel {
+class UserThreadListViewModel extends Equatable {
   final bool isLoading;
   final List<Thread> userThreads;
   final int currentPage;
@@ -15,4 +16,6 @@ class UserThreadListViewModel {
         userThreads: store.state.userThreadListState.userThreadList,
         currentPage: store.state.userThreadListState.page,
       );
+
+  List<Object> get props => [isLoading, userThreads, currentPage];
 }

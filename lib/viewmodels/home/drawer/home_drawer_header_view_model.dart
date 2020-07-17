@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hkgalden_flutter/models/user.dart';
@@ -8,7 +9,7 @@ import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:redux/redux.dart';
 
-class HomeDrawerHeaderViewModel {
+class HomeDrawerHeaderViewModel extends Equatable {
   final bool isLoggedIn;
   final User sessionUser;
   final String sessionUserName;
@@ -52,4 +53,13 @@ class HomeDrawerHeaderViewModel {
               isRefresh: false));
         });
   }
+
+  List<Object> get props => [
+        isLoggedIn,
+        sessionUser,
+        sessionUserName,
+        sessionUserAvatar,
+        sessionUserGender,
+        sessionUserGroup
+      ];
 }

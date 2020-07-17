@@ -46,12 +46,6 @@ class _ThreadPageState extends State<ThreadPage>
   }
 
   @override
-  void deactivate() {
-    store.dispatch(ClearThreadStateAction());
-    super.deactivate();
-  }
-
-  @override
   void dispose() {
     _scrollController.dispose();
     _fabAnimationController.dispose();
@@ -64,6 +58,7 @@ class _ThreadPageState extends State<ThreadPage>
     final ThreadPageArguments arguments =
         ModalRoute.of(context).settings.arguments;
     return StoreConnector<AppState, ThreadPageViewModel>(
+      distinct: true,
       onInit: (store) {
         _canReply = store.state.sessionUserState.isLoggedIn;
         store.dispatch(RequestThreadAction(

@@ -1,9 +1,10 @@
+import 'package:equatable/equatable.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 import 'package:redux/redux.dart';
 
-class ThreadPageViewModel {
+class ThreadPageViewModel extends Equatable {
   final int threadId;
   final List<Reply> previousPageReplies;
   final List<Reply> replies;
@@ -43,4 +44,16 @@ class ThreadPageViewModel {
         appendReply: (reply) =>
             store.dispatch(AppendReplyToThreadAction(reply: reply)));
   }
+
+  List<Object> get props => [
+        threadId,
+        previousPageReplies,
+        replies,
+        isLoading,
+        isInitialLoad,
+        blockedUserIds,
+        totalReplies,
+        currentPage,
+        endPage
+      ];
 }

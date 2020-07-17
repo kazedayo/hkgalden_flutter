@@ -1,9 +1,10 @@
+import 'package:equatable/equatable.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:redux/redux.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 
-class HomePageViewModel {
+class HomePageViewModel extends Equatable {
   final bool isLoggedIn;
   final List<Thread> threads;
   final String title;
@@ -41,4 +42,14 @@ class HomePageViewModel {
       blockedUserIds: store.state.sessionUserState.sessionUser.blockedUsers,
     );
   }
+
+  List<Object> get props => [
+        isLoggedIn,
+        threads,
+        title,
+        selectedChannelId,
+        isThreadLoading,
+        isRefresh,
+        blockedUserIds
+      ];
 }
