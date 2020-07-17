@@ -20,7 +20,6 @@ class StartupScreen extends StatefulWidget {
 
 class _StartupScreenState extends State<StartupScreen>
     with TickerProviderStateMixin {
-  String _currentRoute = '';
   AnimationController _controller;
   String token;
 

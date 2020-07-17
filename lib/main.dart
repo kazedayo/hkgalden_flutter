@@ -1,8 +1,6 @@
-import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
-import 'package:hkgalden_flutter/routes.dart';
 import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/ui/startup_animation.dart';
 
