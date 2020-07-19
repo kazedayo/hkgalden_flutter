@@ -68,90 +68,87 @@ class _HomePageState extends State<HomePage>
           });
       },
       builder: (BuildContext context, HomePageViewModel viewModel) =>
-          WillPopScope(
-        onWillPop: () async => false,
-        child: BackdropScaffold(
-          appBar: AppBar(
-            leading: BackdropToggleButton(icon: AnimatedIcons.close_menu),
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Hero(
-                    tag: 'logo',
-                    child: SizedBox(
-                        child: SvgPicture.asset('assets/icon-hkgalden.svg'),
-                        width: 27,
-                        height: 27)),
-                SizedBox(width: 5),
-                Text(viewModel.title,
-                    style: TextStyle(fontWeight: FontWeight.w700),
-                    strutStyle: StrutStyle(height: 1.25)),
-              ],
-            ),
+          BackdropScaffold(
+        appBar: AppBar(
+          leading: BackdropToggleButton(icon: AnimatedIcons.close_menu),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Hero(
+                  tag: 'logo',
+                  child: SizedBox(
+                      child: SvgPicture.asset('assets/icon-hkgalden.svg'),
+                      width: 27,
+                      height: 27)),
+              SizedBox(width: 5),
+              Text(viewModel.title,
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                  strutStyle: StrutStyle(height: 1.25)),
+            ],
           ),
-          frontLayer: Material(
-            color: Theme.of(context).primaryColor,
-            child: Container(
-              child: viewModel.isThreadLoading && viewModel.isRefresh == false
-                  ? ListLoadingSkeleton()
-                  : RefreshIndicator(
-                      strokeWidth: 2.5,
-                      onRefresh: () =>
-                          viewModel.onRefresh(viewModel.selectedChannelId),
-                      child: ListView.builder(
-                        controller: _scrollController,
-                        itemCount: viewModel.threads.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == viewModel.threads.length) {
-                            return PageEndLoadingInidicator();
-                          } else {
-                            return Visibility(
-                              visible: !viewModel.blockedUserIds.contains(
-                                  viewModel
-                                      .threads[index].replies[0].author.userId),
-                              child: ThreadCell(
-                                title: viewModel.threads[index].title,
-                                authorName: viewModel
-                                    .threads[index].replies[0].authorNickname,
-                                totalReplies:
-                                    viewModel.threads[index].totalReplies,
-                                lastReply: viewModel
-                                            .threads[index].replies.length ==
-                                        2
-                                    ? viewModel.threads[index].replies[1].date
-                                    : viewModel.threads[index].replies[0].date,
-                                tagName: viewModel.threads[index].tagName,
-                                tagColor: viewModel.threads[index].tagColor,
-                                onTap: () =>
-                                    _loadThread(viewModel.threads[index]),
-                                onLongPress: () =>
-                                    _jumpToPage(viewModel.threads[index]),
-                              ),
-                            );
-                          }
-                        },
-                      ),
+        ),
+        frontLayer: Material(
+          color: Theme.of(context).primaryColor,
+          child: Container(
+            child: viewModel.isThreadLoading && viewModel.isRefresh == false
+                ? ListLoadingSkeleton()
+                : RefreshIndicator(
+                    strokeWidth: 2.5,
+                    onRefresh: () =>
+                        viewModel.onRefresh(viewModel.selectedChannelId),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: viewModel.threads.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == viewModel.threads.length) {
+                          return PageEndLoadingInidicator();
+                        } else {
+                          return Visibility(
+                            visible: !viewModel.blockedUserIds.contains(
+                                viewModel
+                                    .threads[index].replies[0].author.userId),
+                            child: ThreadCell(
+                              title: viewModel.threads[index].title,
+                              authorName: viewModel
+                                  .threads[index].replies[0].authorNickname,
+                              totalReplies:
+                                  viewModel.threads[index].totalReplies,
+                              lastReply:
+                                  viewModel.threads[index].replies.length == 2
+                                      ? viewModel.threads[index].replies[1].date
+                                      : viewModel
+                                          .threads[index].replies[0].date,
+                              tagName: viewModel.threads[index].tagName,
+                              tagColor: viewModel.threads[index].tagColor,
+                              onTap: () =>
+                                  _loadThread(viewModel.threads[index]),
+                              onLongPress: () =>
+                                  _jumpToPage(viewModel.threads[index]),
+                            ),
+                          );
+                        }
+                      },
                     ),
-            ),
+                  ),
           ),
-          inactiveOverlayColor: Colors.black,
-          stickyFrontLayer: true,
-          backLayer: HomeDrawer(),
-          backLayerBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.create),
-            onPressed: () => viewModel.isLoggedIn
-                ? Navigator.of(context).pushNamed('/Compose',
-                    arguments: ComposePageArguments(
-                      composeMode: ComposeMode.newPost,
-                      onCreateThread: (channelId) =>
-                          viewModel.onCreateThread(channelId),
-                    ))
-                : showModal<void>(
-                    context: context, builder: (context) => LoginCheckDialog()),
-          ),
+        ),
+        inactiveOverlayColor: Colors.black,
+        stickyFrontLayer: true,
+        backLayer: HomeDrawer(),
+        backLayerBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.create),
+          onPressed: () => viewModel.isLoggedIn
+              ? navigatorKey.currentState.pushNamed('/Compose',
+                  arguments: ComposePageArguments(
+                    composeMode: ComposeMode.newPost,
+                    onCreateThread: (channelId) =>
+                        viewModel.onCreateThread(channelId),
+                  ))
+              : showModal<void>(
+                  context: context, builder: (context) => LoginCheckDialog()),
         ),
       ),
     );

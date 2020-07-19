@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hkgalden_flutter/nested_navigator.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/channel/channel_action.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
@@ -59,43 +60,8 @@ class _StartupScreenState extends State<StartupScreen>
             if (viewModel.threadIsLoading == false &&
                 viewModel.channelIsLoading == false &&
                 viewModel.sessionUserIsLoading == false) {
-              Navigator.of(context).pushReplacement(SizeRoute(
-                  page: WillPopScope(
-                      child: Navigator(
-                        key: navigatorKey,
-                        observers: [HeroController()],
-                        onGenerateRoute: (settings) {
-                          WidgetBuilder builder;
-                          switch (settings.name) {
-                            case '/':
-                              builder = (context) => HomePage();
-                              break;
-                            case '/Thread':
-                              builder = (context) => ThreadPage();
-                              break;
-                            case '/Compose':
-                              builder = (context) => ComposePage();
-                              break;
-                            default:
-                          }
-                          if (settings.name != '/Compose' &&
-                              Theme.of(context).platform ==
-                                  TargetPlatform.iOS) {
-                            return CupertinoPageRoute(
-                                builder: builder, settings: settings);
-                          } else {
-                            return MaterialPageRoute(
-                                builder: builder, settings: settings);
-                          }
-                        },
-                      ),
-                      onWillPop: () async {
-                        navigatorKey.currentState.canPop()
-                            ? navigatorKey.currentState.pop()
-                            : SystemNavigator.pop();
-                        //navigatorKey.currentState.pop();
-                        return false;
-                      })));
+              Navigator.of(context)
+                  .pushReplacement(SizeRoute(page: NestedNavigator()));
             }
           },
           onInit: (store) {
