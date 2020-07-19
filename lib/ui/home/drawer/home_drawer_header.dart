@@ -22,7 +22,7 @@ class HomeDrawerHeader extends StatelessWidget {
                 child: DividerTheme(
                   data: DividerThemeData(color: Colors.transparent),
                   child: Container(
-                    height: 100,
+                    margin: EdgeInsets.only(bottom: 20, top: 10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: <Widget>[

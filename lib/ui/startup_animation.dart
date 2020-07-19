@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -7,6 +8,7 @@ import 'package:hkgalden_flutter/redux/channel/channel_action.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
+import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/home/home_page.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
@@ -71,10 +73,20 @@ class _StartupScreenState extends State<StartupScreen>
                             case '/Thread':
                               builder = (context) => ThreadPage();
                               break;
+                            case '/Compose':
+                              builder = (context) => ComposePage();
+                              break;
                             default:
                           }
-                          return MaterialPageRoute(
-                              builder: builder, settings: settings);
+                          if (settings.name != '/Compose' &&
+                              Theme.of(context).platform ==
+                                  TargetPlatform.iOS) {
+                            return CupertinoPageRoute(
+                                builder: builder, settings: settings);
+                          } else {
+                            return MaterialPageRoute(
+                                builder: builder, settings: settings);
+                          }
                         },
                       ),
                       onWillPop: () async {

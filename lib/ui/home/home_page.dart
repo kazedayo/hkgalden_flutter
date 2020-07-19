@@ -10,7 +10,6 @@ import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
-import 'package:hkgalden_flutter/ui/common/common_controllers.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
@@ -34,19 +33,16 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   ScrollController _scrollController;
-  AnimationController _fabAnimationController;
 
   @override
   void initState() {
     _scrollController = ScrollController();
-    _fabAnimationController = getFabAnimationController(this);
     super.initState();
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
-    _fabAnimationController.dispose();
     super.dispose();
   }
 
@@ -65,114 +61,97 @@ class _HomePageState extends State<HomePage>
                   page: store.state.threadListState.currentPage + 1,
                   isRefresh: true));
             }
-          })
-          ..addListener(() {
-            if (_scrollController.position.userScrollDirection ==
-                ScrollDirection.reverse) {
-              _fabAnimationController.reverse();
-            } else if (_scrollController.position.userScrollDirection ==
-                ScrollDirection.forward) {
-              _fabAnimationController.forward();
-            }
           });
       },
       builder: (BuildContext context, HomePageViewModel viewModel) =>
           WillPopScope(
         onWillPop: () async => false,
         child: BackdropScaffold(
-            appBar: AppBar(
-              leading: BackdropToggleButton(icon: AnimatedIcons.close_menu),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Hero(
-                      tag: 'logo',
-                      child: SizedBox(
-                          child: SvgPicture.asset('assets/icon-hkgalden.svg'),
-                          width: 27,
-                          height: 27)),
-                  SizedBox(width: 5),
-                  Text(viewModel.title,
-                      style: TextStyle(fontWeight: FontWeight.w700),
-                      strutStyle: StrutStyle(height: 1.25)),
-                ],
-              ),
+          appBar: AppBar(
+            leading: BackdropToggleButton(icon: AnimatedIcons.close_menu),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Hero(
+                    tag: 'logo',
+                    child: SizedBox(
+                        child: SvgPicture.asset('assets/icon-hkgalden.svg'),
+                        width: 27,
+                        height: 27)),
+                SizedBox(width: 5),
+                Text(viewModel.title,
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                    strutStyle: StrutStyle(height: 1.25)),
+              ],
             ),
-            frontLayer: Material(
-              color: Theme.of(context).primaryColor,
-              child: Container(
-                child: viewModel.isThreadLoading && viewModel.isRefresh == false
-                    ? ListLoadingSkeleton()
-                    : RefreshIndicator(
-                        strokeWidth: 2.5,
-                        onRefresh: () =>
-                            viewModel.onRefresh(viewModel.selectedChannelId),
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          itemCount: viewModel.threads.length + 1,
-                          itemBuilder: (context, index) {
-                            if (index == viewModel.threads.length) {
-                              return PageEndLoadingInidicator();
-                            } else {
-                              return Visibility(
-                                visible: !viewModel.blockedUserIds.contains(
-                                    viewModel.threads[index].replies[0].author
-                                        .userId),
-                                child: ThreadCell(
-                                  title: viewModel.threads[index].title,
-                                  authorName: viewModel
-                                      .threads[index].replies[0].authorNickname,
-                                  totalReplies:
-                                      viewModel.threads[index].totalReplies,
-                                  lastReply: viewModel
-                                              .threads[index].replies.length ==
-                                          2
-                                      ? viewModel.threads[index].replies[1].date
-                                      : viewModel
-                                          .threads[index].replies[0].date,
-                                  tagName: viewModel.threads[index].tagName,
-                                  tagColor: viewModel.threads[index].tagColor,
-                                  onTap: () =>
-                                      _loadThread(viewModel.threads[index]),
-                                  onLongPress: () =>
-                                      _jumpToPage(viewModel.threads[index]),
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-              ),
-            ),
-            inactiveOverlayColor: Colors.black,
-            stickyFrontLayer: true,
-            backLayer: HomeDrawer(),
-            backLayerBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            onBackLayerRevealed: () => _fabAnimationController.reverse(),
-            onBackLayerConcealed: () => _fabAnimationController.forward(),
-            floatingActionButton: AnimatedBuilder(
-              animation: _fabAnimationController,
-              builder: (BuildContext context, Widget child) =>
-                  FadeScaleTransition(
-                animation: _fabAnimationController,
-                child: child,
-              ),
-              child: FloatingActionButton(
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.create),
                 onPressed: () => viewModel.isLoggedIn
-                    ? Navigator.of(context).push(SlideInFromBottomRoute(
-                        page: ComposePage(
-                        composeMode: ComposeMode.newPost,
-                        onCreateThread: (channelId) =>
-                            viewModel.onCreateThread(channelId),
-                      )))
+                    ? Navigator.of(context).pushNamed('/Compose',
+                        arguments: ComposePageArguments(
+                          composeMode: ComposeMode.newPost,
+                          onCreateThread: (channelId) =>
+                              viewModel.onCreateThread(channelId),
+                        ))
                     : showModal<void>(
                         context: context,
                         builder: (context) => LoginCheckDialog()),
-                child: Icon(Icons.create),
-              ),
-            )),
+              )
+            ],
+          ),
+          frontLayer: Material(
+            color: Theme.of(context).primaryColor,
+            child: Container(
+              child: viewModel.isThreadLoading && viewModel.isRefresh == false
+                  ? ListLoadingSkeleton()
+                  : RefreshIndicator(
+                      strokeWidth: 2.5,
+                      onRefresh: () =>
+                          viewModel.onRefresh(viewModel.selectedChannelId),
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        itemCount: viewModel.threads.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index == viewModel.threads.length) {
+                            return PageEndLoadingInidicator();
+                          } else {
+                            return Visibility(
+                              visible: !viewModel.blockedUserIds.contains(
+                                  viewModel
+                                      .threads[index].replies[0].author.userId),
+                              child: ThreadCell(
+                                title: viewModel.threads[index].title,
+                                authorName: viewModel
+                                    .threads[index].replies[0].authorNickname,
+                                totalReplies:
+                                    viewModel.threads[index].totalReplies,
+                                lastReply: viewModel
+                                            .threads[index].replies.length ==
+                                        2
+                                    ? viewModel.threads[index].replies[1].date
+                                    : viewModel.threads[index].replies[0].date,
+                                tagName: viewModel.threads[index].tagName,
+                                tagColor: viewModel.threads[index].tagColor,
+                                onTap: () =>
+                                    _loadThread(viewModel.threads[index]),
+                                onLongPress: () =>
+                                    _jumpToPage(viewModel.threads[index]),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+            ),
+          ),
+          inactiveOverlayColor: Colors.black,
+          stickyFrontLayer: true,
+          backLayer: HomeDrawer(),
+          backLayerBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        ),
       ),
     );
   }

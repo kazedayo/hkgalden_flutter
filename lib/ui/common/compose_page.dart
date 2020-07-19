@@ -12,27 +12,13 @@ import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
+import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/utils/zefyr_delegates.dart';
 import 'package:hkgalden_flutter/viewmodels/tag_selector_view_model.dart';
 import 'package:zefyr/zefyr.dart';
 import 'package:quill_delta/quill_delta.dart';
 
 class ComposePage extends StatefulWidget {
-  final ComposeMode composeMode;
-  final int threadId;
-  final Reply parentReply;
-  final Function(Reply) onSent;
-  final Function(String) onCreateThread;
-
-  const ComposePage(
-      {Key key,
-      this.composeMode,
-      this.threadId,
-      this.parentReply,
-      this.onSent,
-      this.onCreateThread})
-      : super(key: key);
-
   @override
   _ComposePageState createState() => _ComposePageState();
 }
@@ -69,137 +55,140 @@ class _ComposePageState extends State<ComposePage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-              icon: Icon(Icons.close),
-              onPressed: () => Navigator.of(context).pop()),
-          title: Text(widget.composeMode == ComposeMode.newPost
-              ? '發表主題'
-              : widget.composeMode == ComposeMode.reply
-                  ? '回覆主題'
-                  : '引用回覆 (#${widget.parentReply.floor})'),
-          automaticallyImplyLeading: false,
-          actions: <Widget>[
-            ActionBarSpinner(isVisible: _isSending),
-            Builder(
-              builder: (context) => IconButton(
-                icon: const Icon(Icons.send),
-                onPressed: _isSending
-                    ? null
-                    : () async {
-                        setState(() {
-                          _isSending = true;
-                        });
-                        widget.composeMode == ComposeMode.newPost
-                            ? _title == '' ||
-                                    _controller.document.toString() == '/n'
-                                ? showModal(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: Text('注意!'),
-                                      content: Text('內文/標題不能為空'),
-                                      actions: <Widget>[
-                                        FlatButton(
-                                            onPressed: () =>
-                                                Navigator.of(context).pop(),
-                                            child: Text('OK'))
-                                      ],
-                                    ),
-                                  )
-                                : _createThread(context)
-                            : _sendReply(context);
-                        // await DeltaJsonParser().toGaldenHtml(
-                        //     json.decode(_getZefyrEditorContent()));
-                      },
-              ),
-            ),
-          ],
-        ),
-        body: ZefyrTheme(
-          data: ZefyrThemeData(
-              toolbarTheme: ToolbarTheme.fallback(context).copyWith(
-            color: Theme.of(context).primaryColor,
-          )),
-          child: ZefyrScaffold(
-            child: Column(
-              children: <Widget>[
-                widget.composeMode == ComposeMode.newPost
-                    ? Container(
-                        margin: EdgeInsets.symmetric(horizontal: 12),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: <Widget>[
-                            InputChip(
-                              label: Text('#${_tag.name}',
-                                  strutStyle: StrutStyle(height: 1.25),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .caption
-                                      .copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700)),
-                              backgroundColor: _tag.color,
-                              onPressed: () => showModal<void>(
+  Widget build(BuildContext context) {
+    final ComposePageArguments arguments =
+        ModalRoute.of(context).settings.arguments;
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+            icon: Icon(Icons.close),
+            onPressed: () => Navigator.of(context).pop()),
+        title: Text(arguments.composeMode == ComposeMode.newPost
+            ? '發表主題'
+            : arguments.composeMode == ComposeMode.reply
+                ? '回覆主題'
+                : '引用回覆 (#${arguments.parentReply.floor})'),
+        automaticallyImplyLeading: false,
+        actions: <Widget>[
+          ActionBarSpinner(isVisible: _isSending),
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.send),
+              onPressed: _isSending
+                  ? null
+                  : () async {
+                      setState(() {
+                        _isSending = true;
+                      });
+                      arguments.composeMode == ComposeMode.newPost
+                          ? _title == '' ||
+                                  _controller.document.toString() == '/n'
+                              ? showModal(
                                   context: context,
-                                  builder: (context) => _TagSelectDialog(
-                                        onTagSelect: (tag, channelId) {
-                                          setState(() {
-                                            _tag = tag;
-                                            _channelId = channelId;
-                                          });
-                                        },
-                                      )),
-                            ),
-                            SizedBox(
-                              width: 12,
-                            ),
-                            Expanded(
-                              child: TextField(
-                                controller: _titleFieldController,
-                                decoration: InputDecoration(
-                                  labelText: '標題',
-                                ),
-                                onChanged: (value) {
-                                  setState(() {
-                                    _title = value;
-                                  });
-                                },
-                              ),
-                            )
-                          ],
-                        ))
-                    : SizedBox(),
-                widget.composeMode == ComposeMode.quotedReply
-                    ? ConstrainedBox(
-                        constraints: BoxConstraints(
-                            maxHeight:
-                                MediaQuery.of(context).size.height * 0.3),
-                        child: SingleChildScrollView(
-                          reverse: true,
-                          scrollDirection: Axis.vertical,
-                          padding: const EdgeInsets.symmetric(horizontal: 14),
-                          child: StyledHtmlView(
-                            htmlString: HKGaldenHtmlParser()
-                                .replyWithQuotes(widget.parentReply),
-                            floor: widget.parentReply.floor,
-                          ),
-                        ),
-                      )
-                    : SizedBox(),
-                Expanded(
-                  child: ZefyrEditor(
-                    controller: _controller,
-                    focusNode: _focusNode,
-                    toolbarDelegate: CustomZefyrToolbarDelegate(),
-                    imageDelegate: CustomZefyrImageDelegate(),
-                  ),
-                )
-              ],
+                                  builder: (context) => AlertDialog(
+                                    title: Text('注意!'),
+                                    content: Text('內文/標題不能為空'),
+                                    actions: <Widget>[
+                                      FlatButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(),
+                                          child: Text('OK'))
+                                    ],
+                                  ),
+                                )
+                              : _createThread(context, arguments)
+                          : _sendReply(context, arguments);
+                      // await DeltaJsonParser().toGaldenHtml(
+                      //     json.decode(_getZefyrEditorContent()));
+                    },
             ),
           ),
+        ],
+      ),
+      body: ZefyrTheme(
+        data: ZefyrThemeData(
+            toolbarTheme: ToolbarTheme.fallback(context).copyWith(
+          color: Theme.of(context).primaryColor,
+        )),
+        child: ZefyrScaffold(
+          child: Column(
+            children: <Widget>[
+              arguments.composeMode == ComposeMode.newPost
+                  ? Container(
+                      margin: EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: <Widget>[
+                          InputChip(
+                            label: Text('#${_tag.name}',
+                                strutStyle: StrutStyle(height: 1.25),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .caption
+                                    .copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700)),
+                            backgroundColor: _tag.color,
+                            onPressed: () => showModal<void>(
+                                context: context,
+                                builder: (context) => _TagSelectDialog(
+                                      onTagSelect: (tag, channelId) {
+                                        setState(() {
+                                          _tag = tag;
+                                          _channelId = channelId;
+                                        });
+                                      },
+                                    )),
+                          ),
+                          SizedBox(
+                            width: 12,
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: _titleFieldController,
+                              decoration: InputDecoration(
+                                labelText: '標題',
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  _title = value;
+                                });
+                              },
+                            ),
+                          )
+                        ],
+                      ))
+                  : SizedBox(),
+              arguments.composeMode == ComposeMode.quotedReply
+                  ? ConstrainedBox(
+                      constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(context).size.height * 0.3),
+                      child: SingleChildScrollView(
+                        reverse: true,
+                        scrollDirection: Axis.vertical,
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        child: StyledHtmlView(
+                          htmlString: HKGaldenHtmlParser()
+                              .replyWithQuotes(arguments.parentReply),
+                          floor: arguments.parentReply.floor,
+                        ),
+                      ),
+                    )
+                  : SizedBox(),
+              Expanded(
+                child: ZefyrEditor(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  toolbarDelegate: CustomZefyrToolbarDelegate(),
+                  imageDelegate: CustomZefyrImageDelegate(),
+                ),
+              )
+            ],
+          ),
         ),
-      );
+      ),
+    );
+  }
 
   NotusDocument _loadDocument() {
     final Delta delta = Delta()..insert('\n');
@@ -211,7 +200,8 @@ class _ComposePageState extends State<ComposePage> {
     return json.encode(content);
   }
 
-  Future<void> _createThread(BuildContext context) async {
+  Future<void> _createThread(
+      BuildContext context, ComposePageArguments arguments) async {
     HKGaldenApi()
         .createThread(
             _title,
@@ -223,7 +213,7 @@ class _ComposePageState extends State<ComposePage> {
         _isSending = false;
         if (threadId != null) {
           Navigator.pop(context);
-          widget.onCreateThread(_channelId);
+          arguments.onCreateThread(_channelId);
         } else {
           Scaffold.of(context).showSnackBar(SnackBar(content: Text('回覆發送失敗!')));
         }
@@ -231,14 +221,15 @@ class _ComposePageState extends State<ComposePage> {
     });
   }
 
-  Future<void> _sendReply(BuildContext context) async {
+  Future<void> _sendReply(
+      BuildContext context, ComposePageArguments arguments) async {
     HKGaldenApi()
         .sendReply(
-      widget.threadId,
+      arguments.threadId,
       await DeltaJsonParser()
           .toGaldenHtml(json.decode(_getZefyrEditorContent())),
-      parentId: widget.composeMode == ComposeMode.quotedReply
-          ? widget.parentReply.replyId
+      parentId: arguments.composeMode == ComposeMode.quotedReply
+          ? arguments.parentReply.replyId
           : '',
     )
         .then((sentReply) {
@@ -246,7 +237,7 @@ class _ComposePageState extends State<ComposePage> {
         _isSending = false;
         if (sentReply != null) {
           Navigator.pop(context);
-          widget.onSent(sentReply);
+          arguments.onSent(sentReply);
         } else {
           Scaffold.of(context).showSnackBar(SnackBar(content: Text('回覆發送失敗!')));
         }

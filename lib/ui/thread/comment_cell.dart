@@ -13,6 +13,7 @@ import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_detail_view.dart';
+import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/viewmodels/thread_page_view_model.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 
@@ -100,15 +101,15 @@ class CommentCell extends StatelessWidget {
                   IconButton(
                       icon: Icon(Icons.format_quote),
                       onPressed: () => canReply
-                          ? Navigator.of(context).push(SlideInFromBottomRoute(
-                              page: ComposePage(
-                              composeMode: ComposeMode.quotedReply,
-                              threadId: threadId,
-                              parentReply: reply,
-                              onSent: (reply) {
-                                onSent(reply);
-                              },
-                            )))
+                          ? Navigator.of(context).pushNamed('/Compose',
+                              arguments: ComposePageArguments(
+                                composeMode: ComposeMode.quotedReply,
+                                threadId: threadId,
+                                parentReply: reply,
+                                onSent: (reply) {
+                                  onSent(reply);
+                                },
+                              ))
                           : showModal<void>(
                               context: context,
                               builder: (context) => LoginCheckDialog())),

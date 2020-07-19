@@ -7,7 +7,6 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
-import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
@@ -37,6 +36,9 @@ class _ThreadPageState extends State<ThreadPage>
     _fabAnimationController = AnimationController(
       duration: Duration(milliseconds: 150),
       reverseDuration: Duration(milliseconds: 75),
+      //animationBehavior: AnimationBehavior.preserve,
+      lowerBound: 0,
+      upperBound: 1,
       value: 1,
       vsync: this,
     );
@@ -188,14 +190,14 @@ class _ThreadPageState extends State<ThreadPage>
                   ? showModal<void>(
                       context: context,
                       builder: (context) => LoginCheckDialog())
-                  : Navigator.of(context).push(SlideInFromBottomRoute(
-                      page: ComposePage(
-                      composeMode: ComposeMode.reply,
-                      threadId: viewModel.threadId,
-                      onSent: (reply) {
-                        _onReplySuccess(viewModel, reply);
-                      },
-                    )))),
+                  : Navigator.of(context).pushNamed('/Compose',
+                      arguments: ComposePageArguments(
+                        composeMode: ComposeMode.reply,
+                        threadId: viewModel.threadId,
+                        onSent: (reply) {
+                          _onReplySuccess(viewModel, reply);
+                        },
+                      ))),
         ),
       ),
     );

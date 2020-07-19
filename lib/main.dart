@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
                 contentTextStyle: TextStyle(color: Colors.white)),
             pageTransitionsTheme: PageTransitionsTheme(builders: {
               TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
-              TargetPlatform.iOS: CupertinoPageTransitionsBuilder()
+              TargetPlatform.iOS: OpenUpwardsPageTransitionsBuilder()
             }),
             dialogTheme: DialogTheme(
                 shape: RoundedRectangleBorder(
