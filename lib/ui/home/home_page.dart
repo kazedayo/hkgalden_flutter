@@ -10,13 +10,11 @@ import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
-import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
 import 'package:hkgalden_flutter/ui/home/list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
-import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/viewmodels/home/home_page_view_model.dart';
@@ -44,6 +42,12 @@ class _HomePageState extends State<HomePage>
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    context.dependOnInheritedWidgetOfExactType();
+    super.didChangeDependencies();
   }
 
   @override
@@ -86,21 +90,6 @@ class _HomePageState extends State<HomePage>
                     strutStyle: StrutStyle(height: 1.25)),
               ],
             ),
-            actions: <Widget>[
-              IconButton(
-                icon: Icon(Icons.create),
-                onPressed: () => viewModel.isLoggedIn
-                    ? Navigator.of(context).pushNamed('/Compose',
-                        arguments: ComposePageArguments(
-                          composeMode: ComposeMode.newPost,
-                          onCreateThread: (channelId) =>
-                              viewModel.onCreateThread(channelId),
-                        ))
-                    : showModal<void>(
-                        context: context,
-                        builder: (context) => LoginCheckDialog()),
-              )
-            ],
           ),
           frontLayer: Material(
             color: Theme.of(context).primaryColor,
@@ -151,6 +140,18 @@ class _HomePageState extends State<HomePage>
           stickyFrontLayer: true,
           backLayer: HomeDrawer(),
           backLayerBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          floatingActionButton: FloatingActionButton(
+            child: Icon(Icons.create),
+            onPressed: () => viewModel.isLoggedIn
+                ? Navigator.of(context).pushNamed('/Compose',
+                    arguments: ComposePageArguments(
+                      composeMode: ComposeMode.newPost,
+                      onCreateThread: (channelId) =>
+                          viewModel.onCreateThread(channelId),
+                    ))
+                : showModal<void>(
+                    context: context, builder: (context) => LoginCheckDialog()),
+          ),
         ),
       ),
     );

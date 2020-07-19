@@ -8,9 +8,7 @@ import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
-import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
-import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/ui/thread/comment_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page_loading_skeleton.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
@@ -28,6 +26,7 @@ class _ThreadPageState extends State<ThreadPage>
   AnimationController _fabAnimationController;
   bool _onLastPage;
   bool _canReply;
+  bool _fabIsHidden;
   double _elevation;
 
   @override
@@ -37,12 +36,11 @@ class _ThreadPageState extends State<ThreadPage>
       duration: Duration(milliseconds: 150),
       reverseDuration: Duration(milliseconds: 75),
       //animationBehavior: AnimationBehavior.preserve,
-      lowerBound: 0,
-      upperBound: 1,
       value: 1,
       vsync: this,
     );
     _onLastPage = false;
+    _fabIsHidden = false;
     _elevation = 0.0;
     super.initState();
   }
@@ -93,10 +91,22 @@ class _ThreadPageState extends State<ThreadPage>
           })
           ..addListener(() {
             if (_scrollController.position.userScrollDirection ==
-                ScrollDirection.reverse) {
+                    ScrollDirection.reverse &&
+                !_fabIsHidden) {
+              print('reverse');
+              setState(() {
+                _fabIsHidden = true;
+              });
               _fabAnimationController.reverse();
-            } else if (_scrollController.position.userScrollDirection ==
-                ScrollDirection.forward) {
+            } else if ((_scrollController.position.userScrollDirection ==
+                        ScrollDirection.forward ||
+                    _scrollController.position.pixels ==
+                        _scrollController.position.maxScrollExtent) &&
+                _fabIsHidden) {
+              print('forward');
+              setState(() {
+                _fabIsHidden = false;
+              });
               _fabAnimationController.forward();
             }
           })

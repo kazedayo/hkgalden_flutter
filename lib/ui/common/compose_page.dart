@@ -4,7 +4,6 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
-import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/tag.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
@@ -90,8 +89,12 @@ class _ComposePageState extends State<ComposePage> {
                                     content: Text('內文/標題不能為空'),
                                     actions: <Widget>[
                                       FlatButton(
-                                          onPressed: () =>
-                                              Navigator.of(context).pop(),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                            setState(() {
+                                              _isSending = false;
+                                            });
+                                          },
                                           child: Text('OK'))
                                     ],
                                   ),

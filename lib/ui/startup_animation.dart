@@ -59,7 +59,7 @@ class _StartupScreenState extends State<StartupScreen>
             if (viewModel.threadIsLoading == false &&
                 viewModel.channelIsLoading == false &&
                 viewModel.sessionUserIsLoading == false) {
-              Navigator.of(context).pushReplacement(SizeRoute(
+              Navigator.of(context).push(SizeRoute(
                   page: WillPopScope(
                       child: Navigator(
                         key: navigatorKey,

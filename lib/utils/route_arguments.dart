@@ -1,6 +1,5 @@
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
-import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 
 class ThreadPageArguments {
   final String title;
