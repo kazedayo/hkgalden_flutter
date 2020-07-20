@@ -13,7 +13,8 @@ import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
-import 'package:hkgalden_flutter/ui/home/list_loading_skeleton.dart';
+import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton.dart';
+import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton_cell.dart';
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
@@ -103,7 +104,7 @@ class _HomePageState extends State<HomePage>
                       itemCount: viewModel.threads.length + 1,
                       itemBuilder: (context, index) {
                         if (index == viewModel.threads.length) {
-                          return PageEndLoadingInidicator();
+                          return ListLoadingSkeletonCell();
                         } else {
                           return Visibility(
                             visible: !viewModel.blockedUserIds.contains(

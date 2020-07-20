@@ -10,7 +10,9 @@ import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
 import 'package:hkgalden_flutter/ui/thread/comment_cell.dart';
-import 'package:hkgalden_flutter/ui/thread/thread_page_loading_skeleton.dart';
+import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton.dart';
+import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton_cell.dart';
+import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton_header.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/viewmodels/thread_page_view_model.dart';
@@ -23,24 +25,14 @@ class ThreadPage extends StatefulWidget {
 class _ThreadPageState extends State<ThreadPage>
     with SingleTickerProviderStateMixin {
   ScrollController _scrollController;
-  AnimationController _fabAnimationController;
   bool _onLastPage;
   bool _canReply;
-  bool _fabIsHidden;
   double _elevation;
 
   @override
   void initState() {
     _scrollController = ScrollController();
-    _fabAnimationController = AnimationController(
-      duration: Duration(milliseconds: 150),
-      reverseDuration: Duration(milliseconds: 75),
-      //animationBehavior: AnimationBehavior.preserve,
-      value: 1,
-      vsync: this,
-    );
     _onLastPage = false;
-    _fabIsHidden = false;
     _elevation = 0.0;
     super.initState();
   }
@@ -48,7 +40,6 @@ class _ThreadPageState extends State<ThreadPage>
   @override
   void dispose() {
     _scrollController.dispose();
-    _fabAnimationController.dispose();
     super.dispose();
   }
 
@@ -87,27 +78,6 @@ class _ThreadPageState extends State<ThreadPage>
                       isInitialLoad: false),
                 );
               }
-            }
-          })
-          ..addListener(() {
-            if (_scrollController.position.userScrollDirection ==
-                    ScrollDirection.reverse &&
-                !_fabIsHidden) {
-              print('reverse');
-              setState(() {
-                _fabIsHidden = true;
-              });
-              _fabAnimationController.reverse();
-            } else if ((_scrollController.position.userScrollDirection ==
-                        ScrollDirection.forward ||
-                    _scrollController.position.pixels ==
-                        _scrollController.position.maxScrollExtent) &&
-                _fabIsHidden) {
-              print('forward');
-              setState(() {
-                _fabIsHidden = false;
-              });
-              _fabAnimationController.forward();
             }
           })
           ..addListener(() {
@@ -188,27 +158,19 @@ class _ThreadPageState extends State<ThreadPage>
                   ],
                 ),
               ),
-        floatingActionButton: AnimatedBuilder(
-          animation: _fabAnimationController,
-          builder: (context, child) => FadeScaleTransition(
-            animation: _fabAnimationController,
-            child: child,
-          ),
-          child: FloatingActionButton(
-              child: Icon(Icons.reply),
-              onPressed: () => !_canReply
-                  ? showModal<void>(
-                      context: context,
-                      builder: (context) => LoginCheckDialog())
-                  : Navigator.of(context).pushNamed('/Compose',
-                      arguments: ComposePageArguments(
-                        composeMode: ComposeMode.reply,
-                        threadId: viewModel.threadId,
-                        onSent: (reply) {
-                          _onReplySuccess(viewModel, reply);
-                        },
-                      ))),
-        ),
+        floatingActionButton: FloatingActionButton(
+            child: Icon(Icons.reply),
+            onPressed: () => !_canReply
+                ? showModal<void>(
+                    context: context, builder: (context) => LoginCheckDialog())
+                : Navigator.of(context).pushNamed('/Compose',
+                    arguments: ComposePageArguments(
+                      composeMode: ComposeMode.reply,
+                      threadId: viewModel.threadId,
+                      onSent: (reply) {
+                        _onReplySuccess(viewModel, reply);
+                      },
+                    ))),
       ),
     );
   }
@@ -227,16 +189,10 @@ class _ThreadPageState extends State<ThreadPage>
   Widget _generatePreviousPageSliver(
       ThreadPageViewModel viewModel, int index, int page) {
     if (viewModel.previousPageReplies.isEmpty) {
-      if (page != 1) {
-        return Container(
-          height: 50,
-          child: Center(
-            child: Text('撈緊上一頁...', style: TextStyle(color: Colors.grey)),
-          ),
-        );
-      } else {
-        return SizedBox();
-      }
+      return Visibility(
+        visible: page != 1,
+        child: ThreadPageLoadingSkeletonCell(),
+      );
     } else {
       if (viewModel
                   .previousPageReplies[
@@ -260,12 +216,7 @@ class _ThreadPageState extends State<ThreadPage>
                             50.0)
                         .ceil() ==
                     viewModel.currentPage)
-              Container(
-                height: 50,
-                child: Center(
-                  child: Text('撈緊上一頁...', style: TextStyle(color: Colors.grey)),
-                ),
-              ),
+              ThreadPageLoadingSkeletonCell(),
             Container(
               height: 50,
               child: Center(
@@ -378,13 +329,7 @@ class _ThreadPageState extends State<ThreadPage>
             canReply: _canReply,
           ),
           !_onLastPage
-              ? Container(
-                  height: 50,
-                  child: Center(
-                    child:
-                        Text('撈緊下一頁...', style: TextStyle(color: Colors.grey)),
-                  ),
-                )
+              ? ThreadPageLoadingSkeletonHeader()
               : Container(
                   height: 50,
                   child: Center(
