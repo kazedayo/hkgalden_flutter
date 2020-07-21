@@ -11,7 +11,6 @@ import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
-import 'package:hkgalden_flutter/ui/common/page_end_loading_indicator.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
 import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton_cell.dart';
@@ -29,13 +28,14 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage> {
   ScrollController _scrollController;
+  bool _fabIsHidden;
 
   @override
   void initState() {
     _scrollController = ScrollController();
+    _fabIsHidden = false;
     super.initState();
   }
 
@@ -65,6 +65,21 @@ class _HomePageState extends State<HomePage>
                   channelId: store.state.threadListState.currentChannelId,
                   page: store.state.threadListState.currentPage + 1,
                   isRefresh: true));
+            }
+          })
+          ..addListener(() {
+            if (_scrollController.position.userScrollDirection ==
+                    ScrollDirection.forward &&
+                _fabIsHidden == true) {
+              setState(() {
+                _fabIsHidden = false;
+              });
+            } else if (_scrollController.position.userScrollDirection ==
+                    ScrollDirection.reverse &&
+                _fabIsHidden == false) {
+              setState(() {
+                _fabIsHidden = true;
+              });
             }
           });
       },
@@ -139,18 +154,21 @@ class _HomePageState extends State<HomePage>
         stickyFrontLayer: true,
         backLayer: HomeDrawer(),
         backLayerBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.create),
-          onPressed: () => viewModel.isLoggedIn
-              ? navigatorKey.currentState.pushNamed('/Compose',
-                  arguments: ComposePageArguments(
-                    composeMode: ComposeMode.newPost,
-                    onCreateThread: (channelId) =>
-                        viewModel.onCreateThread(channelId),
-                  ))
-              : showModal<void>(
-                  context: context, builder: (context) => LoginCheckDialog()),
-        ),
+        floatingActionButton: _fabIsHidden
+            ? null
+            : FloatingActionButton(
+                child: Icon(Icons.create),
+                onPressed: () => viewModel.isLoggedIn
+                    ? navigatorKey.currentState.pushNamed('/Compose',
+                        arguments: ComposePageArguments(
+                          composeMode: ComposeMode.newPost,
+                          onCreateThread: (channelId) =>
+                              viewModel.onCreateThread(channelId),
+                        ))
+                    : showModal<void>(
+                        context: context,
+                        builder: (context) => LoginCheckDialog()),
+              ),
       ),
     );
   }

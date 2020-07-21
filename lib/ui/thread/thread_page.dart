@@ -22,17 +22,18 @@ class ThreadPage extends StatefulWidget {
   _ThreadPageState createState() => _ThreadPageState();
 }
 
-class _ThreadPageState extends State<ThreadPage>
-    with SingleTickerProviderStateMixin {
+class _ThreadPageState extends State<ThreadPage> {
   ScrollController _scrollController;
   bool _onLastPage;
   bool _canReply;
+  bool _fabIsHidden;
   double _elevation;
 
   @override
   void initState() {
     _scrollController = ScrollController();
     _onLastPage = false;
+    _fabIsHidden = false;
     _elevation = 0.0;
     super.initState();
   }
@@ -78,6 +79,25 @@ class _ThreadPageState extends State<ThreadPage>
                       isInitialLoad: false),
                 );
               }
+            }
+          })
+          ..addListener(() {
+            if (_scrollController.position.userScrollDirection ==
+                    ScrollDirection.reverse &&
+                !_fabIsHidden) {
+              print('reverse');
+              setState(() {
+                _fabIsHidden = true;
+              });
+            } else if ((_scrollController.position.userScrollDirection ==
+                        ScrollDirection.forward ||
+                    _scrollController.position.pixels ==
+                        _scrollController.position.maxScrollExtent) &&
+                _fabIsHidden) {
+              print('forward');
+              setState(() {
+                _fabIsHidden = false;
+              });
             }
           })
           ..addListener(() {
@@ -158,19 +178,22 @@ class _ThreadPageState extends State<ThreadPage>
                   ],
                 ),
               ),
-        floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.reply),
-            onPressed: () => !_canReply
-                ? showModal<void>(
-                    context: context, builder: (context) => LoginCheckDialog())
-                : Navigator.of(context).pushNamed('/Compose',
-                    arguments: ComposePageArguments(
-                      composeMode: ComposeMode.reply,
-                      threadId: viewModel.threadId,
-                      onSent: (reply) {
-                        _onReplySuccess(viewModel, reply);
-                      },
-                    ))),
+        floatingActionButton: _fabIsHidden
+            ? null
+            : FloatingActionButton(
+                child: Icon(Icons.reply),
+                onPressed: () => !_canReply
+                    ? showModal<void>(
+                        context: context,
+                        builder: (context) => LoginCheckDialog())
+                    : Navigator.of(context).pushNamed('/Compose',
+                        arguments: ComposePageArguments(
+                          composeMode: ComposeMode.reply,
+                          threadId: viewModel.threadId,
+                          onSent: (reply) {
+                            _onReplySuccess(viewModel, reply);
+                          },
+                        ))),
       ),
     );
   }
@@ -308,7 +331,7 @@ class _ThreadPageState extends State<ThreadPage>
             canReply: _canReply,
           ),
           Container(
-            height: 50,
+            height: 85,
             child: Center(
               child: Text('已到post底', style: TextStyle(color: Colors.grey)),
             ),
@@ -331,7 +354,7 @@ class _ThreadPageState extends State<ThreadPage>
           !_onLastPage
               ? ThreadPageLoadingSkeletonHeader()
               : Container(
-                  height: 50,
+                  height: 85,
                   child: Center(
                     child:
                         Text('已到post底', style: TextStyle(color: Colors.grey)),
