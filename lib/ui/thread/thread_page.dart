@@ -154,29 +154,26 @@ class _ThreadPageState extends State<ThreadPage> {
         ),
         body: viewModel.isLoading && viewModel.isInitialLoad
             ? ThreadPageLoadingSkeleton()
-            : SafeArea(
-                top: false,
-                child: CustomScrollView(
-                  center: centerKey,
-                  controller: _scrollController,
-                  slivers: <Widget>[
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        return _generatePreviousPageSliver(
-                            viewModel, index, arguments.page);
-                      },
-                          childCount: viewModel.previousPageReplies.length == 0
-                              ? 1
-                              : viewModel.previousPageReplies.length),
-                    ),
-                    SliverList(
-                      key: centerKey,
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        return _generatePageSliver(viewModel, index);
-                      }, childCount: viewModel.replies.length),
-                    ),
-                  ],
-                ),
+            : CustomScrollView(
+                center: centerKey,
+                controller: _scrollController,
+                slivers: <Widget>[
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      return _generatePreviousPageSliver(
+                          viewModel, index, arguments.page);
+                    },
+                        childCount: viewModel.previousPageReplies.length == 0
+                            ? 1
+                            : viewModel.previousPageReplies.length),
+                  ),
+                  SliverList(
+                    key: centerKey,
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      return _generatePageSliver(viewModel, index);
+                    }, childCount: viewModel.replies.length),
+                  ),
+                ],
               ),
         floatingActionButton: _fabIsHidden
             ? null
