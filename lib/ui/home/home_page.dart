@@ -85,26 +85,33 @@ class _HomePageState extends State<HomePage> {
       },
       builder: (BuildContext context, HomePageViewModel viewModel) =>
           BackdropScaffold(
-        appBar: AppBar(
-          leading: BackdropToggleButton(icon: AnimatedIcons.close_menu),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Hero(
-                  tag: 'logo',
-                  child: SizedBox(
-                      child: SvgPicture.asset('assets/icon-hkgalden.svg'),
-                      width: 27,
-                      height: 27)),
-              SizedBox(width: 5),
-              Text(viewModel.title,
-                  style: TextStyle(fontWeight: FontWeight.w700),
-                  strutStyle: StrutStyle(height: 1.25)),
-            ],
-          ),
-        ),
+        appBar: PreferredSize(
+            child: GestureDetector(
+              onTap: () => _scrollController.animateTo(0,
+                  duration: Duration(milliseconds: 1000),
+                  curve: Curves.easeOutExpo),
+              child: AppBar(
+                leading: BackdropToggleButton(icon: AnimatedIcons.close_menu),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Hero(
+                        tag: 'logo',
+                        child: SizedBox(
+                            child: SvgPicture.asset('assets/icon-hkgalden.svg'),
+                            width: 27,
+                            height: 27)),
+                    SizedBox(width: 5),
+                    Text(viewModel.title,
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                        strutStyle: StrutStyle(height: 1.25)),
+                  ],
+                ),
+              ),
+            ),
+            preferredSize: Size.fromHeight(kToolbarHeight)),
         frontLayer: Material(
           color: Theme.of(context).primaryColor,
           child: Container(

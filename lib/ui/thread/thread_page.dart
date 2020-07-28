@@ -85,7 +85,6 @@ class _ThreadPageState extends State<ThreadPage> {
             if (_scrollController.position.userScrollDirection ==
                     ScrollDirection.reverse &&
                 !_fabIsHidden) {
-              print('reverse');
               setState(() {
                 _fabIsHidden = true;
               });
@@ -94,7 +93,6 @@ class _ThreadPageState extends State<ThreadPage> {
                     _scrollController.position.pixels ==
                         _scrollController.position.maxScrollExtent) &&
                 _fabIsHidden) {
-              print('forward');
               setState(() {
                 _fabIsHidden = false;
               });
@@ -129,29 +127,36 @@ class _ThreadPageState extends State<ThreadPage> {
       builder: (BuildContext context, ThreadPageViewModel viewModel) =>
           Scaffold(
         key: scaffoldKey,
-        appBar: AppBar(
-          elevation: _elevation,
-          title: SizedBox(
-            height: kToolbarHeight * 0.85,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Flexible(
-                  fit: FlexFit.loose,
-                  child: AutoSizeText(
-                    arguments.title,
-                    style: TextStyle(fontWeight: FontWeight.w700),
-                    maxLines: 2,
-                    minFontSize: 14,
-                    //overflow: TextOverflow.ellipsis
+        appBar: PreferredSize(
+            child: GestureDetector(
+              onTap: () => _scrollController.animateTo(0,
+                  duration: Duration(milliseconds: 1000),
+                  curve: Curves.easeOutExpo),
+              child: AppBar(
+                elevation: _elevation,
+                title: SizedBox(
+                  height: kToolbarHeight * 0.85,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: AutoSizeText(
+                          arguments.title,
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                          maxLines: 2,
+                          minFontSize: 14,
+                          //overflow: TextOverflow.ellipsis
+                        ),
+                      )
+                    ],
                   ),
-                )
-              ],
+                ),
+              ),
             ),
-          ),
-        ),
+            preferredSize: Size.fromHeight(kToolbarHeight)),
         body: viewModel.isLoading && viewModel.isInitialLoad
             ? ThreadPageLoadingSkeleton()
             : CustomScrollView(
