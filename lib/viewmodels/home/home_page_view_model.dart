@@ -15,17 +15,16 @@ class HomePageViewModel extends Equatable {
   final Function(String) onCreateThread;
   final List<String> blockedUserIds;
 
-  HomePageViewModel({
-    this.isLoggedIn,
-    this.threads,
-    this.title,
-    this.selectedChannelId,
-    this.isThreadLoading,
-    this.isRefresh,
-    this.onRefresh,
-    this.onCreateThread,
-    this.blockedUserIds,
-  });
+  HomePageViewModel(
+      {this.isLoggedIn,
+      this.threads,
+      this.title,
+      this.selectedChannelId,
+      this.isThreadLoading,
+      this.isRefresh,
+      this.onRefresh,
+      this.onCreateThread,
+      this.blockedUserIds});
 
   factory HomePageViewModel.create(Store<AppState> store) {
     return HomePageViewModel(
@@ -54,6 +53,6 @@ class HomePageViewModel extends Equatable {
         selectedChannelId,
         isThreadLoading,
         isRefresh,
-        blockedUserIds
+        blockedUserIds,
       ];
 }

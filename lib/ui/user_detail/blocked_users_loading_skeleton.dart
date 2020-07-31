@@ -9,7 +9,7 @@ class BlockedUsersLoadingSkeleton extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(20, 12, 20, 20),
           itemCount: 20,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+              crossAxisCount: 3,
               mainAxisSpacing: 24,
               crossAxisSpacing: 20,
               childAspectRatio: 4),
@@ -20,5 +20,5 @@ class BlockedUsersLoadingSkeleton extends StatelessWidget {
                 ),
               )),
       baseColor: Theme.of(context).scaffoldBackgroundColor,
-      highlightColor: Theme.of(context).splashColor);
+      highlightColor: Theme.of(context).primaryColor);
 }

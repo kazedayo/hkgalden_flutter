@@ -10,6 +10,10 @@ import 'package:hkgalden_flutter/viewmodels/home/drawer/home_drawer_header_view_
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 
 class HomeDrawerHeader extends StatelessWidget {
+  final Function onAvatarTap;
+
+  const HomeDrawerHeader({Key key, this.onAvatarTap}) : super(key: key);
+
   @override
   Widget build(BuildContext context) =>
       StoreConnector<AppState, HomeDrawerHeaderViewModel>(
@@ -30,7 +34,7 @@ class HomeDrawerHeader extends StatelessWidget {
                           avatarImage: viewModel.sessionUserAvatar,
                           userGroup: viewModel.sessionUserGroup,
                           onTap: () => viewModel.isLoggedIn
-                              ? null
+                              ? onAvatarTap()
                               : Navigator.of(context).push(
                                   SlideInFromBottomRoute(page: LoginPage())),
                         ),

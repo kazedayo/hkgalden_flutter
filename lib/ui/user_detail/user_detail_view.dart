@@ -1,18 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
-import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
 import 'package:hkgalden_flutter/redux/store.dart';
-import 'package:hkgalden_flutter/redux/user_thread_list/user_thread_list_action.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
-import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
-import 'package:hkgalden_flutter/viewmodels/user_detail/user_thread_list_view_model.dart';
+import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_page.dart';
 
 class UserDetailView extends StatefulWidget {
   final User user;
@@ -111,7 +107,7 @@ class _UserDetailViewState extends State<UserDetailView> {
                 ),
                 SizedBox(height: 15),
                 Expanded(
-                  child: _UserThreadListPage(userId: widget.user.userId),
+                  child: UserThreadListPage(userId: widget.user.userId),
                 ),
               ],
             ),
@@ -120,71 +116,5 @@ class _UserDetailViewState extends State<UserDetailView> {
           color: Theme.of(context).scaffoldBackgroundColor,
           elevation: 24,
         ),
-      );
-}
-
-// class _BlockListPage extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) =>
-//       StoreConnector<AppState, BlockedUsersViewModel>(
-//         onInit: (store) => store.dispatch(RequestBlockedUsersAction()),
-//         converter: (store) => BlockedUsersViewModel.create(store),
-//         builder: (context, viewModel) => viewModel.isLoading
-//             ? BlockedUsersLoadingSkeleton()
-//             : GridView.builder(
-//                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-//                     crossAxisCount: 2,
-//                     mainAxisSpacing: 4,
-//                     crossAxisSpacing: 4,
-//                     childAspectRatio: 3),
-//                 itemCount: viewModel.blockedUsers.length,
-//                 itemBuilder: (context, index) {
-//                   return BlockedUserCell(user: viewModel.blockedUsers[index]);
-//                 }),
-//       );
-// }
-
-class _UserThreadListPage extends StatelessWidget {
-  final String userId;
-
-  _UserThreadListPage({this.userId});
-
-  @override
-  Widget build(BuildContext context) =>
-      StoreConnector<AppState, UserThreadListViewModel>(
-        distinct: true,
-        onInit: (store) => store
-            .dispatch(RequestUserThreadListAction(userId: userId, page: 1)),
-        converter: (store) => UserThreadListViewModel.create(store),
-        builder: (context, viewModel) => viewModel.isLoading
-            ? UserThreadListLoadingSkeleton()
-            : ListView.builder(
-                itemCount: viewModel.userThreads.length,
-                itemBuilder: (context, index) => Column(
-                      children: <Widget>[
-                        ListTile(
-                          title: Text(
-                            viewModel.userThreads[index].title,
-                          ),
-                          trailing: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 4),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
-                                color: viewModel.userThreads[index].tagColor),
-                            child: Text(
-                              '#${viewModel.userThreads[index].tagName}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .caption
-                                  .copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700),
-                              strutStyle: StrutStyle(height: 1.25),
-                            ),
-                          ),
-                        ),
-                        Divider(indent: 8, height: 1, thickness: 1),
-                      ],
-                    )),
       );
 }
