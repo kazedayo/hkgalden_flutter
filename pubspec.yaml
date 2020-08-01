@@ -43,11 +43,12 @@ dependencies:
   auto_size_text: 
   shimmer: 
   image_picker: 
-  backdrop: 
+  backdrop:
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -92,3 +93,10 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
   assets:
     - assets/
+
+flutter_icons:
+  ios: true
+  image_path: "assets/app-icon.png"
+  android: true
+  adaptive_icon_background: "assets/app-icon.png"
+  adaptive_icon_foreground: "assets/app-icon.png"
