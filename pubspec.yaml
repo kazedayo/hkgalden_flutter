@@ -44,7 +44,6 @@ dependencies:
   shimmer: 
   image_picker: 
   backdrop: 
-  google_fonts:
 
 dev_dependencies:
   flutter_test:

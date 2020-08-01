@@ -12,7 +12,7 @@ class BlockedUsersLoadingSkeleton extends StatelessWidget {
               crossAxisCount: 3,
               mainAxisSpacing: 24,
               crossAxisSpacing: 20,
-              childAspectRatio: 4),
+              childAspectRatio: 3.5),
           itemBuilder: (context, index) => Container(
                 decoration: BoxDecoration(
                   color: Colors.grey,

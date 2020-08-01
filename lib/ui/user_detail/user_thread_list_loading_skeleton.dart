@@ -5,31 +5,26 @@ class UserThreadListLoadingSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Shimmer.fromColors(
       child: ListView.builder(
+          padding: EdgeInsets.only(top: 12),
           physics: NeverScrollableScrollPhysics(),
           itemCount: 20,
           itemBuilder: (context, index) => Row(
                 children: <Widget>[
-                  Flexible(
-                    flex: 4,
+                  Expanded(
                     child: Container(
-                      margin: EdgeInsets.fromLTRB(12, 8, 0, 8),
-                      height: 40,
+                      margin: EdgeInsets.fromLTRB(12, 8, 100, 8),
+                      height: 35,
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
                           color: Colors.grey),
                     ),
                   ),
-                  Spacer(),
-                  Flexible(
-                    flex: 2,
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(0, 8, 12, 8),
-                      height: 40,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: Colors.grey),
-                    ),
+                  Chip(
+                    label: Text('#哈哈'),
                   ),
+                  SizedBox(
+                    width: 12,
+                  )
                 ],
               )),
       baseColor: Theme.of(context).scaffoldBackgroundColor,
