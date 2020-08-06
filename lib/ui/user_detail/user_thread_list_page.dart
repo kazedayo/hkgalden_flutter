@@ -20,7 +20,6 @@ class UserThreadListPage extends StatelessWidget {
         builder: (context, viewModel) => viewModel.isLoading
             ? UserThreadListLoadingSkeleton()
             : ListView.builder(
-                shrinkWrap: true,
                 itemCount: viewModel.userThreads.length,
                 itemBuilder: (context, index) => Column(
                       children: <Widget>[
