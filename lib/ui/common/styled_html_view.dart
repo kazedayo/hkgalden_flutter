@@ -31,99 +31,102 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
 
   @override
   Widget build(BuildContext context) {
-    return Html(
-      data: widget.htmlString,
-      customRender: {
-        'img': (context, _, attributes, __) {
-          return GestureDetector(
-              onTap: () => _showImageView(
-                  context.buildContext,
-                  attributes['src'],
-                  '${widget.floor}_${attributes['src']}_$_randomHash'),
-              child: Container(
-                margin: EdgeInsets.symmetric(vertical: 8),
-                child: Hero(
-                  tag: '${widget.floor}_${attributes['src']}_$_randomHash',
-                  child: CachedNetworkImage(
-                    imageUrl: attributes['src'],
-                    placeholder: (context, url) => SizedBox(
-                      width: 25,
-                      height: 25,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+      child: Html(
+        data: widget.htmlString,
+        customRender: {
+          'img': (context, _, attributes, __) {
+            return GestureDetector(
+                onTap: () => _showImageView(
+                    context.buildContext,
+                    attributes['src'],
+                    '${widget.floor}_${attributes['src']}_$_randomHash'),
+                child: Container(
+                  margin: EdgeInsets.symmetric(vertical: 8),
+                  child: Hero(
+                    tag: '${widget.floor}_${attributes['src']}_$_randomHash',
+                    child: CachedNetworkImage(
+                      imageUrl: attributes['src'],
+                      placeholder: (context, url) => SizedBox(
+                        width: 25,
+                        height: 25,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      errorWidget: (context, url, error) => SizedBox(
+                        width: 25,
+                        height: 25,
+                        child: Icon(Icons.error),
+                      ),
+                      fadeInDuration: Duration(milliseconds: 250),
+                      fadeOutDuration: Duration(milliseconds: 250),
                     ),
-                    errorWidget: (context, url, error) => SizedBox(
-                      width: 25,
-                      height: 25,
-                      child: Icon(Icons.error),
-                    ),
-                    fadeInDuration: Duration(milliseconds: 250),
-                    fadeOutDuration: Duration(milliseconds: 250),
                   ),
-                ),
-              ));
-        },
-        'icon': (_, __, attributes, ____) {
-          return Container(
-            margin: EdgeInsets.all(3),
-            child: CachedNetworkImage(
-              alignment: Alignment.center,
-              imageUrl: attributes['src'],
-              fadeInDuration: Duration(milliseconds: 250),
-              fadeOutDuration: Duration(milliseconds: 250),
-            ),
-          );
-        },
-        'span': (context, child, attributes, element) {
-          if (element.className == ('color')) {
-            Style newStyle = context.style.copyWith(
-                color: Color(int.parse('FF${attributes['hex']}', radix: 16)),
-                fontSize: FontSize(18));
+                ));
+          },
+          'icon': (_, __, attributes, ____) {
             return Container(
-              transform:
-                  Theme.of(context.buildContext).platform == TargetPlatform.iOS
-                      ? Matrix4.translationValues(0, 2.5, 0)
-                      : Matrix4.translationValues(0, 0.5, 0),
-              child: ContainerSpan(
-                newContext: RenderContext(
-                    buildContext: context.buildContext,
-                    style: newStyle,
-                    parser: context.parser),
-                style: newStyle,
-                children: (child as ContainerSpan).children,
-                child: (child as ContainerSpan).child,
+              margin: EdgeInsets.all(3),
+              child: CachedNetworkImage(
+                alignment: Alignment.center,
+                imageUrl: attributes['src'],
+                fadeInDuration: Duration(milliseconds: 250),
+                fadeOutDuration: Duration(milliseconds: 250),
               ),
             );
+          },
+          'span': (context, child, attributes, element) {
+            if (element.className == ('color')) {
+              Style newStyle = context.style.copyWith(
+                  color: Color(int.parse('FF${attributes['hex']}', radix: 16)),
+                  fontSize: FontSize(18));
+              return Container(
+                transform: Theme.of(context.buildContext).platform ==
+                        TargetPlatform.iOS
+                    ? Matrix4.translationValues(0, 2.5, 0)
+                    : Matrix4.translationValues(0, 0.5, 0),
+                child: ContainerSpan(
+                  newContext: RenderContext(
+                      buildContext: context.buildContext,
+                      style: newStyle,
+                      parser: context.parser),
+                  style: newStyle,
+                  children: (child as ContainerSpan).children,
+                  child: (child as ContainerSpan).child,
+                ),
+              );
+            }
+            return child;
           }
-          return child;
-        }
-      },
-      style: {
-        "html": Style(
-          backgroundColor: Colors.transparent,
-          fontSize: FontSize(18),
-        ),
-        "body": Style(
-            margin: EdgeInsets.symmetric(vertical: 15, horizontal: 3),
-            padding: EdgeInsets.zero),
-        "a": Style(
-            color: Colors.blueAccent, textDecoration: TextDecoration.none),
-        "blockquote": Style(
-            border: Border(left: BorderSide(color: Colors.grey, width: 2.3)),
-            padding: EdgeInsets.only(left: 8),
-            margin: EdgeInsets.only(left: 10, right: 0, bottom: 15, top: 0)),
-        "div.quoteName": Style(
-            fontSize: FontSize.smaller,
-            color: Colors.grey,
-            margin: EdgeInsets.symmetric(vertical: 4)),
-        "div.center": Style(alignment: Alignment.center),
-        "div.right": Style(alignment: Alignment.centerRight),
-        "h1, h2, h3": Style(
-          margin: EdgeInsets.zero,
-          padding: EdgeInsets.zero,
-        ),
-        "p": Style(margin: EdgeInsets.symmetric(vertical: 0)),
-      },
-      onLinkTap: (url) => _launchURL(url),
+        },
+        style: {
+          "html": Style(
+            backgroundColor: Colors.transparent,
+            fontSize: FontSize(18),
+          ),
+          "body": Style(
+              margin: EdgeInsets.symmetric(vertical: 15, horizontal: 3),
+              padding: EdgeInsets.zero),
+          "a": Style(
+              color: Colors.blueAccent, textDecoration: TextDecoration.none),
+          "blockquote": Style(
+              border: Border(left: BorderSide(color: Colors.grey, width: 2.3)),
+              padding: EdgeInsets.only(left: 8),
+              margin: EdgeInsets.only(left: 10, right: 0, bottom: 15, top: 0)),
+          "div.quoteName": Style(
+              fontSize: FontSize.smaller,
+              color: Colors.grey,
+              margin: EdgeInsets.symmetric(vertical: 4)),
+          "div.center": Style(alignment: Alignment.center),
+          "div.right": Style(alignment: Alignment.centerRight),
+          "h1, h2, h3": Style(
+            margin: EdgeInsets.zero,
+            padding: EdgeInsets.zero,
+          ),
+          "p": Style(margin: EdgeInsets.symmetric(vertical: 0)),
+        },
+        onLinkTap: (url) => _launchURL(url),
+      ),
     );
   }
 
