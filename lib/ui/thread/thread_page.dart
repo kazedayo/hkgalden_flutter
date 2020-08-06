@@ -353,15 +353,18 @@ class _ThreadPageState extends State<ThreadPage> {
             },
             canReply: _canReply,
           ),
-          !_onLastPage
-              ? ThreadPageLoadingSkeletonHeader()
-              : Container(
-                  height: 85,
-                  child: Center(
-                    child:
-                        Text('已到post底', style: TextStyle(color: Colors.grey)),
+          SafeArea(
+            top: false,
+            child: !_onLastPage
+                ? ThreadPageLoadingSkeletonHeader()
+                : Container(
+                    height: 85,
+                    child: Center(
+                      child:
+                          Text('已到post底', style: TextStyle(color: Colors.grey)),
+                    ),
                   ),
-                ),
+          )
         ],
       );
     } else {

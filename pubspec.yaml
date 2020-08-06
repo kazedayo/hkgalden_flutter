@@ -24,8 +24,11 @@ dependencies:
   flutter:
     sdk: flutter
 
-  zefyr: 
-  flutter_svg: ^0.17.4
+  zefyr:
+    git:
+      url: https://github.com/memspace/zefyr.git
+      path: packages/zefyr
+  flutter_svg: 
   graphql: ^3.0.2
   redux: 
   flutter_redux: 
@@ -33,22 +36,28 @@ dependencies:
   flutter_secure_storage: 
   equatable: 
   flutter_html: 
+    git:
+      url: https://github.com/Sub6Resources/flutter_html.git
   date_time_format: 
   universal_html: 
   url_launcher: 
   cached_network_image: 
-  photo_view: 
   animations: 
   image_downloader: 
   auto_size_text: 
   shimmer: 
   image_picker: 
   backdrop:
+    git:
+      url: https://github.com/fluttercommunity/backdrop.git
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons:
+
+dependency_overrides:
+  flutter_svg: 0.18.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

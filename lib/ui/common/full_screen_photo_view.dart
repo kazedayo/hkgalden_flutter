@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:image_downloader/image_downloader.dart';
-import 'package:photo_view/photo_view.dart';
 
 class FullScreenPhotoView extends StatefulWidget {
   final String imageUrl;
@@ -86,10 +85,9 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
           constraints: BoxConstraints.expand(
             height: MediaQuery.of(context).size.height,
           ),
-          child: PhotoView.customChild(
-            gestureDetectorBehavior: HitTestBehavior.opaque,
-            backgroundDecoration:
-                BoxDecoration(color: Theme.of(context).scaffoldBackgroundColor),
+          child: InteractiveViewer(
+            minScale: 1.0,
+            maxScale: 3.0,
             child: GestureDetector(
               onVerticalDragStart: (details) => _startVerticalDrag(details),
               onVerticalDragUpdate: (details) => _whileVerticalDrag(details),
@@ -114,9 +112,6 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
                 ],
               ),
             ),
-            //heroAttributes: PhotoViewHeroAttributes(tag: heroTag, transitionOnUserGestures: true),
-            minScale: PhotoViewComputedScale.contained,
-            maxScale: PhotoViewComputedScale.covered * 3,
           ),
         ),
       );
