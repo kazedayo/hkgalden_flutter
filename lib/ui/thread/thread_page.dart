@@ -287,7 +287,7 @@ class _ThreadPageState extends State<ThreadPage> {
 
   Widget _generatePageSliver(ThreadPageViewModel viewModel, int index) {
     if (viewModel.replies[index].floor % 50 == 1 &&
-        viewModel.replies[index].floor == viewModel.replies.last.floor) {
+        viewModel.replies[index] == viewModel.replies.last) {
       return Column(
         children: <Widget>[
           Container(
