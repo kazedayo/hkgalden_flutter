@@ -57,6 +57,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
               child: _showSubPage
                   ? SessionUserDetailView()
                   : GridView.count(
+                      padding: EdgeInsets.only(bottom: 10),
                       key: drawerKey,
                       physics: NeverScrollableScrollPhysics(),
                       shrinkWrap: true,

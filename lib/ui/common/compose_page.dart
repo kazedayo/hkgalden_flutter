@@ -182,6 +182,7 @@ class _ComposePageState extends State<ComposePage> {
                 child: ZefyrEditor(
                   controller: _controller,
                   focusNode: _focusNode,
+                  selectionControls: materialTextSelectionControls,
                   toolbarDelegate: CustomZefyrToolbarDelegate(),
                   imageDelegate: CustomZefyrImageDelegate(),
                 ),

@@ -287,31 +287,7 @@ class _ThreadPageState extends State<ThreadPage> {
 
   Widget _generatePageSliver(ThreadPageViewModel viewModel, int index) {
     if (viewModel.replies[index].floor % 50 == 1 &&
-        viewModel.replies.length != 1) {
-      return Column(
-        children: <Widget>[
-          Container(
-            height: 50,
-            child: Center(
-              child: Text(viewModel.replies[index].floor == 1
-                  ? '第 1 頁'
-                  : '第 ${((viewModel.replies[index].floor + 49) ~/ 50)} 頁'),
-            ),
-          ),
-          CommentCell(
-            viewModel: viewModel,
-            threadId: viewModel.threadId,
-            reply: viewModel.replies[index],
-            onLastPage: _onLastPage,
-            onSent: (reply) {
-              _onReplySuccess(viewModel, reply);
-            },
-            canReply: _canReply,
-          ),
-        ],
-      );
-    } else if (viewModel.replies[index].floor % 50 == 1 &&
-        viewModel.replies.length == 1) {
+        viewModel.replies[index].floor == viewModel.replies.last.floor) {
       return Column(
         children: <Widget>[
           Container(
@@ -337,6 +313,30 @@ class _ThreadPageState extends State<ThreadPage> {
             child: Center(
               child: Text('已到post底', style: TextStyle(color: Colors.grey)),
             ),
+          ),
+        ],
+      );
+    } else if (viewModel.replies[index].floor % 50 == 1 &&
+        viewModel.replies.length != 1) {
+      return Column(
+        children: <Widget>[
+          Container(
+            height: 50,
+            child: Center(
+              child: Text(viewModel.replies[index].floor == 1
+                  ? '第 1 頁'
+                  : '第 ${((viewModel.replies[index].floor + 49) ~/ 50)} 頁'),
+            ),
+          ),
+          CommentCell(
+            viewModel: viewModel,
+            threadId: viewModel.threadId,
+            reply: viewModel.replies[index],
+            onLastPage: _onLastPage,
+            onSent: (reply) {
+              _onReplySuccess(viewModel, reply);
+            },
+            canReply: _canReply,
           ),
         ],
       );
