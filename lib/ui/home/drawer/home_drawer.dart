@@ -54,7 +54,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                   fillColor: Theme.of(context).scaffoldBackgroundColor,
                 );
               },
-              child: _showSubPage
+              child: _showSubPage && viewModel.isLoggedIn
                   ? SessionUserDetailView()
                   : GridView.count(
                       padding: EdgeInsets.only(bottom: 10),

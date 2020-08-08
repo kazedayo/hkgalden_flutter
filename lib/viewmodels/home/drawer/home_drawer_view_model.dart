@@ -9,23 +9,21 @@ class HomeDrawerViewModel extends Equatable {
   final List<Channel> channels;
   final String selectedChannelId;
   final Function(String) onTap;
+  final bool isLoggedIn;
 
-  HomeDrawerViewModel({
-    this.channels,
-    this.selectedChannelId,
-    this.onTap,
-  });
+  HomeDrawerViewModel(
+      {this.channels, this.selectedChannelId, this.onTap, this.isLoggedIn});
 
   factory HomeDrawerViewModel.create(Store<AppState> store) {
     return HomeDrawerViewModel(
-      channels: store.state.channelState.channels,
-      selectedChannelId: store.state.channelState.selectedChannelId,
-      onTap: (channelId) {
-        store.dispatch(SetSelectedChannelId(channelId: channelId));
-        store.dispatch(RequestThreadListAction(
-            channelId: channelId, page: 1, isRefresh: false));
-      },
-    );
+        channels: store.state.channelState.channels,
+        selectedChannelId: store.state.channelState.selectedChannelId,
+        onTap: (channelId) {
+          store.dispatch(SetSelectedChannelId(channelId: channelId));
+          store.dispatch(RequestThreadListAction(
+              channelId: channelId, page: 1, isRefresh: false));
+        },
+        isLoggedIn: store.state.sessionUserState.isLoggedIn);
   }
 
   List<Object> get props => [channels, selectedChannelId];
