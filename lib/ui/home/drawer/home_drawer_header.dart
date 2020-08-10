@@ -78,7 +78,7 @@ class HomeDrawerHeader extends StatelessWidget {
                                               applicationName:
                                                   'hkGalden Flutter',
                                               applicationLegalese:
-                                                  'hkGalden & Winson Lam',
+                                                  '©hkGalden & 1080',
                                             ),
                                           ))),
                               IconButton(
