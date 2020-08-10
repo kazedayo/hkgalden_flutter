@@ -119,11 +119,11 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
     setState(() {
       _isDownloadingImage = true;
     });
-    GallerySaver.saveImage(url).then((value) {
+    GallerySaver.saveImage(url).then((success) {
       setState(() {
         _isDownloadingImage = false;
       });
-      if (value == null) {
+      if (success == false) {
         Scaffold.of(context).showSnackBar(SnackBar(content: Text('圖片下載失敗!')));
         return;
       }
