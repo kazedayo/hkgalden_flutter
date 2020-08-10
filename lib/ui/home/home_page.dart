@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return StoreConnector<AppState, HomePageViewModel>(
       converter: (store) => HomePageViewModel.create(store),
-      //distinct: true,
+      distinct: true,
       onInit: (store) {
         _scrollController
           ..addListener(() {
