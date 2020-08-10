@@ -1,8 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:gallery_saver/gallery_saver.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
-import 'package:image_downloader/image_downloader.dart';
 
 class FullScreenPhotoView extends StatefulWidget {
   final String imageUrl;
@@ -74,7 +73,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
                   icon: Icon(Icons.save_alt),
                   onPressed: _isDownloadingImage
                       ? null
-                      : () => _downloadImage(context, widget.imageUrl)),
+                      : () => _saveImage(context, widget.imageUrl)),
             ),
             IconButton(
                 icon: Icon(Icons.close),
@@ -116,26 +115,19 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
         ),
       );
 
-  _downloadImage(BuildContext context, String url) async {
-    try {
+  _saveImage(BuildContext context, String url) async {
+    setState(() {
+      _isDownloadingImage = true;
+    });
+    GallerySaver.saveImage(url).then((value) {
       setState(() {
-        _isDownloadingImage = true;
+        _isDownloadingImage = false;
       });
-      // Saved with this method.
-      await ImageDownloader.downloadImage(url,
-              destination: AndroidDestinationType.directoryPictures)
-          .then((value) {
-        setState(() {
-          _isDownloadingImage = false;
-        });
-        if (value == null) {
-          Scaffold.of(context).showSnackBar(SnackBar(content: Text('圖片下載失敗!')));
-          return;
-        }
-        Scaffold.of(context).showSnackBar(SnackBar(content: Text('圖片下載成功!')));
-      });
-    } on PlatformException catch (error) {
-      print(error);
-    }
+      if (value == null) {
+        Scaffold.of(context).showSnackBar(SnackBar(content: Text('圖片下載失敗!')));
+        return;
+      }
+      Scaffold.of(context).showSnackBar(SnackBar(content: Text('圖片下載成功!')));
+    });
   }
 }

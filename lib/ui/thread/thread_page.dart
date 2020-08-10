@@ -50,7 +50,7 @@ class _ThreadPageState extends State<ThreadPage> {
     final ThreadPageArguments arguments =
         ModalRoute.of(context).settings.arguments;
     return StoreConnector<AppState, ThreadPageViewModel>(
-      distinct: true,
+      //distinct: true,
       onInit: (store) {
         _canReply = store.state.sessionUserState.isLoggedIn;
         store.dispatch(RequestThreadAction(

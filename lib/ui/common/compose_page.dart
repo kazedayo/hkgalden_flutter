@@ -219,7 +219,7 @@ class _ComposePageState extends State<ComposePage> {
           Navigator.pop(context);
           arguments.onCreateThread(_channelId);
         } else {
-          Scaffold.of(context).showSnackBar(SnackBar(content: Text('回覆發送失敗!')));
+          Scaffold.of(context).showSnackBar(SnackBar(content: Text('主題發表失敗!')));
         }
       });
     });
