@@ -97,37 +97,44 @@ class CommentCell extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  IconButton(
-                      icon: Icon(Icons.format_quote),
-                      onPressed: () => canReply
-                          ? Navigator.of(context).pushNamed('/Compose',
-                              arguments: ComposePageArguments(
-                                composeMode: ComposeMode.quotedReply,
-                                threadId: threadId,
-                                parentReply: reply,
-                                onSent: (reply) {
-                                  onSent(reply);
-                                },
-                              ))
-                          : showModal<void>(
-                              context: context,
-                              builder: (context) => LoginCheckDialog())),
-                  IconButton(
-                      icon: Icon(Icons.flag),
-                      onPressed: () => showModal<void>(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text('回報問題'),
-                              content: Text(
-                                  '如有任何關於用戶發表內容問題，請電郵至hkgalden.org@gmail.com'),
-                              actions: <Widget>[
-                                FlatButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(),
-                                    child: Text('OK'))
-                              ],
-                            ),
-                          )),
+                  Transform(
+                    transform: Matrix4.translationValues(8, 0, 0),
+                    child: IconButton(
+                        visualDensity: VisualDensity.compact,
+                        splashRadius: 20.0,
+                        icon: Icon(Icons.format_quote),
+                        onPressed: () => canReply
+                            ? Navigator.of(context).pushNamed('/Compose',
+                                arguments: ComposePageArguments(
+                                  composeMode: ComposeMode.quotedReply,
+                                  threadId: threadId,
+                                  parentReply: reply,
+                                  onSent: (reply) {
+                                    onSent(reply);
+                                  },
+                                ))
+                            : showModal<void>(
+                                context: context,
+                                builder: (context) => LoginCheckDialog())),
+                  ),
+                  // IconButton(
+                  //     visualDensity: VisualDensity.compact,
+                  //     splashRadius: 20.0,
+                  //     icon: Icon(Icons.flag),
+                  //     onPressed: () => showModal<void>(
+                  //           context: context,
+                  //           builder: (context) => AlertDialog(
+                  //             title: Text('回報問題'),
+                  //             content: Text(
+                  //                 '如有任何關於用戶發表內容問題，請電郵至hkgalden.org@gmail.com'),
+                  //             actions: <Widget>[
+                  //               FlatButton(
+                  //                   onPressed: () =>
+                  //                       Navigator.of(context).pop(),
+                  //                   child: Text('OK'))
+                  //             ],
+                  //           ),
+                  //         )),
                 ],
               ),
             ],

@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage> {
                   duration: Duration(milliseconds: 1000),
                   curve: Curves.easeOutExpo),
               child: AppBar(
-                leading: BackdropToggleButton(icon: AnimatedIcons.close_menu),
+                leading: _LeadingButton(),
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -211,4 +211,17 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+}
+
+class _LeadingButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => IconButton(
+        //visualDensity: VisualDensity.compact,
+        splashRadius: 25.0,
+        icon: AnimatedIcon(
+          icon: AnimatedIcons.close_menu,
+          progress: Backdrop.of(context).controller.view,
+        ),
+        onPressed: () => Backdrop.of(context).fling(),
+      );
 }
