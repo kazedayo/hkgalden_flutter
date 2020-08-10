@@ -24,14 +24,15 @@ class CommentCell extends StatelessWidget {
   final Function(Reply) onSent;
   final bool canReply;
 
-  CommentCell({
-    this.viewModel,
-    this.threadId,
-    this.reply,
-    this.onLastPage,
-    this.onSent,
-    this.canReply,
-  });
+  CommentCell(
+      {Key key,
+      this.viewModel,
+      this.threadId,
+      this.reply,
+      this.onLastPage,
+      this.onSent,
+      this.canReply})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) => Card(

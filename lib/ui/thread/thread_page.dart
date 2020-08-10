@@ -257,6 +257,10 @@ class _ThreadPageState extends State<ThreadPage> {
               ),
             ),
             CommentCell(
+              key: ValueKey(viewModel
+                  .previousPageReplies[
+                      viewModel.previousPageReplies.length - index - 1]
+                  .replyId),
               viewModel: viewModel,
               threadId: viewModel.threadId,
               reply: viewModel.previousPageReplies[
@@ -271,6 +275,10 @@ class _ThreadPageState extends State<ThreadPage> {
         );
       } else {
         return CommentCell(
+          key: ValueKey(viewModel
+              .previousPageReplies[
+                  viewModel.previousPageReplies.length - index - 1]
+              .replyId),
           viewModel: viewModel,
           threadId: viewModel.threadId,
           reply: viewModel.previousPageReplies[
@@ -299,6 +307,7 @@ class _ThreadPageState extends State<ThreadPage> {
             ),
           ),
           CommentCell(
+            key: ValueKey(viewModel.replies[index].replyId),
             viewModel: viewModel,
             threadId: viewModel.threadId,
             reply: viewModel.replies[index],
@@ -329,6 +338,7 @@ class _ThreadPageState extends State<ThreadPage> {
             ),
           ),
           CommentCell(
+            key: ValueKey(viewModel.replies[index].replyId),
             viewModel: viewModel,
             threadId: viewModel.threadId,
             reply: viewModel.replies[index],
@@ -344,6 +354,7 @@ class _ThreadPageState extends State<ThreadPage> {
       return Column(
         children: <Widget>[
           CommentCell(
+            key: ValueKey(viewModel.replies[index].replyId),
             viewModel: viewModel,
             threadId: viewModel.threadId,
             reply: viewModel.replies[index],
@@ -369,6 +380,7 @@ class _ThreadPageState extends State<ThreadPage> {
       );
     } else {
       return CommentCell(
+        key: ValueKey(viewModel.replies[index].replyId),
         viewModel: viewModel,
         threadId: viewModel.threadId,
         reply: viewModel.replies[index],

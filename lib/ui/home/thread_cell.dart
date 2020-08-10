@@ -11,16 +11,17 @@ class ThreadCell extends StatelessWidget {
   final Function onTap;
   final Function onLongPress;
 
-  ThreadCell({
-    this.title,
-    this.authorName,
-    this.totalReplies,
-    this.lastReply,
-    this.tagName,
-    this.tagColor,
-    this.onTap,
-    this.onLongPress,
-  });
+  const ThreadCell(
+      {Key key,
+      this.title,
+      this.authorName,
+      this.totalReplies,
+      this.lastReply,
+      this.tagName,
+      this.tagColor,
+      this.onTap,
+      this.onLongPress})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) => Column(

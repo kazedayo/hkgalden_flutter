@@ -133,6 +133,7 @@ class _HomePageState extends State<HomePage> {
                                 viewModel
                                     .threads[index].replies[0].author.userId),
                             child: ThreadCell(
+                              key: ValueKey(viewModel.threads[index].threadId),
                               title: viewModel.threads[index].title,
                               authorName: viewModel
                                   .threads[index].replies[0].authorNickname,
