@@ -70,12 +70,14 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
             ActionBarSpinner(isVisible: _isDownloadingImage),
             Builder(
               builder: (context) => IconButton(
+                  splashRadius: 25.0,
                   icon: Icon(Icons.save_alt),
                   onPressed: _isDownloadingImage
                       ? null
                       : () => _saveImage(context, widget.imageUrl)),
             ),
             IconButton(
+                splashRadius: 25.0,
                 icon: Icon(Icons.close),
                 onPressed: () => Navigator.of(context).pop())
           ],

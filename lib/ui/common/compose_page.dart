@@ -60,6 +60,7 @@ class _ComposePageState extends State<ComposePage> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
+            splashRadius: 25.0,
             icon: Icon(Icons.close),
             onPressed: () => Navigator.of(context).pop()),
         title: Text(arguments.composeMode == ComposeMode.newPost
@@ -72,6 +73,7 @@ class _ComposePageState extends State<ComposePage> {
           ActionBarSpinner(isVisible: _isSending),
           Builder(
             builder: (context) => IconButton(
+              splashRadius: 25.0,
               icon: const Icon(Icons.send),
               onPressed: _isSending
                   ? null

@@ -134,6 +134,13 @@ class _ThreadPageState extends State<ThreadPage> {
                   curve: Curves.easeOutExpo),
               child: AppBar(
                 elevation: _elevation,
+                automaticallyImplyLeading: false,
+                leading: IconButton(
+                    splashRadius: 25.0,
+                    icon: Icon(Theme.of(context).platform == TargetPlatform.iOS
+                        ? Icons.arrow_back_ios
+                        : Icons.arrow_back),
+                    onPressed: () => Navigator.of(context).pop()),
                 title: SizedBox(
                   height: kToolbarHeight * 0.85,
                   child: Row(
