@@ -48,6 +48,7 @@ dependencies:
   backdrop:
     git:
       url: https://github.com/fluttercommunity/backdrop.git
+  package_info:
 
 dev_dependencies:
   flutter_test:

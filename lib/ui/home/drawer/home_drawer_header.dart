@@ -1,5 +1,7 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:flutter_svg/svg.dart';
 
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
@@ -8,6 +10,7 @@ import 'package:hkgalden_flutter/ui/login_page.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/viewmodels/home/drawer/home_drawer_header_view_model.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
+import 'package:package_info/package_info.dart';
 
 class HomeDrawerHeader extends StatelessWidget {
   final Function onAvatarTap;
@@ -60,7 +63,24 @@ class HomeDrawerHeader extends StatelessWidget {
                           child: Row(
                             children: <Widget>[
                               IconButton(
-                                  icon: Icon(Icons.settings), onPressed: null),
+                                  icon: Icon(Icons.info_outline),
+                                  onPressed: () => PackageInfo.fromPlatform()
+                                      .then((packageInfo) => showModal(
+                                            context: context,
+                                            builder: (context) => AboutDialog(
+                                              applicationIcon: SvgPicture.asset(
+                                                'assets/icon-hkgalden.svg',
+                                                width: 50,
+                                                height: 50,
+                                              ),
+                                              applicationVersion:
+                                                  '${packageInfo.version}+${packageInfo.buildNumber}',
+                                              applicationName:
+                                                  'hkGalden Flutter',
+                                              applicationLegalese:
+                                                  'hkGalden & Winson Lam',
+                                            ),
+                                          ))),
                               IconButton(
                                 icon: Icon(Icons.exit_to_app),
                                 onPressed: () => TokenSecureStorage()
