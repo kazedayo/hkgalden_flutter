@@ -49,6 +49,7 @@ dependencies:
     git:
       url: https://github.com/fluttercommunity/backdrop.git
   package_info:
+  google_fonts: ^0.2.0
 
 dev_dependencies:
   flutter_test:

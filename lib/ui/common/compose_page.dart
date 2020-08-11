@@ -65,11 +65,14 @@ class _ComposePageState extends State<ComposePage> {
             splashRadius: 25.0,
             icon: Icon(Icons.close),
             onPressed: () => Navigator.of(context).pop()),
-        title: Text(arguments.composeMode == ComposeMode.newPost
-            ? '發表主題'
-            : arguments.composeMode == ComposeMode.reply
-                ? '回覆主題'
-                : '引用回覆 (#${arguments.parentReply.floor})'),
+        title: Text(
+          arguments.composeMode == ComposeMode.newPost
+              ? '發表主題'
+              : arguments.composeMode == ComposeMode.reply
+                  ? '回覆主題'
+                  : '引用回覆 (#${arguments.parentReply.floor})',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         automaticallyImplyLeading: false,
         actions: <Widget>[
           ActionBarSpinner(isVisible: _isSending),
@@ -122,9 +125,9 @@ class _ComposePageState extends State<ComposePage> {
             children: <Widget>[
               arguments.composeMode == ComposeMode.newPost
                   ? Container(
-                      margin: EdgeInsets.symmetric(horizontal: 12),
+                      margin: EdgeInsets.fromLTRB(12, 8, 12, 0),
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           InputChip(
                             label: Text('#${_tag.name}',
@@ -152,10 +155,15 @@ class _ComposePageState extends State<ComposePage> {
                           ),
                           Expanded(
                             child: TextField(
+                              style: TextStyle(fontSize: 15),
+                              strutStyle: StrutStyle(height: 1.25),
                               controller: _titleFieldController,
                               decoration: InputDecoration(
-                                labelText: '標題',
-                              ),
+                                  border: OutlineInputBorder(),
+                                  labelText: '標題',
+                                  labelStyle: TextStyle(height: 1),
+                                  contentPadding: EdgeInsets.all(10),
+                                  isDense: true),
                               onChanged: (value) {
                                 setState(() {
                                   _title = value;

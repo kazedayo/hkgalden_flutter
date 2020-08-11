@@ -22,6 +22,7 @@ class _LoginPageState extends State<LoginPage> {
           automaticallyImplyLeading: false,
           actions: <Widget>[
             IconButton(
+              splashRadius: 25.0,
               icon: const Icon(Icons.close),
               onPressed: () => Navigator.pop(context),
             ),
