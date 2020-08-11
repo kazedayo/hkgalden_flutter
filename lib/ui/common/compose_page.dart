@@ -59,6 +59,8 @@ class _ComposePageState extends State<ComposePage> {
         ModalRoute.of(context).settings.arguments;
     return Scaffold(
       appBar: AppBar(
+        centerTitle:
+            Theme.of(context).platform == TargetPlatform.iOS ? true : false,
         leading: IconButton(
             splashRadius: 25.0,
             icon: Icon(Icons.close),

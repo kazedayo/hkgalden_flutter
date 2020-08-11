@@ -75,10 +75,9 @@ class HomeDrawerHeader extends StatelessWidget {
                                               ),
                                               applicationVersion:
                                                   '${packageInfo.version}+${packageInfo.buildNumber}',
-                                              applicationName:
-                                                  'hkGalden Flutter',
+                                              applicationName: 'hkGalden',
                                               applicationLegalese:
-                                                  '©hkGalden & 1080',
+                                                  '© hkGalden & 1080',
                                             ),
                                           ))),
                               IconButton(
