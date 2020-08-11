@@ -34,14 +34,14 @@ class ThreadCell extends StatelessWidget {
                 children: <Widget>[
                   Text(title,
                       style:
-                          TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                   SizedBox(height: 10),
                   Container(
                     //constraints: BoxConstraints.expand(height: 20),
                     child: Row(
                       //crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        Icon(Icons.face, size: 15),
+                        Icon(Icons.face, size: 13),
                         SizedBox(width: 5),
                         Text(
                           authorName,
@@ -49,7 +49,7 @@ class ThreadCell extends StatelessWidget {
                           strutStyle: StrutStyle(height: 1.25),
                         ),
                         SizedBox(width: 10),
-                        Icon(Icons.reply, size: 15),
+                        Icon(Icons.reply, size: 13),
                         SizedBox(width: 5),
                         Text(
                           totalReplies.toString(),
@@ -57,7 +57,7 @@ class ThreadCell extends StatelessWidget {
                           strutStyle: StrutStyle(height: 1.25),
                         ),
                         SizedBox(width: 10),
-                        Icon(Icons.access_time, size: 15),
+                        Icon(Icons.access_time, size: 13),
                         SizedBox(width: 5),
                         Text(
                           DateTimeFormat.relative(lastReply.toLocal(),
@@ -77,7 +77,7 @@ class ThreadCell extends StatelessWidget {
                                   .caption
                                   .copyWith(
                                       color: Colors.white,
-                                      fontWeight: FontWeight.w700)),
+                                      fontWeight: FontWeight.w600)),
                           //labelPadding: EdgeInsets.zero,
                           backgroundColor: tagColor,
                         )

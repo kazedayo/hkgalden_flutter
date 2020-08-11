@@ -109,17 +109,20 @@ class HKGaldenHtmlParser {
         break;
       //parse h1
       case 'h1':
-        return Element.tag('h1')
+        return Element.span()
+          ..setAttribute('class', 'h1')
           ..setInnerHtml(parse(element.innerHtml), validator: validator);
         break;
       //parse h2
       case 'h2':
-        return Element.tag('h2')
+        return Element.span()
+          ..setAttribute('class', 'h2')
           ..setInnerHtml(parse(element.innerHtml), validator: validator);
         break;
       //parse h3
       case 'h3':
-        return Element.tag('h3')
+        return Element.span()
+          ..setAttribute('class', 'h3')
           ..setInnerHtml(parse(element.innerHtml), validator: validator);
         break;
       default:

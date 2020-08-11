@@ -79,7 +79,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
             if (element.className == ('color')) {
               Style newStyle = context.style.copyWith(
                   color: Color(int.parse('FF${attributes['hex']}', radix: 16)),
-                  fontSize: FontSize(18));
+                  fontSize: FontSize.large);
               return Container(
                 transform: Theme.of(context.buildContext).platform ==
                         TargetPlatform.iOS
@@ -102,7 +102,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
         style: {
           "html": Style(
             backgroundColor: Colors.transparent,
-            fontSize: FontSize(18),
+            fontSize: FontSize.large,
           ),
           "body": Style(
               margin: EdgeInsets.symmetric(vertical: 15, horizontal: 3),
@@ -119,9 +119,20 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
               margin: EdgeInsets.symmetric(vertical: 4)),
           "div.center": Style(alignment: Alignment.center),
           "div.right": Style(alignment: Alignment.centerRight),
-          "h1, h2, h3": Style(
+          "span.h1": Style(
+            fontSize: FontSize(33),
+            fontWeight: FontWeight.normal,
             margin: EdgeInsets.zero,
-            padding: EdgeInsets.zero,
+          ),
+          "span.h2": Style(
+            fontSize: FontSize.xxLarge,
+            fontWeight: FontWeight.normal,
+            margin: EdgeInsets.zero,
+          ),
+          "span.h3": Style(
+            fontSize: FontSize.xLarge,
+            fontWeight: FontWeight.normal,
+            margin: EdgeInsets.zero,
           ),
           "p": Style(margin: EdgeInsets.symmetric(vertical: 0)),
         },
