@@ -1,5 +1,6 @@
 import 'package:hkgalden_flutter/models/reply.dart';
-import 'package:hkgalden_flutter/redux/store.dart';
+import 'package:hkgalden_flutter/redux/app/app_state.dart';
+import 'package:redux/redux.dart';
 import 'package:universal_html/parsing.dart';
 import 'package:universal_html/html.dart';
 
@@ -132,7 +133,7 @@ class HKGaldenHtmlParser {
   }
 
   //dumb method, may change to recursive function
-  String commentWithQuotes(Reply reply) {
+  String commentWithQuotes(Reply reply, Store<AppState> store) {
     final Reply rootParent = reply.parent;
 
     final htmlDoc = parseHtmlDocument(reply.content);
@@ -179,7 +180,7 @@ class HKGaldenHtmlParser {
     return parse(htmlDoc.body.innerHtml);
   }
 
-  String replyWithQuotes(Reply reply) {
+  String replyWithQuotes(Reply reply, Store<AppState> store) {
     final htmlDoc = parseHtmlDocument('');
 
     if (reply != null &&

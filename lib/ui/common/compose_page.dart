@@ -183,8 +183,9 @@ class _ComposePageState extends State<ComposePage> {
                         scrollDirection: Axis.vertical,
                         padding: const EdgeInsets.symmetric(horizontal: 14),
                         child: StyledHtmlView(
-                          htmlString: HKGaldenHtmlParser()
-                              .replyWithQuotes(arguments.parentReply),
+                          htmlString: HKGaldenHtmlParser().replyWithQuotes(
+                              arguments.parentReply,
+                              StoreProvider.of<AppState>(context)),
                           floor: arguments.parentReply.floor,
                         ),
                       ),

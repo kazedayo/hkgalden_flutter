@@ -1,11 +1,12 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
+import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
-import 'package:hkgalden_flutter/redux/store.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -37,11 +38,16 @@ class _LoginPageState extends State<LoginPage> {
             if (request.url.startsWith('http://localhost/callback')) {
               TokenSecureStorage().writeToken(request.url.substring(32),
                   onFinish: (_) {
-                store.dispatch(RequestSessionUserAction());
-                store.dispatch(RequestThreadListAction(
-                    channelId: store.state.channelState.selectedChannelId,
-                    page: 1,
-                    isRefresh: false));
+                StoreProvider.of<AppState>(context)
+                    .dispatch(RequestSessionUserAction());
+                StoreProvider.of<AppState>(context).dispatch(
+                    RequestThreadListAction(
+                        channelId: StoreProvider.of<AppState>(context)
+                            .state
+                            .channelState
+                            .selectedChannelId,
+                        page: 1,
+                        isRefresh: false));
                 Navigator.pop(context);
               });
               return NavigationDecision.prevent;

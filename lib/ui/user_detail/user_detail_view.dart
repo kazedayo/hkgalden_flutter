@@ -1,10 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
+import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
-import 'package:hkgalden_flutter/redux/store.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
@@ -77,7 +78,11 @@ class _UserDetailViewState extends State<UserDetailView> {
                     ),
                     FlatButton.icon(
                         onPressed: _blockedButtonPressed ||
-                                store.state.sessionUserState.isLoggedIn == false
+                                StoreProvider.of<AppState>(context)
+                                        .state
+                                        .sessionUserState
+                                        .isLoggedIn ==
+                                    false
                             ? null
                             : () {
                                 setState(() {
@@ -92,8 +97,9 @@ class _UserDetailViewState extends State<UserDetailView> {
                                         !_blockedButtonPressed;
                                   });
                                   if (isSuccess) {
-                                    store.dispatch(AppendUserToBlockListAction(
-                                        widget.user.userId));
+                                    StoreProvider.of<AppState>(context)
+                                        .dispatch(AppendUserToBlockListAction(
+                                            widget.user.userId));
                                     Navigator.of(context).pop();
                                     scaffoldKey.currentState.showSnackBar(SnackBar(
                                         content: Text(

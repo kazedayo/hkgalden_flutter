@@ -1,10 +1,12 @@
 import 'package:animations/animations.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
+import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
@@ -92,7 +94,8 @@ class CommentCell extends StatelessWidget {
               Padding(
                   padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
                   child: StyledHtmlView(
-                      htmlString: HKGaldenHtmlParser().commentWithQuotes(reply),
+                      htmlString: HKGaldenHtmlParser().commentWithQuotes(
+                          reply, StoreProvider.of<AppState>(context)),
                       floor: reply.floor)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
