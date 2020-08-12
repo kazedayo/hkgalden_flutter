@@ -26,11 +26,12 @@ class NestedNavigator extends StatelessWidget {
               break;
             default:
           }
-          if (settings.name != '/Compose' &&
-              Theme.of(context).platform == TargetPlatform.iOS) {
-            return CupertinoPageRoute(builder: builder, settings: settings);
+          if (settings.name == '/Compose') {
+            return MaterialPageRoute(
+                builder: builder, settings: settings, fullscreenDialog: true);
           } else {
-            return MaterialPageRoute(builder: builder, settings: settings);
+            return MaterialPageRoute(
+                builder: builder, settings: settings, fullscreenDialog: false);
           }
         },
       ),

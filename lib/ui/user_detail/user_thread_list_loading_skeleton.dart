@@ -7,13 +7,13 @@ class UserThreadListLoadingSkeleton extends StatelessWidget {
       child: ListView.builder(
           padding: EdgeInsets.only(top: 12),
           physics: NeverScrollableScrollPhysics(),
-          itemCount: 20,
+          itemCount: 5,
           itemBuilder: (context, index) => Row(
                 children: <Widget>[
                   Expanded(
                     child: Container(
-                      margin: EdgeInsets.fromLTRB(12, 8, 100, 8),
-                      height: 35,
+                      margin: EdgeInsets.fromLTRB(12, 0, 100, 25),
+                      height: 30,
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
                           color: Colors.grey),

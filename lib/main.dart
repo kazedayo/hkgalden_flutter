@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -39,8 +40,9 @@ class MyApp extends StatelessWidget {
           backgroundColor: Color(0xff323d3a),
           contentTextStyle: TextStyle(color: Colors.white)),
       pageTransitionsTheme: PageTransitionsTheme(builders: {
-        TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
-        TargetPlatform.iOS: OpenUpwardsPageTransitionsBuilder()
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.android: SharedAxisPageTransitionsBuilder(
+            transitionType: SharedAxisTransitionType.scaled),
       }),
       dialogTheme: DialogTheme(
           shape:

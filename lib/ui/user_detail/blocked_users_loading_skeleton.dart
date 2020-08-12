@@ -7,7 +7,7 @@ class BlockedUsersLoadingSkeleton extends StatelessWidget {
       child: GridView.builder(
           physics: NeverScrollableScrollPhysics(),
           padding: EdgeInsets.fromLTRB(20, 12, 20, 20),
-          itemCount: 20,
+          itemCount: 15,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
               mainAxisSpacing: 24,
