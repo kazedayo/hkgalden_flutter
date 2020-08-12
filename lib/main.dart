@@ -42,7 +42,8 @@ class MyApp extends StatelessWidget {
       pageTransitionsTheme: PageTransitionsTheme(builders: {
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         TargetPlatform.android: SharedAxisPageTransitionsBuilder(
-            transitionType: SharedAxisTransitionType.scaled),
+            transitionType: SharedAxisTransitionType.scaled,
+            fillColor: Color(0xff1b1f1e)),
       }),
       dialogTheme: DialogTheme(
           shape:
