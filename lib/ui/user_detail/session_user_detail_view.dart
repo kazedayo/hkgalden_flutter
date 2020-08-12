@@ -14,7 +14,7 @@ class SessionUserDetailView extends StatefulWidget {
 class _SessionUserDetailViewState extends State<SessionUserDetailView> {
   int _index;
   double _height;
-  final tabs = <int, Widget>{0: Text('封鎖名單'), 1: Text('最近動態')};
+  final tabs = <int, Widget>{0: Text('最近動態'), 1: Text('封鎖名單')};
 
   @override
   void initState() {
@@ -33,13 +33,13 @@ class _SessionUserDetailViewState extends State<SessionUserDetailView> {
   @override
   Widget build(BuildContext context) {
     List<Widget> _pages = [
-      BlockListPage(),
       UserThreadListPage(
           userId: StoreProvider.of<AppState>(context)
               .state
               .sessionUserState
               .sessionUser
               .userId),
+      BlockListPage(),
     ];
     return DefaultTabController(
       initialIndex: _index,

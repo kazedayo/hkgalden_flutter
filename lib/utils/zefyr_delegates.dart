@@ -36,22 +36,23 @@ class CustomZefyrToolbarDelegate implements ZefyrToolbarDelegate {
     ZefyrToolbarAction.confirm: 20.0,
   };
 
-  /*static const kDefaultButtonTexts = {
+  static const kDefaultButtonTexts = {
     ZefyrToolbarAction.headingLevel1: 'H1',
     ZefyrToolbarAction.headingLevel2: 'H2',
     ZefyrToolbarAction.headingLevel3: 'H3',
-  };*/
+  };
 
   @override
   Widget buildButton(BuildContext context, ZefyrToolbarAction action,
       {VoidCallback onPressed}) {
     //final theme = Theme.of(context);
-    if (action == ZefyrToolbarAction.bold ||
-        action == ZefyrToolbarAction.italic ||
-        action == ZefyrToolbarAction.image ||
+    if (action == ZefyrToolbarAction.image ||
         action == ZefyrToolbarAction.cameraImage ||
         action == ZefyrToolbarAction.galleryImage ||
         action == ZefyrToolbarAction.link ||
+        action == ZefyrToolbarAction.bold ||
+        action == ZefyrToolbarAction.italic ||
+        action == ZefyrToolbarAction.heading ||
         action == ZefyrToolbarAction.hideKeyboard) {
       final icon = kDefaultButtonIcons[action];
       final size = kSpecialIconSizes[action];
@@ -59,6 +60,20 @@ class CustomZefyrToolbarDelegate implements ZefyrToolbarDelegate {
         action: action,
         icon: icon,
         iconSize: size,
+        onPressed: onPressed,
+      );
+    } else if (action == ZefyrToolbarAction.headingLevel1 ||
+        action == ZefyrToolbarAction.headingLevel2 ||
+        action == ZefyrToolbarAction.headingLevel3) {
+      final text = kDefaultButtonTexts[action];
+      final style = Theme.of(context)
+          .textTheme
+          .caption
+          .copyWith(fontWeight: FontWeight.bold, fontSize: 14.0);
+      return ZefyrButton.text(
+        action: action,
+        text: text,
+        style: style,
         onPressed: onPressed,
       );
     } else {
