@@ -27,9 +27,10 @@ SessionUserState updateSessionUserReducer(
 
 SessionUserState appendUserToBlockListReducer(
     SessionUserState state, AppendUserToBlockListAction action) {
+  List<String> blockedUsers = state.sessionUser.blockedUsers.toList();
+  blockedUsers.add(action.userId);
   return state.copyWith(
-      sessionUser: state.sessionUser.copyWith(
-          blockedUsers: state.sessionUser.blockedUsers..add(action.userId)));
+      sessionUser: state.sessionUser.copyWith(blockedUsers: blockedUsers));
 }
 
 SessionUserState removeSessionUserReducer(

@@ -32,16 +32,8 @@ class ThreadPageViewModel extends Equatable {
   factory ThreadPageViewModel.create(Store<AppState> store) {
     return ThreadPageViewModel(
         threadId: store.state.threadState.thread.threadId,
-        previousPageReplies: store.state.threadState.previousPages.replies
-            .where((reply) => !store
-                .state.sessionUserState.sessionUser.blockedUsers
-                .contains(reply.author.userId))
-            .toList(),
-        replies: store.state.threadState.thread.replies
-            .where((reply) => !store
-                .state.sessionUserState.sessionUser.blockedUsers
-                .contains(reply.author.userId))
-            .toList(),
+        previousPageReplies: store.state.threadState.previousPages.replies,
+        replies: store.state.threadState.thread.replies,
         isLoading: store.state.threadState.threadIsLoading,
         isInitialLoad: store.state.threadState.isInitialLoad,
         blockedUserIds: store.state.sessionUserState.sessionUser.blockedUsers,

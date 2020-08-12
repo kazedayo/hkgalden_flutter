@@ -2,6 +2,8 @@ import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_state.dart';
 import 'package:redux/redux.dart';
 
+import 'package:hkgalden_flutter/models/reply.dart';
+
 final Reducer<ThreadState> threadReducer = combineReducers([
   TypedReducer<ThreadState, RequestThreadAction>(requestThreadReducer),
   TypedReducer<ThreadState, UpdateThreadAction>(updateThreadReducer),
@@ -50,9 +52,9 @@ ThreadState updateThreadReducer(ThreadState state, UpdateThreadAction action) {
 
 ThreadState appendReplyToThreadReducer(
     ThreadState state, AppendReplyToThreadAction action) {
-  return state.copyWith(
-      thread: state.thread
-          .copyWith(replies: state.thread.replies..add(action.reply)));
+  List<Reply> replies = state.thread.replies;
+  replies.add(action.reply);
+  return state.copyWith(thread: state.thread.copyWith(replies: replies));
 }
 
 ThreadState clearThreadStateReducer(

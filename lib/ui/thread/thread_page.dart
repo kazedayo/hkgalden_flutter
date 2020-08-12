@@ -167,29 +167,26 @@ class _ThreadPageState extends State<ThreadPage> {
             preferredSize: Size.fromHeight(kToolbarHeight)),
         body: viewModel.isLoading && viewModel.isInitialLoad
             ? ThreadPageLoadingSkeleton()
-            : Scrollbar(
+            : CustomScrollView(
+                center: centerKey,
                 controller: _scrollController,
-                child: CustomScrollView(
-                  center: centerKey,
-                  controller: _scrollController,
-                  slivers: <Widget>[
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        return _generatePreviousPageSliver(
-                            viewModel, index, arguments.page);
-                      },
-                          childCount: viewModel.previousPageReplies.length == 0
-                              ? 1
-                              : viewModel.previousPageReplies.length),
-                    ),
-                    SliverList(
-                      key: centerKey,
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        return _generatePageSliver(viewModel, index);
-                      }, childCount: viewModel.replies.length),
-                    ),
-                  ],
-                ),
+                slivers: <Widget>[
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      return _generatePreviousPageSliver(
+                          viewModel, index, arguments.page);
+                    },
+                        childCount: viewModel.previousPageReplies.length == 0
+                            ? 1
+                            : viewModel.previousPageReplies.length),
+                  ),
+                  SliverList(
+                    key: centerKey,
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      return _generatePageSliver(viewModel, index);
+                    }, childCount: viewModel.replies.length),
+                  ),
+                ],
               ),
         floatingActionButton: _fabIsHidden
             ? null
@@ -230,52 +227,137 @@ class _ThreadPageState extends State<ThreadPage> {
         child: ThreadPageLoadingSkeletonCell(),
       );
     } else {
-      if (viewModel
-                  .previousPageReplies[
-                      viewModel.previousPageReplies.length - index - 1]
-                  .floor %
-              50 ==
-          1) {
+      if (!viewModel.blockedUserIds.contains(viewModel
+          .previousPageReplies[viewModel.previousPageReplies.length - index - 1]
+          .author
+          .userId)) {
+        if (viewModel
+                    .previousPageReplies[
+                        viewModel.previousPageReplies.length - index - 1]
+                    .floor %
+                50 ==
+            1) {
+          return Column(
+            children: <Widget>[
+              if (viewModel
+                          .previousPageReplies[
+                              viewModel.previousPageReplies.length - index - 1]
+                          .floor !=
+                      1 &&
+                  (viewModel
+                                  .previousPageReplies[
+                                      viewModel.previousPageReplies.length -
+                                          index -
+                                          1]
+                                  .floor /
+                              50.0)
+                          .ceil() ==
+                      viewModel.currentPage)
+                ThreadPageLoadingSkeletonCell(),
+              Container(
+                height: 50,
+                child: Center(
+                  child: Text(viewModel
+                              .previousPageReplies[
+                                  viewModel.previousPageReplies.length -
+                                      index -
+                                      1]
+                              .floor ==
+                          1
+                      ? '第 1 頁'
+                      : '第 ${((viewModel.previousPageReplies[viewModel.previousPageReplies.length - index - 1].floor + 49) ~/ 50)} 頁'),
+                ),
+              ),
+              CommentCell(
+                key: ValueKey(viewModel
+                    .previousPageReplies[
+                        viewModel.previousPageReplies.length - index - 1]
+                    .replyId),
+                viewModel: viewModel,
+                threadId: viewModel.threadId,
+                reply: viewModel.previousPageReplies[
+                    viewModel.previousPageReplies.length - index - 1],
+                onLastPage: _onLastPage,
+                onSent: (reply) {
+                  _onReplySuccess(viewModel, reply);
+                },
+                canReply: _canReply,
+              ),
+            ],
+          );
+        } else {
+          return CommentCell(
+            key: ValueKey(viewModel
+                .previousPageReplies[
+                    viewModel.previousPageReplies.length - index - 1]
+                .replyId),
+            viewModel: viewModel,
+            threadId: viewModel.threadId,
+            reply: viewModel.previousPageReplies[
+                viewModel.previousPageReplies.length - index - 1],
+            onLastPage: _onLastPage,
+            onSent: (reply) {
+              _onReplySuccess(viewModel, reply);
+            },
+            canReply: _canReply,
+          );
+        }
+      }
+      return SizedBox();
+    }
+  }
+
+  Widget _generatePageSliver(ThreadPageViewModel viewModel, int index) {
+    if (!viewModel.blockedUserIds
+        .contains(viewModel.replies[index].author.userId)) {
+      if (viewModel.replies[index].floor % 50 == 1 &&
+          viewModel.replies[index] == viewModel.replies.last) {
         return Column(
           children: <Widget>[
-            if (viewModel
-                        .previousPageReplies[
-                            viewModel.previousPageReplies.length - index - 1]
-                        .floor !=
-                    1 &&
-                (viewModel
-                                .previousPageReplies[
-                                    viewModel.previousPageReplies.length -
-                                        index -
-                                        1]
-                                .floor /
-                            50.0)
-                        .ceil() ==
-                    viewModel.currentPage)
-              ThreadPageLoadingSkeletonCell(),
             Container(
               height: 50,
               child: Center(
-                child: Text(viewModel
-                            .previousPageReplies[
-                                viewModel.previousPageReplies.length -
-                                    index -
-                                    1]
-                            .floor ==
-                        1
+                child: Text(viewModel.replies[index].floor == 1
                     ? '第 1 頁'
-                    : '第 ${((viewModel.previousPageReplies[viewModel.previousPageReplies.length - index - 1].floor + 49) ~/ 50)} 頁'),
+                    : '第 ${((viewModel.replies[index].floor + 49) ~/ 50)} 頁'),
               ),
             ),
             CommentCell(
-              key: ValueKey(viewModel
-                  .previousPageReplies[
-                      viewModel.previousPageReplies.length - index - 1]
-                  .replyId),
+              key: ValueKey(viewModel.replies[index].replyId),
               viewModel: viewModel,
               threadId: viewModel.threadId,
-              reply: viewModel.previousPageReplies[
-                  viewModel.previousPageReplies.length - index - 1],
+              reply: viewModel.replies[index],
+              onLastPage: _onLastPage,
+              onSent: (reply) {
+                _onReplySuccess(viewModel, reply);
+              },
+              canReply: _canReply,
+            ),
+            Container(
+              height: 85,
+              child: Center(
+                child: Text('已到post底', style: TextStyle(color: Colors.grey)),
+              ),
+            ),
+          ],
+        );
+      } else if (viewModel.replies[index].floor % 50 == 1 &&
+          viewModel.replies.length != 1) {
+        return Column(
+          children: <Widget>[
+            Container(
+              height: 50,
+              child: Center(
+                child: Text(viewModel.replies[index].floor == 1
+                    ? '第 1 頁'
+                    : '第 ${((viewModel.replies[index].floor + 49) ~/ 50)} 頁'),
+              ),
+            ),
+            CommentCell(
+              key: ValueKey(viewModel.replies[index].replyId),
+              viewModel: viewModel,
+              threadId: viewModel.threadId,
+              reply: viewModel.replies[index],
               onLastPage: _onLastPage,
               onSent: (reply) {
                 _onReplySuccess(viewModel, reply);
@@ -284,16 +366,40 @@ class _ThreadPageState extends State<ThreadPage> {
             ),
           ],
         );
+      } else if (index == viewModel.replies.length - 1) {
+        return Column(
+          children: <Widget>[
+            CommentCell(
+              key: ValueKey(viewModel.replies[index].replyId),
+              viewModel: viewModel,
+              threadId: viewModel.threadId,
+              reply: viewModel.replies[index],
+              onLastPage: _onLastPage,
+              onSent: (reply) {
+                _onReplySuccess(viewModel, reply);
+              },
+              canReply: _canReply,
+            ),
+            SafeArea(
+              top: false,
+              child: !_onLastPage
+                  ? ThreadPageLoadingSkeletonHeader()
+                  : Container(
+                      height: 85,
+                      child: Center(
+                        child: Text('已到post底',
+                            style: TextStyle(color: Colors.grey)),
+                      ),
+                    ),
+            )
+          ],
+        );
       } else {
         return CommentCell(
-          key: ValueKey(viewModel
-              .previousPageReplies[
-                  viewModel.previousPageReplies.length - index - 1]
-              .replyId),
+          key: ValueKey(viewModel.replies[index].replyId),
           viewModel: viewModel,
           threadId: viewModel.threadId,
-          reply: viewModel.previousPageReplies[
-              viewModel.previousPageReplies.length - index - 1],
+          reply: viewModel.replies[index],
           onLastPage: _onLastPage,
           onSent: (reply) {
             _onReplySuccess(viewModel, reply);
@@ -302,105 +408,6 @@ class _ThreadPageState extends State<ThreadPage> {
         );
       }
     }
-  }
-
-  Widget _generatePageSliver(ThreadPageViewModel viewModel, int index) {
-    if (viewModel.replies[index].floor % 50 == 1 &&
-        viewModel.replies[index] == viewModel.replies.last) {
-      return Column(
-        children: <Widget>[
-          Container(
-            height: 50,
-            child: Center(
-              child: Text(viewModel.replies[index].floor == 1
-                  ? '第 1 頁'
-                  : '第 ${((viewModel.replies[index].floor + 49) ~/ 50)} 頁'),
-            ),
-          ),
-          CommentCell(
-            key: ValueKey(viewModel.replies[index].replyId),
-            viewModel: viewModel,
-            threadId: viewModel.threadId,
-            reply: viewModel.replies[index],
-            onLastPage: _onLastPage,
-            onSent: (reply) {
-              _onReplySuccess(viewModel, reply);
-            },
-            canReply: _canReply,
-          ),
-          Container(
-            height: 85,
-            child: Center(
-              child: Text('已到post底', style: TextStyle(color: Colors.grey)),
-            ),
-          ),
-        ],
-      );
-    } else if (viewModel.replies[index].floor % 50 == 1 &&
-        viewModel.replies.length != 1) {
-      return Column(
-        children: <Widget>[
-          Container(
-            height: 50,
-            child: Center(
-              child: Text(viewModel.replies[index].floor == 1
-                  ? '第 1 頁'
-                  : '第 ${((viewModel.replies[index].floor + 49) ~/ 50)} 頁'),
-            ),
-          ),
-          CommentCell(
-            key: ValueKey(viewModel.replies[index].replyId),
-            viewModel: viewModel,
-            threadId: viewModel.threadId,
-            reply: viewModel.replies[index],
-            onLastPage: _onLastPage,
-            onSent: (reply) {
-              _onReplySuccess(viewModel, reply);
-            },
-            canReply: _canReply,
-          ),
-        ],
-      );
-    } else if (index == viewModel.replies.length - 1) {
-      return Column(
-        children: <Widget>[
-          CommentCell(
-            key: ValueKey(viewModel.replies[index].replyId),
-            viewModel: viewModel,
-            threadId: viewModel.threadId,
-            reply: viewModel.replies[index],
-            onLastPage: _onLastPage,
-            onSent: (reply) {
-              _onReplySuccess(viewModel, reply);
-            },
-            canReply: _canReply,
-          ),
-          SafeArea(
-            top: false,
-            child: !_onLastPage
-                ? ThreadPageLoadingSkeletonHeader()
-                : Container(
-                    height: 85,
-                    child: Center(
-                      child:
-                          Text('已到post底', style: TextStyle(color: Colors.grey)),
-                    ),
-                  ),
-          )
-        ],
-      );
-    } else {
-      return CommentCell(
-        key: ValueKey(viewModel.replies[index].replyId),
-        viewModel: viewModel,
-        threadId: viewModel.threadId,
-        reply: viewModel.replies[index],
-        onLastPage: _onLastPage,
-        onSent: (reply) {
-          _onReplySuccess(viewModel, reply);
-        },
-        canReply: _canReply,
-      );
-    }
+    return SizedBox();
   }
 }

@@ -117,47 +117,43 @@ class _HomePageState extends State<HomePage> {
           child: Container(
             child: viewModel.isThreadLoading && viewModel.isRefresh == false
                 ? ListLoadingSkeleton()
-                : Scrollbar(
-                    controller: _scrollController,
-                    child: RefreshIndicator(
-                      strokeWidth: 2.5,
-                      onRefresh: () =>
-                          viewModel.onRefresh(viewModel.selectedChannelId),
-                      child: ListView.builder(
-                        controller: _scrollController,
-                        itemCount: viewModel.threads.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == viewModel.threads.length) {
-                            return ListLoadingSkeletonCell();
-                          } else {
-                            return Visibility(
-                              visible: !viewModel.blockedUserIds.contains(
-                                  viewModel
-                                      .threads[index].replies[0].author.userId),
-                              child: ThreadCell(
-                                key:
-                                    ValueKey(viewModel.threads[index].threadId),
-                                title: viewModel.threads[index].title,
-                                authorName: viewModel
-                                    .threads[index].replies[0].authorNickname,
-                                totalReplies:
-                                    viewModel.threads[index].totalReplies,
-                                lastReply: viewModel
-                                            .threads[index].replies.length ==
-                                        2
-                                    ? viewModel.threads[index].replies[1].date
-                                    : viewModel.threads[index].replies[0].date,
-                                tagName: viewModel.threads[index].tagName,
-                                tagColor: viewModel.threads[index].tagColor,
-                                onTap: () =>
-                                    _loadThread(viewModel.threads[index]),
-                                onLongPress: () =>
-                                    _jumpToPage(viewModel.threads[index]),
-                              ),
-                            );
-                          }
-                        },
-                      ),
+                : RefreshIndicator(
+                    strokeWidth: 2.5,
+                    onRefresh: () =>
+                        viewModel.onRefresh(viewModel.selectedChannelId),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: viewModel.threads.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == viewModel.threads.length) {
+                          return ListLoadingSkeletonCell();
+                        } else {
+                          return Visibility(
+                            visible: !viewModel.blockedUserIds.contains(
+                                viewModel
+                                    .threads[index].replies[0].author.userId),
+                            child: ThreadCell(
+                              key: ValueKey(viewModel.threads[index].threadId),
+                              title: viewModel.threads[index].title,
+                              authorName: viewModel
+                                  .threads[index].replies[0].authorNickname,
+                              totalReplies:
+                                  viewModel.threads[index].totalReplies,
+                              lastReply:
+                                  viewModel.threads[index].replies.length == 2
+                                      ? viewModel.threads[index].replies[1].date
+                                      : viewModel
+                                          .threads[index].replies[0].date,
+                              tagName: viewModel.threads[index].tagName,
+                              tagColor: viewModel.threads[index].tagColor,
+                              onTap: () =>
+                                  _loadThread(viewModel.threads[index]),
+                              onLongPress: () =>
+                                  _jumpToPage(viewModel.threads[index]),
+                            ),
+                          );
+                        }
+                      },
                     ),
                   ),
           ),
