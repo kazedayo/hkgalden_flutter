@@ -6,15 +6,17 @@ import 'package:flutter/material.dart';
 
 class DeltaJsonParser {
   Future<String> toGaldenHtml(List<dynamic> json) async {
-    String result = '';
     print(json);
+    String result = '';
     String row = '';
+    String styledInsert = '';
     await Future.forEach(json, (element) async {
       //print(element);
-      if (!(element['insert'] as String).contains('\n')) {
+      if (!element['insert'].contains('\n') || element['insert'] == '\n') {
+        styledInsert =
+            element['insert'] == '\n' ? styledInsert : element['insert'];
         if (element['attributes'] != null) {
           //print(element['insert']);
-          String styledInsert = element['insert'];
           await Future.forEach(
               (element['attributes'] as Map<String, dynamic>).entries,
               (entry) async {
@@ -30,8 +32,10 @@ class DeltaJsonParser {
                 styledInsert = '<span data-nodetype="i">$styledInsert</span>';
                 break;
               case 'heading':
+                //heading自成一行
+                row = '';
                 styledInsert =
-                    '<span data-nodetype="h${entry.value as String}">$styledInsert</span>';
+                    '<span data-nodetype="h${entry.value}">$styledInsert</span>';
                 break;
               case 'embed':
                 if (entry.value['type'] == 'image') {
@@ -44,15 +48,23 @@ class DeltaJsonParser {
             }
           });
           row += styledInsert;
+          if (element['insert'] == '\n') {
+            //heading自成一行
+            result += '<p>$row</p>';
+            row = '';
+          }
         } else {
+          //for 混排
           row += element['insert'];
         }
       } else {
-        List<String> texts = (element['insert'] as String).split('\n');
+        List<String> texts = element['insert'].split('\n');
         //print(texts.length);
         if (texts.length == 2) {
           row += texts.first;
+          //save old row and start new row
           result += '<p>$row</p>';
+          row = '';
         } else {
           texts.forEach((element) {
             //save old row and start new row

@@ -121,26 +121,26 @@ class _ComposePageState extends State<ComposePage> {
             defaultLineTheme: LineTheme(
                 textStyle: Theme.of(context)
                     .textTheme
-                    .bodyText1
+                    .bodyText2
                     .copyWith(fontSize: FontSize.large.size, height: 1.25),
                 padding: EdgeInsets.zero),
             attributeTheme: AttributeTheme(
                 link: TextStyle(
                     decoration: TextDecoration.none, color: Colors.blueAccent),
                 heading1: LineTheme(
-                    textStyle: Theme.of(context).textTheme.bodyText1.copyWith(
+                    textStyle: Theme.of(context).textTheme.bodyText2.copyWith(
                         fontWeight: FontWeight.normal,
                         fontSize: 33,
                         height: 1.25),
                     padding: EdgeInsets.zero),
                 heading2: LineTheme(
-                    textStyle: Theme.of(context).textTheme.bodyText1.copyWith(
+                    textStyle: Theme.of(context).textTheme.bodyText2.copyWith(
                         fontWeight: FontWeight.normal,
                         fontSize: FontSize.xxLarge.size,
                         height: 1.25),
                     padding: EdgeInsets.zero),
                 heading3: LineTheme(
-                    textStyle: Theme.of(context).textTheme.bodyText1.copyWith(
+                    textStyle: Theme.of(context).textTheme.bodyText2.copyWith(
                         fontWeight: FontWeight.normal,
                         fontSize: FontSize.xLarge.size,
                         height: 1.25),
