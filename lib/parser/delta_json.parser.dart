@@ -19,6 +19,10 @@ class DeltaJsonParser {
               (element['attributes'] as Map<String, dynamic>).entries,
               (entry) async {
             switch (entry.key) {
+              case 'a':
+                styledInsert =
+                    '<span data-nodetype="a" data-href="${entry.value}">$styledInsert</span>';
+                break;
               case 'b':
                 styledInsert = '<span data-nodetype="b">$styledInsert</span>';
                 break;

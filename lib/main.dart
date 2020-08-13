@@ -1,8 +1,6 @@
-import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hkgalden_flutter/redux/app/app_reducer.dart';
 import 'package:hkgalden_flutter/redux/blocked_users/blocked_users_middleware.dart';
 import 'package:hkgalden_flutter/redux/channel/channel_middleware.dart';
@@ -17,22 +15,24 @@ import 'package:redux/redux.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  final Store<AppState> store = Store<AppState>(
+    appReducer,
+    initialState: AppState.initial(),
+    distinct: true,
+    middleware: [
+      ThreadListMiddleware(),
+      ThreadMiddleware(),
+      ChannelMiddleware(),
+      SessionUserMiddleware(),
+      BlockedUsersMiddleware(),
+      UserThreadListMiddleware(),
+    ],
+  );
+
   @override
   Widget build(BuildContext context) {
     return StoreProvider<AppState>(
-      store: Store<AppState>(
-        appReducer,
-        initialState: AppState.initial(),
-        distinct: true,
-        middleware: [
-          ThreadListMiddleware(),
-          ThreadMiddleware(),
-          ChannelMiddleware(),
-          SessionUserMiddleware(),
-          BlockedUsersMiddleware(),
-          UserThreadListMiddleware(),
-        ],
-      ),
+      store: store,
       child: MaterialApp(
         home: StartupScreen(),
         theme: _generateTheme(),
@@ -43,7 +43,6 @@ class MyApp extends StatelessWidget {
   ThemeData _generateTheme() {
     var baseTheme = ThemeData(
       brightness: Brightness.dark,
-      //splashColor: Color(0xff2c3632),,
       primaryColor: Color(0xff2e3533),
       scaffoldBackgroundColor: Color(0xff1b1f1e),
       appBarTheme: AppBarTheme(color: Color(0xff1b1f1e), elevation: 0),
@@ -68,7 +67,6 @@ class MyApp extends StatelessWidget {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
     );
 
-    return baseTheme.copyWith(
-        textTheme: GoogleFonts.notoSansHKTextTheme(baseTheme.textTheme));
+    return baseTheme;
   }
 }

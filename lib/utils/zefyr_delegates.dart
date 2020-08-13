@@ -46,14 +46,21 @@ class CustomZefyrToolbarDelegate implements ZefyrToolbarDelegate {
   Widget buildButton(BuildContext context, ZefyrToolbarAction action,
       {VoidCallback onPressed}) {
     //final theme = Theme.of(context);
-    if (action == ZefyrToolbarAction.image ||
-        action == ZefyrToolbarAction.cameraImage ||
-        action == ZefyrToolbarAction.galleryImage ||
-        action == ZefyrToolbarAction.link ||
-        action == ZefyrToolbarAction.bold ||
-        action == ZefyrToolbarAction.italic ||
-        action == ZefyrToolbarAction.heading ||
-        action == ZefyrToolbarAction.hideKeyboard) {
+    final List<ZefyrToolbarAction> enabledActions = [
+      ZefyrToolbarAction.image,
+      ZefyrToolbarAction.cameraImage,
+      ZefyrToolbarAction.galleryImage,
+      ZefyrToolbarAction.link,
+      ZefyrToolbarAction.bold,
+      ZefyrToolbarAction.italic,
+      ZefyrToolbarAction.heading,
+      ZefyrToolbarAction.hideKeyboard,
+      ZefyrToolbarAction.confirm,
+      ZefyrToolbarAction.clipboardCopy,
+      ZefyrToolbarAction.close,
+      ZefyrToolbarAction.unlink
+    ];
+    if (enabledActions.contains(action)) {
       final icon = kDefaultButtonIcons[action];
       final size = kSpecialIconSizes[action];
       return ZefyrButton.icon(

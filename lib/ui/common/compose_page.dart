@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/style.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/tag.dart';
@@ -108,8 +109,8 @@ class _ComposePageState extends State<ComposePage> {
                                 )
                               : _createThread(context, arguments)
                           : _sendReply(context, arguments);
-                      // await DeltaJsonParser().toGaldenHtml(
-                      //     json.decode(_getZefyrEditorContent()));
+                      // await DeltaJsonParser()
+                      //     .toGaldenHtml(json.decode(_getZefyrEditorContent()));
                     },
             ),
           ),
@@ -117,9 +118,36 @@ class _ComposePageState extends State<ComposePage> {
       ),
       body: ZefyrTheme(
         data: ZefyrThemeData(
+            defaultLineTheme: LineTheme(
+                textStyle: Theme.of(context)
+                    .textTheme
+                    .bodyText1
+                    .copyWith(fontSize: FontSize.large.size, height: 1.25),
+                padding: EdgeInsets.zero),
+            attributeTheme: AttributeTheme(
+                link: TextStyle(
+                    decoration: TextDecoration.none, color: Colors.blueAccent),
+                heading1: LineTheme(
+                    textStyle: Theme.of(context).textTheme.bodyText1.copyWith(
+                        fontWeight: FontWeight.normal,
+                        fontSize: 33,
+                        height: 1.25),
+                    padding: EdgeInsets.zero),
+                heading2: LineTheme(
+                    textStyle: Theme.of(context).textTheme.bodyText1.copyWith(
+                        fontWeight: FontWeight.normal,
+                        fontSize: FontSize.xxLarge.size,
+                        height: 1.25),
+                    padding: EdgeInsets.zero),
+                heading3: LineTheme(
+                    textStyle: Theme.of(context).textTheme.bodyText1.copyWith(
+                        fontWeight: FontWeight.normal,
+                        fontSize: FontSize.xLarge.size,
+                        height: 1.25),
+                    padding: EdgeInsets.zero)),
             toolbarTheme: ToolbarTheme.fallback(context).copyWith(
-          color: Theme.of(context).primaryColor,
-        )),
+              color: Theme.of(context).primaryColor,
+            )),
         child: ZefyrScaffold(
           child: Column(
             children: <Widget>[
@@ -190,7 +218,9 @@ class _ComposePageState extends State<ComposePage> {
                         ),
                       ),
                     )
-                  : SizedBox(),
+                  : SizedBox(
+                      height: 12,
+                    ),
               Expanded(
                 child: ZefyrEditor(
                   controller: _controller,

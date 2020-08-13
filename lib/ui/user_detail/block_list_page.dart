@@ -14,12 +14,7 @@ class BlockListPage extends StatelessWidget {
         converter: (store) => BlockedUsersViewModel.create(store),
         builder: (context, viewModel) => viewModel.isLoading
             ? BlockedUsersLoadingSkeleton()
-            : GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 4,
-                    crossAxisSpacing: 4,
-                    childAspectRatio: 3),
+            : ListView.builder(
                 itemCount: viewModel.blockedUsers.length,
                 itemBuilder: (context, index) {
                   return BlockedUserCell(user: viewModel.blockedUsers[index]);

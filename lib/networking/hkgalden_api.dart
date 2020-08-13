@@ -224,6 +224,11 @@ class HKGaldenApi {
           id
           nickname
           gender
+          avatar
+          groups {
+            id
+            name
+          }
         }
       }
     ''';
