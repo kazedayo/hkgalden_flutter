@@ -3,7 +3,10 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_html/html_parser.dart';
 import 'package:flutter_redux/flutter_redux.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
@@ -250,19 +253,11 @@ class _ThreadPageState extends State<ThreadPage> {
                         .ceil() ==
                     viewModel.currentPage)
               ThreadPageLoadingSkeletonCell(),
-            Container(
-              height: 50,
-              child: Center(
-                child: Text(viewModel
-                            .previousPageReplies[
-                                viewModel.previousPageReplies.length -
-                                    index -
-                                    1]
-                            .floor ==
-                        1
-                    ? '第 1 頁'
-                    : '第 ${((viewModel.previousPageReplies[viewModel.previousPageReplies.length - index - 1].floor + 49) ~/ 50)} 頁'),
-              ),
+            _PageHeader(
+              floor: viewModel
+                  .previousPageReplies[
+                      viewModel.previousPageReplies.length - index - 1]
+                  .floor,
             ),
             CommentCell(
               key: ValueKey(viewModel
@@ -306,14 +301,7 @@ class _ThreadPageState extends State<ThreadPage> {
         viewModel.replies[index] == viewModel.replies.last) {
       return Column(
         children: <Widget>[
-          Container(
-            height: 50,
-            child: Center(
-              child: Text(viewModel.replies[index].floor == 1
-                  ? '第 1 頁'
-                  : '第 ${((viewModel.replies[index].floor + 49) ~/ 50)} 頁'),
-            ),
-          ),
+          _PageHeader(floor: viewModel.replies[index].floor),
           CommentCell(
             key: ValueKey(viewModel.replies[index].replyId),
             viewModel: viewModel,
@@ -325,26 +313,22 @@ class _ThreadPageState extends State<ThreadPage> {
             },
             canReply: _canReply,
           ),
-          Container(
-            height: 85,
-            child: Center(
-              child: Text('已到post底', style: TextStyle(color: Colors.grey)),
-            ),
-          ),
+          _PageFooter(
+            onLastPage: _onLastPage,
+            isLoading: viewModel.isLoading,
+            onTap: () => StoreProvider.of<AppState>(context).dispatch(
+                RequestThreadAction(
+                    threadId: viewModel.threadId,
+                    page: viewModel.endPage,
+                    isInitialLoad: false)),
+          )
         ],
       );
     } else if (viewModel.replies[index].floor % 50 == 1 &&
         viewModel.replies.length != 1) {
       return Column(
         children: <Widget>[
-          Container(
-            height: 50,
-            child: Center(
-              child: Text(viewModel.replies[index].floor == 1
-                  ? '第 1 頁'
-                  : '第 ${((viewModel.replies[index].floor + 49) ~/ 50)} 頁'),
-            ),
-          ),
+          _PageHeader(floor: viewModel.replies[index].floor),
           CommentCell(
             key: ValueKey(viewModel.replies[index].replyId),
             viewModel: viewModel,
@@ -372,18 +356,15 @@ class _ThreadPageState extends State<ThreadPage> {
             },
             canReply: _canReply,
           ),
-          SafeArea(
-            top: false,
-            child: !_onLastPage
-                ? ThreadPageLoadingSkeletonHeader()
-                : Container(
-                    height: 85,
-                    child: Center(
-                      child:
-                          Text('已到post底', style: TextStyle(color: Colors.grey)),
-                    ),
-                  ),
-          )
+          _PageFooter(
+            onLastPage: _onLastPage,
+            isLoading: viewModel.isLoading,
+            onTap: () => StoreProvider.of<AppState>(context).dispatch(
+                RequestThreadAction(
+                    threadId: viewModel.threadId,
+                    page: viewModel.endPage,
+                    isInitialLoad: false)),
+          ),
         ],
       );
     } else {
@@ -400,4 +381,61 @@ class _ThreadPageState extends State<ThreadPage> {
       );
     }
   }
+}
+
+class _PageHeader extends StatelessWidget {
+  final int floor;
+
+  const _PageHeader({Key key, this.floor}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Container(
+        height: 50,
+        child: Center(
+          child: Text(floor == 1 ? '第 1 頁' : '第 ${((floor + 49) ~/ 50)} 頁'),
+        ),
+      );
+}
+
+class _PageFooter extends StatelessWidget {
+  final bool onLastPage;
+  final bool isLoading;
+  final Function onTap;
+
+  const _PageFooter({Key key, this.onLastPage, this.isLoading, this.onTap})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => SafeArea(
+        top: false,
+        child: !onLastPage
+            ? ThreadPageLoadingSkeletonHeader()
+            : Column(
+                children: [
+                  Container(
+                    height: 85,
+                    child: Center(
+                      child: FlatButton.icon(
+                          highlightColor: Colors.transparent,
+                          splashColor: Colors.transparent,
+                          onPressed: () => onTap(),
+                          icon: isLoading
+                              ? SpinKitFadingFour(
+                                  color: Colors.grey,
+                                  size: 25,
+                                )
+                              : Icon(
+                                  Icons.refresh,
+                                  size: 25,
+                                  color: Colors.grey,
+                                ),
+                          label: Text(
+                            isLoading ? '撈緊...' : '重新整理',
+                            style: Theme.of(context).textTheme.caption,
+                          )),
+                    ),
+                  ),
+                ],
+              ),
+      );
 }
