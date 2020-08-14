@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:hkgalden_flutter/redux/app/app_reducer.dart';
 import 'package:hkgalden_flutter/redux/blocked_users/blocked_users_middleware.dart';
@@ -36,6 +37,18 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         home: StartupScreen(),
         theme: _generateTheme(),
+        localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: [
+          const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+          const Locale.fromSubtags(
+              languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
+          const Locale.fromSubtags(
+              languageCode: 'zh', scriptCode: 'Hant', countryCode: 'TW'),
+        ],
       ),
     );
   }
