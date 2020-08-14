@@ -422,7 +422,7 @@ class _PageFooter extends StatelessWidget {
                           icon: isLoading
                               ? SpinKitFadingFour(
                                   color: Colors.grey,
-                                  size: 25,
+                                  size: 20,
                                 )
                               : Icon(
                                   Icons.refresh,
@@ -432,6 +432,8 @@ class _PageFooter extends StatelessWidget {
                           label: Text(
                             isLoading ? '撈緊...' : '重新整理',
                             style: Theme.of(context).textTheme.caption,
+                            strutStyle:
+                                StrutStyle(height: 1.1, forceStrutHeight: true),
                           )),
                     ),
                   ),
