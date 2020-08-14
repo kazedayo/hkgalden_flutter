@@ -52,6 +52,7 @@ dependencies:
     git:
       url: https://github.com/fluttercommunity/backdrop.git
   package_info:
+  flutter_spinkit:
 
 dev_dependencies:
   flutter_test:

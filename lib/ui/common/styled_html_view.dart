@@ -1,10 +1,12 @@
 import 'dart:math';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/html_parser.dart';
 import 'package:flutter_html/style.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -22,10 +24,12 @@ class StyledHtmlView extends StatefulWidget {
 
 class _StyledHtmlViewState extends State<StyledHtmlView> {
   int _randomHash;
+  bool _imageLoadingHasError;
 
   @override
   void initState() {
     _randomHash = Random().nextInt(1000);
+    _imageLoadingHasError = false;
     super.initState();
   }
 
@@ -38,26 +42,45 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
         customRender: {
           'img': (context, _, attributes, __) {
             return GestureDetector(
-                onTap: () => _showImageView(
-                    context.buildContext,
-                    attributes['src'],
-                    '${widget.floor}_${attributes['src']}_$_randomHash'),
+                onTap: () => _imageLoadingHasError
+                    ? null
+                    : _showImageView(context.buildContext, attributes['src'],
+                        '${widget.floor}_${attributes['src']}_$_randomHash'),
                 child: Container(
                   margin: EdgeInsets.symmetric(vertical: 8),
                   child: Hero(
                     tag: '${widget.floor}_${attributes['src']}_$_randomHash',
                     child: CachedNetworkImage(
                       imageUrl: attributes['src'],
-                      placeholder: (context, url) => SizedBox(
-                        width: 25,
-                        height: 25,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                      placeholder: (context, url) => SpinKitFadingFour(
+                        color: Colors.grey,
+                        size: 25,
                       ),
-                      errorWidget: (context, url, error) => SizedBox(
-                        width: 25,
-                        height: 25,
-                        child: Icon(Icons.error),
-                      ),
+                      errorWidget: (context, url, error) {
+                        _imageLoadingHasError = true;
+                        return Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.error,
+                                color: Colors.grey,
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Expanded(
+                                child: AutoSizeText(
+                                  '圖片載入錯誤 (${error.toString()})',
+                                  style: Theme.of(context).textTheme.caption,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              )
+                            ],
+                          ),
+                        );
+                      },
                       fadeInDuration: Duration(milliseconds: 250),
                       fadeOutDuration: Duration(milliseconds: 250),
                     ),
