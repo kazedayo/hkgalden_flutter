@@ -1,5 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_advanced_networkimage/provider.dart';
+import 'package:flutter_advanced_networkimage/zoomable.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 
@@ -86,32 +87,36 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
           constraints: BoxConstraints.expand(
             height: MediaQuery.of(context).size.height,
           ),
-          child: InteractiveViewer(
-            minScale: 1.0,
-            maxScale: 3.0,
-            child: GestureDetector(
-              onVerticalDragStart: (details) => _startVerticalDrag(details),
-              onVerticalDragUpdate: (details) => _whileVerticalDrag(details),
-              onVerticalDragEnd: (details) => _endVerticalDrag(details),
-              child: Stack(
-                children: <Widget>[
-                  AnimatedPositioned(
-                    duration: _animationDuration,
-                    curve: Curves.fastOutSlowIn,
-                    top: 0 + _positionYDelta,
-                    bottom: 0 - _positionYDelta,
-                    left: 0,
-                    right: 0,
-                    child: Hero(
-                      tag: widget.heroTag,
-                      child: CachedNetworkImage(
-                        imageUrl: widget.imageUrl,
-                        filterQuality: FilterQuality.high,
-                      ),
+          child: GestureDetector(
+            onVerticalDragStart: (details) => _startVerticalDrag(details),
+            onVerticalDragUpdate: (details) => _whileVerticalDrag(details),
+            onVerticalDragEnd: (details) => _endVerticalDrag(details),
+            child: Stack(
+              children: <Widget>[
+                AnimatedPositioned(
+                  duration: _animationDuration,
+                  curve: Curves.fastOutSlowIn,
+                  top: 0 + _positionYDelta,
+                  bottom: 0 - _positionYDelta,
+                  left: 0,
+                  right: 0,
+                  child: Hero(
+                    tag: widget.heroTag,
+                    child: ZoomableWidget(
+                      panLimit: 1.0,
+                      maxScale: 2.5,
+                      minScale: 1.0,
+                      singleFingerPan: true,
+                      multiFingersPan: true,
+                      enableRotate: false,
+                      enableFling: false,
+                      zoomSteps: 2,
+                      child:
+                          Image(image: AdvancedNetworkImage(widget.imageUrl)),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

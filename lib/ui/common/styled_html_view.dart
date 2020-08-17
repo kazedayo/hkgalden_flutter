@@ -1,8 +1,9 @@
 import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_advanced_networkimage/provider.dart';
+import 'package:flutter_advanced_networkimage/transition.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/html_parser.dart';
 import 'package:flutter_html/style.dart';
@@ -50,39 +51,37 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                   margin: EdgeInsets.symmetric(vertical: 8),
                   child: Hero(
                     tag: '${widget.floor}_${attributes['src']}_$_randomHash',
-                    child: CachedNetworkImage(
-                      imageUrl: attributes['src'],
-                      placeholder: (context, url) => SpinKitFadingFour(
+                    child: TransitionToImage(
+                      image: AdvancedNetworkImage(attributes['src']),
+                      loadingWidget: SpinKitFadingFour(
                         color: Colors.grey,
                         size: 25,
                       ),
-                      errorWidget: (context, url, error) {
-                        _imageLoadingHasError = true;
-                        return Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error,
-                                color: Colors.grey,
+                      placeholder: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error,
+                              color: Colors.grey,
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Expanded(
+                              child: AutoSizeText(
+                                '圖片載入錯誤',
+                                style: Theme.of(context.buildContext)
+                                    .textTheme
+                                    .caption,
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              Expanded(
-                                child: AutoSizeText(
-                                  '圖片載入錯誤 (${error.toString()})',
-                                  style: Theme.of(context).textTheme.caption,
-                                  maxLines: 3,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              )
-                            ],
-                          ),
-                        );
-                      },
-                      fadeInDuration: Duration(milliseconds: 250),
-                      fadeOutDuration: Duration(milliseconds: 250),
+                            )
+                          ],
+                        ),
+                      ),
+                      loadFailedCallback: () => _imageLoadingHasError = true,
                     ),
                   ),
                 ));
@@ -90,11 +89,12 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
           'icon': (_, __, attributes, ____) {
             return Container(
               margin: EdgeInsets.all(3),
-              child: CachedNetworkImage(
+              child: TransitionToImage(
+                loadingWidget: SizedBox.fromSize(
+                  size: Size.square(30),
+                ),
                 alignment: Alignment.center,
-                imageUrl: attributes['src'],
-                fadeInDuration: Duration(milliseconds: 250),
-                fadeOutDuration: Duration(milliseconds: 250),
+                image: AdvancedNetworkImage(attributes['src']),
               ),
             );
           },

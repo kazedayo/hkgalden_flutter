@@ -1,5 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_advanced_networkimage/provider.dart';
+import 'package:flutter_advanced_networkimage/transition.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
@@ -36,12 +37,13 @@ class _BlockedUserCellState extends State<BlockedUserCell> {
             avatarImage: widget.user.avatar == ''
                 ? SvgPicture.asset('assets/icon-hkgalden.svg',
                     width: 30, height: 30, color: Colors.grey)
-                : CachedNetworkImage(
-                    imageUrl: widget.user.avatar,
+                : TransitionToImage(
+                    image: AdvancedNetworkImage(widget.user.avatar),
+                    loadingWidget: SizedBox.fromSize(
+                      size: Size.square(30),
+                    ),
                     width: 30,
                     height: 30,
-                    fadeInDuration: Duration(milliseconds: 250),
-                    fadeOutDuration: Duration(milliseconds: 250),
                   ),
             userGroup: widget.user.userGroup,
           ),

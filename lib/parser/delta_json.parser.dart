@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_advanced_networkimage/provider.dart';
 
 class DeltaJsonParser {
   Future<String> toGaldenHtml(List<dynamic> json) async {
@@ -82,7 +82,7 @@ class DeltaJsonParser {
 
   Future<ui.Image> _getImageDimension(String url) {
     Completer<ui.Image> imageCompleter = Completer<ui.Image>();
-    CachedNetworkImageProvider(url)
+    AdvancedNetworkImage(url)
         .resolve(ImageConfiguration())
         .addListener(ImageStreamListener((ImageInfo info, bool _) {
       imageCompleter.complete(info.image);

@@ -1,6 +1,8 @@
 import 'package:animations/animations.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_advanced_networkimage/provider.dart';
+import 'package:flutter_advanced_networkimage/transition.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
@@ -11,7 +13,6 @@ import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_detail_view.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/viewmodels/thread_page_view_model.dart';
@@ -54,12 +55,13 @@ class CommentCell extends StatelessWidget {
                     avatarImage: reply.author.avatar == ''
                         ? SvgPicture.asset('assets/icon-hkgalden.svg',
                             width: 30, height: 30, color: Colors.grey)
-                        : CachedNetworkImage(
-                            imageUrl: reply.author.avatar,
+                        : TransitionToImage(
+                            loadingWidget: SizedBox.fromSize(
+                              size: Size.square(30),
+                            ),
+                            image: AdvancedNetworkImage(reply.author.avatar),
                             width: 30,
                             height: 30,
-                            fadeInDuration: Duration(milliseconds: 300),
-                            fadeOutDuration: Duration(milliseconds: 300),
                           ),
                     userGroup: reply.author.userGroup == null
                         ? []
