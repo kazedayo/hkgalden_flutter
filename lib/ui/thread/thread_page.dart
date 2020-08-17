@@ -32,7 +32,7 @@ class _ThreadPageState extends State<ThreadPage> {
 
   @override
   void initState() {
-    _scrollController = ScrollController();
+    //_scrollController = ScrollController();
     _onLastPage = false;
     _fabIsHidden = false;
     _elevation = 0.0;
@@ -50,161 +50,164 @@ class _ThreadPageState extends State<ThreadPage> {
     const Key centerKey = ValueKey('second-sliver-list');
     final ThreadPageArguments arguments =
         ModalRoute.of(context).settings.arguments;
-    return StoreConnector<AppState, ThreadPageViewModel>(
-      distinct: true,
-      onInit: (store) {
-        _canReply = store.state.sessionUserState.isLoggedIn;
-        store.dispatch(RequestThreadAction(
-            threadId: arguments.threadId,
-            page: arguments.page,
-            isInitialLoad: true));
-        _scrollController
-          ..addListener(() {
-            if (_scrollController.position.pixels ==
-                _scrollController.position.maxScrollExtent) {
-              if (!_onLastPage) {
-                store.dispatch(RequestThreadAction(
-                  threadId: store.state.threadState.thread.threadId,
-                  page: store.state.threadState.currentPage + 1,
-                  isInitialLoad: false,
-                ));
-              }
-            } else if (_scrollController.position.pixels ==
-                _scrollController.position.minScrollExtent) {
-              if (store.state.threadState.currentPage != 1 &&
-                  store.state.threadState.endPage <= arguments.page) {
-                store.dispatch(
-                  RequestThreadAction(
+    return Scaffold(
+      body: Builder(
+        builder: (context) => StoreConnector<AppState, ThreadPageViewModel>(
+          distinct: true,
+          onInit: (store) {
+            _canReply = store.state.sessionUserState.isLoggedIn;
+            store.dispatch(RequestThreadAction(
+                threadId: arguments.threadId,
+                page: arguments.page,
+                isInitialLoad: true));
+            _scrollController = PrimaryScrollController.of(context);
+            _scrollController
+              ..addListener(() {
+                if (_scrollController.position.pixels ==
+                    _scrollController.position.maxScrollExtent) {
+                  if (!_onLastPage) {
+                    store.dispatch(RequestThreadAction(
                       threadId: store.state.threadState.thread.threadId,
-                      page: store.state.threadState.currentPage - 1,
-                      isInitialLoad: false),
-                );
-              }
-            }
-          })
-          ..addListener(() {
-            if (_scrollController.position.userScrollDirection ==
-                    ScrollDirection.reverse &&
-                !_fabIsHidden) {
-              setState(() {
-                _fabIsHidden = true;
+                      page: store.state.threadState.currentPage + 1,
+                      isInitialLoad: false,
+                    ));
+                  }
+                } else if (_scrollController.position.pixels ==
+                    _scrollController.position.minScrollExtent) {
+                  if (store.state.threadState.currentPage != 1 &&
+                      store.state.threadState.endPage <= arguments.page) {
+                    store.dispatch(
+                      RequestThreadAction(
+                          threadId: store.state.threadState.thread.threadId,
+                          page: store.state.threadState.currentPage - 1,
+                          isInitialLoad: false),
+                    );
+                  }
+                }
+              })
+              ..addListener(() {
+                if (_scrollController.position.userScrollDirection ==
+                        ScrollDirection.reverse &&
+                    !_fabIsHidden) {
+                  setState(() {
+                    _fabIsHidden = true;
+                  });
+                } else if ((_scrollController.position.userScrollDirection ==
+                            ScrollDirection.forward ||
+                        _scrollController.position.pixels ==
+                            _scrollController.position.maxScrollExtent ||
+                        _scrollController.position.pixels == 0.0) &&
+                    _fabIsHidden) {
+                  setState(() {
+                    _fabIsHidden = false;
+                  });
+                }
+              })
+              ..addListener(() {
+                double newElevation = _scrollController.position.pixels >
+                        _scrollController.position.minScrollExtent
+                    ? 4.0
+                    : 0.0;
+                if (newElevation != _elevation) {
+                  setState(() {
+                    _elevation = newElevation;
+                  });
+                }
               });
-            } else if ((_scrollController.position.userScrollDirection ==
-                        ScrollDirection.forward ||
-                    _scrollController.position.pixels ==
-                        _scrollController.position.maxScrollExtent) &&
-                _fabIsHidden) {
+          },
+          onDidChange: (viewModel) {
+            if ((viewModel.totalReplies.toDouble() / 50.0).ceil() >
+                viewModel.endPage) {
               setState(() {
-                _fabIsHidden = false;
+                _onLastPage = false;
+              });
+            } else {
+              setState(() {
+                _onLastPage = true;
               });
             }
-          })
-          ..addListener(() {
-            double newElevation = _scrollController.position.pixels >
-                    _scrollController.position.minScrollExtent
-                ? 4.0
-                : 0.0;
-            if (newElevation != _elevation) {
-              setState(() {
-                _elevation = newElevation;
-              });
-            }
-          });
-      },
-      onDidChange: (viewModel) {
-        if ((viewModel.totalReplies.toDouble() / 50.0).ceil() >
-            viewModel.endPage) {
-          setState(() {
-            _onLastPage = false;
-          });
-        } else {
-          setState(() {
-            _onLastPage = true;
-          });
-        }
-      },
-      onDispose: (store) => store.dispatch(ClearThreadStateAction()),
-      converter: (store) => ThreadPageViewModel.create(store),
-      builder: (BuildContext context, ThreadPageViewModel viewModel) =>
-          Scaffold(
-        resizeToAvoidBottomInset: false,
-        key: scaffoldKey,
-        appBar: PreferredSize(
-            child: GestureDetector(
-              onTap: () => _scrollController.animateTo(0,
-                  duration: Duration(milliseconds: 1000),
-                  curve: Curves.easeOutExpo),
-              child: AppBar(
-                elevation: _elevation,
-                automaticallyImplyLeading: false,
-                leading: IconButton(
-                    splashRadius: 25.0,
-                    icon: Icon(Theme.of(context).platform == TargetPlatform.iOS
-                        ? Icons.arrow_back_ios
-                        : Icons.arrow_back),
-                    onPressed: () => Navigator.of(context).pop()),
-                title: SizedBox(
-                  height: kToolbarHeight * 0.85,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Flexible(
-                        fit: FlexFit.loose,
-                        child: AutoSizeText(
-                          arguments.title,
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                          maxLines: 2,
-                          minFontSize: 14,
-                          //overflow: TextOverflow.ellipsis
-                        ),
-                      )
-                    ],
+          },
+          onDispose: (store) => store.dispatch(ClearThreadStateAction()),
+          converter: (store) => ThreadPageViewModel.create(store),
+          builder: (BuildContext context, ThreadPageViewModel viewModel) =>
+              Scaffold(
+            resizeToAvoidBottomInset: false,
+            key: scaffoldKey,
+            appBar: PreferredSize(
+                child: AppBar(
+                  elevation: _elevation,
+                  automaticallyImplyLeading: false,
+                  leading: IconButton(
+                      splashRadius: 25.0,
+                      icon: Icon(
+                          Theme.of(context).platform == TargetPlatform.iOS
+                              ? Icons.arrow_back_ios
+                              : Icons.arrow_back),
+                      onPressed: () => Navigator.of(context).pop()),
+                  title: SizedBox(
+                    height: kToolbarHeight * 0.85,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: AutoSizeText(
+                            arguments.title,
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                            maxLines: 2,
+                            minFontSize: 14,
+                            //overflow: TextOverflow.ellipsis
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ),
-            preferredSize: Size.fromHeight(kToolbarHeight)),
-        body: viewModel.isLoading && viewModel.isInitialLoad
-            ? ThreadPageLoadingSkeleton()
-            : CustomScrollView(
-                center: centerKey,
-                controller: _scrollController,
-                slivers: <Widget>[
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      return _generatePreviousPageSliver(
-                          viewModel, index, arguments.page);
-                    },
-                        childCount: viewModel.previousPageReplies.length == 0
-                            ? 1
-                            : viewModel.previousPageReplies.length),
+                preferredSize: Size.fromHeight(kToolbarHeight)),
+            body: viewModel.isLoading && viewModel.isInitialLoad
+                ? ThreadPageLoadingSkeleton()
+                : CustomScrollView(
+                    center: centerKey,
+                    controller: _scrollController,
+                    slivers: <Widget>[
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          return _generatePreviousPageSliver(
+                              viewModel, index, arguments.page);
+                        },
+                            childCount:
+                                viewModel.previousPageReplies.length == 0
+                                    ? 1
+                                    : viewModel.previousPageReplies.length),
+                      ),
+                      SliverList(
+                        key: centerKey,
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          return _generatePageSliver(viewModel, index);
+                        }, childCount: viewModel.replies.length),
+                      ),
+                    ],
                   ),
-                  SliverList(
-                    key: centerKey,
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      return _generatePageSliver(viewModel, index);
-                    }, childCount: viewModel.replies.length),
-                  ),
-                ],
-              ),
-        floatingActionButton: _fabIsHidden
-            ? null
-            : FloatingActionButton(
-                child: Icon(Icons.reply),
-                onPressed: () => !_canReply
-                    ? showModal<void>(
-                        context: context,
-                        builder: (context) => LoginCheckDialog())
-                    : Navigator.of(context).pushNamed('/Compose',
-                        arguments: ComposePageArguments(
-                          composeMode: ComposeMode.reply,
-                          threadId: viewModel.threadId,
-                          onSent: (reply) {
-                            _onReplySuccess(viewModel, reply);
-                          },
-                        ))),
+            floatingActionButton: _fabIsHidden
+                ? null
+                : FloatingActionButton(
+                    child: Icon(Icons.reply),
+                    onPressed: () => !_canReply
+                        ? showModal<void>(
+                            context: context,
+                            builder: (context) => LoginCheckDialog())
+                        : Navigator.of(context).pushNamed('/Compose',
+                            arguments: ComposePageArguments(
+                              composeMode: ComposeMode.reply,
+                              threadId: viewModel.threadId,
+                              onSent: (reply) {
+                                _onReplySuccess(viewModel, reply);
+                              },
+                            ))),
+          ),
+        ),
       ),
     );
   }

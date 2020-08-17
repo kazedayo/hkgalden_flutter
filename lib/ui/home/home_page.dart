@@ -33,7 +33,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    _scrollController = ScrollController();
+    //_scrollController = ScrollController();
     _fabIsHidden = false;
     super.initState();
   }
@@ -44,139 +44,143 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  @override
-  void didChangeDependencies() {
-    context.dependOnInheritedWidgetOfExactType();
-    super.didChangeDependencies();
-  }
+  // @override
+  // void didChangeDependencies() {
+  //   context.dependOnInheritedWidgetOfExactType();
+  //   super.didChangeDependencies();
+  // }
 
   @override
   Widget build(BuildContext context) {
-    return StoreConnector<AppState, HomePageViewModel>(
-      converter: (store) => HomePageViewModel.create(store),
-      distinct: true,
-      onInit: (store) {
-        _scrollController
-          ..addListener(() {
-            if (_scrollController.position.pixels ==
-                _scrollController.position.maxScrollExtent) {
-              store.dispatch(RequestThreadListAction(
-                  channelId: store.state.threadListState.currentChannelId,
-                  page: store.state.threadListState.currentPage + 1,
-                  isRefresh: true));
-            }
-          })
-          ..addListener(() {
-            if (_scrollController.position.userScrollDirection ==
-                    ScrollDirection.forward &&
-                _fabIsHidden == true) {
-              setState(() {
-                _fabIsHidden = false;
+    return Scaffold(
+      body: Builder(
+        builder: (context) => StoreConnector<AppState, HomePageViewModel>(
+          converter: (store) => HomePageViewModel.create(store),
+          distinct: true,
+          onInit: (store) {
+            _scrollController = PrimaryScrollController.of(context);
+            _scrollController
+              ..addListener(() {
+                if (_scrollController.position.pixels ==
+                    _scrollController.position.maxScrollExtent) {
+                  store.dispatch(RequestThreadListAction(
+                      channelId: store.state.threadListState.currentChannelId,
+                      page: store.state.threadListState.currentPage + 1,
+                      isRefresh: true));
+                }
+              })
+              ..addListener(() {
+                if ((_scrollController.position.userScrollDirection ==
+                            ScrollDirection.forward ||
+                        _scrollController.position.pixels == 0.0) &&
+                    _fabIsHidden) {
+                  setState(() {
+                    _fabIsHidden = false;
+                  });
+                } else if (_scrollController.position.userScrollDirection ==
+                        ScrollDirection.reverse &&
+                    !_fabIsHidden) {
+                  setState(() {
+                    _fabIsHidden = true;
+                  });
+                }
               });
-            } else if (_scrollController.position.userScrollDirection ==
-                    ScrollDirection.reverse &&
-                _fabIsHidden == false) {
-              setState(() {
-                _fabIsHidden = true;
-              });
-            }
-          });
-      },
-      builder: (BuildContext context, HomePageViewModel viewModel) =>
-          BackdropScaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: PreferredSize(
-            child: GestureDetector(
-              onTap: () => _scrollController.animateTo(0,
-                  duration: Duration(milliseconds: 1000),
-                  curve: Curves.easeOutExpo),
-              child: AppBar(
-                leading: _LeadingButton(),
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Hero(
-                        tag: 'logo',
-                        child: SizedBox(
-                            child: SvgPicture.asset('assets/icon-hkgalden.svg'),
-                            width: 27,
-                            height: 27)),
-                    SizedBox(width: 5),
-                    Text(viewModel.title,
-                        style: TextStyle(fontWeight: FontWeight.w700),
-                        strutStyle: StrutStyle(height: 1.25)),
-                  ],
+          },
+          builder: (BuildContext context, HomePageViewModel viewModel) =>
+              BackdropScaffold(
+            resizeToAvoidBottomInset: false,
+            appBar: PreferredSize(
+                child: AppBar(
+                  leading: _LeadingButton(),
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Hero(
+                          tag: 'logo',
+                          child: SizedBox(
+                              child:
+                                  SvgPicture.asset('assets/icon-hkgalden.svg'),
+                              width: 27,
+                              height: 27)),
+                      SizedBox(width: 5),
+                      Text(viewModel.title,
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                          strutStyle: StrutStyle(height: 1.25)),
+                    ],
+                  ),
                 ),
-              ),
-            ),
-            preferredSize: Size.fromHeight(kToolbarHeight)),
-        frontLayer: Material(
-          color: Theme.of(context).primaryColor,
-          child: Container(
-            child: viewModel.isThreadLoading && viewModel.isRefresh == false
-                ? ListLoadingSkeleton()
-                : RefreshIndicator(
-                    strokeWidth: 2.5,
-                    onRefresh: () =>
-                        viewModel.onRefresh(viewModel.selectedChannelId),
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      itemCount: viewModel.threads.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == viewModel.threads.length) {
-                          return ListLoadingSkeletonCell();
-                        } else {
-                          return Visibility(
-                            visible: !viewModel.blockedUserIds.contains(
-                                viewModel
-                                    .threads[index].replies[0].author.userId),
-                            child: ThreadCell(
-                              key: ValueKey(viewModel.threads[index].threadId),
-                              title: viewModel.threads[index].title,
-                              authorName: viewModel
-                                  .threads[index].replies[0].authorNickname,
-                              totalReplies:
-                                  viewModel.threads[index].totalReplies,
-                              lastReply:
-                                  viewModel.threads[index].replies.length == 2
+                preferredSize: Size.fromHeight(kToolbarHeight)),
+            frontLayer: Material(
+              color: Theme.of(context).primaryColor,
+              child: Container(
+                child: viewModel.isThreadLoading && viewModel.isRefresh == false
+                    ? ListLoadingSkeleton()
+                    : RefreshIndicator(
+                        strokeWidth: 2.5,
+                        onRefresh: () =>
+                            viewModel.onRefresh(viewModel.selectedChannelId),
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          itemCount: viewModel.threads.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index == viewModel.threads.length) {
+                              return ListLoadingSkeletonCell();
+                            } else {
+                              return Visibility(
+                                visible: !viewModel.blockedUserIds.contains(
+                                    viewModel.threads[index].replies[0].author
+                                        .userId),
+                                child: ThreadCell(
+                                  key: ValueKey(
+                                      viewModel.threads[index].threadId),
+                                  title: viewModel.threads[index].title,
+                                  authorName: viewModel
+                                      .threads[index].replies[0].authorNickname,
+                                  totalReplies:
+                                      viewModel.threads[index].totalReplies,
+                                  lastReply: viewModel
+                                              .threads[index].replies.length ==
+                                          2
                                       ? viewModel.threads[index].replies[1].date
                                       : viewModel
                                           .threads[index].replies[0].date,
-                              tagName: viewModel.threads[index].tagName,
-                              tagColor: viewModel.threads[index].tagColor,
-                              onTap: () =>
-                                  _loadThread(viewModel.threads[index]),
-                              onLongPress: () =>
-                                  _jumpToPage(viewModel.threads[index]),
-                            ),
-                          );
-                        }
-                      },
-                    ),
+                                  tagName: viewModel.threads[index].tagName,
+                                  tagColor: viewModel.threads[index].tagColor,
+                                  onTap: () =>
+                                      _loadThread(viewModel.threads[index]),
+                                  onLongPress: () =>
+                                      _jumpToPage(viewModel.threads[index]),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+              ),
+            ),
+            inactiveOverlayColor: Colors.black,
+            stickyFrontLayer: true,
+            backLayer: HomeDrawer(),
+            backLayerBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            floatingActionButton: _fabIsHidden
+                ? null
+                : FloatingActionButton(
+                    child: Icon(Icons.create),
+                    onPressed: () => viewModel.isLoggedIn
+                        ? navigatorKey.currentState.pushNamed('/Compose',
+                            arguments: ComposePageArguments(
+                              composeMode: ComposeMode.newPost,
+                              onCreateThread: (channelId) =>
+                                  viewModel.onCreateThread(channelId),
+                            ))
+                        : showModal<void>(
+                            context: context,
+                            builder: (context) => LoginCheckDialog()),
                   ),
           ),
         ),
-        inactiveOverlayColor: Colors.black,
-        stickyFrontLayer: true,
-        backLayer: HomeDrawer(),
-        backLayerBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        floatingActionButton: _fabIsHidden
-            ? null
-            : FloatingActionButton(
-                child: Icon(Icons.create),
-                onPressed: () => viewModel.isLoggedIn
-                    ? navigatorKey.currentState.pushNamed('/Compose',
-                        arguments: ComposePageArguments(
-                          composeMode: ComposeMode.newPost,
-                          onCreateThread: (channelId) =>
-                              viewModel.onCreateThread(channelId),
-                        ))
-                    : showModal<void>(
-                        context: context,
-                        builder: (context) => LoginCheckDialog()),
-              ),
       ),
     );
   }

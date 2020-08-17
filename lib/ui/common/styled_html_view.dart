@@ -52,7 +52,8 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                   child: Hero(
                     tag: '${widget.floor}_${attributes['src']}_$_randomHash',
                     child: TransitionToImage(
-                      image: AdvancedNetworkImage(attributes['src']),
+                      image: AdvancedNetworkImage(attributes['src'],
+                          useDiskCache: true),
                       loadingWidget: SpinKitFadingFour(
                         color: Colors.grey,
                         size: 25,
