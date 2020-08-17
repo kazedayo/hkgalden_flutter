@@ -46,7 +46,7 @@ dependencies:
     git:
       url: https://github.com/mchome/flutter_advanced_networkimage.git 
   animations: 
-  gallery_saver: 
+  image_downloader: 
   auto_size_text: 
   shimmer: 
   image_picker: 

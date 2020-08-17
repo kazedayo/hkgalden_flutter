@@ -1,8 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_networkimage/provider.dart';
 import 'package:flutter_advanced_networkimage/zoomable.dart';
-import 'package:gallery_saver/gallery_saver.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
+import 'package:image_downloader/image_downloader.dart';
 
 class FullScreenPhotoView extends StatefulWidget {
   final String imageUrl;
@@ -18,46 +19,10 @@ class FullScreenPhotoView extends StatefulWidget {
 class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
   //drag to dismiss code: https://github.com/Furkankyl/full_screen_image/blob/master/lib/full_screen_image.dart
   bool _isDownloadingImage;
-  double _initialPositionY = 0;
-  double _currentPositionY = 0;
-  double _positionYDelta = 0;
-  double _disposeLimit = 150;
-  Duration _animationDuration = Duration.zero;
-
   @override
   void initState() {
     _isDownloadingImage = false;
     super.initState();
-  }
-
-  void _startVerticalDrag(details) {
-    setState(() {
-      _initialPositionY = details.globalPosition.dy;
-    });
-  }
-
-  void _whileVerticalDrag(details) {
-    setState(() {
-      _currentPositionY = details.globalPosition.dy;
-      _positionYDelta = _currentPositionY - _initialPositionY;
-    });
-  }
-
-  _endVerticalDrag(DragEndDetails details) {
-    if (_positionYDelta > _disposeLimit || _positionYDelta < -_disposeLimit) {
-      Navigator.of(context).pop();
-    } else {
-      setState(() {
-        _animationDuration = Duration(milliseconds: 300);
-        _positionYDelta = 0;
-      });
-
-      Future.delayed(_animationDuration).then((_) {
-        setState(() {
-          _animationDuration = Duration.zero;
-        });
-      });
-    }
   }
 
   @override
@@ -65,8 +30,12 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
         extendBodyBehindAppBar: true,
         appBar: AppBar(
           automaticallyImplyLeading: false,
+          leading: IconButton(
+              splashRadius: 25.0,
+              icon: Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop()),
           backgroundColor: Colors.transparent,
-          elevation: 0,
+          elevation: 30,
           actions: <Widget>[
             ActionBarSpinner(isVisible: _isDownloadingImage),
             Builder(
@@ -77,46 +46,21 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
                       ? null
                       : () => _saveImage(context, widget.imageUrl)),
             ),
-            IconButton(
-                splashRadius: 25.0,
-                icon: Icon(Icons.close),
-                onPressed: () => Navigator.of(context).pop())
           ],
         ),
         body: Container(
           constraints: BoxConstraints.expand(
             height: MediaQuery.of(context).size.height,
           ),
-          child: GestureDetector(
-            onVerticalDragStart: (details) => _startVerticalDrag(details),
-            onVerticalDragUpdate: (details) => _whileVerticalDrag(details),
-            onVerticalDragEnd: (details) => _endVerticalDrag(details),
-            child: Stack(
-              children: <Widget>[
-                AnimatedPositioned(
-                  duration: _animationDuration,
-                  curve: Curves.fastOutSlowIn,
-                  top: 0 + _positionYDelta,
-                  bottom: 0 - _positionYDelta,
-                  left: 0,
-                  right: 0,
-                  child: Hero(
-                    tag: widget.heroTag,
-                    child: ZoomableWidget(
-                      panLimit: 1.0,
-                      maxScale: 2.5,
-                      minScale: 1.0,
-                      singleFingerPan: true,
-                      multiFingersPan: true,
-                      enableRotate: false,
-                      enableFling: false,
-                      zoomSteps: 2,
-                      child:
-                          Image(image: AdvancedNetworkImage(widget.imageUrl)),
-                    ),
-                  ),
-                ),
-              ],
+          child: Hero(
+            tag: widget.heroTag,
+            child: ZoomableWidget(
+              autoCenter: true,
+              maxScale: 2.5,
+              minScale: 1.0,
+              zoomSteps: 2,
+              child: Image(image: AdvancedNetworkImage(widget.imageUrl)),
+              onTap: () => Navigator.of(context).pop(),
             ),
           ),
         ),
@@ -126,11 +70,11 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
     setState(() {
       _isDownloadingImage = true;
     });
-    GallerySaver.saveImage(url).then((success) {
+    ImageDownloader.downloadImage(url).then((id) {
       setState(() {
         _isDownloadingImage = false;
       });
-      if (success == false) {
+      if (id == null) {
         Scaffold.of(context).showSnackBar(SnackBar(content: Text('圖片下載失敗!')));
         return;
       }

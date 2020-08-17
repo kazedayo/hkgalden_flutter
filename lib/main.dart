@@ -37,6 +37,8 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         home: StartupScreen(),
         theme: _generateTheme(),
+        locale: Locale.fromSubtags(
+            languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
         localizationsDelegates: [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
