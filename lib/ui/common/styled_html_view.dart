@@ -42,10 +42,16 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
         data: widget.htmlString,
         customRender: {
           'img': (context, _, attributes, __) {
+            precacheImage(
+                AdvancedNetworkImage(attributes['src'], useDiskCache: true),
+                context.buildContext);
             return GestureDetector(
                 onTap: () => _imageLoadingHasError
                     ? null
-                    : _showImageView(context.buildContext, attributes['src'],
+                    : _showImageView(
+                        context.buildContext,
+                        AdvancedNetworkImage(attributes['src'],
+                            useDiskCache: true),
                         '${widget.floor}_${attributes['src']}_$_randomHash'),
                 child: Container(
                   margin: EdgeInsets.symmetric(vertical: 8),
@@ -173,8 +179,9 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
     }
   }
 
-  _showImageView(BuildContext context, String url, String heroTag) {
+  _showImageView(
+      BuildContext context, AdvancedNetworkImage image, String heroTag) {
     Navigator.of(context).push(
-        FadeRoute(page: FullScreenPhotoView(imageUrl: url, heroTag: heroTag)));
+        FadeRoute(page: FullScreenPhotoView(image: image, heroTag: heroTag)));
   }
 }

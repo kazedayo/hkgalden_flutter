@@ -50,9 +50,7 @@ dependencies:
   auto_size_text: 
   shimmer: 
   image_picker: 
-  backdrop:
-    git:
-      url: https://github.com/fluttercommunity/backdrop.git
+  backdrop: 
   package_info:
   flutter_spinkit:
 

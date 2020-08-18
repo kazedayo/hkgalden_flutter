@@ -24,76 +24,73 @@ class HomeDrawerHeader extends StatelessWidget {
         converter: (store) => HomeDrawerHeaderViewModel.create(store),
         builder: (BuildContext context, HomeDrawerHeaderViewModel viewModel) =>
             Container(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                color: Theme.of(context).scaffoldBackgroundColor,
-                child: DividerTheme(
-                  data: DividerThemeData(color: Colors.transparent),
-                  child: Container(
-                    margin: EdgeInsets.only(bottom: 20, top: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        AvatarWidget(
-                          avatarImage: viewModel.sessionUserAvatar,
-                          userGroup: viewModel.sessionUserGroup,
-                          onTap: () => viewModel.isLoggedIn
-                              ? onAvatarTap()
-                              : Navigator.of(context).push(
-                                  SlideInFromBottomRoute(page: LoginPage())),
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          viewModel.isLoggedIn
-                              ? viewModel.sessionUserName
-                              : '未登入',
-                          style: TextStyle(
-                              color: viewModel.isLoggedIn
-                                  ? (viewModel.sessionUserGender == 'M'
-                                      ? Theme.of(context)
-                                          .colorScheme
-                                          .brotherColor
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .sisterColor)
-                                  : Colors.white),
-                        ),
-                        Spacer(),
-                        Visibility(
-                          visible: viewModel.isLoggedIn,
-                          child: Row(
-                            children: <Widget>[
-                              IconButton(
-                                  icon: Icon(Icons.info_outline),
-                                  onPressed: () => PackageInfo.fromPlatform()
-                                      .then((packageInfo) => showModal(
-                                            context: context,
-                                            builder: (context) => AboutDialog(
-                                              applicationIcon: SvgPicture.asset(
-                                                'assets/icon-hkgalden.svg',
-                                                width: 50,
-                                                height: 50,
-                                              ),
-                                              applicationVersion:
-                                                  '${packageInfo.version}+${packageInfo.buildNumber}',
-                                              applicationName: 'hkGalden',
-                                              applicationLegalese:
-                                                  '© hkGalden & 1080',
-                                            ),
-                                          ))),
-                              IconButton(
-                                icon: Icon(Icons.exit_to_app),
-                                onPressed: () => TokenSecureStorage()
-                                    .writeToken('', onFinish: (_) {
-                                  viewModel.onLogout();
-                                }),
-                                color: Colors.redAccent[400],
-                              )
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
+          margin: EdgeInsets.only(bottom: 20, top: 10),
+          child: Material(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: Row(
+              children: <Widget>[
+                SizedBox(
+                  width: 12,
+                ),
+                AvatarWidget(
+                  avatarImage: viewModel.sessionUserAvatar,
+                  userGroup: viewModel.sessionUserGroup,
+                  onTap: () => viewModel.isLoggedIn
+                      ? onAvatarTap()
+                      : Navigator.of(context)
+                          .push(SlideInFromBottomRoute(page: LoginPage())),
+                ),
+                SizedBox(width: 10),
+                Text(
+                  viewModel.isLoggedIn ? viewModel.sessionUserName : '未登入',
+                  style: TextStyle(
+                      color: viewModel.isLoggedIn
+                          ? (viewModel.sessionUserGender == 'M'
+                              ? Theme.of(context).colorScheme.brotherColor
+                              : Theme.of(context).colorScheme.sisterColor)
+                          : Colors.white),
+                ),
+                Spacer(),
+                Visibility(
+                  visible: viewModel.isLoggedIn,
+                  child: Row(
+                    children: <Widget>[
+                      IconButton(
+                          splashRadius: 25,
+                          icon: Icon(Icons.info_outline),
+                          onPressed: () => PackageInfo.fromPlatform()
+                              .then((packageInfo) => showModal(
+                                    context: context,
+                                    builder: (context) => AboutDialog(
+                                      applicationIcon: SvgPicture.asset(
+                                        'assets/icon-hkgalden.svg',
+                                        width: 50,
+                                        height: 50,
+                                      ),
+                                      applicationVersion:
+                                          '${packageInfo.version}+${packageInfo.buildNumber}',
+                                      applicationName: 'hkGalden',
+                                      applicationLegalese: '© hkGalden & 1080',
+                                    ),
+                                  ))),
+                      IconButton(
+                        splashRadius: 25,
+                        icon: Icon(Icons.exit_to_app),
+                        onPressed: () =>
+                            TokenSecureStorage().writeToken('', onFinish: (_) {
+                          viewModel.onLogout();
+                        }),
+                        color: Colors.redAccent[400],
+                      ),
+                      SizedBox(
+                        width: 9,
+                      )
+                    ],
                   ),
-                )),
+                )
+              ],
+            ),
+          ),
+        ),
       );
 }

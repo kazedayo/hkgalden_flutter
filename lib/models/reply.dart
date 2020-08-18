@@ -12,25 +12,28 @@ class Reply extends Equatable {
   final DateTime date;
   final Reply parent;
 
-  Reply({
-    this.replyId,
-    this.floor,
-    this.content,
-    this.author,
-    this.authorNickname,
-    this.date,
-    this.parent
-  });
+  Reply(
+      {this.replyId,
+      this.floor,
+      this.content,
+      this.author,
+      this.authorNickname,
+      this.date,
+      this.parent});
 
   factory Reply.fromJson(json) => new Reply(
-    replyId: json['id'],
-    floor: json['floor'],
-    content: json['content'] == null ? null : json['content'],
-    author: User.fromJson(json['author']),
-    authorNickname: json['authorNickname'],
-    date: DateTime.parse(json['date']),
-    parent: json['parent'] == null ? null : Reply.fromJson(json['parent']),
-  );
+        replyId: json['id'],
+        floor: json['floor'],
+        content: json['content'] == null
+            ? null
+            : String.fromCharCodes((json['content'] as String).codeUnits),
+        author: User.fromJson(json['author']),
+        authorNickname:
+            String.fromCharCodes((json['authorNickname'] as String).codeUnits),
+        date: DateTime.parse(json['date']),
+        parent: json['parent'] == null ? null : Reply.fromJson(json['parent']),
+      );
 
- List<Object> get props => [replyId, floor, content, author, authorNickname, date, parent];
+  List<Object> get props =>
+      [replyId, floor, content, author, authorNickname, date, parent];
 }

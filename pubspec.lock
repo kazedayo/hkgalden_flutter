@@ -39,12 +39,10 @@ packages:
   backdrop:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: c96566204367c92042a591bf538fafb39e96dc43
-      url: "https://github.com/fluttercommunity/backdrop.git"
-    source: git
-    version: "0.4.1"
+      name: backdrop
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.4.3"
   boolean_selector:
     dependency: transitive
     description:

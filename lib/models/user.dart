@@ -23,7 +23,7 @@ class User extends Equatable {
 
   factory User.fromJson(Map<String, dynamic> json) => User(
         userId: json['id'],
-        nickName: json['nickname'],
+        nickName: String.fromCharCodes((json['nickname'] as String).codeUnits),
         avatar: json['avatar'] == null ? '' : json['avatar'],
         userGroup: json['groups'] == null
             ? []

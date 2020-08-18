@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_networkimage/provider.dart';
 import 'package:flutter_advanced_networkimage/zoomable.dart';
@@ -6,10 +5,10 @@ import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:image_downloader/image_downloader.dart';
 
 class FullScreenPhotoView extends StatefulWidget {
-  final String imageUrl;
+  final AdvancedNetworkImage image;
   final String heroTag;
 
-  const FullScreenPhotoView({Key key, this.imageUrl, this.heroTag})
+  const FullScreenPhotoView({Key key, this.image, this.heroTag})
       : super(key: key);
 
   @override
@@ -44,7 +43,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
                   icon: Icon(Icons.save_alt),
                   onPressed: _isDownloadingImage
                       ? null
-                      : () => _saveImage(context, widget.imageUrl)),
+                      : () => _saveImage(context, widget.image.url)),
             ),
           ],
         ),
@@ -59,7 +58,9 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
               maxScale: 2.5,
               minScale: 1.0,
               zoomSteps: 2,
-              child: Image(image: AdvancedNetworkImage(widget.imageUrl)),
+              child: Image(
+                image: widget.image,
+              ),
               onTap: () => Navigator.of(context).pop(),
             ),
           ),

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:animations/animations.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +44,6 @@ class CommentCell extends StatelessWidget {
         color: Theme.of(context).primaryColor,
         child: Container(
           padding: EdgeInsets.only(top: 16, left: 16, right: 16),
-          //height: 200,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

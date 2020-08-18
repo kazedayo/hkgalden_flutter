@@ -10,6 +10,7 @@ import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/viewmodels/startup_animation_view_model.dart';
+import 'dart:ui';
 
 class StartupScreen extends StatefulWidget {
   @override
@@ -23,6 +24,12 @@ class _StartupScreenState extends State<StartupScreen>
 
   @override
   void initState() {
+    //workaround for displaying emoji properly
+    //https://github.com/flutter/flutter/issues/42586#issuecomment-541870382
+    ParagraphBuilder pb =
+        ParagraphBuilder(ParagraphStyle(locale: window.locale));
+    pb.addText('🗡'); // single char emoji
+    pb.build().layout(ParagraphConstraints(width: 100));
     super.initState();
     TokenSecureStorage().readToken(onFinish: (value) {
       if (value == null) {
