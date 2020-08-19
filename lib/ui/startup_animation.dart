@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/nested_navigator.dart';
@@ -55,43 +56,46 @@ class _StartupScreenState extends State<StartupScreen>
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        body: StoreConnector<AppState, StartupAnimationViewModel>(
-          distinct: true,
-          onDidChange: (viewModel) {
-            if (viewModel.threadIsLoading == false &&
-                viewModel.channelIsLoading == false &&
-                viewModel.sessionUserIsLoading == false) {
-              Navigator.of(context)
-                  .pushReplacement(SizeRoute(page: NestedNavigator()));
-            }
-          },
-          onInit: (store) {
-            _controller.forward();
-            _controller.addStatusListener((status) {
-              if (status == AnimationStatus.completed) {
-                //Hardcode default to 'bw' channel
-                store.dispatch(
-                    RequestThreadListAction(channelId: 'bw', page: 1));
-                store.dispatch(RequestChannelAction());
-                if (token != '') {
-                  store.dispatch(RequestSessionUserAction());
-                }
+  Widget build(BuildContext context) {
+    if (Theme.of(context).platform == TargetPlatform.iOS) {
+      SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+    }
+    return Scaffold(
+      body: StoreConnector<AppState, StartupAnimationViewModel>(
+        distinct: true,
+        onDidChange: (viewModel) {
+          if (viewModel.threadIsLoading == false &&
+              viewModel.channelIsLoading == false &&
+              viewModel.sessionUserIsLoading == false) {
+            SizeRoute route = SizeRoute(page: NestedNavigator());
+            Navigator.of(context).pushReplacement(route);
+          }
+        },
+        onInit: (store) {
+          _controller.forward();
+          _controller.addStatusListener((status) {
+            if (status == AnimationStatus.completed) {
+              //Hardcode default to 'bw' channel
+              store.dispatch(RequestThreadListAction(channelId: 'bw', page: 1));
+              store.dispatch(RequestChannelAction());
+              if (token != '') {
+                store.dispatch(RequestSessionUserAction());
               }
-            });
-          },
-          converter: (store) => StartupAnimationViewModel.create(store),
-          builder:
-              (BuildContext context, StartupAnimationViewModel viewModel) =>
-                  Center(
-            child: Container(
-              width: 300,
-              height: 300,
-              child: StaggerAnimation(controller: _controller),
-            ),
+            }
+          });
+        },
+        converter: (store) => StartupAnimationViewModel.create(store),
+        builder: (BuildContext context, StartupAnimationViewModel viewModel) =>
+            Center(
+          child: Container(
+            width: 300,
+            height: 300,
+            child: StaggerAnimation(controller: _controller),
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 class StaggerAnimation extends StatelessWidget {

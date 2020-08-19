@@ -173,7 +173,8 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
 
   _launchURL(String url) async {
     if (await canLaunch(url)) {
-      await launch(url, forceSafariVC: true);
+      await launch(url,
+          statusBarBrightness: MediaQuery.of(context).platformBrightness);
     } else {
       throw 'Could not launch $url';
     }

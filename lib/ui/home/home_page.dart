@@ -3,6 +3,7 @@ import 'package:backdrop/scaffold.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
@@ -35,7 +36,17 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     //_scrollController = ScrollController();
     _fabIsHidden = false;
+    showAfter();
     super.initState();
+  }
+
+  //hacky way to show status bar after hero finished
+  Future<void> showAfter() async {
+    await Future.delayed(Duration(milliseconds: 650), () {
+      print('delay completed');
+    });
+    SystemChrome.setEnabledSystemUIOverlays(
+        [SystemUiOverlay.top, SystemUiOverlay.bottom]);
   }
 
   @override

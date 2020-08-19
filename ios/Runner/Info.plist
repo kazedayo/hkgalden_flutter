@@ -2,12 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleLocalizations</key>
-	<array>
-		<string>zh_TW</string>
-	</array>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -16,6 +10,10 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>zh_TW</string>
+	</array>
 	<key>CFBundleName</key>
 	<string>hkGalden</string>
 	<key>CFBundlePackageType</key>
@@ -26,6 +24,8 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -39,6 +39,8 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>UIStatusBarHidden</key>
+	<true/>
 	<key>UIStatusBarStyle</key>
 	<string>UIStatusBarStyleDarkContent</string>
 	<key>UISupportedInterfaceOrientations</key>
