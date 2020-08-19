@@ -19,7 +19,10 @@ class ThreadListMiddleware extends MiddlewareClass<AppState> {
               isRefresh: action.isRefresh,
               page: action.page));
     } else if (action is RequestThreadListErrorAction) {
-      next(RequestThreadListAction());
+      next(RequestThreadListAction(
+          channelId: action.channelId,
+          page: action.page,
+          isRefresh: action.isRefresh));
     }
   }
 }
