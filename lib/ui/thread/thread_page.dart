@@ -180,13 +180,16 @@ class _ThreadPageState extends State<ThreadPage> {
                             childCount:
                                 viewModel.previousPageReplies.length == 0
                                     ? 1
-                                    : viewModel.previousPageReplies.length),
+                                    : viewModel.previousPageReplies.length,
+                            addAutomaticKeepAlives: false),
                       ),
                       SliverList(
                         key: centerKey,
                         delegate: SliverChildBuilderDelegate((context, index) {
                           return _generatePageSliver(viewModel, index);
-                        }, childCount: viewModel.replies.length),
+                        },
+                            childCount: viewModel.replies.length,
+                            addAutomaticKeepAlives: false),
                       ),
                     ],
                   ),

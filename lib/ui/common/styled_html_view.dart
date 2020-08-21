@@ -98,7 +98,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
               margin: EdgeInsets.all(3),
               child: TransitionToImage(
                 loadingWidget: SizedBox.fromSize(
-                  size: Size.square(30),
+                  size: Size.square(25),
                 ),
                 alignment: Alignment.center,
                 image: AdvancedNetworkImage(attributes['src']),
