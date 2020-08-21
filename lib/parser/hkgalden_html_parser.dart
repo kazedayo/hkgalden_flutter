@@ -159,7 +159,7 @@ class HKGaldenHtmlParser {
           ${rootParent.content}</blockquote>${htmlDoc.body.innerHtml}''',
               validator: validator);
           //print('result: ${htmlDoc.body.innerHtml}');
-          return parse(htmlDoc.body.innerHtml);
+          return htmlDoc.body.innerHtml;
         }
         htmlDoc.body.setInnerHtml('''<blockquote><blockquote>
             <div class="quoteName">${rootParent.parent.authorNickname} 說:</div>
@@ -168,16 +168,16 @@ class HKGaldenHtmlParser {
             ${rootParent.content}</blockquote>${htmlDoc.body.innerHtml}''',
             validator: validator);
         //print('result: ${htmlDoc.body.innerHtml}');
-        return parse(htmlDoc.body.innerHtml);
+        return htmlDoc.body.innerHtml;
       }
       htmlDoc.body.setInnerHtml('''<blockquote>
           <div class="quoteName">${rootParent.authorNickname} 說:</div>
           ${rootParent.content}</blockquote>${htmlDoc.body.innerHtml}''',
           validator: validator);
       //print('result: ${htmlDoc.body.innerHtml}');
-      return parse(htmlDoc.body.innerHtml);
+      return htmlDoc.body.innerHtml;
     }
-    return parse(htmlDoc.body.innerHtml);
+    return htmlDoc.body.innerHtml;
   }
 
   String replyWithQuotes(Reply reply, Store<AppState> store) {
@@ -202,7 +202,7 @@ class HKGaldenHtmlParser {
             ${reply.content}</blockquote>${htmlDoc.body.innerHtml}''',
               validator: validator);
           //print('result: ${htmlDoc.body.innerHtml}');
-          return parse(htmlDoc.body.innerHtml);
+          return htmlDoc.body.innerHtml;
         }
         htmlDoc.body.setInnerHtml('''<blockquote><blockquote>
               <div class="quoteName">${reply.parent.authorNickname} 說:</div>
@@ -211,16 +211,16 @@ class HKGaldenHtmlParser {
               ${reply.content}</blockquote>${htmlDoc.body.innerHtml}''',
             validator: validator);
         //print('result: ${htmlDoc.body.innerHtml}');
-        return parse(htmlDoc.body.innerHtml);
+        return htmlDoc.body.innerHtml;
       }
       htmlDoc.body.setInnerHtml('''<blockquote>
             <div class="quoteName">${reply.authorNickname} 說:</div>
             ${reply.content}</blockquote>${htmlDoc.body.innerHtml}''',
           validator: validator);
       //print('result: ${htmlDoc.body.innerHtml}');
-      return parse(htmlDoc.body.innerHtml);
+      return htmlDoc.body.innerHtml;
     }
-    return parse(htmlDoc.body.innerHtml);
+    return htmlDoc.body.innerHtml;
   }
 }
 

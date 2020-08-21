@@ -1,4 +1,5 @@
 import 'package:hkgalden_flutter/models/user.dart';
+import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
 
@@ -26,7 +27,8 @@ class Reply extends Equatable {
         floor: json['floor'],
         content: json['content'] == null
             ? null
-            : String.fromCharCodes((json['content'] as String).codeUnits),
+            : HKGaldenHtmlParser().parse(
+                String.fromCharCodes((json['content'] as String).codeUnits)),
         author: User.fromJson(json['author']),
         authorNickname:
             String.fromCharCodes((json['authorNickname'] as String).codeUnits),
