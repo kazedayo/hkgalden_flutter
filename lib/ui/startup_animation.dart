@@ -149,9 +149,8 @@ class StaggerAnimation extends StatelessWidget {
           ),
           Opacity(
             opacity: opacity.value,
-            child: SizedBox(
-              width: 15,
-              height: 15,
+            child: SizedBox.fromSize(
+              size: Size.square(15),
               child: CircularProgressIndicator(
                 strokeWidth: 2.0,
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.grey[600]),

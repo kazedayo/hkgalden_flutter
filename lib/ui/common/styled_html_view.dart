@@ -7,7 +7,6 @@ import 'package:flutter_advanced_networkimage/transition.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/html_parser.dart';
 import 'package:flutter_html/style.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -60,33 +59,34 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                     child: TransitionToImage(
                       image: AdvancedNetworkImage(attributes['src'],
                           useDiskCache: true),
-                      loadingWidget: SpinKitFadingFour(
-                        color: Colors.grey,
-                        size: 25,
+                      loadingWidget: SizedBox.fromSize(
+                        size: Size.square(15),
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.grey)),
                       ),
-                      placeholder: Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.error,
-                              color: Colors.grey,
+                      placeholder: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error,
+                            color: Colors.grey,
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                            child: AutoSizeText(
+                              '圖片載入錯誤',
+                              style: Theme.of(context.buildContext)
+                                  .textTheme
+                                  .caption,
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Expanded(
-                              child: AutoSizeText(
-                                '圖片載入錯誤',
-                                style: Theme.of(context.buildContext)
-                                    .textTheme
-                                    .caption,
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            )
-                          ],
-                        ),
+                          )
+                        ],
                       ),
                       loadFailedCallback: () => _imageLoadingHasError = true,
                     ),
@@ -98,7 +98,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
               margin: EdgeInsets.all(3),
               child: TransitionToImage(
                 loadingWidget: SizedBox.fromSize(
-                  size: Size.square(25),
+                  size: Size.square(15),
                 ),
                 alignment: Alignment.center,
                 image: AdvancedNetworkImage(attributes['src']),

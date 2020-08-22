@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_redux/flutter_redux.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
@@ -424,9 +423,12 @@ class _PageFooter extends StatelessWidget {
                           splashColor: Colors.transparent,
                           onPressed: () => onTap(),
                           icon: isLoading
-                              ? SpinKitFadingFour(
-                                  color: Colors.grey,
-                                  size: 20,
+                              ? SizedBox.fromSize(
+                                  size: Size.square(15),
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.grey)),
                                 )
                               : Icon(
                                   Icons.refresh,

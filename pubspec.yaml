@@ -52,7 +52,6 @@ dependencies:
   image_picker: 
   backdrop: 
   package_info:
-  flutter_spinkit:
 
 dev_dependencies:
   flutter_test:
