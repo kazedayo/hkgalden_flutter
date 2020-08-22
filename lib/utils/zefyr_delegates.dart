@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_advanced_networkimage/provider.dart';
 import 'package:flutter_advanced_networkimage/transition.dart';
 import 'package:hkgalden_flutter/networking/image_upload_api.dart';
+import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:zefyr/zefyr.dart';
 
@@ -103,12 +104,7 @@ class CustomZefyrImageDelegate implements ZefyrImageDelegate {
   @override
   Widget buildImage(BuildContext context, String url) {
     return TransitionToImage(
-      loadingWidget: SizedBox.fromSize(
-        size: Size.square(15),
-        child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.grey)),
-      ),
+      loadingWidget: ProgressSpinner(),
       image: AdvancedNetworkImage(url),
     );
   }

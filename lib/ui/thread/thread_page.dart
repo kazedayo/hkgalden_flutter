@@ -9,6 +9,7 @@ import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
 import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
+import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/thread/comment_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton_cell.dart';
@@ -423,13 +424,7 @@ class _PageFooter extends StatelessWidget {
                           splashColor: Colors.transparent,
                           onPressed: () => onTap(),
                           icon: isLoading
-                              ? SizedBox.fromSize(
-                                  size: Size.square(15),
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.grey)),
-                                )
+                              ? ProgressSpinner()
                               : Icon(
                                   Icons.refresh,
                                   size: 25,

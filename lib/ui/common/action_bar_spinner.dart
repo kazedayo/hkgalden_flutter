@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 
 class ActionBarSpinner extends StatelessWidget {
   final bool isVisible;
@@ -7,13 +8,10 @@ class ActionBarSpinner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    width: 20,
-    padding: EdgeInsets.symmetric(vertical: 18),
-    child: Visibility(
-      visible: isVisible,
-      child: CircularProgressIndicator(
-        strokeWidth: 1,
-      ),
-    ),
-  );
+        margin: EdgeInsets.symmetric(vertical: 20),
+        child: Visibility(
+          visible: isVisible,
+          child: ProgressSpinner(),
+        ),
+      );
 }

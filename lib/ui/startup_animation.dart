@@ -9,6 +9,7 @@ import 'package:hkgalden_flutter/redux/channel/channel_action.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
+import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/viewmodels/startup_animation_view_model.dart';
 import 'dart:ui';
@@ -149,13 +150,7 @@ class StaggerAnimation extends StatelessWidget {
           ),
           Opacity(
             opacity: opacity.value,
-            child: SizedBox.fromSize(
-              size: Size.square(15),
-              child: CircularProgressIndicator(
-                strokeWidth: 2.0,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.grey[600]),
-              ),
-            ),
+            child: ProgressSpinner(),
           ),
           Spacer(),
         ],

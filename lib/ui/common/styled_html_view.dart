@@ -8,6 +8,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/html_parser.dart';
 import 'package:flutter_html/style.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
+import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -59,13 +60,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                     child: TransitionToImage(
                       image: AdvancedNetworkImage(attributes['src'],
                           useDiskCache: true),
-                      loadingWidget: SizedBox.fromSize(
-                        size: Size.square(15),
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.grey)),
-                      ),
+                      loadingWidget: ProgressSpinner(),
                       placeholder: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
