@@ -79,8 +79,6 @@ class _HomePageState extends State<HomePage> {
                       page: store.state.threadListState.currentPage + 1,
                       isRefresh: true));
                 }
-              })
-              ..addListener(() {
                 if ((_scrollController.position.userScrollDirection ==
                             ScrollDirection.forward ||
                         _scrollController.position.pixels == 0.0) &&

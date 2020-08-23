@@ -84,8 +84,6 @@ class _ThreadPageState extends State<ThreadPage> {
                     );
                   }
                 }
-              })
-              ..addListener(() {
                 if (_scrollController.position.userScrollDirection ==
                         ScrollDirection.reverse &&
                     !_fabIsHidden) {
@@ -102,8 +100,6 @@ class _ThreadPageState extends State<ThreadPage> {
                     _fabIsHidden = false;
                   });
                 }
-              })
-              ..addListener(() {
                 double newElevation = _scrollController.position.pixels >
                         _scrollController.position.minScrollExtent
                     ? 4.0
