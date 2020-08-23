@@ -133,6 +133,7 @@ class _HomePageState extends State<HomePage> {
                         onRefresh: () =>
                             viewModel.onRefresh(viewModel.selectedChannelId),
                         child: ListView.builder(
+                          addAutomaticKeepAlives: false,
                           controller: _scrollController,
                           itemCount: viewModel.threads.length + 1,
                           itemBuilder: (context, index) {
