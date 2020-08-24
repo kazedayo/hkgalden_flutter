@@ -153,6 +153,7 @@ class _ComposePageState extends State<ComposePage> {
             children: <Widget>[
               arguments.composeMode == ComposeMode.newPost
                   ? Container(
+                      height: 34,
                       margin: EdgeInsets.fromLTRB(12, 8, 12, 0),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -183,6 +184,7 @@ class _ComposePageState extends State<ComposePage> {
                           ),
                           Expanded(
                             child: TextField(
+                              cursorWidth: 1,
                               style: TextStyle(fontSize: 15),
                               strutStyle: StrutStyle(height: 1.25),
                               controller: _titleFieldController,
@@ -192,9 +194,9 @@ class _ComposePageState extends State<ComposePage> {
                                   border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(100)),
                                   labelText: '標題',
-                                  labelStyle: TextStyle(height: 1),
+                                  labelStyle: TextStyle(height: 1.25),
                                   contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 15, vertical: 10),
+                                      horizontal: 15, vertical: 8),
                                   isDense: true),
                               onChanged: (value) {
                                 setState(() {
