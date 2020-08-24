@@ -50,8 +50,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                     ? null
                     : _showImageView(
                         context.buildContext,
-                        AdvancedNetworkImage(attributes['src'],
-                            useDiskCache: true),
+                        AdvancedNetworkImage(attributes['src']),
                         '${widget.floor}_${attributes['src']}_$_randomHash'),
                 child: Container(
                   margin: EdgeInsets.symmetric(vertical: 8),
