@@ -1,11 +1,10 @@
 //hacky way to hide button on toolbar before zefyr 1.0 release
 
 import 'package:flutter/material.dart';
-import 'package:flutter_advanced_networkimage/provider.dart';
-import 'package:flutter_advanced_networkimage/transition.dart';
 import 'package:hkgalden_flutter/networking/image_upload_api.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:octo_image/octo_image.dart';
 import 'package:zefyr/zefyr.dart';
 
 class CustomZefyrToolbarDelegate implements ZefyrToolbarDelegate {
@@ -103,9 +102,9 @@ class CustomZefyrImageDelegate implements ZefyrImageDelegate {
 
   @override
   Widget buildImage(BuildContext context, String url) {
-    return TransitionToImage(
-      loadingWidget: ProgressSpinner(),
-      image: AdvancedNetworkImage(url),
+    return OctoImage(
+      image: Image.network(url),
+      placeholderBuilder: (context) => ProgressSpinner(),
     );
   }
 

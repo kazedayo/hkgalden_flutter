@@ -1,13 +1,12 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_advanced_networkimage/provider.dart';
-import 'package:flutter_advanced_networkimage/transition.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/models/user_group.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
+import 'package:octo_image/octo_image.dart';
 import 'package:redux/redux.dart';
 
 class HomeDrawerHeaderViewModel extends Equatable {
@@ -37,14 +36,15 @@ class HomeDrawerHeaderViewModel extends Equatable {
         sessionUserAvatar: store.state.sessionUserState.sessionUser.avatar == ''
             ? SvgPicture.asset('assets/icon-hkgalden.svg',
                 width: 30, height: 30, color: Colors.grey)
-            : TransitionToImage(
-                loadingWidget: SizedBox.fromSize(
-                  size: Size.square(30),
-                ),
-                image: AdvancedNetworkImage(
-                    store.state.sessionUserState.sessionUser.avatar),
+            : OctoImage(
                 width: 30,
                 height: 30,
+                image: Image.network(
+                        store.state.sessionUserState.sessionUser.avatar)
+                    .image,
+                placeholderBuilder: (context) => SizedBox.fromSize(
+                  size: Size.square(30),
+                ),
               ),
         sessionUserGender: store.state.sessionUserState.sessionUser.gender,
         sessionUserGroup: store.state.sessionUserState.sessionUser.userGroup,

@@ -1,15 +1,14 @@
 import 'dart:math';
 
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_advanced_networkimage/provider.dart';
-import 'package:flutter_advanced_networkimage/transition.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/html_parser.dart';
 import 'package:flutter_html/style.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
+import 'package:hkgalden_flutter/ui/common/image_loading_error.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
+import 'package:octo_image/octo_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class StyledHtmlView extends StatefulWidget {
@@ -42,62 +41,36 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
         data: widget.htmlString,
         customRender: {
           'img': (context, _, attributes, __) {
-            precacheImage(
-                AdvancedNetworkImage(attributes['src'], useDiskCache: true),
-                context.buildContext);
+            final image = Image.network(attributes['src']);
+            precacheImage(image.image, context.buildContext);
             return GestureDetector(
                 onTap: () => _imageLoadingHasError
                     ? null
                     : _showImageView(
                         context.buildContext,
-                        AdvancedNetworkImage(attributes['src']),
-                        '${widget.floor}_${attributes['src']}_$_randomHash'),
+                        Image.network(attributes['src']).image,
+                        attributes['src'],
+                        '${widget.floor}_${attributes['src']}_$_randomHash',
+                      ),
                 child: Container(
                   margin: EdgeInsets.symmetric(vertical: 8),
                   child: Hero(
                     tag: '${widget.floor}_${attributes['src']}_$_randomHash',
-                    child: TransitionToImage(
-                      image: AdvancedNetworkImage(attributes['src'],
-                          useDiskCache: true),
-                      loadingWidget: ProgressSpinner(),
-                      placeholder: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error,
-                            color: Colors.grey,
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: AutoSizeText(
-                              '圖片載入錯誤',
-                              style: Theme.of(context.buildContext)
-                                  .textTheme
-                                  .caption,
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          )
-                        ],
-                      ),
-                      loadFailedCallback: () => _imageLoadingHasError = true,
+                    child: OctoImage(
+                      image: image.image,
+                      placeholderBuilder: (context) => ProgressSpinner(),
+                      errorBuilder: (context, error, stackTrace) {
+                        _imageLoadingHasError = true;
+                        return ImageLoadingError(error.toString());
+                      },
                     ),
                   ),
                 ));
           },
-          'icon': (_, __, attributes, ____) {
-            return Container(
-              margin: EdgeInsets.all(3),
-              child: TransitionToImage(
-                loadingWidget: SizedBox.fromSize(
-                  size: Size.square(15),
-                ),
-                alignment: Alignment.center,
-                image: AdvancedNetworkImage(attributes['src']),
-              ),
-            );
+          'icon': (context, __, attributes, ____) {
+            final image = Image.network(attributes['src']);
+            precacheImage(image.image, context.buildContext);
+            return Container(margin: EdgeInsets.all(3), child: image);
           },
           'span': (context, child, attributes, element) {
             if (element.className == ('color')) {
@@ -175,8 +148,12 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
   }
 
   _showImageView(
-      BuildContext context, AdvancedNetworkImage image, String heroTag) {
-    Navigator.of(context).push(
-        FadeRoute(page: FullScreenPhotoView(image: image, heroTag: heroTag)));
+      BuildContext context, ImageProvider image, String url, String heroTag) {
+    Navigator.of(context).push(FadeRoute(
+        page: FullScreenPhotoView(
+      image: image,
+      heroTag: heroTag,
+      url: url,
+    )));
   }
 }

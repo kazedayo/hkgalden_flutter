@@ -42,9 +42,7 @@ dependencies:
   date_time_format: 
   universal_html: 
   url_launcher: 
-  flutter_advanced_networkimage: 
-    git:
-      url: https://github.com/mchome/flutter_advanced_networkimage.git 
+  octo_image: 
   animations: 
   image_downloader: 
   auto_size_text: 

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_advanced_networkimage/provider.dart';
-import 'package:flutter_advanced_networkimage/transition.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/models/user.dart';
@@ -11,6 +9,7 @@ import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_page.dart';
+import 'package:octo_image/octo_image.dart';
 
 class UserDetailView extends StatefulWidget {
   final User user;
@@ -53,12 +52,13 @@ class _UserDetailViewState extends State<UserDetailView> {
                             avatarImage: widget.user.avatar == ''
                                 ? SvgPicture.asset('assets/icon-hkgalden.svg',
                                     width: 30, height: 30, color: Colors.grey)
-                                : TransitionToImage(
-                                    loadingWidget: SizedBox.fromSize(
+                                : OctoImage(
+                                    placeholderBuilder: (context) =>
+                                        SizedBox.fromSize(
                                       size: Size.square(30),
                                     ),
-                                    image: AdvancedNetworkImage(
-                                        widget.user.avatar),
+                                    image:
+                                        Image.network(widget.user.avatar).image,
                                     width: 30,
                                     height: 30,
                                   ),

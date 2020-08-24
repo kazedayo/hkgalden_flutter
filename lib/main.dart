@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -75,7 +76,9 @@ class MyApp extends StatelessWidget {
           contentTextStyle: TextStyle(color: Colors.white)),
       pageTransitionsTheme: PageTransitionsTheme(builders: {
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-        TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
+        TargetPlatform.android: SharedAxisPageTransitionsBuilder(
+            transitionType: SharedAxisTransitionType.horizontal,
+            fillColor: Color(0xff1b1f1e)),
       }),
       dialogTheme: DialogTheme(
           shape:

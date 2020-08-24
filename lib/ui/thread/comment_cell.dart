@@ -3,8 +3,6 @@ import 'dart:ui';
 import 'package:animations/animations.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_advanced_networkimage/provider.dart';
-import 'package:flutter_advanced_networkimage/transition.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
@@ -19,6 +17,7 @@ import 'package:hkgalden_flutter/ui/user_detail/user_detail_view.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/viewmodels/thread_page_view_model.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
+import 'package:octo_image/octo_image.dart';
 
 class CommentCell extends StatelessWidget {
   final ThreadPageViewModel viewModel;
@@ -56,11 +55,11 @@ class CommentCell extends StatelessWidget {
                     avatarImage: reply.author.avatar == ''
                         ? SvgPicture.asset('assets/icon-hkgalden.svg',
                             width: 30, height: 30, color: Colors.grey)
-                        : TransitionToImage(
-                            loadingWidget: SizedBox.fromSize(
+                        : OctoImage(
+                            placeholderBuilder: (context) => SizedBox.fromSize(
                               size: Size.square(30),
                             ),
-                            image: AdvancedNetworkImage(reply.author.avatar),
+                            image: Image.network(reply.author.avatar).image,
                             width: 30,
                             height: 30,
                           ),

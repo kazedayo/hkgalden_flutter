@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_advanced_networkimage/provider.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:image_downloader/image_downloader.dart';
 
 class FullScreenPhotoView extends StatefulWidget {
-  final AdvancedNetworkImage image;
+  final ImageProvider image;
+  final String url;
   final String heroTag;
 
-  const FullScreenPhotoView({Key key, this.image, this.heroTag})
+  const FullScreenPhotoView({Key key, this.image, this.heroTag, this.url})
       : super(key: key);
 
   @override
@@ -17,11 +17,9 @@ class FullScreenPhotoView extends StatefulWidget {
 class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
   //drag to dismiss code: https://github.com/Furkankyl/full_screen_image/blob/master/lib/full_screen_image.dart
   bool _isDownloadingImage;
-  String _heroTag;
   @override
   void initState() {
     _isDownloadingImage = false;
-    _heroTag = widget.heroTag;
     super.initState();
   }
 
@@ -45,7 +43,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
                     icon: Icon(Icons.save_alt),
                     onPressed: _isDownloadingImage
                         ? null
-                        : () => _saveImage(context, widget.image.url)),
+                        : () => _saveImage(context, widget.url)),
               ),
             ],
           ),
@@ -54,13 +52,10 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
           constraints: BoxConstraints.expand(
             height: MediaQuery.of(context).size.height,
           ),
-          child: Hero(
-            tag: _heroTag,
-            child: InteractiveViewer(
-              maxScale: 3.0,
-              minScale: 1.0,
-              child: Image(image: widget.image),
-            ),
+          child: InteractiveViewer(
+            maxScale: 3.0,
+            minScale: 1.0,
+            child: Hero(tag: widget.heroTag, child: Image(image: widget.image)),
           ),
         ),
       );
