@@ -185,7 +185,7 @@ class _ComposePageState extends State<ComposePage> {
                           Expanded(
                             child: TextField(
                               cursorWidth: 1,
-                              style: TextStyle(fontSize: 15),
+                              style: TextStyle(fontSize: 14),
                               strutStyle: StrutStyle(height: 1.25),
                               controller: _titleFieldController,
                               decoration: InputDecoration(
@@ -194,7 +194,7 @@ class _ComposePageState extends State<ComposePage> {
                                   border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(100)),
                                   labelText: '標題',
-                                  labelStyle: TextStyle(height: 1.25),
+                                  labelStyle: TextStyle(height: 1.2),
                                   contentPadding: EdgeInsets.symmetric(
                                       horizontal: 15, vertical: 8),
                                   isDense: true),
