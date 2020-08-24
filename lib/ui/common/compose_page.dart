@@ -187,10 +187,14 @@ class _ComposePageState extends State<ComposePage> {
                               strutStyle: StrutStyle(height: 1.25),
                               controller: _titleFieldController,
                               decoration: InputDecoration(
-                                  border: OutlineInputBorder(),
+                                  floatingLabelBehavior:
+                                      FloatingLabelBehavior.never,
+                                  border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(100)),
                                   labelText: '標題',
                                   labelStyle: TextStyle(height: 1),
-                                  contentPadding: EdgeInsets.all(10),
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 15, vertical: 10),
                                   isDense: true),
                               onChanged: (value) {
                                 setState(() {
