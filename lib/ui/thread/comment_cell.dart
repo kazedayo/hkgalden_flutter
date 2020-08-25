@@ -103,7 +103,6 @@ class CommentCell extends StatelessWidget {
                     transform: Matrix4.translationValues(8, 0, 0),
                     child: IconButton(
                         visualDensity: VisualDensity.compact,
-                        splashRadius: 20.0,
                         icon: Icon(Icons.format_quote),
                         onPressed: () => canReply
                             ? Navigator.of(context).pushNamed('/Compose',
@@ -121,7 +120,6 @@ class CommentCell extends StatelessWidget {
                   ),
                   // IconButton(
                   //     visualDensity: VisualDensity.compact,
-                  //     splashRadius: 20.0,
                   //     icon: Icon(Icons.flag),
                   //     onPressed: () => showModal<void>(
                   //           context: context,

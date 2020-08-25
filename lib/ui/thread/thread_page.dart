@@ -134,7 +134,6 @@ class _ThreadPageState extends State<ThreadPage> {
                   elevation: _elevation,
                   automaticallyImplyLeading: false,
                   leading: IconButton(
-                      splashRadius: 25.0,
                       icon: Icon(
                           Theme.of(context).platform == TargetPlatform.iOS
                               ? Icons.arrow_back_ios

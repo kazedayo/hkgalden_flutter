@@ -32,14 +32,12 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
           child: Row(
             children: [
               IconButton(
-                  splashRadius: 25.0,
                   icon: Icon(Icons.close),
                   onPressed: () => Navigator.of(context).pop()),
               Spacer(),
               ActionBarSpinner(isVisible: _isDownloadingImage),
               Builder(
                 builder: (context) => IconButton(
-                    splashRadius: 25.0,
                     icon: Icon(Icons.save_alt),
                     onPressed: _isDownloadingImage
                         ? null

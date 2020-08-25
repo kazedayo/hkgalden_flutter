@@ -63,7 +63,6 @@ class _ComposePageState extends State<ComposePage> {
         centerTitle:
             Theme.of(context).platform == TargetPlatform.iOS ? true : false,
         leading: IconButton(
-            splashRadius: 25.0,
             icon: Icon(Icons.close),
             onPressed: () => Navigator.of(context).pop()),
         title: Text(
@@ -79,7 +78,6 @@ class _ComposePageState extends State<ComposePage> {
           ActionBarSpinner(isVisible: _isSending),
           Builder(
             builder: (context) => IconButton(
-              splashRadius: 25.0,
               icon: const Icon(Icons.send),
               onPressed: _isSending
                   ? null

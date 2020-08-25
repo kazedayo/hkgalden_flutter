@@ -357,7 +357,6 @@ class _LeadingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => IconButton(
         //visualDensity: VisualDensity.compact,
-        splashRadius: 25.0,
         icon: AnimatedIcon(
           icon: AnimatedIcons.close_menu,
           progress: Backdrop.of(context).controller.view,
