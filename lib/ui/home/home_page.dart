@@ -45,9 +45,10 @@ class _HomePageState extends State<HomePage>
     //_scrollController = ScrollController();
     _backgroundBlurAnimationController = AnimationController(
         vsync: this,
-        duration: Duration(milliseconds: 250),
+        duration: Duration(milliseconds: 150),
+        reverseDuration: Duration(milliseconds: 200),
         value: 0.0,
-        upperBound: 5.0)
+        upperBound: 0.5)
       ..addStatusListener((status) {
         if (status == AnimationStatus.dismissed) {
           setState(() {
@@ -191,8 +192,8 @@ class _HomePageState extends State<HomePage>
                                                   applicationIcon:
                                                       SvgPicture.asset(
                                                     'assets/icon-hkgalden.svg',
-                                                    width: 30,
-                                                    height: 30,
+                                                    width: 50,
+                                                    height: 50,
                                                   ),
                                                   applicationVersion:
                                                       '${info.version}+${info.buildNumber}',
@@ -305,11 +306,9 @@ class _HomePageState extends State<HomePage>
                   animation: _backgroundBlurAnimationController,
                   builder: (context, child) => BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                    child: Opacity(
-                      opacity: _backgroundBlurAnimationController.value,
-                      child: Container(
-                        color: Colors.black.withOpacity(0.5),
-                      ),
+                    child: Container(
+                      color: Colors.black.withOpacity(
+                          _backgroundBlurAnimationController.value),
                     ),
                   ),
                 ),
