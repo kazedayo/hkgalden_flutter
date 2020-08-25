@@ -176,8 +176,7 @@ class _ThreadPageState extends State<ThreadPage> {
                             childCount:
                                 viewModel.previousPageReplies.length == 0
                                     ? 1
-                                    : viewModel.previousPageReplies.length,
-                            addAutomaticKeepAlives: false),
+                                    : viewModel.previousPageReplies.length),
                       ),
                       SliverList(
                         key: centerKey,
@@ -264,7 +263,6 @@ class _ThreadPageState extends State<ThreadPage> {
                   .previousPageReplies[
                       viewModel.previousPageReplies.length - index - 1]
                   .replyId),
-              viewModel: viewModel,
               threadId: viewModel.threadId,
               reply: viewModel.previousPageReplies[
                   viewModel.previousPageReplies.length - index - 1],
@@ -282,7 +280,6 @@ class _ThreadPageState extends State<ThreadPage> {
               .previousPageReplies[
                   viewModel.previousPageReplies.length - index - 1]
               .replyId),
-          viewModel: viewModel,
           threadId: viewModel.threadId,
           reply: viewModel.previousPageReplies[
               viewModel.previousPageReplies.length - index - 1],
@@ -304,7 +301,6 @@ class _ThreadPageState extends State<ThreadPage> {
           _PageHeader(floor: viewModel.replies[index].floor),
           CommentCell(
             key: ValueKey(viewModel.replies[index].replyId),
-            viewModel: viewModel,
             threadId: viewModel.threadId,
             reply: viewModel.replies[index],
             onLastPage: _onLastPage,
@@ -331,7 +327,6 @@ class _ThreadPageState extends State<ThreadPage> {
           _PageHeader(floor: viewModel.replies[index].floor),
           CommentCell(
             key: ValueKey(viewModel.replies[index].replyId),
-            viewModel: viewModel,
             threadId: viewModel.threadId,
             reply: viewModel.replies[index],
             onLastPage: _onLastPage,
@@ -347,7 +342,6 @@ class _ThreadPageState extends State<ThreadPage> {
         children: <Widget>[
           CommentCell(
             key: ValueKey(viewModel.replies[index].replyId),
-            viewModel: viewModel,
             threadId: viewModel.threadId,
             reply: viewModel.replies[index],
             onLastPage: _onLastPage,
@@ -370,7 +364,6 @@ class _ThreadPageState extends State<ThreadPage> {
     } else {
       return CommentCell(
         key: ValueKey(viewModel.replies[index].replyId),
-        viewModel: viewModel,
         threadId: viewModel.threadId,
         reply: viewModel.replies[index],
         onLastPage: _onLastPage,

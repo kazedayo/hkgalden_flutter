@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:animations/animations.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -15,12 +16,9 @@ import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_detail_view.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
-import 'package:hkgalden_flutter/viewmodels/thread_page_view_model.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
-import 'package:octo_image/octo_image.dart';
 
 class CommentCell extends StatelessWidget {
-  final ThreadPageViewModel viewModel;
   final int threadId;
   final Reply reply;
   final bool onLastPage;
@@ -30,7 +28,6 @@ class CommentCell extends StatelessWidget {
 
   CommentCell(
       {Key key,
-      this.viewModel,
       this.threadId,
       this.reply,
       this.onLastPage,
@@ -55,11 +52,11 @@ class CommentCell extends StatelessWidget {
                     avatarImage: reply.author.avatar == ''
                         ? SvgPicture.asset('assets/icon-hkgalden.svg',
                             width: 30, height: 30, color: Colors.grey)
-                        : OctoImage(
-                            placeholderBuilder: (context) => SizedBox.fromSize(
+                        : CachedNetworkImage(
+                            placeholder: (context, url) => SizedBox.fromSize(
                               size: Size.square(30),
                             ),
-                            image: Image.network(reply.author.avatar).image,
+                            imageUrl: reply.author.avatar,
                             width: 30,
                             height: 30,
                           ),

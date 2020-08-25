@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class DeltaJsonParser {
@@ -81,8 +82,7 @@ class DeltaJsonParser {
 
   Future<ui.Image> _getImageDimension(String url) {
     Completer<ui.Image> imageCompleter = Completer<ui.Image>();
-    Image.network(url)
-        .image
+    CachedNetworkImageProvider(url)
         .resolve(ImageConfiguration())
         .addListener(ImageStreamListener((ImageInfo info, bool _) {
       imageCompleter.complete(info.image);

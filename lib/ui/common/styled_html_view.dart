@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/html_parser.dart';
@@ -8,7 +9,6 @@ import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/common/image_loading_error.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
-import 'package:octo_image/octo_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class StyledHtmlView extends StatefulWidget {
@@ -41,14 +41,12 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
         data: widget.htmlString,
         customRender: {
           'img': (context, _, attributes, __) {
-            final image = Image.network(attributes['src']);
-            precacheImage(image.image, context.buildContext);
             return GestureDetector(
                 onTap: () => _imageLoadingHasError
                     ? null
                     : _showImageView(
                         context.buildContext,
-                        Image.network(attributes['src']).image,
+                        CachedNetworkImageProvider(attributes['src']),
                         attributes['src'],
                         '${widget.floor}_${attributes['src']}_$_randomHash',
                       ),
@@ -56,10 +54,10 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                   margin: EdgeInsets.symmetric(vertical: 8),
                   child: Hero(
                     tag: '${widget.floor}_${attributes['src']}_$_randomHash',
-                    child: OctoImage(
-                      image: image.image,
-                      placeholderBuilder: (context) => ProgressSpinner(),
-                      errorBuilder: (context, error, stackTrace) {
+                    child: CachedNetworkImage(
+                      imageUrl: attributes['src'],
+                      placeholder: (context, url) => ProgressSpinner(),
+                      errorWidget: (context, error, stackTrace) {
                         _imageLoadingHasError = true;
                         return ImageLoadingError(error.toString());
                       },
@@ -68,9 +66,9 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                 ));
           },
           'icon': (context, __, attributes, ____) {
-            final image = Image.network(attributes['src']);
-            precacheImage(image.image, context.buildContext);
-            return Container(margin: EdgeInsets.all(3), child: image);
+            return Container(
+                margin: EdgeInsets.all(3),
+                child: CachedNetworkImage(imageUrl: attributes['src']));
           },
           'span': (context, child, attributes, element) {
             if (element.className == ('color')) {

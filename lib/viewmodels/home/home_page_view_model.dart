@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
+import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
 import 'package:redux/redux.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 
@@ -13,6 +14,7 @@ class HomePageViewModel extends Equatable {
   final bool isRefresh;
   final Function(String) onRefresh;
   final Function(String) onCreateThread;
+  final Function onLogout;
   final List<String> blockedUserIds;
 
   HomePageViewModel(
@@ -24,6 +26,7 @@ class HomePageViewModel extends Equatable {
       this.isRefresh,
       this.onRefresh,
       this.onCreateThread,
+      this.onLogout,
       this.blockedUserIds});
 
   factory HomePageViewModel.create(Store<AppState> store) {
@@ -42,6 +45,13 @@ class HomePageViewModel extends Equatable {
           channelId: channelId, page: 1, isRefresh: true)),
       onCreateThread: (channelId) => store.dispatch(RequestThreadListAction(
           channelId: channelId, page: 1, isRefresh: false)),
+      onLogout: () {
+        store.dispatch(RemoveSessionUserAction());
+        store.dispatch(RequestThreadListAction(
+            channelId: store.state.channelState.selectedChannelId,
+            page: 1,
+            isRefresh: false));
+      },
       blockedUserIds: store.state.sessionUserState.sessionUser.blockedUsers,
     );
   }

@@ -42,7 +42,7 @@ dependencies:
   date_time_format: 
   universal_html: 
   url_launcher: 
-  octo_image: 
+  cached_network_image: ^2.3.0-rc 
   animations: 
   image_downloader: 
   auto_size_text: 

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -9,7 +10,6 @@ import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_page.dart';
-import 'package:octo_image/octo_image.dart';
 
 class UserDetailView extends StatefulWidget {
   final User user;
@@ -52,13 +52,12 @@ class _UserDetailViewState extends State<UserDetailView> {
                             avatarImage: widget.user.avatar == ''
                                 ? SvgPicture.asset('assets/icon-hkgalden.svg',
                                     width: 30, height: 30, color: Colors.grey)
-                                : OctoImage(
-                                    placeholderBuilder: (context) =>
+                                : CachedNetworkImage(
+                                    placeholder: (context, url) =>
                                         SizedBox.fromSize(
                                       size: Size.square(30),
                                     ),
-                                    image:
-                                        Image.network(widget.user.avatar).image,
+                                    imageUrl: widget.user.avatar,
                                     width: 30,
                                     height: 30,
                                   ),
