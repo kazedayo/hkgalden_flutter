@@ -36,7 +36,7 @@ class ChannelCell extends StatelessWidget {
         ),
         decoration: BoxDecoration(
             color: viewModel.selectedChannelId == channel.channelId
-                ? Theme.of(context).splashColor
+                ? Theme.of(context).primaryColor
                 : Theme.of(context).scaffoldBackgroundColor,
             borderRadius: BorderRadius.all(Radius.circular(5))),
       );

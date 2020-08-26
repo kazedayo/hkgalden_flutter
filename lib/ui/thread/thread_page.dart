@@ -8,7 +8,7 @@ import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
-import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
+import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/thread/comment_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton.dart';
@@ -194,7 +194,10 @@ class _ThreadPageState extends State<ThreadPage> {
                     onPressed: () => !_canReply
                         ? showModal<void>(
                             context: context,
-                            builder: (context) => LoginCheckDialog())
+                            builder: (context) => CustomAlertDialog(
+                                  title: '未登入',
+                                  content: '請先登入',
+                                ))
                         : Navigator.of(context).pushNamed('/Compose',
                             arguments: ComposePageArguments(
                               composeMode: ComposeMode.reply,
@@ -408,8 +411,6 @@ class _PageFooter extends StatelessWidget {
                     height: 85,
                     child: Center(
                       child: FlatButton.icon(
-                          highlightColor: Colors.transparent,
-                          splashColor: Colors.transparent,
                           onPressed: () => onTap(),
                           icon: isLoading
                               ? ProgressSpinner()

@@ -12,7 +12,7 @@ import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
-import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
+import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
 import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton_cell.dart';
@@ -148,11 +148,8 @@ class _HomePageState extends State<HomePage>
                         viewModel.isLoggedIn
                             ? PopupMenuButton(
                                 padding: EdgeInsets.zero,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5)),
                                 icon: Icon(Icons.apps),
                                 offset: Offset(0, kToolbarHeight - 20),
-                                color: Colors.white,
                                 onCanceled: () {
                                   _backgroundBlurAnimationController.reverse();
                                 },
@@ -172,8 +169,11 @@ class _HomePageState extends State<HomePage>
                                               Icons.account_box,
                                               color: Colors.black87,
                                             ),
-                                            onPressed: () =>
-                                                Navigator.of(context).pop()),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                              Navigator.of(context)
+                                                  .pushNamed('/SessionUser');
+                                            }),
                                         IconButton(
                                             icon: Icon(
                                               Icons.settings,
@@ -186,19 +186,23 @@ class _HomePageState extends State<HomePage>
                                                       .fromPlatform();
                                               showModal(
                                                 context: context,
-                                                builder: (context) =>
-                                                    AboutDialog(
-                                                  applicationName: 'hkGalden',
-                                                  applicationIcon:
-                                                      SvgPicture.asset(
-                                                    'assets/icon-hkgalden.svg',
-                                                    width: 50,
-                                                    height: 50,
+                                                builder: (context) => Theme(
+                                                  data: ThemeData.light(),
+                                                  child: AboutDialog(
+                                                    applicationName: 'hkGalden',
+                                                    applicationIcon:
+                                                        SvgPicture.asset(
+                                                      'assets/icon-hkgalden.svg',
+                                                      width: 50,
+                                                      height: 50,
+                                                      color: Theme.of(context)
+                                                          .accentColor,
+                                                    ),
+                                                    applicationVersion:
+                                                        '${info.version}+${info.buildNumber}',
+                                                    applicationLegalese:
+                                                        '© hkGalden & 1080',
                                                   ),
-                                                  applicationVersion:
-                                                      '${info.version}+${info.buildNumber}',
-                                                  applicationLegalese:
-                                                      '© hkGalden & 1080',
                                                 ),
                                               );
                                             }),
@@ -228,55 +232,60 @@ class _HomePageState extends State<HomePage>
                       ],
                     ),
                     preferredSize: Size.fromHeight(kToolbarHeight)),
-                frontLayer: Material(
-                  color: Theme.of(context).primaryColor,
-                  child: Container(
-                    child: viewModel.isThreadLoading &&
-                            viewModel.isRefresh == false
-                        ? ListLoadingSkeleton()
-                        : RefreshIndicator(
-                            strokeWidth: 2.5,
-                            onRefresh: () => viewModel
-                                .onRefresh(viewModel.selectedChannelId),
-                            child: ListView.builder(
-                              controller: _scrollController,
-                              itemCount: viewModel.threads.length + 1,
-                              itemBuilder: (context, index) {
-                                if (index == viewModel.threads.length) {
-                                  return ListLoadingSkeletonCell();
-                                } else {
-                                  return Visibility(
-                                    visible: !viewModel.blockedUserIds.contains(
-                                        viewModel.threads[index].replies[0]
-                                            .author.userId),
-                                    child: ThreadCell(
-                                      key: ValueKey(
-                                          viewModel.threads[index].threadId),
-                                      title: viewModel.threads[index].title,
-                                      authorName: viewModel.threads[index]
-                                          .replies[0].authorNickname,
-                                      totalReplies:
-                                          viewModel.threads[index].totalReplies,
-                                      lastReply: viewModel.threads[index]
-                                                  .replies.length ==
-                                              2
-                                          ? viewModel
-                                              .threads[index].replies[1].date
-                                          : viewModel
-                                              .threads[index].replies[0].date,
-                                      tagName: viewModel.threads[index].tagName,
-                                      tagColor:
-                                          viewModel.threads[index].tagColor,
-                                      onTap: () =>
-                                          _loadThread(viewModel.threads[index]),
-                                      onLongPress: () =>
-                                          _jumpToPage(viewModel.threads[index]),
-                                    ),
-                                  );
-                                }
-                              },
+                frontLayer: Theme(
+                  data: Theme.of(context)
+                      .copyWith(highlightColor: Color(0xff373d3c)),
+                  child: Material(
+                    color: Theme.of(context).primaryColor,
+                    child: Container(
+                      child: viewModel.isThreadLoading &&
+                              viewModel.isRefresh == false
+                          ? ListLoadingSkeleton()
+                          : RefreshIndicator(
+                              strokeWidth: 2.5,
+                              onRefresh: () => viewModel
+                                  .onRefresh(viewModel.selectedChannelId),
+                              child: ListView.builder(
+                                controller: _scrollController,
+                                itemCount: viewModel.threads.length + 1,
+                                itemBuilder: (context, index) {
+                                  if (index == viewModel.threads.length) {
+                                    return ListLoadingSkeletonCell();
+                                  } else {
+                                    return Visibility(
+                                      visible: !viewModel.blockedUserIds
+                                          .contains(viewModel.threads[index]
+                                              .replies[0].author.userId),
+                                      child: ThreadCell(
+                                        key: ValueKey(
+                                            viewModel.threads[index].threadId),
+                                        title: viewModel.threads[index].title,
+                                        authorName: viewModel.threads[index]
+                                            .replies[0].authorNickname,
+                                        totalReplies: viewModel
+                                            .threads[index].totalReplies,
+                                        lastReply: viewModel.threads[index]
+                                                    .replies.length ==
+                                                2
+                                            ? viewModel
+                                                .threads[index].replies[1].date
+                                            : viewModel
+                                                .threads[index].replies[0].date,
+                                        tagName:
+                                            viewModel.threads[index].tagName,
+                                        tagColor:
+                                            viewModel.threads[index].tagColor,
+                                        onTap: () => _loadThread(
+                                            viewModel.threads[index]),
+                                        onLongPress: () => _jumpToPage(
+                                            viewModel.threads[index]),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
                             ),
-                          ),
+                    ),
                   ),
                 ),
                 inactiveOverlayColor: Colors.black,
@@ -297,7 +306,10 @@ class _HomePageState extends State<HomePage>
                                 ))
                             : showModal<void>(
                                 context: context,
-                                builder: (context) => LoginCheckDialog()),
+                                builder: (context) => CustomAlertDialog(
+                                      title: '未登入',
+                                      content: '請先登入',
+                                    )),
                       ),
               ),
               Visibility(
@@ -329,24 +341,47 @@ class _HomePageState extends State<HomePage>
   void _jumpToPage(Thread thread) {
     showModal<void>(
       context: context,
-      builder: (context) => SimpleDialog(
-        title: const Text('跳到頁數'),
-        children: List.generate(
-            (thread.replies.last.floor.toDouble() / 50.0).ceil(),
-            (index) => SimpleDialogOption(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    navigatorKey.currentState.pushNamed('/Thread',
-                        arguments: ThreadPageArguments(
-                            threadId: thread.threadId,
-                            title: thread.title,
-                            page: index + 1));
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text('第 ${index + 1} 頁'),
-                  ),
-                )),
+      builder: (context) => Theme(
+        data: Theme.of(context).copyWith(highlightColor: Colors.grey[300]),
+        child: SimpleDialog(
+          backgroundColor: Colors.white,
+          title: const Text(
+            '跳到頁數',
+            style: TextStyle(color: Colors.black87),
+          ),
+          children: List.generate(
+              (thread.replies.last.floor.toDouble() / 50.0).ceil(),
+              (index) => Card(
+                    color: Colors.transparent,
+                    elevation: 0,
+                    clipBehavior: Clip.hardEdge,
+                    margin: EdgeInsets.symmetric(horizontal: 8),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5)),
+                    child: SimpleDialogOption(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        navigatorKey.currentState.pushNamed('/Thread',
+                            arguments: ThreadPageArguments(
+                                threadId: thread.threadId,
+                                title: thread.title,
+                                page: index + 1));
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          '第 ${index + 1} 頁',
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle1
+                              .copyWith(color: Colors.black87),
+                        ),
+                      ),
+                    ),
+                  )),
+        ),
       ),
     );
   }

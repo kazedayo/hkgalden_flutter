@@ -90,7 +90,7 @@ class ThreadCell extends StatelessWidget {
             onTap: () => onTap(),
             onLongPress: () => onLongPress(),
           ),
-          Divider(indent: 8, height: 1, thickness: 1),
+          Divider(height: 1, thickness: 1),
         ],
       );
 }

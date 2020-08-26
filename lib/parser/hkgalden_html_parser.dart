@@ -20,7 +20,8 @@ class HKGaldenHtmlParser {
       'data-pack-id',
       'data-sx',
       'data-sy',
-      'data-alt'
+      'data-alt',
+      'hex'
     ]);
 
   String parse(String htmlString) {

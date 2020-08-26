@@ -12,7 +12,7 @@ import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
-import 'package:hkgalden_flutter/ui/common/login_check_dialog.dart';
+import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_detail_view.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
@@ -37,9 +37,11 @@ class CommentCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
+        margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         color: Theme.of(context).primaryColor,
         child: Container(
-          padding: EdgeInsets.only(top: 16, left: 16, right: 16),
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -116,7 +118,10 @@ class CommentCell extends StatelessWidget {
                                 ))
                             : showModal<void>(
                                 context: context,
-                                builder: (context) => LoginCheckDialog())),
+                                builder: (context) => CustomAlertDialog(
+                                      title: '未登入',
+                                      content: '請先登入',
+                                    ))),
                   ),
                   // IconButton(
                   //     visualDensity: VisualDensity.compact,

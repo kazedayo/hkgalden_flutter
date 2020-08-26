@@ -59,6 +59,13 @@ class MyApp extends StatelessWidget {
   ThemeData _generateTheme() {
     var baseTheme = ThemeData(
       brightness: Brightness.dark,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      dividerColor: Colors.grey[800],
+      popupMenuTheme: PopupMenuThemeData(
+          color: Colors.white,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
       primaryColor: Color(0xff2e3533),
       scaffoldBackgroundColor: Color(0xff1b1f1e),
       appBarTheme: AppBarTheme(color: Color(0xff1b1f1e), elevation: 0),
@@ -66,7 +73,6 @@ class MyApp extends StatelessWidget {
       cursorColor: Color(0xff45c17c),
       textSelectionColor: Color(0xff2d8052),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        splashColor: Color(0xff4fe090),
         foregroundColor: Colors.white,
       ),
       cupertinoOverrideTheme:
@@ -80,9 +86,6 @@ class MyApp extends StatelessWidget {
             transitionType: SharedAxisTransitionType.horizontal,
             fillColor: Color(0xff1b1f1e)),
       }),
-      dialogTheme: DialogTheme(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
     );
 
     return baseTheme;

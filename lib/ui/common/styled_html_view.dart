@@ -76,10 +76,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                   color: Color(int.parse('FF${attributes['hex']}', radix: 16)),
                   fontSize: FontSize.large);
               return Container(
-                transform: Theme.of(context.buildContext).platform ==
-                        TargetPlatform.iOS
-                    ? Matrix4.translationValues(0, 2.5, 0)
-                    : Matrix4.translationValues(0, 0.5, 0),
+                transform: Matrix4.translationValues(0, 1, 0),
                 child: ContainerSpan(
                   newContext: RenderContext(
                       buildContext: context.buildContext,

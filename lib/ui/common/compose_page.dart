@@ -11,6 +11,7 @@ import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
+import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/utils/zefyr_delegates.dart';
@@ -90,20 +91,13 @@ class _ComposePageState extends State<ComposePage> {
                                   _controller.document.toString() == '/n'
                               ? showModal(
                                   context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: Text('注意!'),
-                                    content: Text('內文/標題不能為空'),
-                                    actions: <Widget>[
-                                      FlatButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                            setState(() {
-                                              _isSending = false;
-                                            });
-                                          },
-                                          child: Text('OK'))
-                                    ],
-                                  ),
+                                  builder: (context) {
+                                    setState(() {
+                                      _isSending = false;
+                                    });
+                                    return CustomAlertDialog(
+                                        title: '注意!', content: '內文/標題不能為空');
+                                  },
                                 )
                               : _createThread(context, arguments)
                           : _sendReply(context, arguments);
@@ -156,26 +150,34 @@ class _ComposePageState extends State<ComposePage> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          InputChip(
-                            label: Text('#${_tag.name}',
-                                strutStyle: StrutStyle(height: 1.25),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .caption
-                                    .copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700)),
-                            backgroundColor: _tag.color,
-                            onPressed: () => showModal<void>(
-                                context: context,
-                                builder: (context) => _TagSelectDialog(
+                          Theme(
+                            data: Theme.of(context).copyWith(
+                                highlightColor: Colors.transparent,
+                                splashColor: Colors.transparent),
+                            child: InputChip(
+                              label: Text('#${_tag.name}',
+                                  strutStyle: StrutStyle(height: 1.25),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .caption
+                                      .copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700)),
+                              backgroundColor: _tag.color,
+                              onPressed: () => showMenu(
+                                  context: context,
+                                  position: RelativeRect.fromLTRB(0, 160, 0, 0),
+                                  items: [
+                                    PopupMenuItem(child: _TagSelectDialog(
                                       onTagSelect: (tag, channelId) {
                                         setState(() {
                                           _tag = tag;
                                           _channelId = channelId;
                                         });
                                       },
-                                    )),
+                                    ))
+                                  ]),
+                            ),
                           ),
                           SizedBox(
                             width: 12,
@@ -306,41 +308,49 @@ class _TagSelectDialog extends StatelessWidget {
       StoreConnector<AppState, TagSelectorViewModel>(
         distinct: true,
         converter: (store) => TagSelectorViewModel.create(store),
-        builder: (context, viewModel) => SimpleDialog(
-          title: Text('選擇標籤'),
-          contentPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          children: viewModel.channels
-              .map((channel) => Container(
-                    margin: EdgeInsets.symmetric(vertical: 4),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(channel.channelName,
-                            style: Theme.of(context).textTheme.caption),
-                        Wrap(
-                          spacing: 8,
-                          children: channel.tags
-                              .map((tag) => InputChip(
-                                    label: Text('#${tag.name}',
-                                        strutStyle: StrutStyle(height: 1.25),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .caption
-                                            .copyWith(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w700)),
-                                    backgroundColor: tag.color,
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                      onTagSelect(tag, channel.channelId);
-                                    },
-                                  ))
-                              .toList(),
-                        )
-                      ],
-                    ),
-                  ))
-              .toList(),
+        builder: (context, viewModel) => Container(
+          height: 200,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: viewModel.channels
+                  .map((channel) => Container(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(channel.channelName,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .caption
+                                    .copyWith(color: Colors.black45)),
+                            Wrap(
+                              spacing: 8,
+                              children: channel.tags
+                                  .map((tag) => InputChip(
+                                        label: Text('#${tag.name}',
+                                            strutStyle:
+                                                StrutStyle(height: 1.25),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .caption
+                                                .copyWith(
+                                                    color: Colors.white,
+                                                    fontWeight:
+                                                        FontWeight.w700)),
+                                        backgroundColor: tag.color,
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          onTagSelect(tag, channel.channelId);
+                                        },
+                                      ))
+                                  .toList(),
+                            )
+                          ],
+                        ),
+                      ))
+                  .toList(),
+            ),
+          ),
         ),
       );
 }
