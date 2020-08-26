@@ -31,7 +31,7 @@ class NestedNavigator extends StatelessWidget {
             default:
           }
           if (settings.name == '/Compose') {
-            return MaterialPageRoute(
+            return CupertinoPageRoute(
                 builder: builder, settings: settings, fullscreenDialog: true);
           } else {
             return MaterialPageRoute(
