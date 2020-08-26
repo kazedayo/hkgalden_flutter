@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ThreadPageLoadingSkeletonCell extends StatelessWidget {
@@ -59,7 +60,7 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
               children: <Widget>[
                 Container(
                   height: 25,
-                  width: MediaQuery.of(context).size.width,
+                  width: displayWidth(context),
                   decoration: BoxDecoration(
                     color: Colors.grey,
                     borderRadius: BorderRadius.circular(5),
@@ -68,7 +69,7 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
                 SizedBox(height: 10),
                 Container(
                   height: 25,
-                  width: MediaQuery.of(context).size.width / 2,
+                  width: displayWidth(context) / 2,
                   decoration: BoxDecoration(
                     color: Colors.grey,
                     borderRadius: BorderRadius.circular(5),

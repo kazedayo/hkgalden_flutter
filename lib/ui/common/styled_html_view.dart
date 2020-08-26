@@ -9,6 +9,7 @@ import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/common/image_loading_error.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
+import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class StyledHtmlView extends StatefulWidget {
@@ -35,7 +36,6 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
 
   @override
   Widget build(BuildContext context) {
-    final deviceWidth = MediaQuery.of(context).size.width;
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: Html(
@@ -56,7 +56,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                     tag: '${widget.floor}_${attributes['src']}_$_randomHash',
                     child: CachedNetworkImage(
                       imageUrl: attributes['src'],
-                      memCacheWidth: deviceWidth.toInt(),
+                      memCacheWidth: displayWidth(context.buildContext).toInt(),
                       placeholder: (context, url) => ProgressSpinner(),
                       errorWidget: (context, error, stackTrace) {
                         _imageLoadingHasError = true;

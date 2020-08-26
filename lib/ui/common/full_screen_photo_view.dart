@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
+import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:image_downloader/image_downloader.dart';
 
 class FullScreenPhotoView extends StatefulWidget {
@@ -68,7 +69,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
         ),
         body: Container(
           constraints: BoxConstraints.expand(
-            height: MediaQuery.of(context).size.height,
+            height: displayHeight(context),
           ),
           child: InteractiveViewer(
             maxScale: 3.0,
@@ -80,14 +81,12 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
                         fadeInDuration: Duration.zero,
                         placeholder: (context, url) => CachedNetworkImage(
                               imageUrl: widget.url,
-                              memCacheWidth:
-                                  MediaQuery.of(context).size.width.toInt(),
+                              memCacheWidth: displayWidth(context).toInt(),
                             ),
                         imageUrl: widget.url)
                     : CachedNetworkImage(
                         imageUrl: widget.url,
-                        memCacheWidth:
-                            MediaQuery.of(context).size.width.toInt(),
+                        memCacheWidth: displayWidth(context).toInt(),
                       )),
           ),
         ),

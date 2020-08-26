@@ -13,6 +13,7 @@ import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
+import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/utils/zefyr_delegates.dart';
 import 'package:hkgalden_flutter/viewmodels/tag_selector_view_model.dart';
@@ -211,7 +212,7 @@ class _ComposePageState extends State<ComposePage> {
               arguments.composeMode == ComposeMode.quotedReply
                   ? ConstrainedBox(
                       constraints: BoxConstraints(
-                          maxHeight: MediaQuery.of(context).size.height * 0.3),
+                          maxHeight: displayHeight(context) * 0.3),
                       child: SingleChildScrollView(
                         reverse: true,
                         scrollDirection: Axis.vertical,
