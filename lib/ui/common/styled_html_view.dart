@@ -35,6 +35,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
 
   @override
   Widget build(BuildContext context) {
+    final deviceWidth = MediaQuery.of(context).size.width;
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: Html(
@@ -46,7 +47,6 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                     ? null
                     : _showImageView(
                         context.buildContext,
-                        CachedNetworkImageProvider(attributes['src']),
                         attributes['src'],
                         '${widget.floor}_${attributes['src']}_$_randomHash',
                       ),
@@ -56,6 +56,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                     tag: '${widget.floor}_${attributes['src']}_$_randomHash',
                     child: CachedNetworkImage(
                       imageUrl: attributes['src'],
+                      memCacheWidth: deviceWidth.toInt(),
                       placeholder: (context, url) => ProgressSpinner(),
                       errorWidget: (context, error, stackTrace) {
                         _imageLoadingHasError = true;
@@ -142,11 +143,9 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
     }
   }
 
-  _showImageView(
-      BuildContext context, ImageProvider image, String url, String heroTag) {
+  _showImageView(BuildContext context, String url, String heroTag) {
     Navigator.of(context).push(FadeRoute(
         page: FullScreenPhotoView(
-      image: image,
       heroTag: heroTag,
       url: url,
     )));

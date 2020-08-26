@@ -1,13 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:image_downloader/image_downloader.dart';
 
 class FullScreenPhotoView extends StatefulWidget {
-  final ImageProvider image;
   final String url;
   final String heroTag;
 
-  const FullScreenPhotoView({Key key, this.image, this.heroTag, this.url})
+  const FullScreenPhotoView({Key key, this.heroTag, this.url})
       : super(key: key);
 
   @override
@@ -17,10 +17,30 @@ class FullScreenPhotoView extends StatefulWidget {
 class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
   //drag to dismiss code: https://github.com/Furkankyl/full_screen_image/blob/master/lib/full_screen_image.dart
   bool _isDownloadingImage;
+  bool _heroFinished;
+
   @override
   void initState() {
     _isDownloadingImage = false;
+    _heroFinished = false;
+    showAfter();
     super.initState();
+  }
+
+  //hacky way to show full res image after hero finished
+  Future<void> showAfter() async {
+    await Future.delayed(Duration(milliseconds: 300), () {
+      print('delay completed');
+    });
+    setState(() {
+      _heroFinished = true;
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    precacheImage(CachedNetworkImageProvider(widget.url), context);
+    super.didChangeDependencies();
   }
 
   @override
@@ -53,7 +73,22 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
           child: InteractiveViewer(
             maxScale: 3.0,
             minScale: 1.0,
-            child: Hero(tag: widget.heroTag, child: Image(image: widget.image)),
+            child: Hero(
+                tag: widget.heroTag,
+                child: _heroFinished
+                    ? CachedNetworkImage(
+                        fadeInDuration: Duration.zero,
+                        placeholder: (context, url) => CachedNetworkImage(
+                              imageUrl: widget.url,
+                              memCacheWidth:
+                                  MediaQuery.of(context).size.width.toInt(),
+                            ),
+                        imageUrl: widget.url)
+                    : CachedNetworkImage(
+                        imageUrl: widget.url,
+                        memCacheWidth:
+                            MediaQuery.of(context).size.width.toInt(),
+                      )),
           ),
         ),
       );

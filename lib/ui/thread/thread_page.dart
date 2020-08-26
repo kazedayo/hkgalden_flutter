@@ -179,11 +179,12 @@ class _ThreadPageState extends State<ThreadPage> {
                       ),
                       SliverList(
                         key: centerKey,
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          return _generatePageSliver(viewModel, index);
-                        },
-                            childCount: viewModel.replies.length,
-                            addAutomaticKeepAlives: false),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return _generatePageSliver(viewModel, index);
+                          },
+                          childCount: viewModel.replies.length,
+                        ),
                       ),
                     ],
                   ),
