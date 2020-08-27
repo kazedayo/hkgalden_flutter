@@ -79,8 +79,9 @@ class MyApp extends StatelessWidget {
       cupertinoOverrideTheme:
           CupertinoThemeData(primaryColor: Color(0xff45c17c)),
       snackBarTheme: SnackBarThemeData(
-          backgroundColor: Color(0xff323d3a),
-          contentTextStyle: TextStyle(color: Colors.white)),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.white,
+          contentTextStyle: TextStyle(color: Colors.black87)),
       pageTransitionsTheme: PageTransitionsTheme(builders: {
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         TargetPlatform.android: SharedAxisPageTransitionsBuilder(
