@@ -13,31 +13,34 @@ class ChannelCell extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         margin: EdgeInsets.symmetric(horizontal: 8),
         child: Center(
-          child: ListTile(
-            title: Text(
-              channel.channelName,
-            ),
-            trailing: Container(
-              width: 15,
-              height: 15,
-              decoration: BoxDecoration(
-                color: channel.channelColor,
-                shape: BoxShape.circle,
-              ),
-            ),
-            onTap: () {
-              viewModel.onTap(channel.channelId);
-              //Navigator.pop(context);
-              Backdrop.of(context).concealBackLayer();
-            },
-            selected: false,
-            dense: true,
-          ),
-        ),
-        decoration: BoxDecoration(
+          child: Material(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+            elevation: viewModel.selectedChannelId == channel.channelId ? 6 : 0,
             color: viewModel.selectedChannelId == channel.channelId
                 ? Theme.of(context).primaryColor
                 : Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: BorderRadius.all(Radius.circular(5))),
+            child: ListTile(
+              title: Text(
+                channel.channelName,
+              ),
+              trailing: Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: channel.channelColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              onTap: () {
+                viewModel.onTap(channel.channelId);
+                //Navigator.pop(context);
+                Backdrop.of(context).concealBackLayer();
+              },
+              selected: false,
+              dense: true,
+            ),
+          ),
+        ),
       );
 }

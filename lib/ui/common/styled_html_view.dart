@@ -98,7 +98,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
             fontSize: FontSize.large,
           ),
           "body": Style(
-              margin: EdgeInsets.symmetric(vertical: 15, horizontal: 3),
+              margin: EdgeInsets.symmetric(vertical: 15),
               padding: EdgeInsets.zero),
           "a": Style(
               color: Colors.blueAccent, textDecoration: TextDecoration.none),

@@ -296,6 +296,7 @@ class _HomePageState extends State<HomePage>
                 floatingActionButton: _fabIsHidden
                     ? null
                     : FloatingActionButton(
+                        highlightElevation: 1,
                         child: Icon(Icons.create),
                         onPressed: () => viewModel.isLoggedIn
                             ? navigatorKey.currentState.pushNamed('/Compose',

@@ -50,6 +50,7 @@ dependencies:
   image_picker: 
   backdrop: 
   package_info:
+  device_preview: 
 
 dev_dependencies:
   flutter_test:

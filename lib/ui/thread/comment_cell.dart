@@ -36,114 +36,149 @@ class CommentCell extends StatelessWidget {
       : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Card(
-        margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-        color: Theme.of(context).primaryColor,
-        child: Container(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  AvatarWidget(
-                    //舊膠登icon死link會炒async #dead#
-                    avatarImage: reply.author.avatar == ''
-                        ? SvgPicture.asset('assets/icon-hkgalden.svg',
-                            width: 30, height: 30, color: Colors.grey)
-                        : CachedNetworkImage(
-                            placeholder: (context, url) => SizedBox.fromSize(
-                              size: Size.square(30),
-                            ),
-                            imageUrl: reply.author.avatar,
-                            width: 30,
-                            height: 30,
-                          ),
-                    userGroup: reply.author.userGroup == null
-                        ? []
-                        : reply.author.userGroup,
-                    onTap: () => showModal<void>(
-                        context: context,
-                        builder: (context) =>
-                            UserDetailView(user: reply.author)),
-                  ),
-                  SizedBox(
-                    width: 5,
-                  ),
-                  Text(
-                    reply.authorNickname,
-                    style: TextStyle(
-                      color: reply.author.gender == 'M'
-                          ? Theme.of(context).colorScheme.brotherColor
-                          : Theme.of(context).colorScheme.sisterColor,
-                    ),
-                  ),
-                  Spacer(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+  Widget build(BuildContext context) => Stack(
+        children: [
+          Column(
+            children: [
+              SizedBox(
+                height: 33,
+              ),
+              Card(
+                elevation: 6,
+                margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                color: Theme.of(context).primaryColor,
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Text('#${reply.floor}'),
-                      Text(DateTimeFormat.format(reply.date.toLocal(),
-                          format: 'Y/m/d h:i A')),
+                      Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                          child: StyledHtmlView(
+                              htmlString: HKGaldenHtmlParser()
+                                  .commentWithQuotes(reply,
+                                      StoreProvider.of<AppState>(context)),
+                              floor: reply.floor)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          Transform(
+                            transform: Matrix4.translationValues(8, 0, 0),
+                            child: IconButton(
+                                visualDensity: VisualDensity.compact,
+                                icon: Icon(Icons.format_quote),
+                                onPressed: () => canReply
+                                    ? Navigator.of(context).pushNamed(
+                                        '/Compose',
+                                        arguments: ComposePageArguments(
+                                          composeMode: ComposeMode.quotedReply,
+                                          threadId: threadId,
+                                          parentReply: reply,
+                                          onSent: (reply) {
+                                            onSent(reply);
+                                          },
+                                        ))
+                                    : showModal<void>(
+                                        context: context,
+                                        builder: (context) => CustomAlertDialog(
+                                              title: '未登入',
+                                              content: '請先登入',
+                                            ))),
+                          ),
+                          // IconButton(
+                          //     visualDensity: VisualDensity.compact,
+                          //     icon: Icon(Icons.flag),
+                          //     onPressed: () => showModal<void>(
+                          //           context: context,
+                          //           builder: (context) => AlertDialog(
+                          //             title: Text('回報問題'),
+                          //             content: Text(
+                          //                 '如有任何關於用戶發表內容問題，請電郵至hkgalden.org@gmail.com'),
+                          //             actions: <Widget>[
+                          //               FlatButton(
+                          //                   onPressed: () =>
+                          //                       Navigator.of(context).pop(),
+                          //                   child: Text('OK'))
+                          //             ],
+                          //           ),
+                          //         )),
+                        ],
+                      ),
                     ],
                   ),
-                ],
-              ),
-              Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
-                  child: StyledHtmlView(
-                      htmlString: HKGaldenHtmlParser().commentWithQuotes(
-                          reply, StoreProvider.of<AppState>(context)),
-                      floor: reply.floor)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  Transform(
-                    transform: Matrix4.translationValues(8, 0, 0),
-                    child: IconButton(
-                        visualDensity: VisualDensity.compact,
-                        icon: Icon(Icons.format_quote),
-                        onPressed: () => canReply
-                            ? Navigator.of(context).pushNamed('/Compose',
-                                arguments: ComposePageArguments(
-                                  composeMode: ComposeMode.quotedReply,
-                                  threadId: threadId,
-                                  parentReply: reply,
-                                  onSent: (reply) {
-                                    onSent(reply);
-                                  },
-                                ))
-                            : showModal<void>(
-                                context: context,
-                                builder: (context) => CustomAlertDialog(
-                                      title: '未登入',
-                                      content: '請先登入',
-                                    ))),
-                  ),
-                  // IconButton(
-                  //     visualDensity: VisualDensity.compact,
-                  //     icon: Icon(Icons.flag),
-                  //     onPressed: () => showModal<void>(
-                  //           context: context,
-                  //           builder: (context) => AlertDialog(
-                  //             title: Text('回報問題'),
-                  //             content: Text(
-                  //                 '如有任何關於用戶發表內容問題，請電郵至hkgalden.org@gmail.com'),
-                  //             actions: <Widget>[
-                  //               FlatButton(
-                  //                   onPressed: () =>
-                  //                       Navigator.of(context).pop(),
-                  //                   child: Text('OK'))
-                  //             ],
-                  //           ),
-                  //         )),
-                ],
+                ),
               ),
             ],
           ),
-        ),
+          Positioned(
+            right: 24,
+            top: 19,
+            child: Text(
+              DateTimeFormat.format(reply.date.toLocal(), format: 'd/m/y H:i'),
+              style: Theme.of(context)
+                  .textTheme
+                  .caption
+                  .copyWith(shadows: [Shadow(blurRadius: 5)]),
+            ),
+          ),
+          Positioned(
+            left: 24,
+            top: 8,
+            child: Row(
+              children: [
+                AvatarWidget(
+                  //舊膠登icon死link會炒async #dead#
+                  avatarImage: reply.author.avatar == ''
+                      ? SvgPicture.asset('assets/icon-hkgalden.svg',
+                          width: 25, height: 25, color: Colors.grey)
+                      : CachedNetworkImage(
+                          placeholder: (context, url) => SizedBox.fromSize(
+                            size: Size.square(30),
+                          ),
+                          imageUrl: reply.author.avatar,
+                          width: 25,
+                          height: 25,
+                        ),
+                  userGroup: reply.author.userGroup == null
+                      ? []
+                      : reply.author.userGroup,
+                  onTap: () => showModal<void>(
+                      context: context,
+                      builder: (context) => UserDetailView(user: reply.author)),
+                ),
+                SizedBox(
+                  width: 5,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Text(
+                      reply.authorNickname,
+                      style: Theme.of(context).textTheme.caption.copyWith(
+                          color: reply.author.gender == 'M'
+                              ? Theme.of(context).colorScheme.brotherColor
+                              : Theme.of(context).colorScheme.sisterColor,
+                          shadows: [Shadow(blurRadius: 5)]),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Text('#${reply.floor}',
+                        style: Theme.of(context)
+                            .textTheme
+                            .caption
+                            .copyWith(shadows: [Shadow(blurRadius: 5)])),
+                  ],
+                )
+              ],
+            ),
+          )
+        ],
       );
 }
