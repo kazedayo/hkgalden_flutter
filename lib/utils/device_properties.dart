@@ -5,3 +5,6 @@ double displayHeight(BuildContext context) =>
 
 double displayWidth(BuildContext context) =>
     MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio;
+
+double displayLogicalWidth(BuildContext context) =>
+    MediaQuery.of(context).size.width;

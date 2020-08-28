@@ -340,6 +340,7 @@ class _HomePageState extends State<HomePage>
   }
 
   void _jumpToPage(Thread thread) {
+    HapticFeedback.mediumImpact();
     showModal<void>(
       context: context,
       builder: (context) => Theme(

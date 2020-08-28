@@ -1,5 +1,6 @@
 import 'package:backdrop/scaffold.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hkgalden_flutter/models/channel.dart';
 import 'package:hkgalden_flutter/viewmodels/home/drawer/home_drawer_view_model.dart';
 
@@ -32,11 +33,14 @@ class ChannelCell extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
               ),
-              onTap: () {
-                viewModel.onTap(channel.channelId);
-                //Navigator.pop(context);
-                Backdrop.of(context).concealBackLayer();
-              },
+              onTap: viewModel.selectedChannelId == channel.channelId
+                  ? null
+                  : () {
+                      HapticFeedback.mediumImpact();
+                      viewModel.onTap(channel.channelId);
+                      //Navigator.pop(context);
+                      Backdrop.of(context).concealBackLayer();
+                    },
               selected: false,
               dense: true,
             ),

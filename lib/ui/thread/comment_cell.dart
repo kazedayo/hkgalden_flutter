@@ -14,7 +14,6 @@ import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
-import 'package:hkgalden_flutter/ui/user_detail/user_detail_view.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 
@@ -44,7 +43,7 @@ class CommentCell extends StatelessWidget {
                 height: 33,
               ),
               Card(
-                elevation: 6,
+                elevation: 3,
                 margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5)),
@@ -121,13 +120,14 @@ class CommentCell extends StatelessWidget {
               style: Theme.of(context)
                   .textTheme
                   .caption
-                  .copyWith(shadows: [Shadow(blurRadius: 5)]),
+                  .copyWith(shadows: [Shadow(offset: Offset(1, 1))]),
             ),
           ),
           Positioned(
             left: 24,
             top: 8,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 AvatarWidget(
                   //舊膠登icon死link會炒async #dead#
@@ -145,26 +145,18 @@ class CommentCell extends StatelessWidget {
                   userGroup: reply.author.userGroup == null
                       ? []
                       : reply.author.userGroup,
-                  onTap: () => showModal<void>(
-                      context: context,
-                      builder: (context) => UserDetailView(user: reply.author)),
-                ),
-                SizedBox(
-                  width: 5,
+                  user: reply.author,
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      height: 5,
-                    ),
                     Text(
                       reply.authorNickname,
                       style: Theme.of(context).textTheme.caption.copyWith(
                           color: reply.author.gender == 'M'
                               ? Theme.of(context).colorScheme.brotherColor
                               : Theme.of(context).colorScheme.sisterColor,
-                          shadows: [Shadow(blurRadius: 5)]),
+                          shadows: [Shadow(offset: Offset(1, 1))]),
                     ),
                     SizedBox(
                       height: 5,
@@ -173,7 +165,10 @@ class CommentCell extends StatelessWidget {
                         style: Theme.of(context)
                             .textTheme
                             .caption
-                            .copyWith(shadows: [Shadow(blurRadius: 5)])),
+                            .copyWith(shadows: [Shadow(offset: Offset(1, 1))])),
+                    SizedBox(
+                      height: 5,
+                    )
                   ],
                 )
               ],
