@@ -61,7 +61,7 @@ class _AvatarWidgetState extends State<AvatarWidget> {
                                 .sessionUserState
                                 .isLoggedIn ==
                             false
-                    ? null
+                    ? () => null
                     : () {
                         setState(() {
                           _blockedButtonPressed = !_blockedButtonPressed;
@@ -90,7 +90,7 @@ class _AvatarWidgetState extends State<AvatarWidget> {
                   Icons.account_box,
                   color: Colors.black87,
                 ),
-                onPressed: null,
+                onPressed: () => null,
               )
             ],
           )),

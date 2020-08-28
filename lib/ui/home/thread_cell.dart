@@ -1,26 +1,15 @@
 import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
+import 'package:hkgalden_flutter/models/thread.dart';
+import 'package:hkgalden_flutter/ui/home/last_reply_timer.dart';
 
 class ThreadCell extends StatelessWidget {
-  final String title;
-  final String authorName;
-  final int totalReplies;
-  final DateTime lastReply;
-  final String tagName;
-  final Color tagColor;
+  final Thread thread;
   final Function onTap;
   final Function onLongPress;
 
   const ThreadCell(
-      {Key key,
-      this.title,
-      this.authorName,
-      this.totalReplies,
-      this.lastReply,
-      this.tagName,
-      this.tagColor,
-      this.onTap,
-      this.onLongPress})
+      {Key key, this.onTap, this.onLongPress, @required this.thread})
       : super(key: key);
 
   @override
@@ -32,7 +21,7 @@ class ThreadCell extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(title,
+                  Text(thread.title,
                       style:
                           TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                   SizedBox(height: 10),
@@ -44,7 +33,7 @@ class ThreadCell extends StatelessWidget {
                         Icon(Icons.face, size: 13),
                         SizedBox(width: 5),
                         Text(
-                          authorName,
+                          thread.replies[0].authorNickname,
                           style: Theme.of(context).textTheme.caption,
                           strutStyle: StrutStyle(height: 1.25),
                         ),
@@ -52,25 +41,24 @@ class ThreadCell extends StatelessWidget {
                         Icon(Icons.reply, size: 13),
                         SizedBox(width: 5),
                         Text(
-                          totalReplies.toString(),
+                          thread.totalReplies.toString(),
                           style: Theme.of(context).textTheme.caption,
                           strutStyle: StrutStyle(height: 1.25),
                         ),
                         SizedBox(width: 10),
                         Icon(Icons.access_time, size: 13),
                         SizedBox(width: 5),
-                        Text(
-                          DateTimeFormat.relative(lastReply.toLocal(),
-                              abbr: true),
-                          style: Theme.of(context).textTheme.caption,
-                          strutStyle: StrutStyle(height: 1.25),
-                        ),
+                        LastReplyTimer(
+                            key: ValueKey(thread.threadId),
+                            time: thread.replies.length == 2
+                                ? thread.replies[1].date.toLocal()
+                                : thread.replies[0].date.toLocal()),
                         Spacer(),
                         Chip(
                           materialTapTargetSize:
                               MaterialTapTargetSize.shrinkWrap,
                           visualDensity: VisualDensity.compact,
-                          label: Text('#$tagName',
+                          label: Text('#${thread.tagName}',
                               strutStyle: StrutStyle(height: 1.25),
                               style: Theme.of(context)
                                   .textTheme
@@ -79,7 +67,7 @@ class ThreadCell extends StatelessWidget {
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600)),
                           //labelPadding: EdgeInsets.zero,
-                          backgroundColor: tagColor,
+                          backgroundColor: thread.tagColor,
                         )
                       ],
                     ),

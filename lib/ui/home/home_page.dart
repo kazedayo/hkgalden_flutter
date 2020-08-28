@@ -14,6 +14,7 @@ import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
+import 'package:hkgalden_flutter/ui/home/menu_button.dart';
 import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton_cell.dart';
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
@@ -146,85 +147,7 @@ class _HomePageState extends State<HomePage>
                       ),
                       actions: [
                         viewModel.isLoggedIn
-                            ? PopupMenuButton(
-                                padding: EdgeInsets.zero,
-                                icon: Icon(Icons.apps),
-                                offset: Offset(0, kToolbarHeight - 20),
-                                onCanceled: () {
-                                  _backgroundBlurAnimationController.reverse();
-                                },
-                                itemBuilder: (context) {
-                                  setState(() {
-                                    _menuIsShowing = true;
-                                  });
-                                  _backgroundBlurAnimationController.forward();
-                                  return [
-                                    PopupMenuItem(
-                                        child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        IconButton(
-                                            icon: Icon(
-                                              Icons.account_box,
-                                              color: Colors.black87,
-                                            ),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                              Navigator.of(context)
-                                                  .pushNamed('/SessionUser');
-                                            }),
-                                        IconButton(
-                                            icon: Icon(
-                                              Icons.settings,
-                                              color: Colors.black87,
-                                            ),
-                                            onPressed: () async {
-                                              Navigator.of(context).pop();
-                                              PackageInfo info =
-                                                  await PackageInfo
-                                                      .fromPlatform();
-                                              showModal(
-                                                context: context,
-                                                builder: (context) => Theme(
-                                                  data: ThemeData.light(),
-                                                  child: AboutDialog(
-                                                    applicationName: 'hkGalden',
-                                                    applicationIcon:
-                                                        SvgPicture.asset(
-                                                      'assets/icon-hkgalden.svg',
-                                                      width: 50,
-                                                      height: 50,
-                                                      color: Theme.of(context)
-                                                          .accentColor,
-                                                    ),
-                                                    applicationVersion:
-                                                        '${info.version}+${info.buildNumber}',
-                                                    applicationLegalese:
-                                                        '© hkGalden & 1080',
-                                                  ),
-                                                ),
-                                              );
-                                            }),
-                                        IconButton(
-                                            icon: Icon(
-                                              Icons.exit_to_app,
-                                              color: Colors.redAccent,
-                                            ),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                              viewModel.onLogout();
-                                            }),
-                                        IconButton(
-                                            icon: Icon(
-                                              Icons.block,
-                                              color: Colors.black87,
-                                            ),
-                                            onPressed: () => null),
-                                      ],
-                                    ))
-                                  ];
-                                })
+                            ? MenuButton()
                             : IconButton(
                                 icon: Icon(Icons.exit_to_app),
                                 onPressed: () => Navigator.of(context).push(
@@ -259,22 +182,7 @@ class _HomePageState extends State<HomePage>
                                       child: ThreadCell(
                                         key: ValueKey(
                                             viewModel.threads[index].threadId),
-                                        title: viewModel.threads[index].title,
-                                        authorName: viewModel.threads[index]
-                                            .replies[0].authorNickname,
-                                        totalReplies: viewModel
-                                            .threads[index].totalReplies,
-                                        lastReply: viewModel.threads[index]
-                                                    .replies.length ==
-                                                2
-                                            ? viewModel
-                                                .threads[index].replies[1].date
-                                            : viewModel
-                                                .threads[index].replies[0].date,
-                                        tagName:
-                                            viewModel.threads[index].tagName,
-                                        tagColor:
-                                            viewModel.threads[index].tagColor,
+                                        thread: viewModel.threads[index],
                                         onTap: () => _loadThread(
                                             viewModel.threads[index]),
                                         onLongPress: () => _jumpToPage(
