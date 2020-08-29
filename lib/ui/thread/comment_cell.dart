@@ -8,20 +8,23 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
+import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
+import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
+import 'package:hkgalden_flutter/ui/common/context_menu_button.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
+import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 
-class CommentCell extends StatelessWidget {
+class CommentCell extends StatefulWidget {
   final int threadId;
   final Reply reply;
   final bool onLastPage;
-  final FullScreenPhotoView photoView = FullScreenPhotoView();
   final Function(Reply) onSent;
   final bool canReply;
 
@@ -33,6 +36,21 @@ class CommentCell extends StatelessWidget {
       this.onSent,
       this.canReply})
       : super(key: key);
+
+  @override
+  _CommentCellState createState() => _CommentCellState();
+}
+
+class _CommentCellState extends State<CommentCell> {
+  final FullScreenPhotoView photoView = FullScreenPhotoView();
+  final ContextMenuButtonController _controller = ContextMenuButtonController();
+  bool _blockedButtonPressed;
+
+  @override
+  void initState() {
+    _blockedButtonPressed = false;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) => Stack(
@@ -58,9 +76,9 @@ class CommentCell extends StatelessWidget {
                           padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
                           child: StyledHtmlView(
                               htmlString: HKGaldenHtmlParser()
-                                  .commentWithQuotes(reply,
+                                  .commentWithQuotes(widget.reply,
                                       StoreProvider.of<AppState>(context)),
-                              floor: reply.floor)),
+                              floor: widget.reply.floor)),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
@@ -69,15 +87,15 @@ class CommentCell extends StatelessWidget {
                             child: IconButton(
                                 visualDensity: VisualDensity.compact,
                                 icon: Icon(Icons.format_quote),
-                                onPressed: () => canReply
+                                onPressed: () => widget.canReply
                                     ? Navigator.of(context).pushNamed(
                                         '/Compose',
                                         arguments: ComposePageArguments(
                                           composeMode: ComposeMode.quotedReply,
-                                          threadId: threadId,
-                                          parentReply: reply,
+                                          threadId: widget.threadId,
+                                          parentReply: widget.reply,
                                           onSent: (reply) {
-                                            onSent(reply);
+                                            widget.onSent(reply);
                                           },
                                         ))
                                     : showModal<void>(
@@ -116,7 +134,8 @@ class CommentCell extends StatelessWidget {
             right: 24,
             top: 19,
             child: Text(
-              DateTimeFormat.format(reply.date.toLocal(), format: 'd/m/y H:i'),
+              DateTimeFormat.format(widget.reply.date.toLocal(),
+                  format: 'd/m/y H:i'),
               style: Theme.of(context)
                   .textTheme
                   .caption
@@ -129,31 +148,93 @@ class CommentCell extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                AvatarWidget(
-                  //舊膠登icon死link會炒async #dead#
-                  avatarImage: reply.author.avatar == ''
-                      ? SvgPicture.asset('assets/icon-hkgalden.svg',
-                          width: 25, height: 25, color: Colors.grey)
-                      : CachedNetworkImage(
-                          placeholder: (context, url) => SizedBox.fromSize(
-                            size: Size.square(30),
+                ContextMenuButton(
+                  controller: _controller,
+                  width: 125,
+                  height: 70,
+                  xOffset: 0,
+                  yOffset: 0,
+                  closedChild: AvatarWidget(
+                    //舊膠登icon死link會炒async #dead#
+                    avatarImage: widget.reply.author.avatar == ''
+                        ? SvgPicture.asset('assets/icon-hkgalden.svg',
+                            width: 25, height: 25, color: Colors.grey)
+                        : CachedNetworkImage(
+                            placeholder: (context, url) => SizedBox.fromSize(
+                              size: Size.square(30),
+                            ),
+                            imageUrl: widget.reply.author.avatar,
+                            width: 25,
+                            height: 25,
                           ),
-                          imageUrl: reply.author.avatar,
-                          width: 25,
-                          height: 25,
+                    userGroup: widget.reply.author.userGroup == null
+                        ? []
+                        : widget.reply.author.userGroup,
+                    onTap: _controller.toggleMenu,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.block,
+                          color: _blockedButtonPressed ||
+                                  StoreProvider.of<AppState>(context)
+                                          .state
+                                          .sessionUserState
+                                          .isLoggedIn ==
+                                      false
+                              ? Colors.grey
+                              : Colors.redAccent,
                         ),
-                  userGroup: reply.author.userGroup == null
-                      ? []
-                      : reply.author.userGroup,
-                  user: reply.author,
+                        onPressed: _blockedButtonPressed ||
+                                StoreProvider.of<AppState>(context)
+                                        .state
+                                        .sessionUserState
+                                        .isLoggedIn ==
+                                    false
+                            ? () => null
+                            : () {
+                                setState(() {
+                                  _blockedButtonPressed =
+                                      !_blockedButtonPressed;
+                                });
+                                HKGaldenApi()
+                                    .blockUser(widget.reply.author.userId)
+                                    .then((isSuccess) {
+                                  setState(() {
+                                    _blockedButtonPressed =
+                                        !_blockedButtonPressed;
+                                  });
+                                  if (isSuccess) {
+                                    StoreProvider.of<AppState>(context)
+                                        .dispatch(AppendUserToBlockListAction(
+                                            widget.reply.author.userId));
+                                    _controller.toggleMenu();
+                                    scaffoldKey.currentState.showSnackBar(SnackBar(
+                                        content: Text(
+                                            '已封鎖會員 ${widget.reply.authorNickname}')));
+                                  } else {}
+                                });
+                              },
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.account_box,
+                          color: Colors.black87,
+                        ),
+                        onPressed: () => null,
+                      )
+                    ],
+                  ),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      reply.authorNickname,
+                      widget.reply.authorNickname,
                       style: Theme.of(context).textTheme.caption.copyWith(
-                          color: reply.author.gender == 'M'
+                          color: widget.reply.author.gender == 'M'
                               ? Theme.of(context).colorScheme.brotherColor
                               : Theme.of(context).colorScheme.sisterColor,
                           shadows: [Shadow(offset: Offset(1, 1))]),
@@ -161,7 +242,7 @@ class CommentCell extends StatelessWidget {
                     SizedBox(
                       height: 5,
                     ),
-                    Text('#${reply.floor}',
+                    Text('#${widget.reply.floor}',
                         style: Theme.of(context)
                             .textTheme
                             .caption

@@ -11,6 +11,7 @@ import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
+import 'package:hkgalden_flutter/ui/common/context_menu_button.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
@@ -33,6 +34,8 @@ class _ComposePageState extends State<ComposePage> {
   TextEditingController _titleFieldController;
   FocusNode _focusNode;
   bool _isSending;
+  final ContextMenuButtonController _menuButtonController =
+      ContextMenuButtonController();
 
   @override
   void initState() {
@@ -151,11 +154,13 @@ class _ComposePageState extends State<ComposePage> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          Theme(
-                            data: Theme.of(context).copyWith(
-                                highlightColor: Colors.transparent,
-                                splashColor: Colors.transparent),
-                            child: InputChip(
+                          ContextMenuButton(
+                            width: 240,
+                            height: 210,
+                            xOffset: 0,
+                            yOffset: 8,
+                            controller: _menuButtonController,
+                            closedChild: InputChip(
                               label: Text('#${_tag.name}',
                                   strutStyle: StrutStyle(height: 1.25),
                                   style: Theme.of(context)
@@ -165,19 +170,16 @@ class _ComposePageState extends State<ComposePage> {
                                           color: Colors.white,
                                           fontWeight: FontWeight.w700)),
                               backgroundColor: _tag.color,
-                              onPressed: () => showMenu(
-                                  context: context,
-                                  position: RelativeRect.fromLTRB(0, 160, 0, 0),
-                                  items: [
-                                    PopupMenuItem(child: _TagSelectDialog(
-                                      onTagSelect: (tag, channelId) {
-                                        setState(() {
-                                          _tag = tag;
-                                          _channelId = channelId;
-                                        });
-                                      },
-                                    ))
-                                  ]),
+                              onPressed: () =>
+                                  _menuButtonController.toggleMenu(),
+                            ),
+                            child: _TagSelectDialog(
+                              onTagSelect: (tag, channelId) {
+                                setState(() {
+                                  _tag = tag;
+                                  _channelId = channelId;
+                                });
+                              },
                             ),
                           ),
                           SizedBox(
@@ -309,48 +311,44 @@ class _TagSelectDialog extends StatelessWidget {
       StoreConnector<AppState, TagSelectorViewModel>(
         distinct: true,
         converter: (store) => TagSelectorViewModel.create(store),
-        builder: (context, viewModel) => Container(
-          height: 200,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: viewModel.channels
-                  .map((channel) => Container(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(channel.channelName,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .caption
-                                    .copyWith(color: Colors.black45)),
-                            Wrap(
-                              spacing: 8,
-                              children: channel.tags
-                                  .map((tag) => InputChip(
-                                        label: Text('#${tag.name}',
-                                            strutStyle:
-                                                StrutStyle(height: 1.25),
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .caption
-                                                .copyWith(
-                                                    color: Colors.white,
-                                                    fontWeight:
-                                                        FontWeight.w700)),
-                                        backgroundColor: tag.color,
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                          onTagSelect(tag, channel.channelId);
-                                        },
-                                      ))
-                                  .toList(),
-                            )
-                          ],
-                        ),
-                      ))
-                  .toList(),
-            ),
+        builder: (context, viewModel) => SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: viewModel.channels
+                .map((channel) => Container(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(channel.channelName,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .caption
+                                  .copyWith(color: Colors.black45)),
+                          Wrap(
+                            spacing: 8,
+                            children: channel.tags
+                                .map((tag) => InputChip(
+                                      label: Text('#${tag.name}',
+                                          strutStyle: StrutStyle(height: 1.25),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .caption
+                                              .copyWith(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w700)),
+                                      backgroundColor: tag.color,
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        onTagSelect(tag, channel.channelId);
+                                      },
+                                    ))
+                                .toList(),
+                          )
+                        ],
+                      ),
+                    ))
+                .toList(),
           ),
         ),
       );

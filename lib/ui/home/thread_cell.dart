@@ -1,4 +1,3 @@
-import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/ui/home/last_reply_timer.dart';

@@ -14,7 +14,7 @@ import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
-import 'package:hkgalden_flutter/ui/home/menu_button.dart';
+import 'package:hkgalden_flutter/ui/common/context_menu_button.dart';
 import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton_cell.dart';
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
@@ -38,12 +38,14 @@ class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   ScrollController _scrollController;
   AnimationController _backgroundBlurAnimationController;
+  ContextMenuButtonController _contextMenuButtonController;
   bool _fabIsHidden;
   bool _menuIsShowing;
 
   @override
   void initState() {
     //_scrollController = ScrollController();
+    _contextMenuButtonController = ContextMenuButtonController();
     _backgroundBlurAnimationController = AnimationController(
         vsync: this,
         duration: Duration(milliseconds: 150),
@@ -147,7 +149,86 @@ class _HomePageState extends State<HomePage>
                       ),
                       actions: [
                         viewModel.isLoggedIn
-                            ? MenuButton()
+                            ? ContextMenuButton(
+                                controller: _contextMenuButtonController,
+                                height: 70,
+                                width: 220,
+                                xOffset: -185,
+                                yOffset: 0,
+                                closedChild: IconButton(
+                                    icon: Icon(Icons.apps),
+                                    onPressed: () =>
+                                        _contextMenuButtonController
+                                            .toggleMenu()),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      IconButton(
+                                          icon: Icon(
+                                            Icons.account_box,
+                                            color: Colors.black87,
+                                          ),
+                                          onPressed: () {
+                                            _contextMenuButtonController
+                                                .toggleMenu();
+                                            Navigator.of(context)
+                                                .pushNamed('/SessionUser');
+                                          }),
+                                      IconButton(
+                                          icon: Icon(
+                                            Icons.settings,
+                                            color: Colors.black87,
+                                          ),
+                                          onPressed: () async {
+                                            _contextMenuButtonController
+                                                .toggleMenu();
+                                            PackageInfo info = await PackageInfo
+                                                .fromPlatform();
+                                            showModal(
+                                              context: context,
+                                              builder: (context) => Theme(
+                                                data: ThemeData.light(),
+                                                child: AboutDialog(
+                                                  applicationName: 'hkGalden',
+                                                  applicationIcon:
+                                                      SvgPicture.asset(
+                                                    'assets/icon-hkgalden.svg',
+                                                    width: 50,
+                                                    height: 50,
+                                                    color: Theme.of(context)
+                                                        .accentColor,
+                                                  ),
+                                                  applicationVersion:
+                                                      '${info.version}+${info.buildNumber}',
+                                                  applicationLegalese:
+                                                      '© hkGalden & 1080',
+                                                ),
+                                              ),
+                                            );
+                                          }),
+                                      IconButton(
+                                          icon: Icon(
+                                            Icons.exit_to_app,
+                                            color: Colors.redAccent,
+                                          ),
+                                          onPressed: () {
+                                            _contextMenuButtonController
+                                                .toggleMenu();
+                                            viewModel.onLogout();
+                                          }),
+                                      IconButton(
+                                          icon: Icon(
+                                            Icons.block,
+                                            color: Colors.black87,
+                                          ),
+                                          onPressed: () => null),
+                                    ],
+                                  ),
+                                ),
+                              )
                             : IconButton(
                                 icon: Icon(Icons.exit_to_app),
                                 onPressed: () => Navigator.of(context).push(
