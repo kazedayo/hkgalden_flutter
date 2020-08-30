@@ -126,6 +126,8 @@ class _HomePageState extends State<HomePage>
             fit: StackFit.expand,
             children: [
               BackdropScaffold(
+                frontLayerBorderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(5), topRight: Radius.circular(5)),
                 resizeToAvoidBottomInset: false,
                 appBar: PreferredSize(
                     child: AppBar(
@@ -332,7 +334,9 @@ class _HomePageState extends State<HomePage>
   void _jumpToPage(Thread thread) {
     HapticFeedback.mediumImpact();
     showModalBottomSheet(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(5), topRight: Radius.circular(5))),
       backgroundColor: Colors.white,
       isScrollControlled: true,
       context: context,
