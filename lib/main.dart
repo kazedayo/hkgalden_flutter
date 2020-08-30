@@ -61,14 +61,18 @@ class MyApp extends StatelessWidget {
 
   ThemeData _generateTheme() {
     var baseTheme = ThemeData(
+      dialogTheme: DialogTheme(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+      bottomSheetTheme: BottomSheetThemeData(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10), topRight: Radius.circular(10))),
+          backgroundColor: Colors.white),
       brightness: Brightness.dark,
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
       dividerColor: Colors.grey[800],
-      popupMenuTheme: PopupMenuThemeData(
-          color: Colors.white,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
       primaryColor: Color(0xff2e3533),
       scaffoldBackgroundColor: Color(0xff1b1f1e),
       appBarTheme: AppBarTheme(color: Color(0xff1b1f1e), elevation: 0),

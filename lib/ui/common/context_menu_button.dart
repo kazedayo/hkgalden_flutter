@@ -111,7 +111,7 @@ class _ContextMenuButtonState extends State<ContextMenuButton>
                         child: Material(
                           color: Colors.white,
                           elevation: 6,
-                          borderRadius: BorderRadius.circular(5),
+                          borderRadius: BorderRadius.circular(10),
                           child: widget.child,
                         ))),
               ),

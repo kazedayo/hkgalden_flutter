@@ -7,7 +7,7 @@ import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_page.dart';
 import 'package:hkgalden_flutter/viewmodels/session_user_page.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 
-class SessionUserPage extends StatelessWidget {
+class UserPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       StoreConnector<AppState, SessionUserPageViewModel>(
@@ -75,8 +75,8 @@ class SessionUserPage extends StatelessWidget {
                   color: Theme.of(context).primaryColor,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16))),
+                          topLeft: Radius.circular(10),
+                          topRight: Radius.circular(10))),
                   elevation: 6,
                   margin: EdgeInsets.zero,
                   child: UserThreadListPage(

@@ -127,7 +127,8 @@ class _HomePageState extends State<HomePage>
             children: [
               BackdropScaffold(
                 frontLayerBorderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(5), topRight: Radius.circular(5)),
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10)),
                 resizeToAvoidBottomInset: false,
                 appBar: PreferredSize(
                     child: AppBar(
@@ -178,7 +179,7 @@ class _HomePageState extends State<HomePage>
                                             _contextMenuButtonController
                                                 .toggleMenu();
                                             Navigator.of(context)
-                                                .pushNamed('/SessionUser');
+                                                .pushNamed('/User');
                                           }),
                                       IconButton(
                                           icon: Icon(
@@ -334,9 +335,6 @@ class _HomePageState extends State<HomePage>
   void _jumpToPage(Thread thread) {
     HapticFeedback.mediumImpact();
     showModalBottomSheet(
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(5), topRight: Radius.circular(5))),
       backgroundColor: Colors.white,
       isScrollControlled: true,
       context: context,
@@ -369,7 +367,7 @@ class _HomePageState extends State<HomePage>
                   clipBehavior: Clip.hardEdge,
                   margin: EdgeInsets.symmetric(horizontal: 8),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5)),
+                      borderRadius: BorderRadius.circular(10)),
                   child: SimpleDialogOption(
                     padding: EdgeInsets.all(16.0),
                     onPressed: () {

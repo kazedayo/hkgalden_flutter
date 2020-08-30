@@ -16,7 +16,7 @@ class ChannelCell extends StatelessWidget {
         child: Center(
           child: Material(
             shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             elevation: viewModel.selectedChannelId == channel.channelId ? 6 : 0,
             color: viewModel.selectedChannelId == channel.channelId
                 ? Theme.of(context).primaryColor

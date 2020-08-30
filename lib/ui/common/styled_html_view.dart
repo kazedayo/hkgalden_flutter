@@ -52,6 +52,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                       ),
                 child: Container(
                   margin: EdgeInsets.symmetric(vertical: 8),
+                  alignment: Alignment.center,
                   child: Hero(
                     tag: '${widget.floor}_${attributes['src']}_$_randomHash',
                     child: CachedNetworkImage(

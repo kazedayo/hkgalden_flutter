@@ -18,7 +18,7 @@ class ThreadPageLoadingSkeleton extends StatelessWidget {
                   width: 50,
                   decoration: BoxDecoration(
                       color: Colors.grey,
-                      borderRadius: BorderRadius.circular(5)),
+                      borderRadius: BorderRadius.circular(10)),
                 ),
               ),
             );

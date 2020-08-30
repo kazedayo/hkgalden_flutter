@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/home/home_page.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
-import 'package:hkgalden_flutter/ui/user_detail/session_user_page.dart';
+import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 
 class NestedNavigator extends StatelessWidget {
@@ -25,8 +25,8 @@ class NestedNavigator extends StatelessWidget {
             case '/Compose':
               builder = (context) => ComposePage();
               break;
-            case '/SessionUser':
-              builder = (context) => SessionUserPage();
+            case '/User':
+              builder = (context) => UserPage();
               break;
             default:
           }

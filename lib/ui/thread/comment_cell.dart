@@ -64,7 +64,7 @@ class _CommentCellState extends State<CommentCell> {
                 elevation: 3,
                 margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5)),
+                    borderRadius: BorderRadius.circular(10)),
                 color: Theme.of(context).primaryColor,
                 child: Container(
                   padding: EdgeInsets.fromLTRB(16, 16, 16, 0),

@@ -8,7 +8,7 @@ class ListLoadingSkeletonCell extends StatelessWidget {
         children: <Widget>[
           Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5),
+                borderRadius: BorderRadius.circular(10),
                 color: Colors.grey,
               ),
               margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
@@ -19,7 +19,7 @@ class ListLoadingSkeletonCell extends StatelessWidget {
                 flex: 2,
                 child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
+                      borderRadius: BorderRadius.circular(10),
                       color: Colors.grey,
                     ),
                     margin: EdgeInsets.fromLTRB(10, 10, 10, 10),

@@ -26,7 +26,7 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
                   height: 25,
                   decoration: BoxDecoration(
                     color: Colors.grey,
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 Spacer(),
@@ -38,7 +38,7 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
                       height: 25,
                       decoration: BoxDecoration(
                         color: Colors.grey,
-                        borderRadius: BorderRadius.circular(5),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                     SizedBox(height: 5),
@@ -47,7 +47,7 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
                       height: 25,
                       decoration: BoxDecoration(
                         color: Colors.grey,
-                        borderRadius: BorderRadius.circular(5),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ],
@@ -60,19 +60,19 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
               children: <Widget>[
                 Container(
                   height: 25,
-                  width: displayWidth(context),
+                  width: displayLogicalWidth(context),
                   decoration: BoxDecoration(
                     color: Colors.grey,
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 SizedBox(height: 10),
                 Container(
                   height: 25,
-                  width: displayWidth(context) / 2,
+                  width: displayLogicalWidth(context) / 2,
                   decoration: BoxDecoration(
                     color: Colors.grey,
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ],
