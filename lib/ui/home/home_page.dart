@@ -361,6 +361,7 @@ class _HomePageState extends State<HomePage>
               constraints:
                   BoxConstraints(maxHeight: displayHeight(context) / 2),
               child: ListView.builder(
+                shrinkWrap: true,
                 itemCount: (thread.replies.last.floor.toDouble() / 50.0).ceil(),
                 itemBuilder: (context, index) => Card(
                   color: Colors.transparent,
