@@ -175,6 +175,7 @@ class _ComposePageState extends State<ComposePage> {
                             ),
                             child: _TagSelectDialog(
                               onTagSelect: (tag, channelId) {
+                                _menuButtonController.toggleMenu();
                                 setState(() {
                                   _tag = tag;
                                   _channelId = channelId;
@@ -339,7 +340,6 @@ class _TagSelectDialog extends StatelessWidget {
                                                   fontWeight: FontWeight.w700)),
                                       backgroundColor: tag.color,
                                       onPressed: () {
-                                        Navigator.of(context).pop();
                                         onTagSelect(tag, channel.channelId);
                                       },
                                     ))
