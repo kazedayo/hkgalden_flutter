@@ -20,6 +20,7 @@ import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton_cell.da
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
 import 'package:hkgalden_flutter/ui/login_page.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
+import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/viewmodels/home/home_page_view_model.dart';
@@ -330,48 +331,63 @@ class _HomePageState extends State<HomePage>
 
   void _jumpToPage(Thread thread) {
     HapticFeedback.mediumImpact();
-    showModal<void>(
+    showModalBottomSheet(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      backgroundColor: Colors.white,
+      isScrollControlled: true,
       context: context,
       builder: (context) => Theme(
         data: Theme.of(context).copyWith(highlightColor: Colors.grey[300]),
-        child: SimpleDialog(
-          backgroundColor: Colors.white,
-          title: const Text(
-            '跳到頁數',
-            style: TextStyle(color: Colors.black87),
-          ),
-          children: List.generate(
-              (thread.replies.last.floor.toDouble() / 50.0).ceil(),
-              (index) => Card(
-                    color: Colors.transparent,
-                    elevation: 0,
-                    clipBehavior: Clip.hardEdge,
-                    margin: EdgeInsets.symmetric(horizontal: 8),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5)),
-                    child: SimpleDialogOption(
-                      padding:
-                          EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        navigatorKey.currentState.pushNamed('/Thread',
-                            arguments: ThreadPageArguments(
-                                threadId: thread.threadId,
-                                title: thread.title,
-                                page: index + 1));
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text(
-                          '第 ${index + 1} 頁',
-                          style: Theme.of(context)
-                              .textTheme
-                              .subtitle1
-                              .copyWith(color: Colors.black87),
-                        ),
-                      ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              child: Text(
+                thread.title,
+                style: Theme.of(context)
+                    .textTheme
+                    .headline6
+                    .copyWith(color: Colors.black87),
+              ),
+            ),
+            ConstrainedBox(
+              constraints:
+                  BoxConstraints(maxHeight: displayHeight(context) / 2),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: (thread.replies.last.floor.toDouble() / 50.0).ceil(),
+                itemBuilder: (context, index) => Card(
+                  color: Colors.transparent,
+                  elevation: 0,
+                  clipBehavior: Clip.hardEdge,
+                  margin: EdgeInsets.symmetric(horizontal: 8),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5)),
+                  child: SimpleDialogOption(
+                    padding: EdgeInsets.all(16.0),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      navigatorKey.currentState.pushNamed('/Thread',
+                          arguments: ThreadPageArguments(
+                              threadId: thread.threadId,
+                              title: thread.title,
+                              page: index + 1));
+                    },
+                    child: Text(
+                      '第 ${index + 1} 頁',
+                      style: Theme.of(context)
+                          .textTheme
+                          .subtitle1
+                          .copyWith(color: Colors.black87),
                     ),
-                  )),
+                  ),
+                ),
+              ),
+            )
+          ],
         ),
       ),
     );
