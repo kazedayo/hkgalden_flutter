@@ -14,74 +14,62 @@ class UserPage extends StatelessWidget {
         converter: (store) => SessionUserPageViewModel.create(store),
         builder: (context, viewModel) => Scaffold(
           appBar: AppBar(),
-          body: Column(
+          body: Stack(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Row(
-                      children: [
-                        AvatarWidget(
-                          avatarImage: viewModel.sessionUserAvatar,
-                          userGroup: viewModel.sessionUserGroup,
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              viewModel.sessionUserName,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyText1
-                                  .copyWith(
-                                      color: viewModel.sessionUserGender == 'M'
-                                          ? Theme.of(context)
-                                              .colorScheme
-                                              .brotherColor
-                                          : Theme.of(context)
-                                              .colorScheme
-                                              .sisterColor),
-                            ),
-                            Text(
-                              viewModel.sessionUserGroup.first.groupName ??
-                                  '郊登仔',
-                              style: Theme.of(context).textTheme.caption,
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 30,
-                    ),
-                    Text(
-                      viewModel.sessionUser.userId,
-                      style: Theme.of(context).textTheme.caption,
-                    )
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Expanded(
-                child: Card(
-                  clipBehavior: Clip.hardEdge,
-                  color: Theme.of(context).primaryColor,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          topRight: Radius.circular(10))),
-                  elevation: 6,
-                  margin: EdgeInsets.zero,
+              Card(
+                clipBehavior: Clip.hardEdge,
+                color: Theme.of(context).primaryColor,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(10))),
+                elevation: 6,
+                margin: EdgeInsets.only(top: 40),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 30),
                   child: UserThreadListPage(
                     userId: viewModel.sessionUser.userId,
                   ),
+                ),
+              ),
+              Positioned(
+                left: 16,
+                top: 16,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    AvatarWidget(
+                      avatarImage: viewModel.sessionUserAvatar,
+                      userGroup: viewModel.sessionUserGroup,
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          viewModel.sessionUserName,
+                          style: Theme.of(context).textTheme.bodyText1.copyWith(
+                              color: viewModel.sessionUserGender == 'M'
+                                  ? Theme.of(context).colorScheme.brotherColor
+                                  : Theme.of(context).colorScheme.sisterColor,
+                              shadows: [Shadow(offset: Offset(1, 1))]),
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          viewModel.sessionUser.userId,
+                          style: Theme.of(context).textTheme.caption.copyWith(
+                              shadows: [Shadow(offset: Offset(1, 1))]),
+                        ),
+                        SizedBox(
+                          height: 13,
+                        )
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],
