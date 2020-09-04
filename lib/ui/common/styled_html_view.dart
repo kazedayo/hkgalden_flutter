@@ -58,7 +58,11 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                     child: CachedNetworkImage(
                       imageUrl: attributes['src'],
                       memCacheWidth: displayWidth(context.buildContext).toInt(),
-                      placeholder: (context, url) => ProgressSpinner(),
+                      //placeholder: (context, url) => ProgressSpinner(),
+                      progressIndicatorBuilder: (context, url, progress) =>
+                          ProgressSpinner(
+                        value: progress.progress,
+                      ),
                       errorWidget: (context, error, stackTrace) {
                         _imageLoadingHasError = true;
                         return ImageLoadingError(error.toString());

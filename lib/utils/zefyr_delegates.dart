@@ -104,7 +104,10 @@ class CustomZefyrImageDelegate implements ZefyrImageDelegate {
   Widget buildImage(BuildContext context, String url) {
     return CachedNetworkImage(
       imageUrl: url,
-      placeholder: (context, url) => ProgressSpinner(),
+      //placeholder: (context, url) => ProgressSpinner(),
+      progressIndicatorBuilder: (context, url, progress) => ProgressSpinner(
+        value: progress.progress,
+      ),
     );
   }
 

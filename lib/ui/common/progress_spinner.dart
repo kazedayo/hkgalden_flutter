@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 class ProgressSpinner extends StatelessWidget {
+  final double value;
+
+  const ProgressSpinner({Key key, this.value}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     // switch (Theme.of(context).platform) {
@@ -27,6 +31,7 @@ class ProgressSpinner extends StatelessWidget {
     return SizedBox.fromSize(
       size: Size.square(15),
       child: CircularProgressIndicator(
+          value: value,
           strokeWidth: 2,
           valueColor: AlwaysStoppedAnimation<Color>(Colors.grey)),
     );
