@@ -17,6 +17,7 @@ import 'package:hkgalden_flutter/ui/common/context_menu_button.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
+import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
@@ -223,7 +224,16 @@ class _CommentCellState extends State<CommentCell> {
                           Icons.account_box,
                           color: Colors.black87,
                         ),
-                        onPressed: () => null,
+                        onPressed: () {
+                          _controller.toggleMenu();
+                          showModalBottomSheet(
+                              backgroundColor: Colors.transparent,
+                              barrierColor: Colors.black87,
+                              context: context,
+                              builder: (context) => UserPage(
+                                    user: widget.reply.author,
+                                  ));
+                        },
                       )
                     ],
                   ),

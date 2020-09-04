@@ -1,79 +1,88 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_redux/flutter_redux.dart';
-import 'package:hkgalden_flutter/redux/app/app_state.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_page.dart';
-import 'package:hkgalden_flutter/viewmodels/session_user_page.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 
 class UserPage extends StatelessWidget {
+  final User user;
+
+  const UserPage({Key key, @required this.user}) : super(key: key);
+
   @override
-  Widget build(BuildContext context) =>
-      StoreConnector<AppState, SessionUserPageViewModel>(
-        converter: (store) => SessionUserPageViewModel.create(store),
-        builder: (context, viewModel) => Scaffold(
-          appBar: AppBar(),
-          body: Stack(
-            children: [
-              Card(
-                clipBehavior: Clip.hardEdge,
-                color: Theme.of(context).primaryColor,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(10),
-                        topRight: Radius.circular(10))),
-                elevation: 6,
-                margin: EdgeInsets.only(top: 40),
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 30),
-                  child: UserThreadListPage(
-                    userId: viewModel.sessionUser.userId,
-                  ),
-                ),
+  Widget build(BuildContext context) => Stack(
+        children: [
+          Card(
+            clipBehavior: Clip.hardEdge,
+            color: Theme.of(context).primaryColor,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10))),
+            elevation: 6,
+            margin: EdgeInsets.only(top: 40),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 30),
+              child: UserThreadListPage(
+                userId: user.userId,
               ),
-              Positioned(
-                left: 16,
-                top: 16,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+            ),
+          ),
+          Positioned(
+            left: 16,
+            top: 16,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                AvatarWidget(
+                  avatarImage: user.avatar == ''
+                      ? SvgPicture.asset('assets/icon-hkgalden.svg',
+                          width: 30, height: 30, color: Colors.grey)
+                      : CachedNetworkImage(
+                          width: 30,
+                          height: 30,
+                          imageUrl: user.avatar,
+                          placeholder: (context, url) => SizedBox.fromSize(
+                            size: Size.square(30),
+                          ),
+                        ),
+                  userGroup: user.userGroup,
+                ),
+                SizedBox(
+                  width: 5,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AvatarWidget(
-                      avatarImage: viewModel.sessionUserAvatar,
-                      userGroup: viewModel.sessionUserGroup,
+                    Text(
+                      user.nickName,
+                      style: Theme.of(context).textTheme.bodyText1.copyWith(
+                          color: user.gender == 'M'
+                              ? Theme.of(context).colorScheme.brotherColor
+                              : Theme.of(context).colorScheme.sisterColor,
+                          shadows: [Shadow(offset: Offset(1, 1))]),
                     ),
                     SizedBox(
-                      width: 5,
+                      height: 5,
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          viewModel.sessionUserName,
-                          style: Theme.of(context).textTheme.bodyText1.copyWith(
-                              color: viewModel.sessionUserGender == 'M'
-                                  ? Theme.of(context).colorScheme.brotherColor
-                                  : Theme.of(context).colorScheme.sisterColor,
-                              shadows: [Shadow(offset: Offset(1, 1))]),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          viewModel.sessionUser.userId,
-                          style: Theme.of(context).textTheme.caption.copyWith(
-                              shadows: [Shadow(offset: Offset(1, 1))]),
-                        ),
-                        SizedBox(
-                          height: 13,
-                        )
-                      ],
+                    Text(
+                      user.userId,
+                      style: Theme.of(context)
+                          .textTheme
+                          .caption
+                          .copyWith(shadows: [Shadow(offset: Offset(1, 1))]),
                     ),
+                    SizedBox(
+                      height: 13,
+                    )
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       );
 }

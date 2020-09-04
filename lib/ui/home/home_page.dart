@@ -20,6 +20,7 @@ import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton_cell.da
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
 import 'package:hkgalden_flutter/ui/login_page.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
+import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
@@ -178,8 +179,17 @@ class _HomePageState extends State<HomePage>
                                           onPressed: () {
                                             _contextMenuButtonController
                                                 .toggleMenu();
-                                            Navigator.of(context)
-                                                .pushNamed('/User');
+                                            // Navigator.of(context)
+                                            //     .pushNamed('/User');
+                                            showModalBottomSheet(
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                barrierColor: Colors.black87,
+                                                context: context,
+                                                builder: (context) => UserPage(
+                                                      user:
+                                                          viewModel.sessionUser,
+                                                    ));
                                           }),
                                       IconButton(
                                           icon: Icon(
