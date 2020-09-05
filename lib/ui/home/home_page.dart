@@ -269,49 +269,83 @@ class _HomePageState extends State<HomePage>
                       child: viewModel.isThreadLoading &&
                               viewModel.isRefresh == false
                           ? ListLoadingSkeleton()
-                          : EasyRefresh(
-                              //strokeWidth: 2.5,
-                              header: ClassicalHeader(
-                                extent: 75,
-                                triggerDistance: 80,
-                                refreshText: "下拉F5",
-                                refreshReadyText: "放手",
-                                refreshingText: "撈緊...",
-                                refreshedText: "撈完 :)",
-                                refreshFailedText: "撈唔到 xx(",
-                                infoText:
-                                    "最後更新: ${_lastRefresh == null ? '未有更新' : DateTimeFormat.format(_lastRefresh, format: 'H:i')}",
-                                textColor:
-                                    Theme.of(context).textTheme.caption.color,
-                                infoColor: Theme.of(context).accentColor,
-                              ),
-                              onRefresh: () => viewModel
-                                  .onRefresh(viewModel.selectedChannelId),
-                              child: ListView.builder(
-                                controller: _scrollController,
-                                itemCount: viewModel.threads.length + 1,
-                                itemBuilder: (context, index) {
-                                  if (index == viewModel.threads.length) {
-                                    return ListLoadingSkeletonCell();
-                                  } else {
-                                    return Visibility(
-                                      visible: !viewModel.blockedUserIds
-                                          .contains(viewModel.threads[index]
-                                              .replies[0].author.userId),
-                                      child: ThreadCell(
-                                        key: ValueKey(
-                                            viewModel.threads[index].threadId),
-                                        thread: viewModel.threads[index],
-                                        onTap: () => _loadThread(
-                                            viewModel.threads[index]),
-                                        onLongPress: () => _jumpToPage(
-                                            viewModel.threads[index]),
-                                      ),
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
+                          : Theme.of(context).platform == TargetPlatform.iOS
+                              ? EasyRefresh(
+                                  //strokeWidth: 2.5,
+                                  header: ClassicalHeader(
+                                    overScroll: Theme.of(context).platform ==
+                                            TargetPlatform.iOS
+                                        ? true
+                                        : false,
+                                    extent: 75,
+                                    triggerDistance: 80,
+                                    refreshText: "下拉F5",
+                                    refreshReadyText: "放手",
+                                    refreshingText: "撈緊...",
+                                    refreshedText: "撈完 :)",
+                                    refreshFailedText: "撈唔到 xx(",
+                                    infoText:
+                                        "最後更新: ${_lastRefresh == null ? '未有更新' : DateTimeFormat.format(_lastRefresh, format: 'H:i')}",
+                                    textColor: Theme.of(context)
+                                        .textTheme
+                                        .caption
+                                        .color,
+                                    infoColor: Theme.of(context).accentColor,
+                                  ),
+                                  onRefresh: () => viewModel
+                                      .onRefresh(viewModel.selectedChannelId),
+                                  child: ListView.builder(
+                                    controller: _scrollController,
+                                    itemCount: viewModel.threads.length + 1,
+                                    itemBuilder: (context, index) {
+                                      if (index == viewModel.threads.length) {
+                                        return ListLoadingSkeletonCell();
+                                      } else {
+                                        return Visibility(
+                                          visible: !viewModel.blockedUserIds
+                                              .contains(viewModel.threads[index]
+                                                  .replies[0].author.userId),
+                                          child: ThreadCell(
+                                            key: ValueKey(viewModel
+                                                .threads[index].threadId),
+                                            thread: viewModel.threads[index],
+                                            onTap: () => _loadThread(
+                                                viewModel.threads[index]),
+                                            onLongPress: () => _jumpToPage(
+                                                viewModel.threads[index]),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                )
+                              : RefreshIndicator(
+                                  child: ListView.builder(
+                                    controller: _scrollController,
+                                    itemCount: viewModel.threads.length + 1,
+                                    itemBuilder: (context, index) {
+                                      if (index == viewModel.threads.length) {
+                                        return ListLoadingSkeletonCell();
+                                      } else {
+                                        return Visibility(
+                                          visible: !viewModel.blockedUserIds
+                                              .contains(viewModel.threads[index]
+                                                  .replies[0].author.userId),
+                                          child: ThreadCell(
+                                            key: ValueKey(viewModel
+                                                .threads[index].threadId),
+                                            thread: viewModel.threads[index],
+                                            onTap: () => _loadThread(
+                                                viewModel.threads[index]),
+                                            onLongPress: () => _jumpToPage(
+                                                viewModel.threads[index]),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                  onRefresh: () => viewModel
+                                      .onRefresh(viewModel.selectedChannelId)),
                     ),
                   ),
                 ),
