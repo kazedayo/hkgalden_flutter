@@ -2,10 +2,12 @@ import 'dart:ui';
 
 import 'package:animations/animations.dart';
 import 'package:backdrop/scaffold.dart';
+import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
@@ -43,6 +45,7 @@ class _HomePageState extends State<HomePage>
   ContextMenuButtonController _contextMenuButtonController;
   bool _fabIsHidden;
   bool _menuIsShowing;
+  DateTime _lastRefresh;
 
   @override
   void initState() {
@@ -122,6 +125,13 @@ class _HomePageState extends State<HomePage>
                   });
                 }
               });
+          },
+          onWillChange: (previousViewModel, newViewModel) {
+            if (previousViewModel.threads != newViewModel.threads) {
+              setState(() {
+                _lastRefresh = DateTime.now();
+              });
+            }
           },
           builder: (BuildContext context, HomePageViewModel viewModel) => Stack(
             fit: StackFit.expand,
@@ -259,8 +269,22 @@ class _HomePageState extends State<HomePage>
                       child: viewModel.isThreadLoading &&
                               viewModel.isRefresh == false
                           ? ListLoadingSkeleton()
-                          : RefreshIndicator(
-                              strokeWidth: 2.5,
+                          : EasyRefresh(
+                              //strokeWidth: 2.5,
+                              header: ClassicalHeader(
+                                extent: 75,
+                                triggerDistance: 80,
+                                refreshText: "下拉F5",
+                                refreshReadyText: "放手",
+                                refreshingText: "撈緊...",
+                                refreshedText: "撈完 :)",
+                                refreshFailedText: "撈唔到 xx(",
+                                infoText:
+                                    "最後更新: ${DateTimeFormat.format(_lastRefresh, format: 'H:i') ?? '未有更新'}",
+                                textColor:
+                                    Theme.of(context).textTheme.caption.color,
+                                infoColor: Theme.of(context).accentColor,
+                              ),
                               onRefresh: () => viewModel
                                   .onRefresh(viewModel.selectedChannelId),
                               child: ListView.builder(
@@ -359,10 +383,8 @@ class _HomePageState extends State<HomePage>
                   const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
               child: Text(
                 thread.title,
-                style: Theme.of(context)
-                    .textTheme
-                    .headline6
-                    .copyWith(color: Colors.black87),
+                style: Theme.of(context).textTheme.headline6.copyWith(
+                    color: Colors.black87, fontWeight: FontWeight.bold),
               ),
             ),
             ConstrainedBox(
