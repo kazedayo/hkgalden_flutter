@@ -280,7 +280,7 @@ class _HomePageState extends State<HomePage>
                                 refreshedText: "撈完 :)",
                                 refreshFailedText: "撈唔到 xx(",
                                 infoText:
-                                    "最後更新: ${DateTimeFormat.format(_lastRefresh, format: 'H:i') ?? '未有更新'}",
+                                    "最後更新: ${_lastRefresh == null ? '未有更新' : DateTimeFormat.format(_lastRefresh, format: 'H:i')}",
                                 textColor:
                                     Theme.of(context).textTheme.caption.color,
                                 infoColor: Theme.of(context).accentColor,
