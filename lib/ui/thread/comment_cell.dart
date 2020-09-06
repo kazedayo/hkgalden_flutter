@@ -177,25 +177,16 @@ class _CommentCellState extends State<CommentCell> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                        icon: Icon(
-                          Icons.block,
-                          color: _blockedButtonPressed ||
-                                  StoreProvider.of<AppState>(context)
-                                          .state
-                                          .sessionUserState
-                                          .isLoggedIn ==
-                                      false
-                              ? Colors.grey
-                              : Colors.redAccent,
-                        ),
+                        icon: Icon(Icons.block, color: Colors.redAccent),
                         onPressed: _blockedButtonPressed ||
                                 StoreProvider.of<AppState>(context)
                                         .state
                                         .sessionUserState
                                         .isLoggedIn ==
                                     false
-                            ? () => null
+                            ? null
                             : () {
+                                _controller.toggleMenu();
                                 setState(() {
                                   _blockedButtonPressed =
                                       !_blockedButtonPressed;
@@ -211,7 +202,6 @@ class _CommentCellState extends State<CommentCell> {
                                     StoreProvider.of<AppState>(context)
                                         .dispatch(AppendUserToBlockListAction(
                                             widget.reply.author.userId));
-                                    _controller.toggleMenu();
                                     scaffoldKey.currentState.showSnackBar(SnackBar(
                                         content: Text(
                                             '已封鎖會員 ${widget.reply.authorNickname}')));
