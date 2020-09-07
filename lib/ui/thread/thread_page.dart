@@ -168,16 +168,17 @@ class _ThreadPageState extends State<ThreadPage> {
                     controller: _scrollController,
                     slivers: <Widget>[
                       SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          return _generatePreviousPageSliver(
-                              viewModel, index, arguments.page);
-                        },
-                            childCount:
-                                viewModel.previousPageReplies.length == 0
-                                    ? 1
-                                    : viewModel.previousPageReplies.length,
-                            addAutomaticKeepAlives: false,
-                            addRepaintBoundaries: false),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return _generatePreviousPageSliver(
+                                viewModel, index, arguments.page);
+                          },
+                          childCount: viewModel.previousPageReplies.length == 0
+                              ? 1
+                              : viewModel.previousPageReplies.length,
+                          // addAutomaticKeepAlives: false,
+                          // addRepaintBoundaries: false
+                        ),
                       ),
                       SliverList(
                         key: centerKey,

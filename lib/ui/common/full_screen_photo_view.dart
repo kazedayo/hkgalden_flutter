@@ -18,24 +18,11 @@ class FullScreenPhotoView extends StatefulWidget {
 class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
   //drag to dismiss code: https://github.com/Furkankyl/full_screen_image/blob/master/lib/full_screen_image.dart
   bool _isDownloadingImage;
-  bool _heroFinished;
 
   @override
   void initState() {
     _isDownloadingImage = false;
-    _heroFinished = false;
-    showAfter();
     super.initState();
-  }
-
-  //hacky way to show full res image after hero finished
-  Future<void> showAfter() async {
-    await Future.delayed(Duration(milliseconds: 300), () {
-      print('delay completed');
-    });
-    setState(() {
-      _heroFinished = true;
-    });
   }
 
   @override
@@ -76,18 +63,13 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
             minScale: 1.0,
             child: Hero(
                 tag: widget.heroTag,
-                child: _heroFinished
-                    ? CachedNetworkImage(
-                        fadeInDuration: Duration.zero,
-                        placeholder: (context, url) => CachedNetworkImage(
-                              imageUrl: widget.url,
-                              memCacheWidth: displayWidth(context).toInt(),
-                            ),
-                        imageUrl: widget.url)
-                    : CachedNetworkImage(
-                        imageUrl: widget.url,
-                        memCacheWidth: displayWidth(context).toInt(),
-                      )),
+                child: CachedNetworkImage(
+                    fadeInDuration: Duration.zero,
+                    placeholder: (context, url) => CachedNetworkImage(
+                          imageUrl: widget.url,
+                          memCacheWidth: displayWidth(context).toInt(),
+                        ),
+                    imageUrl: widget.url)),
           ),
         ),
       );
