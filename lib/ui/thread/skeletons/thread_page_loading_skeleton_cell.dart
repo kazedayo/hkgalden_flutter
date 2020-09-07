@@ -60,7 +60,7 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
               children: <Widget>[
                 Container(
                   height: 25,
-                  width: displayLogicalWidth(context),
+                  width: displayWidth(context),
                   decoration: BoxDecoration(
                     color: Colors.grey,
                     borderRadius: BorderRadius.circular(10),
@@ -69,7 +69,7 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
                 SizedBox(height: 10),
                 Container(
                   height: 25,
-                  width: displayLogicalWidth(context) / 2,
+                  width: displayWidth(context) / 2,
                   decoration: BoxDecoration(
                     color: Colors.grey,
                     borderRadius: BorderRadius.circular(10),

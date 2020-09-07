@@ -277,8 +277,6 @@ class _HomePageState extends State<HomePage>
                                             TargetPlatform.iOS
                                         ? true
                                         : false,
-                                    extent: 75,
-                                    triggerDistance: 80,
                                     refreshText: "下拉F5",
                                     refreshReadyText: "放手",
                                     refreshingText: "撈緊...",
@@ -295,6 +293,8 @@ class _HomePageState extends State<HomePage>
                                   onRefresh: () => viewModel
                                       .onRefresh(viewModel.selectedChannelId),
                                   child: ListView.builder(
+                                    addAutomaticKeepAlives: false,
+                                    addRepaintBoundaries: false,
                                     controller: _scrollController,
                                     itemCount: viewModel.threads.length + 1,
                                     itemBuilder: (context, index) {

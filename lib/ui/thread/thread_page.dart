@@ -175,7 +175,9 @@ class _ThreadPageState extends State<ThreadPage> {
                             childCount:
                                 viewModel.previousPageReplies.length == 0
                                     ? 1
-                                    : viewModel.previousPageReplies.length),
+                                    : viewModel.previousPageReplies.length,
+                            addAutomaticKeepAlives: false,
+                            addRepaintBoundaries: false),
                       ),
                       SliverList(
                         key: centerKey,
@@ -184,6 +186,8 @@ class _ThreadPageState extends State<ThreadPage> {
                             return _generatePageSliver(viewModel, index);
                           },
                           childCount: viewModel.replies.length,
+                          addAutomaticKeepAlives: false,
+                          addRepaintBoundaries: false,
                         ),
                       ),
                     ],
