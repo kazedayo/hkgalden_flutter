@@ -81,8 +81,8 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
               Style newStyle = context.style.copyWith(
                   color: Color(int.parse('FF${attributes['hex']}', radix: 16)),
                   fontSize: FontSize.large);
-              return Container(
-                transform: Matrix4.translationValues(0, 1, 0),
+              return Transform.translate(
+                offset: Offset(0, 1),
                 child: ContainerSpan(
                   newContext: RenderContext(
                       buildContext: context.buildContext,
