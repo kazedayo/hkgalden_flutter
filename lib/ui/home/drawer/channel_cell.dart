@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:backdrop/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,19 +22,9 @@ class ChannelCell extends StatelessWidget {
             color: viewModel.selectedChannelId == channel.channelId
                 ? Theme.of(context).primaryColor
                 : Theme.of(context).scaffoldBackgroundColor,
-            child: ListTile(
-              title: Text(
-                channel.channelName,
-              ),
-              trailing: Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: channel.channelColor,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              onTap: viewModel.selectedChannelId == channel.channelId
+            child: FlatButton(
+              disabledTextColor: Colors.white,
+              onPressed: viewModel.selectedChannelId == channel.channelId
                   ? null
                   : () {
                       HapticFeedback.mediumImpact();
@@ -41,8 +32,26 @@ class ChannelCell extends StatelessWidget {
                       //Navigator.pop(context);
                       Backdrop.of(context).concealBackLayer();
                     },
-              selected: false,
-              dense: true,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  AutoSizeText(
+                    channel.channelName,
+                    minFontSize: 10,
+                    maxFontSize: 14,
+                    maxLines: 1,
+                  ),
+                  Spacer(),
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: channel.channelColor,
+                      shape: BoxShape.circle,
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ),
