@@ -95,15 +95,16 @@ class HKGaldenApi {
       query GetThreadContent($id: Int!, $page: Int!) {
         thread(id: $id,sorting: date_asc,page: $page) {
           id
-            title
-            totalReplies
-            replies {
-              ...CommentsRecursive
-            }
-            tags {
-              name
-              color
-            }
+          title
+          status
+          totalReplies
+          replies {
+            ...CommentsRecursive
+          }
+          tags {
+            name
+            color
+          }
         }
       }
 
@@ -170,6 +171,7 @@ class HKGaldenApi {
         threadsByChannel(channelId: $channelId, page: $page) {
           id
           title
+          status
           replies {
             author {
               id
@@ -256,6 +258,7 @@ class HKGaldenApi {
         threadsByUser(userId: $userId, page: $page) {
           id
           title
+          status
           replies {
             author {
               id

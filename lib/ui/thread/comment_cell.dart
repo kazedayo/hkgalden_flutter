@@ -28,6 +28,7 @@ class CommentCell extends StatefulWidget {
   final bool onLastPage;
   final Function(Reply) onSent;
   final bool canReply;
+  final bool threadLocked;
 
   CommentCell(
       {Key key,
@@ -35,7 +36,8 @@ class CommentCell extends StatefulWidget {
       this.reply,
       this.onLastPage,
       this.onSent,
-      this.canReply})
+      this.canReply,
+      this.threadLocked})
       : super(key: key);
 
   @override
@@ -85,26 +87,31 @@ class _CommentCellState extends State<CommentCell> {
                         children: <Widget>[
                           Transform(
                             transform: Matrix4.translationValues(8, 0, 0),
-                            child: IconButton(
-                                visualDensity: VisualDensity.compact,
-                                icon: Icon(Icons.format_quote),
-                                onPressed: () => widget.canReply
-                                    ? Navigator.of(context).pushNamed(
-                                        '/Compose',
-                                        arguments: ComposePageArguments(
-                                          composeMode: ComposeMode.quotedReply,
-                                          threadId: widget.threadId,
-                                          parentReply: widget.reply,
-                                          onSent: (reply) {
-                                            widget.onSent(reply);
-                                          },
-                                        ))
-                                    : showModal<void>(
-                                        context: context,
-                                        builder: (context) => CustomAlertDialog(
-                                              title: '未登入',
-                                              content: '請先登入',
-                                            ))),
+                            child: Visibility(
+                              visible: !widget.threadLocked,
+                              child: IconButton(
+                                  visualDensity: VisualDensity.compact,
+                                  icon: Icon(Icons.format_quote),
+                                  onPressed: () => widget.canReply
+                                      ? Navigator.of(context)
+                                          .pushNamed('/Compose',
+                                              arguments: ComposePageArguments(
+                                                composeMode:
+                                                    ComposeMode.quotedReply,
+                                                threadId: widget.threadId,
+                                                parentReply: widget.reply,
+                                                onSent: (reply) {
+                                                  widget.onSent(reply);
+                                                },
+                                              ))
+                                      : showModal<void>(
+                                          context: context,
+                                          builder: (context) =>
+                                              CustomAlertDialog(
+                                                title: '未登入',
+                                                content: '請先登入',
+                                              ))),
+                            ),
                           ),
                           // IconButton(
                           //     visualDensity: VisualDensity.compact,

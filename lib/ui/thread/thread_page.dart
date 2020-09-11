@@ -159,6 +159,14 @@ class _ThreadPageState extends State<ThreadPage> {
                       ],
                     ),
                   ),
+                  actions: [
+                    Visibility(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 16.0),
+                          child: Icon(Icons.lock),
+                        ),
+                        visible: arguments.locked)
+                  ],
                 ),
                 preferredSize: Size.fromHeight(kToolbarHeight)),
             body: viewModel.isLoading && viewModel.isInitialLoad
@@ -193,7 +201,7 @@ class _ThreadPageState extends State<ThreadPage> {
                       ),
                     ],
                   ),
-            floatingActionButton: _fabIsHidden
+            floatingActionButton: _fabIsHidden || viewModel.status == 'locked'
                 ? null
                 : FloatingActionButton(
                     child: Icon(Icons.reply),
@@ -279,6 +287,7 @@ class _ThreadPageState extends State<ThreadPage> {
                 _onReplySuccess(viewModel, reply);
               },
               canReply: _canReply,
+              threadLocked: viewModel.status == 'locked',
             ),
           ],
         );
@@ -296,6 +305,7 @@ class _ThreadPageState extends State<ThreadPage> {
             _onReplySuccess(viewModel, reply);
           },
           canReply: _canReply,
+          threadLocked: viewModel.status == 'locked',
         );
       }
     }
@@ -316,6 +326,7 @@ class _ThreadPageState extends State<ThreadPage> {
               _onReplySuccess(viewModel, reply);
             },
             canReply: _canReply,
+            threadLocked: viewModel.status == 'locked',
           ),
           _PageFooter(
             onLastPage: _onLastPage,
@@ -342,6 +353,7 @@ class _ThreadPageState extends State<ThreadPage> {
               _onReplySuccess(viewModel, reply);
             },
             canReply: _canReply,
+            threadLocked: viewModel.status == 'locked',
           ),
         ],
       );
@@ -357,6 +369,7 @@ class _ThreadPageState extends State<ThreadPage> {
               _onReplySuccess(viewModel, reply);
             },
             canReply: _canReply,
+            threadLocked: viewModel.status == 'locked',
           ),
           _PageFooter(
             onLastPage: _onLastPage,
@@ -379,6 +392,7 @@ class _ThreadPageState extends State<ThreadPage> {
           _onReplySuccess(viewModel, reply);
         },
         canReply: _canReply,
+        threadLocked: viewModel.status == 'locked',
       );
     }
   }

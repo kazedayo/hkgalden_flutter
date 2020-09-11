@@ -400,7 +400,10 @@ class _HomePageState extends State<HomePage>
   void _loadThread(Thread thread) {
     Navigator.of(context).pushNamed('/Thread',
         arguments: ThreadPageArguments(
-            threadId: thread.threadId, title: thread.title, page: 1));
+            threadId: thread.threadId,
+            title: thread.title,
+            page: 1,
+            locked: thread.status == 'locked'));
   }
 
   void _jumpToPage(Thread thread) {
@@ -445,7 +448,8 @@ class _HomePageState extends State<HomePage>
                           arguments: ThreadPageArguments(
                               threadId: thread.threadId,
                               title: thread.title,
-                              page: index + 1));
+                              page: index + 1,
+                              locked: thread.status == 'locked'));
                     },
                     child: Text(
                       '第 ${index + 1} 頁',

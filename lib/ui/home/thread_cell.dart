@@ -12,72 +12,92 @@ class ThreadCell extends StatelessWidget {
       : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Column(
-        children: <Widget>[
-          InkWell(
-            child: Container(
-              padding: EdgeInsets.all(8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(thread.title,
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                  SizedBox(height: 10),
-                  Container(
-                    //constraints: BoxConstraints.expand(height: 20),
-                    child: Row(
-                      //crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(Icons.face, size: 13),
-                        SizedBox(width: 5),
-                        Text(
-                          thread.replies[0].authorNickname,
-                          style: Theme.of(context).textTheme.caption,
-                          strutStyle: StrutStyle(height: 1.25),
-                        ),
-                        SizedBox(width: 10),
-                        Icon(Icons.reply, size: 13),
-                        SizedBox(width: 5),
-                        Text(
-                          thread.totalReplies.toString(),
-                          style: Theme.of(context).textTheme.caption,
-                          strutStyle: StrutStyle(height: 1.25),
-                        ),
-                        SizedBox(width: 10),
-                        Icon(Icons.access_time, size: 13),
-                        SizedBox(width: 5),
-                        LastReplyTimer(
-                            key: ValueKey(thread.threadId),
-                            time: thread.replies.length == 2
-                                ? thread.replies[1].date.toLocal()
-                                : thread.replies[0].date.toLocal()),
-                        Spacer(),
-                        Chip(
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                          visualDensity: VisualDensity.compact,
-                          label: Text('#${thread.tagName}',
-                              strutStyle: StrutStyle(height: 1.25),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .caption
-                                  .copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600)),
-                          //labelPadding: EdgeInsets.zero,
-                          backgroundColor: thread.tagColor,
-                        )
-                      ],
+  Widget build(BuildContext context) => Material(
+        color: thread.status == 'locked'
+            ? Theme.of(context).scaffoldBackgroundColor
+            : Theme.of(context).primaryColor,
+        child: Column(
+          children: <Widget>[
+            InkWell(
+              child: Container(
+                padding: EdgeInsets.all(8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text.rich(
+                        TextSpan(children: [
+                          TextSpan(text: thread.title),
+                          WidgetSpan(
+                              child: thread.status == 'locked'
+                                  ? Icon(
+                                      Icons.lock,
+                                      size: 16,
+                                      color: Colors.grey,
+                                    )
+                                  : SizedBox())
+                        ]),
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: thread.status == 'locked'
+                                ? Colors.grey
+                                : Colors.white)),
+                    SizedBox(height: 10),
+                    Container(
+                      //constraints: BoxConstraints.expand(height: 20),
+                      child: Row(
+                        //crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(Icons.face, size: 13),
+                          SizedBox(width: 5),
+                          Text(
+                            thread.replies[0].authorNickname,
+                            style: Theme.of(context).textTheme.caption,
+                            strutStyle: StrutStyle(height: 1.25),
+                          ),
+                          SizedBox(width: 10),
+                          Icon(Icons.reply, size: 13),
+                          SizedBox(width: 5),
+                          Text(
+                            thread.totalReplies.toString(),
+                            style: Theme.of(context).textTheme.caption,
+                            strutStyle: StrutStyle(height: 1.25),
+                          ),
+                          SizedBox(width: 10),
+                          Icon(Icons.access_time, size: 13),
+                          SizedBox(width: 5),
+                          LastReplyTimer(
+                              key: ValueKey(thread.threadId),
+                              time: thread.replies.length == 2
+                                  ? thread.replies[1].date.toLocal()
+                                  : thread.replies[0].date.toLocal()),
+                          Spacer(),
+                          Chip(
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            visualDensity: VisualDensity.compact,
+                            label: Text('#${thread.tagName}',
+                                strutStyle: StrutStyle(height: 1.25),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .caption
+                                    .copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600)),
+                            //labelPadding: EdgeInsets.zero,
+                            backgroundColor: thread.tagColor,
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              onTap: () => onTap(),
+              onLongPress: () => onLongPress(),
             ),
-            onTap: () => onTap(),
-            onLongPress: () => onLongPress(),
-          ),
-          Divider(height: 1, thickness: 1),
-        ],
+            Divider(height: 1, thickness: 1),
+          ],
+        ),
       );
 }

@@ -7,6 +7,7 @@ import 'package:equatable/equatable.dart';
 class Thread extends Equatable {
   final int threadId;
   final String title;
+  final String status;
   final List<Reply> replies;
   final int totalReplies;
   final String tagName;
@@ -15,6 +16,7 @@ class Thread extends Equatable {
   Thread(
       {this.threadId,
       this.title,
+      this.status,
       this.replies,
       this.totalReplies,
       this.tagName,
@@ -23,6 +25,7 @@ class Thread extends Equatable {
   factory Thread.fromJson(Map<String, dynamic> json) => new Thread(
         threadId: json['id'],
         title: String.fromCharCodes((json['title'] as String).trim().runes),
+        status: json['status'],
         replies: (json['replies'] as List<dynamic>)
             .map((reply) => Reply.fromJson(reply))
             .toList(),
@@ -34,6 +37,7 @@ class Thread extends Equatable {
   factory Thread.initial() => Thread(
         threadId: 0,
         title: '',
+        status: '',
         replies: [],
         totalReplies: 0,
         tagName: '',
@@ -43,6 +47,7 @@ class Thread extends Equatable {
   Thread copyWith({
     int threadId,
     String title,
+    String status,
     List<Reply> replies,
     int totalReplies,
     String tagName,
@@ -51,6 +56,7 @@ class Thread extends Equatable {
     return Thread(
       threadId: threadId ?? this.threadId,
       title: title ?? this.title,
+      status: status ?? this.status,
       replies: replies ?? this.replies,
       totalReplies: totalReplies ?? this.totalReplies,
       tagName: tagName ?? this.tagName,
@@ -59,5 +65,5 @@ class Thread extends Equatable {
   }
 
   List<Object> get props =>
-      [threadId, title, replies, totalReplies, tagName, tagColor];
+      [threadId, title, status, replies, totalReplies, tagName, tagColor];
 }

@@ -14,6 +14,7 @@ class ThreadPageViewModel extends Equatable {
   final int totalReplies;
   final int currentPage;
   final int endPage;
+  final String status;
   final Function(Reply) appendReply;
 
   ThreadPageViewModel({
@@ -26,6 +27,7 @@ class ThreadPageViewModel extends Equatable {
     this.totalReplies,
     this.currentPage,
     this.endPage,
+    this.status,
     this.appendReply,
   });
 
@@ -48,6 +50,7 @@ class ThreadPageViewModel extends Equatable {
         totalReplies: store.state.threadState.thread.totalReplies,
         currentPage: store.state.threadState.currentPage,
         endPage: store.state.threadState.endPage,
+        status: store.state.threadState.thread.status,
         appendReply: (reply) =>
             store.dispatch(AppendReplyToThreadAction(reply: reply)));
   }
@@ -61,6 +64,7 @@ class ThreadPageViewModel extends Equatable {
         blockedUserIds,
         totalReplies,
         currentPage,
+        status,
         endPage
       ];
 }
