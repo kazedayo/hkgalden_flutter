@@ -27,11 +27,9 @@ class Reply extends Equatable {
         floor: json['floor'],
         content: json['content'] == null
             ? null
-            : HKGaldenHtmlParser()
-                .parse(String.fromCharCodes((json['content'] as String).runes)),
+            : HKGaldenHtmlParser().parse(json['content']),
         author: User.fromJson(json['author']),
-        authorNickname:
-            String.fromCharCodes((json['authorNickname'] as String).runes),
+        authorNickname: json['authorNickname'],
         date: DateTime.parse(json['date']),
         parent: json['parent'] == null ? null : Reply.fromJson(json['parent']),
       );

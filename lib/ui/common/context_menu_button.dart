@@ -10,6 +10,7 @@ class ContextMenuButton extends StatefulWidget {
   final Widget child;
   final Widget closedChild;
   final ContextMenuButtonController controller;
+  final Function onBarrierDismiss;
 
   const ContextMenuButton(
       {Key key,
@@ -19,7 +20,8 @@ class ContextMenuButton extends StatefulWidget {
       @required this.yOffset,
       @required this.child,
       @required this.closedChild,
-      @required this.controller})
+      @required this.controller,
+      this.onBarrierDismiss})
       : super(key: key);
 
   @override
@@ -75,7 +77,10 @@ class _ContextMenuButtonState extends State<ContextMenuButton>
   OverlayEntry _createBackground() {
     return OverlayEntry(
       builder: (context) => GestureDetector(
-        onTap: () => toggleMenu(),
+        onTap: () {
+          toggleMenu();
+          if (widget.onBarrierDismiss != null) widget.onBarrierDismiss();
+        },
         child: AnimatedBuilder(
             animation: _animationController,
             builder: (context, child) => Container(

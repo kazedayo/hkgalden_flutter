@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -38,7 +40,7 @@ class MyApp extends StatelessWidget {
       store: store,
       child: MaterialApp(
         home: StartupScreen(),
-        theme: _generateTheme(),
+        theme: _generateTheme(context),
         locale: Locale.fromSubtags(
             languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
         localizationsDelegates: [
@@ -59,8 +61,11 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  ThemeData _generateTheme() {
+  ThemeData _generateTheme(BuildContext context) {
     var baseTheme = ThemeData(
+      chipTheme: Theme.of(context).chipTheme.copyWith(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
       dialogTheme: DialogTheme(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),

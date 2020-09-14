@@ -66,17 +66,7 @@ class _HomePageState extends State<HomePage>
       });
     _fabIsHidden = false;
     _menuIsShowing = false;
-    showAfter();
     super.initState();
-  }
-
-  //hacky way to show status bar after hero finished
-  Future<void> showAfter() async {
-    await Future.delayed(Duration(milliseconds: 650), () {
-      print('delay completed');
-    });
-    SystemChrome.setEnabledSystemUIOverlays(
-        [SystemUiOverlay.top, SystemUiOverlay.bottom]);
   }
 
   @override

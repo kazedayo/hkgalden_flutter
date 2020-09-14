@@ -33,6 +33,8 @@ class _ComposePageState extends State<ComposePage> {
   ZefyrController _controller;
   TextEditingController _titleFieldController;
   FocusNode _focusNode;
+  FocusNode _titleFocusNode;
+  FocusNode _currentFocusNode;
   bool _isSending;
   final ContextMenuButtonController _menuButtonController =
       ContextMenuButtonController();
@@ -47,6 +49,7 @@ class _ComposePageState extends State<ComposePage> {
     _controller = ZefyrController(document);
     _titleFieldController = TextEditingController();
     _focusNode = FocusNode();
+    _titleFocusNode = FocusNode();
     _isSending = false;
     super.initState();
   }
@@ -54,6 +57,7 @@ class _ComposePageState extends State<ComposePage> {
   @override
   void dispose() {
     _focusNode.dispose();
+    _titleFocusNode.dispose();
     _controller.dispose();
     _titleFieldController.dispose();
     super.dispose();
@@ -161,20 +165,25 @@ class _ComposePageState extends State<ComposePage> {
                             yOffset: 8,
                             controller: _menuButtonController,
                             closedChild: InputChip(
-                              label: Text('#${_tag.name}',
-                                  strutStyle: StrutStyle(height: 1.25),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .caption
-                                      .copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700)),
-                              backgroundColor: _tag.color,
-                              onPressed: () =>
-                                  _menuButtonController.toggleMenu(),
-                            ),
+                                label: Text('#${_tag.name}',
+                                    strutStyle: StrutStyle(height: 1.25),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .caption
+                                        .copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700)),
+                                backgroundColor: _tag.color,
+                                onPressed: () {
+                                  _currentFocusNode =
+                                      FocusScope.of(context).focusedChild;
+                                  FocusScope.of(context).unfocus();
+                                  _menuButtonController.toggleMenu();
+                                }),
                             child: _TagSelectDialog(
                               onTagSelect: (tag, channelId) {
+                                FocusScope.of(context)
+                                    .requestFocus(_currentFocusNode);
                                 _menuButtonController.toggleMenu();
                                 setState(() {
                                   _tag = tag;
@@ -182,6 +191,8 @@ class _ComposePageState extends State<ComposePage> {
                                 });
                               },
                             ),
+                            onBarrierDismiss: () => FocusScope.of(context)
+                                .requestFocus(_currentFocusNode),
                           ),
                           SizedBox(
                             width: 12,
@@ -192,15 +203,16 @@ class _ComposePageState extends State<ComposePage> {
                               style: TextStyle(fontSize: 14),
                               strutStyle: StrutStyle(height: 1.25),
                               controller: _titleFieldController,
+                              focusNode: _titleFocusNode,
                               decoration: InputDecoration(
                                   floatingLabelBehavior:
                                       FloatingLabelBehavior.never,
                                   border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(100)),
+                                      borderRadius: BorderRadius.circular(10)),
                                   labelText: '標題',
-                                  labelStyle: TextStyle(height: 1.2),
+                                  labelStyle: TextStyle(height: 1),
                                   contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 15, vertical: 8),
+                                      horizontal: 10, vertical: 6.8),
                                   isDense: true),
                               onChanged: (value) {
                                 setState(() {

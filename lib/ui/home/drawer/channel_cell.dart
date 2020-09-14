@@ -23,6 +23,7 @@ class ChannelCell extends StatelessWidget {
                 ? Theme.of(context).primaryColor
                 : Theme.of(context).scaffoldBackgroundColor,
             child: FlatButton(
+              visualDensity: VisualDensity.compact,
               disabledTextColor: Colors.white,
               onPressed: viewModel.selectedChannelId == channel.channelId
                   ? null
@@ -32,25 +33,26 @@ class ChannelCell extends StatelessWidget {
                       //Navigator.pop(context);
                       Backdrop.of(context).concealBackLayer();
                     },
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  AutoSizeText(
-                    channel.channelName,
-                    minFontSize: 10,
-                    maxFontSize: 14,
-                    maxLines: 1,
-                  ),
-                  Spacer(),
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: channel.channelColor,
-                      shape: BoxShape.circle,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Spacer(flex: 1),
+                    Text(channel.channelName),
+                    Spacer(flex: 3),
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: channel.channelColor,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  )
-                ],
+                    Spacer(flex: 1)
+                  ],
+                ),
               ),
             ),
           ),

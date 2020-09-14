@@ -24,7 +24,7 @@ class Thread extends Equatable {
 
   factory Thread.fromJson(Map<String, dynamic> json) => new Thread(
         threadId: json['id'],
-        title: String.fromCharCodes((json['title'] as String).trim().runes),
+        title: json['title'],
         status: json['status'],
         replies: (json['replies'] as List<dynamic>)
             .map((reply) => Reply.fromJson(reply))

@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/nested_navigator.dart';
@@ -12,7 +11,6 @@ import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/viewmodels/startup_animation_view_model.dart';
-import 'dart:ui';
 
 class StartupScreen extends StatefulWidget {
   @override
@@ -26,12 +24,6 @@ class _StartupScreenState extends State<StartupScreen>
 
   @override
   void initState() {
-    //workaround for displaying emoji properly
-    //https://github.com/flutter/flutter/issues/42586#issuecomment-541870382
-    ParagraphBuilder pb =
-        ParagraphBuilder(ParagraphStyle(locale: window.locale));
-    pb.addText('🗡'); // single char emoji
-    pb.build().layout(ParagraphConstraints(width: 100));
     super.initState();
     TokenSecureStorage().readToken(onFinish: (value) {
       if (value == null) {
@@ -58,9 +50,6 @@ class _StartupScreenState extends State<StartupScreen>
 
   @override
   Widget build(BuildContext context) {
-    if (Theme.of(context).platform == TargetPlatform.iOS) {
-      SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
-    }
     return Scaffold(
       body: StoreConnector<AppState, StartupAnimationViewModel>(
         distinct: true,
