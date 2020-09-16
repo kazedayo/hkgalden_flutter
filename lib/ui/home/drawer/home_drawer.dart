@@ -11,16 +11,17 @@ class HomeDrawer extends StatelessWidget {
         distinct: true,
         converter: (store) => HomeDrawerViewModel.create(store),
         builder: (BuildContext context, HomeDrawerViewModel viewModel) =>
-            GridView.count(
+            GridView.builder(
           padding: EdgeInsets.symmetric(vertical: 10),
           physics: NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          crossAxisCount: 3,
-          childAspectRatio: 2.5,
-          children: viewModel.channels
-              .map((channel) =>
-                  ChannelCell(viewModel: viewModel, channel: channel))
-              .toList(),
+          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 125.0, childAspectRatio: 2.3),
+          itemBuilder: (context, index) => ChannelCell(
+            viewModel: viewModel,
+            channel: viewModel.channels[index],
+          ),
+          itemCount: viewModel.channels.length,
         ),
       );
 }
