@@ -30,10 +30,13 @@ class ProgressSpinner extends StatelessWidget {
     // }
     return SizedBox.fromSize(
       size: Size.square(15),
-      child: CircularProgressIndicator(
-          value: value,
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.grey)),
+      child: AspectRatio(
+        aspectRatio: 1.0,
+        child: CircularProgressIndicator(
+            value: value,
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.grey)),
+      ),
     );
   }
 }
