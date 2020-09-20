@@ -39,9 +39,6 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
           elevation: 30,
           child: Row(
             children: [
-              IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop()),
               Spacer(),
               ActionBarSpinner(isVisible: _isDownloadingImage),
               Builder(
@@ -58,18 +55,21 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
           constraints: BoxConstraints.expand(
             height: displayHeight(context),
           ),
-          child: InteractiveViewer(
-            maxScale: 3.0,
-            minScale: 1.0,
-            child: Hero(
-                tag: widget.heroTag,
-                child: CachedNetworkImage(
-                    fadeInDuration: Duration.zero,
-                    placeholder: (context, url) => CachedNetworkImage(
-                          imageUrl: widget.url,
-                          memCacheWidth: displayWidth(context).toInt(),
-                        ),
-                    imageUrl: widget.url)),
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: InteractiveViewer(
+              maxScale: 3.0,
+              minScale: 1.0,
+              child: Hero(
+                  tag: widget.heroTag,
+                  child: CachedNetworkImage(
+                      fadeInDuration: Duration.zero,
+                      placeholder: (context, url) => CachedNetworkImage(
+                            imageUrl: widget.url,
+                            memCacheWidth: displayWidth(context).toInt(),
+                          ),
+                      imageUrl: widget.url)),
+            ),
           ),
         ),
       );

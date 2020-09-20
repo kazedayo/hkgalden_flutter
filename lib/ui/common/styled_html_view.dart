@@ -42,23 +42,23 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
         data: widget.htmlString,
         customRender: {
           'img': (context, _, attributes, __) {
-            return GestureDetector(
-                onTap: () => _imageLoadingHasError
-                    ? null
-                    : _showImageView(
-                        context.buildContext,
-                        attributes['src'],
-                        '${widget.floor}_${attributes['src']}_$_randomHash',
-                      ),
-                child: Container(
-                  margin: EdgeInsets.symmetric(vertical: 8),
-                  alignment: Alignment.center,
+            return ContainerSpan(
+              shrinkWrap: true,
+              newContext: context,
+              child: GestureDetector(
+                  onTap: () => _imageLoadingHasError
+                      ? null
+                      : _showImageView(
+                          context.buildContext,
+                          attributes['src'],
+                          '${widget.floor}_${attributes['src']}_$_randomHash',
+                        ),
                   child: Hero(
                     tag: '${widget.floor}_${attributes['src']}_$_randomHash',
                     child: CachedNetworkImage(
+                      filterQuality: FilterQuality.high,
                       imageUrl: attributes['src'],
                       memCacheWidth: displayWidth(context.buildContext).toInt(),
-                      //placeholder: (context, url) => ProgressSpinner(),
                       progressIndicatorBuilder: (context, url, progress) =>
                           ProgressSpinner(
                         value: progress.progress,
@@ -68,13 +68,20 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                         return ImageLoadingError(error.toString());
                       },
                     ),
-                  ),
-                ));
+                  )),
+            );
           },
           'icon': (context, __, attributes, ____) {
-            return Container(
-                margin: EdgeInsets.all(3),
-                child: CachedNetworkImage(imageUrl: attributes['src']));
+            return ContainerSpan(
+                shrinkWrap: true,
+                newContext: context,
+                child: Padding(
+                  padding: const EdgeInsets.all(3.0),
+                  child: CachedNetworkImage(
+                    imageUrl: attributes['src'],
+                    placeholder: (context, url) => SizedBox(),
+                  ),
+                ));
           },
           'span': (context, child, attributes, element) {
             if (element.className == ('color')) {
@@ -84,6 +91,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
               return Transform.translate(
                 offset: Offset(0, 1),
                 child: ContainerSpan(
+                  shrinkWrap: true,
                   newContext: RenderContext(
                       buildContext: context.buildContext,
                       style: newStyle,
@@ -133,6 +141,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
             margin: EdgeInsets.zero,
           ),
           "p": Style(margin: EdgeInsets.symmetric(vertical: 0)),
+          "img": Style(display: Display.INLINE)
         },
         onLinkTap: (url) => _launchURL(url),
       ),

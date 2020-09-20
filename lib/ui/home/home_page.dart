@@ -311,7 +311,6 @@ class _HomePageState extends State<HomePage>
                                 )
                               : RefreshIndicator(
                                   backgroundColor: Colors.white,
-                                  displacement: 10,
                                   strokeWidth: 2.5,
                                   child: ListView.builder(
                                     controller: _scrollController,
