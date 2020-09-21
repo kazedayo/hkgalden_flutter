@@ -45,7 +45,7 @@ class ThreadCell extends StatelessWidget {
                     Container(
                       //constraints: BoxConstraints.expand(height: 20),
                       child: Row(
-                        //crossAxisAlignment: CrossAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: <Widget>[
                           Text.rich(
                             TextSpan(children: [
@@ -54,20 +54,17 @@ class ThreadCell extends StatelessWidget {
                                   alignment: PlaceholderAlignment.middle),
                               WidgetSpan(
                                   child: SizedBox(
-                                width: 3,
+                                width: 5,
                               )),
                               WidgetSpan(
-                                  child: Text(
-                                    thread.replies[0].authorNickname,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .overline
-                                        .copyWith(color: Colors.grey[400]),
-                                  ),
-                                  alignment: PlaceholderAlignment.middle)
+                                child: Text(
+                                  thread.replies[0].authorNickname,
+                                  style: Theme.of(context).textTheme.caption,
+                                ),
+                              )
                             ]),
                           ),
-                          SizedBox(width: 6),
+                          SizedBox(width: 10),
                           Text.rich(
                             TextSpan(children: [
                               WidgetSpan(
@@ -75,20 +72,15 @@ class ThreadCell extends StatelessWidget {
                                   alignment: PlaceholderAlignment.middle),
                               WidgetSpan(
                                   child: SizedBox(
-                                width: 3,
+                                width: 5,
                               )),
                               WidgetSpan(
-                                  child: Text(
-                                    thread.totalReplies.toString(),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .overline
-                                        .copyWith(color: Colors.grey[400]),
-                                  ),
-                                  alignment: PlaceholderAlignment.middle)
+                                child: Text(thread.totalReplies.toString(),
+                                    style: Theme.of(context).textTheme.caption),
+                              )
                             ]),
                           ),
-                          SizedBox(width: 6),
+                          SizedBox(width: 10),
                           Text.rich(
                             TextSpan(children: [
                               WidgetSpan(
@@ -96,15 +88,15 @@ class ThreadCell extends StatelessWidget {
                                   alignment: PlaceholderAlignment.middle),
                               WidgetSpan(
                                   child: SizedBox(
-                                width: 3,
+                                width: 5,
                               )),
                               WidgetSpan(
-                                  child: LastReplyTimer(
-                                      key: ValueKey(thread.threadId),
-                                      time: thread.replies.length == 2
-                                          ? thread.replies[1].date.toLocal()
-                                          : thread.replies[0].date.toLocal()),
-                                  alignment: PlaceholderAlignment.middle)
+                                child: LastReplyTimer(
+                                    key: ValueKey(thread.threadId),
+                                    time: thread.replies.length == 2
+                                        ? thread.replies[1].date.toLocal()
+                                        : thread.replies[0].date.toLocal()),
+                              )
                             ]),
                           ),
                           Spacer(),
@@ -116,7 +108,7 @@ class ThreadCell extends StatelessWidget {
                             label: Text('#${thread.tagName}',
                                 style: Theme.of(context)
                                     .textTheme
-                                    .caption
+                                    .overline
                                     .copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w600)),
