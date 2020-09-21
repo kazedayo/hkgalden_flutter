@@ -39,7 +39,10 @@ class ChannelCell extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Spacer(flex: 1),
-                    Text(channel.channelName),
+                    Text(
+                      channel.channelName,
+                      style: Theme.of(context).textTheme.subtitle2.copyWith(),
+                    ),
                     Spacer(flex: 3),
                     Container(
                       width: 10,

@@ -31,14 +31,13 @@ class ThreadCell extends StatelessWidget {
                               child: thread.status == 'locked'
                                   ? Icon(
                                       Icons.lock,
-                                      size: 16,
+                                      size: 15,
                                       color: Colors.grey,
                                     )
                                   : SizedBox())
                         ]),
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                        style: Theme.of(context).textTheme.subtitle1.copyWith(
+                            fontWeight: FontWeight.w500,
                             color: thread.status == 'locked'
                                 ? Colors.grey
                                 : Colors.white)),
@@ -48,36 +47,73 @@ class ThreadCell extends StatelessWidget {
                       child: Row(
                         //crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          Icon(Icons.face, size: 13),
-                          SizedBox(width: 5),
-                          Text(
-                            thread.replies[0].authorNickname,
-                            style: Theme.of(context).textTheme.caption,
-                            strutStyle: StrutStyle(height: 1.25),
+                          Text.rich(
+                            TextSpan(children: [
+                              WidgetSpan(
+                                  child: Icon(Icons.face, size: 13),
+                                  alignment: PlaceholderAlignment.middle),
+                              WidgetSpan(
+                                  child: SizedBox(
+                                width: 3,
+                              )),
+                              WidgetSpan(
+                                  child: Text(
+                                    thread.replies[0].authorNickname,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .overline
+                                        .copyWith(color: Colors.grey[400]),
+                                  ),
+                                  alignment: PlaceholderAlignment.middle)
+                            ]),
                           ),
-                          SizedBox(width: 10),
-                          Icon(Icons.reply, size: 13),
-                          SizedBox(width: 5),
-                          Text(
-                            thread.totalReplies.toString(),
-                            style: Theme.of(context).textTheme.caption,
-                            strutStyle: StrutStyle(height: 1.25),
+                          SizedBox(width: 6),
+                          Text.rich(
+                            TextSpan(children: [
+                              WidgetSpan(
+                                  child: Icon(Icons.reply, size: 13),
+                                  alignment: PlaceholderAlignment.middle),
+                              WidgetSpan(
+                                  child: SizedBox(
+                                width: 3,
+                              )),
+                              WidgetSpan(
+                                  child: Text(
+                                    thread.totalReplies.toString(),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .overline
+                                        .copyWith(color: Colors.grey[400]),
+                                  ),
+                                  alignment: PlaceholderAlignment.middle)
+                            ]),
                           ),
-                          SizedBox(width: 10),
-                          Icon(Icons.access_time, size: 13),
-                          SizedBox(width: 5),
-                          LastReplyTimer(
-                              key: ValueKey(thread.threadId),
-                              time: thread.replies.length == 2
-                                  ? thread.replies[1].date.toLocal()
-                                  : thread.replies[0].date.toLocal()),
+                          SizedBox(width: 6),
+                          Text.rich(
+                            TextSpan(children: [
+                              WidgetSpan(
+                                  child: Icon(Icons.access_time, size: 13),
+                                  alignment: PlaceholderAlignment.middle),
+                              WidgetSpan(
+                                  child: SizedBox(
+                                width: 3,
+                              )),
+                              WidgetSpan(
+                                  child: LastReplyTimer(
+                                      key: ValueKey(thread.threadId),
+                                      time: thread.replies.length == 2
+                                          ? thread.replies[1].date.toLocal()
+                                          : thread.replies[0].date.toLocal()),
+                                  alignment: PlaceholderAlignment.middle)
+                            ]),
+                          ),
                           Spacer(),
                           Chip(
+                            padding: EdgeInsets.zero,
                             materialTapTargetSize:
                                 MaterialTapTargetSize.shrinkWrap,
                             visualDensity: VisualDensity.compact,
                             label: Text('#${thread.tagName}',
-                                strutStyle: StrutStyle(height: 1.25),
                                 style: Theme.of(context)
                                     .textTheme
                                     .caption
