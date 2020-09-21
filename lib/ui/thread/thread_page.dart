@@ -153,6 +153,7 @@ class _ThreadPageState extends State<ThreadPage> {
                             style: TextStyle(fontWeight: FontWeight.w700),
                             maxLines: 2,
                             minFontSize: 14,
+                            maxFontSize: 19,
                             //overflow: TextOverflow.ellipsis
                           ),
                         )

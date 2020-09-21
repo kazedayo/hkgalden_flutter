@@ -134,23 +134,26 @@ class _HomePageState extends State<HomePage>
                 appBar: PreferredSize(
                     child: AppBar(
                       leading: _LeadingButton(),
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Hero(
-                              tag: 'logo',
-                              child: SizedBox(
+                      title: Text.rich(
+                        TextSpan(children: [
+                          WidgetSpan(
+                              alignment: PlaceholderAlignment.middle,
+                              child: Hero(
+                                  tag: 'logo',
                                   child: SvgPicture.asset(
-                                      'assets/icon-hkgalden.svg'),
-                                  width: 27,
-                                  height: 27)),
-                          SizedBox(width: 5),
-                          Text(viewModel.title,
-                              style: TextStyle(fontWeight: FontWeight.w700),
-                              strutStyle: StrutStyle(height: 1.25)),
-                        ],
+                                    'assets/icon-hkgalden.svg',
+                                    width: 27,
+                                    height: 27,
+                                  ))),
+                          WidgetSpan(
+                              child: SizedBox(
+                            width: 5,
+                          )),
+                          TextSpan(
+                              text: viewModel.title,
+                              style: TextStyle(
+                                  fontSize: 19, fontWeight: FontWeight.w700))
+                        ]),
                       ),
                       actions: [
                         viewModel.isLoggedIn
