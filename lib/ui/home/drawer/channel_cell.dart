@@ -33,7 +33,7 @@ class ChannelCell extends StatelessWidget {
                       Backdrop.of(context).concealBackLayer();
                     },
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,

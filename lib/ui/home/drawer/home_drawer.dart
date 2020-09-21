@@ -16,7 +16,7 @@ class HomeDrawer extends StatelessWidget {
           physics: NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 125.0, childAspectRatio: 2.3),
+              maxCrossAxisExtent: 135.0, childAspectRatio: 2.3),
           itemBuilder: (context, index) => ChannelCell(
             viewModel: viewModel,
             channel: viewModel.channels[index],
