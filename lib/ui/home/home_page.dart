@@ -231,7 +231,10 @@ class _HomePageState extends State<HomePage>
                                           onPressed: () {
                                             _contextMenuButtonController
                                                 .toggleMenu();
-                                            viewModel.onLogout();
+                                            //ghetto fix
+                                            Future.delayed(
+                                                Duration(milliseconds: 170),
+                                                () => viewModel.onLogout());
                                           }),
                                       IconButton(
                                           icon: Icon(

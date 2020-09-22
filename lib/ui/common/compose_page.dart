@@ -80,7 +80,10 @@ class _ComposePageState extends State<ComposePage> {
               : arguments.composeMode == ComposeMode.reply
                   ? '回覆主題'
                   : '引用回覆 (#${arguments.parentReply.floor})',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: Theme.of(context)
+              .textTheme
+              .subtitle1
+              .copyWith(fontWeight: FontWeight.bold),
         ),
         automaticallyImplyLeading: false,
         actions: <Widget>[

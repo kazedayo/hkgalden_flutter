@@ -3,6 +3,7 @@ import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
+import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:redux/redux.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 
@@ -49,11 +50,13 @@ class HomePageViewModel extends Equatable {
         onCreateThread: (channelId) => store.dispatch(RequestThreadListAction(
             channelId: channelId, page: 1, isRefresh: false)),
         onLogout: () {
-          store.dispatch(RemoveSessionUserAction());
-          store.dispatch(RequestThreadListAction(
-              channelId: store.state.channelState.selectedChannelId,
-              page: 1,
-              isRefresh: false));
+          TokenSecureStorage().writeToken('', onFinish: (_) {
+            store.dispatch(RemoveSessionUserAction());
+            store.dispatch(RequestThreadListAction(
+                channelId: store.state.channelState.selectedChannelId,
+                page: 1,
+                isRefresh: false));
+          });
         },
         blockedUserIds: store.state.sessionUserState.sessionUser.blockedUsers,
         sessionUser: store.state.sessionUserState.sessionUser);
