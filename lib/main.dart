@@ -63,7 +63,7 @@ class MyApp extends StatelessWidget {
 
   ThemeData _generateTheme(BuildContext context) {
     var baseTheme = ThemeData(
-      fontFamily: "NotoSansTC",
+      //fontFamily: "NotoSansTC",
       chipTheme: Theme.of(context).chipTheme.copyWith(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),

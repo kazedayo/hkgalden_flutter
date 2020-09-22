@@ -140,7 +140,7 @@ class _CommentCellState extends State<CommentCell> {
           ),
           Positioned(
             right: 24,
-            top: 16,
+            top: 19,
             child: Text(
               DateTimeFormat.format(widget.reply.date.toLocal(),
                   format: 'd/m/y H:i'),
@@ -255,7 +255,7 @@ class _CommentCellState extends State<CommentCell> {
                             .caption
                             .copyWith(shadows: [Shadow(offset: Offset(1, 1))])),
                     SizedBox(
-                      height: 5,
+                      height: 6,
                     )
                   ],
                 )
