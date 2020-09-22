@@ -127,9 +127,6 @@ class _HomePageState extends State<HomePage>
             fit: StackFit.expand,
             children: [
               BackdropScaffold(
-                frontLayerBorderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10)),
                 resizeToAvoidBottomInset: false,
                 appBar: PreferredSize(
                     child: AppBar(
@@ -234,7 +231,10 @@ class _HomePageState extends State<HomePage>
                                           onPressed: () {
                                             _contextMenuButtonController
                                                 .toggleMenu();
-                                            viewModel.onLogout();
+                                            //ghetto fix
+                                            Future.delayed(
+                                                Duration(milliseconds: 170),
+                                                () => viewModel.onLogout());
                                           }),
                                       IconButton(
                                           icon: Icon(

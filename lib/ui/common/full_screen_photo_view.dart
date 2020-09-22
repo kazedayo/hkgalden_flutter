@@ -35,16 +35,28 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
   Widget build(BuildContext context) => Scaffold(
         extendBody: true,
         bottomNavigationBar: BottomAppBar(
+          elevation: 20,
           color: Colors.transparent,
-          elevation: 30,
           child: Row(
             children: [
               Spacer(),
               ActionBarSpinner(isVisible: _isDownloadingImage),
               Builder(
-                builder: (context) => IconButton(
-                    icon: Icon(Icons.save_alt),
-                    onPressed: _isDownloadingImage
+                builder: (context) => GestureDetector(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text.rich(
+                        TextSpan(children: [
+                          TextSpan(
+                              text: String.fromCharCode(0x0e171),
+                              style: TextStyle(
+                                  fontSize: 25,
+                                  shadows: [Shadow(blurRadius: 5)],
+                                  fontFamily: 'MaterialIcons'))
+                        ]),
+                      ),
+                    ),
+                    onTap: _isDownloadingImage
                         ? null
                         : () => _saveImage(context, widget.url)),
               ),

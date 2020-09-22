@@ -63,17 +63,17 @@ class MyApp extends StatelessWidget {
 
   ThemeData _generateTheme(BuildContext context) {
     var baseTheme = ThemeData(
-      fontFamily: "NotoSansTC",
+      //fontFamily: "NotoSansTC",
       chipTheme: Theme.of(context).chipTheme.copyWith(
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(6))),
       dialogTheme: DialogTheme(
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(6))),
       bottomSheetTheme: BottomSheetThemeData(
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10), topRight: Radius.circular(10))),
+                  topLeft: Radius.circular(16), topRight: Radius.circular(16))),
           backgroundColor: Colors.white),
       brightness: Brightness.dark,
       splashColor: Colors.transparent,

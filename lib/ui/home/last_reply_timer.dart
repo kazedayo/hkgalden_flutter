@@ -36,9 +36,6 @@ class _LastReplyTimerState extends State<LastReplyTimer> {
   @override
   Widget build(BuildContext context) => Text(
         _time,
-        style: Theme.of(context)
-            .textTheme
-            .overline
-            .copyWith(color: Colors.grey[400]),
+        style: Theme.of(context).textTheme.caption,
       );
 }

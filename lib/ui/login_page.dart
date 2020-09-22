@@ -20,7 +20,13 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
-          title: Text('登入hkGalden'),
+          title: Text(
+            '登入hkGalden',
+            style: Theme.of(context)
+                .textTheme
+                .subtitle1
+                .copyWith(fontWeight: FontWeight.bold),
+          ),
           automaticallyImplyLeading: false,
           actions: <Widget>[
             IconButton(

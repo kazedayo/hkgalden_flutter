@@ -80,7 +80,10 @@ class _ComposePageState extends State<ComposePage> {
               : arguments.composeMode == ComposeMode.reply
                   ? '回覆主題'
                   : '引用回覆 (#${arguments.parentReply.floor})',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: Theme.of(context)
+              .textTheme
+              .subtitle1
+              .copyWith(fontWeight: FontWeight.bold),
         ),
         automaticallyImplyLeading: false,
         actions: <Widget>[
@@ -208,11 +211,10 @@ class _ComposePageState extends State<ComposePage> {
                                   floatingLabelBehavior:
                                       FloatingLabelBehavior.never,
                                   border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10)),
+                                      borderRadius: BorderRadius.circular(6)),
                                   labelText: '標題',
-                                  labelStyle: TextStyle(height: 1),
                                   contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 6.8),
+                                      horizontal: 7, vertical: 6.8),
                                   isDense: true),
                               onChanged: (value) {
                                 setState(() {
