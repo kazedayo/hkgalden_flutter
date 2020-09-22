@@ -127,9 +127,6 @@ class _HomePageState extends State<HomePage>
             fit: StackFit.expand,
             children: [
               BackdropScaffold(
-                frontLayerBorderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10)),
                 resizeToAvoidBottomInset: false,
                 appBar: PreferredSize(
                     child: AppBar(
