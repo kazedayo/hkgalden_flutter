@@ -8,7 +8,7 @@ class ActionBarSpinner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        //margin: EdgeInsets.symmetric(vertical: 20),
+        margin: EdgeInsets.symmetric(vertical: 20),
         child: Visibility(
           visible: isVisible,
           child: ProgressSpinner(),
