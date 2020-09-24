@@ -195,13 +195,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_easyrefresh:
-    dependency: "direct main"
-    description:
-      name: flutter_easyrefresh
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.1.5"
   flutter_html:
     dependency: "direct main"
     description:

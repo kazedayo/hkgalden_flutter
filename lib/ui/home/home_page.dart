@@ -2,12 +2,10 @@ import 'dart:ui';
 
 import 'package:animations/animations.dart';
 import 'package:backdrop/scaffold.dart';
-import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_easyrefresh/easy_refresh.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
@@ -45,7 +43,6 @@ class _HomePageState extends State<HomePage>
   ContextMenuButtonController _contextMenuButtonController;
   bool _fabIsHidden;
   bool _menuIsShowing;
-  DateTime _lastRefresh;
 
   @override
   void initState() {
@@ -115,13 +112,6 @@ class _HomePageState extends State<HomePage>
                   });
                 }
               });
-          },
-          onWillChange: (previousViewModel, newViewModel) {
-            if (previousViewModel.threads != newViewModel.threads) {
-              setState(() {
-                _lastRefresh = DateTime.now();
-              });
-            }
           },
           builder: (BuildContext context, HomePageViewModel viewModel) => Stack(
             fit: StackFit.expand,
@@ -263,34 +253,16 @@ class _HomePageState extends State<HomePage>
                               viewModel.isRefresh == false
                           ? ListLoadingSkeleton()
                           : Theme.of(context).platform == TargetPlatform.iOS
-                              ? EasyRefresh(
-                                  //strokeWidth: 2.5,
-                                  header: ClassicalHeader(
-                                    overScroll: Theme.of(context).platform ==
-                                            TargetPlatform.iOS
-                                        ? true
-                                        : false,
-                                    refreshText: "下拉F5",
-                                    refreshReadyText: "放手",
-                                    refreshingText: "撈緊...",
-                                    refreshedText: "撈完 :)",
-                                    refreshFailedText: "撈唔到 xx(",
-                                    infoText:
-                                        "最後更新: ${_lastRefresh == null ? '未有更新' : DateTimeFormat.format(_lastRefresh, format: 'H:i')}",
-                                    textColor: Theme.of(context)
-                                        .textTheme
-                                        .caption
-                                        .color,
-                                    infoColor: Theme.of(context).accentColor,
-                                  ),
-                                  onRefresh: () => viewModel
-                                      .onRefresh(viewModel.selectedChannelId),
-                                  child: ListView.builder(
-                                    addAutomaticKeepAlives: false,
-                                    addRepaintBoundaries: false,
-                                    controller: _scrollController,
-                                    itemCount: viewModel.threads.length + 1,
-                                    itemBuilder: (context, index) {
+                              ? CustomScrollView(
+                                  controller: _scrollController,
+                                  slivers: [
+                                    CupertinoSliverRefreshControl(
+                                      onRefresh: () => viewModel.onRefresh(
+                                          viewModel.selectedChannelId),
+                                    ),
+                                    SliverList(
+                                        delegate: SliverChildBuilderDelegate(
+                                            (context, index) {
                                       if (index == viewModel.threads.length) {
                                         return ListLoadingSkeletonCell();
                                       } else {
@@ -310,7 +282,9 @@ class _HomePageState extends State<HomePage>
                                         );
                                       }
                                     },
-                                  ),
+                                            childCount:
+                                                viewModel.threads.length + 1))
+                                  ],
                                 )
                               : RefreshIndicator(
                                   backgroundColor: Colors.white,

@@ -50,7 +50,6 @@ dependencies:
   image_picker: ^0.6.7+9
   backdrop: ^0.4.6
   package_info: ^0.4.3
-  flutter_easyrefresh: ^2.1.5
   transparent_image: ^1.0.0
 
 dependency_overrides:
