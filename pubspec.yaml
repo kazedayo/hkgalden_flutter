@@ -42,7 +42,7 @@ dependencies:
   date_time_format: ^1.1.0
   universal_html: ^1.2.3
   url_launcher: ^5.6.0
-  cached_network_image: ^2.3.2+1
+  paulonia_cache_image: ^0.1.0
   animations: ^1.1.2
   image_downloader: ^0.20.0
   auto_size_text: ^2.1.0
@@ -51,6 +51,7 @@ dependencies:
   backdrop: ^0.4.6
   package_info: ^0.4.3
   flutter_easyrefresh: ^2.1.5
+  transparent_image: ^1.0.0
 
 dependency_overrides:
   cupertino_icons: '1.0.0'

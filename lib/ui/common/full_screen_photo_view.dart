@@ -1,8 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:image_downloader/image_downloader.dart';
+import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 
 class FullScreenPhotoView extends StatefulWidget {
   final String url;
@@ -16,7 +16,6 @@ class FullScreenPhotoView extends StatefulWidget {
 }
 
 class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
-  //drag to dismiss code: https://github.com/Furkankyl/full_screen_image/blob/master/lib/full_screen_image.dart
   bool _isDownloadingImage;
 
   @override
@@ -25,11 +24,11 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
     super.initState();
   }
 
-  @override
-  void didChangeDependencies() {
-    precacheImage(CachedNetworkImageProvider(widget.url), context);
-    super.didChangeDependencies();
-  }
+  // @override
+  // void didChangeDependencies() {
+  //   precacheImage(CachedNetworkImageProvider(widget.url), context);
+  //   super.didChangeDependencies();
+  // }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -79,13 +78,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
               minScale: 1.0,
               child: Hero(
                   tag: widget.heroTag,
-                  child: CachedNetworkImage(
-                      fadeInDuration: Duration.zero,
-                      placeholder: (context, url) => CachedNetworkImage(
-                            imageUrl: widget.url,
-                            memCacheWidth: displayWidth(context).toInt(),
-                          ),
-                      imageUrl: widget.url)),
+                  child: Image(image: PCacheImage(widget.url))),
             ),
           ),
         ),
