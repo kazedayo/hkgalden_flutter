@@ -56,9 +56,9 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                   child: Hero(
                     tag: '${widget.floor}_${attributes['src']}_$_randomHash',
                     child: CachedNetworkImage(
-                      filterQuality: FilterQuality.high,
+                      filterQuality: FilterQuality.none,
                       imageUrl: attributes['src'],
-                      memCacheWidth: displayWidth(context.buildContext).toInt(),
+                      memCacheWidth: 1000,
                       progressIndicatorBuilder: (context, url, progress) =>
                           ProgressSpinner(
                         value: progress.progress,

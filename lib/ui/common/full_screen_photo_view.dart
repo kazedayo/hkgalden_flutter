@@ -67,8 +67,13 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
           constraints: BoxConstraints.expand(
             height: displayHeight(context),
           ),
-          child: GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
+          child: Dismissible(
+            key: UniqueKey(),
+            direction: DismissDirection.vertical,
+            resizeDuration: null,
+            onDismissed: (direction) {
+              Navigator.of(context).pop();
+            },
             child: InteractiveViewer(
               maxScale: 3.0,
               minScale: 1.0,
