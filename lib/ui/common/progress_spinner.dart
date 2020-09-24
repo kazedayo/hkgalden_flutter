@@ -32,10 +32,12 @@ class ProgressSpinner extends StatelessWidget {
       size: Size.square(15),
       child: AspectRatio(
         aspectRatio: 1.0,
-        child: CircularProgressIndicator(
-            value: value,
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.grey)),
+        child: Theme.of(context).platform == TargetPlatform.iOS
+            ? CupertinoActivityIndicator()
+            : CircularProgressIndicator(
+                value: value,
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.grey)),
       ),
     );
   }
