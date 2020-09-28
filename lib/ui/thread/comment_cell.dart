@@ -142,13 +142,9 @@ class _CommentCellState extends State<CommentCell> {
             right: 24,
             top: 19,
             child: Text(
-              DateTimeFormat.format(widget.reply.date.toLocal(),
-                  format: 'd/m/y H:i'),
-              style: Theme.of(context)
-                  .textTheme
-                  .caption
-                  .copyWith(shadows: [Shadow(offset: Offset(1, 1))]),
-            ),
+                DateTimeFormat.format(widget.reply.date.toLocal(),
+                    format: 'd/m/y H:i'),
+                style: Theme.of(context).textTheme.caption),
           ),
           Positioned(
             left: 24,
@@ -243,19 +239,16 @@ class _CommentCellState extends State<CommentCell> {
                     Text(
                       widget.reply.authorNickname,
                       style: Theme.of(context).textTheme.caption.copyWith(
-                          color: widget.reply.author.gender == 'M'
-                              ? Theme.of(context).colorScheme.brotherColor
-                              : Theme.of(context).colorScheme.sisterColor,
-                          shadows: [Shadow(offset: Offset(1, 1))]),
+                            color: widget.reply.author.gender == 'M'
+                                ? Theme.of(context).colorScheme.brotherColor
+                                : Theme.of(context).colorScheme.sisterColor,
+                          ),
                     ),
                     SizedBox(
-                      height: 2,
+                      height: 3,
                     ),
                     Text('#${widget.reply.floor}',
-                        style: Theme.of(context)
-                            .textTheme
-                            .caption
-                            .copyWith(shadows: [Shadow(offset: Offset(1, 1))])),
+                        style: Theme.of(context).textTheme.caption),
                     SizedBox(
                       height: 6,
                     )

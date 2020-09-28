@@ -47,7 +47,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
                       child: Text.rich(
                         TextSpan(children: [
                           TextSpan(
-                              text: String.fromCharCode(0x0e171),
+                              text: String.fromCharCode(0xe9a2),
                               style: TextStyle(
                                   fontSize: 25,
                                   shadows: [Shadow(blurRadius: 5)],

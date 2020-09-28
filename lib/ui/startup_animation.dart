@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -24,6 +26,10 @@ class _StartupScreenState extends State<StartupScreen>
 
   @override
   void initState() {
+    ParagraphBuilder pb =
+        ParagraphBuilder(ParagraphStyle(locale: window.locale));
+    pb.addText('\ud83d\ude01'); // smiley face emoji
+    pb.build().layout(ParagraphConstraints(width: 100));
     super.initState();
     TokenSecureStorage().readToken(onFinish: (value) {
       if (value == null) {

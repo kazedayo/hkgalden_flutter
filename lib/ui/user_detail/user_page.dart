@@ -64,19 +64,13 @@ class UserPage extends StatelessWidget {
                       style: Theme.of(context).textTheme.bodyText1.copyWith(
                           color: user.gender == 'M'
                               ? Theme.of(context).colorScheme.brotherColor
-                              : Theme.of(context).colorScheme.sisterColor,
-                          shadows: [Shadow(offset: Offset(1, 1))]),
+                              : Theme.of(context).colorScheme.sisterColor),
                     ),
                     SizedBox(
                       height: 5,
                     ),
-                    Text(
-                      user.userId,
-                      style: Theme.of(context)
-                          .textTheme
-                          .caption
-                          .copyWith(shadows: [Shadow(offset: Offset(1, 1))]),
-                    ),
+                    Text(user.userId,
+                        style: Theme.of(context).textTheme.caption),
                     SizedBox(
                       height: 13,
                     )
