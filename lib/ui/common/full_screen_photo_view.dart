@@ -1,8 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:image_downloader/image_downloader.dart';
-import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 
 class FullScreenPhotoView extends StatefulWidget {
   final String url;
@@ -78,7 +78,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
               minScale: 1.0,
               child: Hero(
                   tag: widget.heroTag,
-                  child: Image(image: PCacheImage(widget.url))),
+                  child: Image(image: CachedNetworkImageProvider(widget.url))),
             ),
           ),
         ),

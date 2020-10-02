@@ -1,9 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
-import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 
 class BlockedUserCell extends StatefulWidget {
   final User user;
@@ -36,15 +36,13 @@ class _BlockedUserCellState extends State<BlockedUserCell> {
             avatarImage: widget.user.avatar == ''
                 ? SvgPicture.asset('assets/icon-hkgalden.svg',
                     width: 30, height: 30, color: Colors.grey)
-                : Image(
+                : CachedNetworkImage(
                     width: 30,
                     height: 30,
-                    image: PCacheImage(widget.user.avatar),
-                    frameBuilder: (_, child, __, ___) =>
-                        child ??
-                        SizedBox.fromSize(
-                          size: Size.square(30),
-                        ),
+                    imageUrl: widget.user.avatar,
+                    placeholder: (context, url) => SizedBox.fromSize(
+                      size: Size.square(30),
+                    ),
                   ),
             userGroup: widget.user.userGroup,
           ),

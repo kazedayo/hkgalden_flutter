@@ -1,9 +1,10 @@
 //hacky way to hide button on toolbar before zefyr 1.0 release
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/networking/image_upload_api.dart';
+import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:zefyr/zefyr.dart';
 
@@ -102,9 +103,9 @@ class CustomZefyrImageDelegate implements ZefyrImageDelegate {
 
   @override
   Widget buildImage(BuildContext context, String url) {
-    return FadeInImage(
-      image: PCacheImage(url),
-      placeholder: Image.memory(kTransparentImage).image,
+    return CachedNetworkImage(
+      imageUrl: url,
+      placeholder: (context, url) => ProgressSpinner(),
     );
   }
 

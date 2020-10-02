@@ -253,11 +253,10 @@ class _HomePageState extends State<HomePage>
                               viewModel.isRefresh == false
                           ? ListLoadingSkeleton()
                           : Scrollbar(
-                              controller: _scrollController,
                               child: Theme.of(context).platform ==
                                       TargetPlatform.iOS
                                   ? CustomScrollView(
-                                      cacheExtent: 1000,
+                                      //cacheExtent: 500,
                                       controller: _scrollController,
                                       slivers: [
                                         CupertinoSliverRefreshControl(
@@ -301,6 +300,7 @@ class _HomePageState extends State<HomePage>
                                       backgroundColor: Colors.white,
                                       strokeWidth: 2.5,
                                       child: ListView.builder(
+                                        //cacheExtent: 500,
                                         controller: _scrollController,
                                         itemCount: viewModel.threads.length + 1,
                                         itemBuilder: (context, index) {

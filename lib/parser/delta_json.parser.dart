@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 
 class DeltaJsonParser {
   Future<String> toGaldenHtml(List<dynamic> json) async {
@@ -82,7 +81,8 @@ class DeltaJsonParser {
 
   Future<ui.Image> _getImageDimension(String url) {
     Completer<ui.Image> imageCompleter = Completer<ui.Image>();
-    PCacheImage(url)
+    Image.network(url)
+        .image
         .resolve(ImageConfiguration())
         .addListener(ImageStreamListener((ImageInfo info, bool _) {
       imageCompleter.complete(info.image);

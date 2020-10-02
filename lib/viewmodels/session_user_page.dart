@@ -1,10 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/models/user_group.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
-import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 import 'package:redux/redux.dart';
 
 class SessionUserPageViewModel extends Equatable {
@@ -29,16 +29,13 @@ class SessionUserPageViewModel extends Equatable {
       sessionUserAvatar: store.state.sessionUserState.sessionUser.avatar == ''
           ? SvgPicture.asset('assets/icon-hkgalden.svg',
               width: 30, height: 30, color: Colors.grey)
-          : Image(
+          : CachedNetworkImage(
               width: 30,
               height: 30,
-              image:
-                  PCacheImage(store.state.sessionUserState.sessionUser.avatar),
-              frameBuilder: (_, child, __, ___) =>
-                  child ??
-                  SizedBox.fromSize(
-                    size: Size.square(30),
-                  ),
+              imageUrl: store.state.sessionUserState.sessionUser.avatar,
+              placeholder: (context, url) => SizedBox.fromSize(
+                size: Size.square(30),
+              ),
             ),
       sessionUserGender: store.state.sessionUserState.sessionUser.gender,
       sessionUserGroup: store.state.sessionUserState.sessionUser.userGroup,

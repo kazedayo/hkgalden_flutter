@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -15,12 +16,11 @@ import 'package:hkgalden_flutter/redux/thread_list/thread_list_middleware.dart';
 import 'package:hkgalden_flutter/redux/user_thread_list/user_thread_list_middleware.dart';
 import 'package:hkgalden_flutter/ui/startup_animation.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
-import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 import 'package:redux/redux.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await PCacheImage.init(enableInMemory: true);
+  GestureBinding.instance.resamplingEnabled = true;
   runApp(MyApp());
 }
 

@@ -173,9 +173,8 @@ class _ThreadPageState extends State<ThreadPage> {
             body: viewModel.isLoading && viewModel.isInitialLoad
                 ? ThreadPageLoadingSkeleton()
                 : Scrollbar(
-                    controller: _scrollController,
                     child: CustomScrollView(
-                      cacheExtent: 5000,
+                      //cacheExtent: 2500,
                       center: centerKey,
                       controller: _scrollController,
                       slivers: <Widget>[
@@ -207,7 +206,9 @@ class _ThreadPageState extends State<ThreadPage> {
                       ],
                     ),
                   ),
-            floatingActionButton: _fabIsHidden || viewModel.status == 'locked'
+            floatingActionButton: _fabIsHidden ||
+                    viewModel.status == 'locked' ||
+                    (viewModel.isLoading && viewModel.isInitialLoad)
                 ? null
                 : FloatingActionButton(
                     child: Icon(Icons.reply),
