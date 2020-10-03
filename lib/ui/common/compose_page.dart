@@ -14,11 +14,9 @@ import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:hkgalden_flutter/ui/common/context_menu_button.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
-import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/viewmodels/tag_selector_view_model.dart';
 import 'package:zefyr/zefyr.dart';
-import 'package:quill_delta/quill_delta.dart';
 
 class ComposePage extends StatefulWidget {
   @override
@@ -44,8 +42,7 @@ class _ComposePageState extends State<ComposePage> {
     _tag = Tag(id: '02NP3MVYm', name: '吹水', color: Color(0xff457cb0));
     _channelId = '';
     _title = '';
-    final document = _loadDocument();
-    _controller = ZefyrController(document);
+    _controller = ZefyrController(NotusDocument());
     _titleFieldController = TextEditingController();
     _focusNode = FocusNode();
     _titleFocusNode = FocusNode();
@@ -237,6 +234,10 @@ class _ComposePageState extends State<ComposePage> {
                 : SizedBox(
                     height: 12,
                   ),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ZefyrToolbar.basic(controller: _controller),
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -248,16 +249,11 @@ class _ComposePageState extends State<ComposePage> {
                   keyboardAppearance: Brightness.dark,
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
     );
-  }
-
-  NotusDocument _loadDocument() {
-    final NotusDocument notus = NotusDocument()..insert(0, '');
-    return notus;
   }
 
   String _getZefyrEditorContent() {
