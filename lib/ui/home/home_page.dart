@@ -254,7 +254,6 @@ class _HomePageState extends State<HomePage>
                           ? ListLoadingSkeleton()
                           : Theme.of(context).platform == TargetPlatform.iOS
                               ? CustomScrollView(
-                                  //cacheExtent: 500,
                                   controller: _scrollController,
                                   slivers: [
                                     CupertinoSliverRefreshControl(
@@ -284,14 +283,17 @@ class _HomePageState extends State<HomePage>
                                       }
                                     },
                                             childCount:
-                                                viewModel.threads.length + 1))
+                                                viewModel.threads.length + 1,
+                                            addAutomaticKeepAlives: false,
+                                            addRepaintBoundaries: false))
                                   ],
                                 )
                               : RefreshIndicator(
                                   backgroundColor: Colors.white,
                                   strokeWidth: 2.5,
                                   child: ListView.builder(
-                                    //cacheExtent: 500,
+                                    addAutomaticKeepAlives: false,
+                                    addRepaintBoundaries: false,
                                     controller: _scrollController,
                                     itemCount: viewModel.threads.length + 1,
                                     itemBuilder: (context, index) {

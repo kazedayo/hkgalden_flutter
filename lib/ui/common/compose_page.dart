@@ -14,6 +14,7 @@ import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:hkgalden_flutter/ui/common/context_menu_button.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
+import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/viewmodels/tag_selector_view_model.dart';
 import 'package:zefyr/zefyr.dart';
@@ -147,6 +148,7 @@ class _ComposePageState extends State<ComposePage> {
           ),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             arguments.composeMode == ComposeMode.newPost
                 ? Container(
@@ -220,20 +222,22 @@ class _ComposePageState extends State<ComposePage> {
                     ))
                 : SizedBox(),
             arguments.composeMode == ComposeMode.quotedReply
-                ? SingleChildScrollView(
-                    reverse: true,
-                    scrollDirection: Axis.vertical,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    child: StyledHtmlView(
-                      htmlString: HKGaldenHtmlParser().replyWithQuotes(
-                          arguments.parentReply,
-                          StoreProvider.of<AppState>(context)),
-                      floor: arguments.parentReply.floor,
+                ? ConstrainedBox(
+                    constraints:
+                        BoxConstraints(maxHeight: displayHeight(context) / 4),
+                    child: SingleChildScrollView(
+                      reverse: true,
+                      scrollDirection: Axis.vertical,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      child: StyledHtmlView(
+                        htmlString: HKGaldenHtmlParser().replyWithQuotes(
+                            arguments.parentReply,
+                            StoreProvider.of<AppState>(context)),
+                        floor: arguments.parentReply.floor,
+                      ),
                     ),
                   )
-                : SizedBox(
-                    height: 12,
-                  ),
+                : SizedBox(),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: ZefyrToolbar.basic(controller: _controller),

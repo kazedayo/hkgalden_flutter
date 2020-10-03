@@ -9,7 +9,6 @@ import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/common/image_loading_error.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
-import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class StyledHtmlView extends StatefulWidget {
@@ -58,7 +57,10 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                     child: CachedNetworkImage(
                       //memCacheWidth: displayWidth(context.buildContext).toInt(),
                       imageUrl: attributes['src'],
-                      placeholder: (context, url) => ProgressSpinner(),
+                      placeholder: (context, url) => Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ProgressSpinner(),
+                      ),
                       errorWidget: (context, error, stackTrace) {
                         _imageLoadingHasError = true;
                         return ImageLoadingError(error.toString());
