@@ -252,86 +252,71 @@ class _HomePageState extends State<HomePage>
                       child: viewModel.isThreadLoading &&
                               viewModel.isRefresh == false
                           ? ListLoadingSkeleton()
-                          : Scrollbar(
-                              child: Theme.of(context).platform ==
-                                      TargetPlatform.iOS
-                                  ? CustomScrollView(
-                                      //cacheExtent: 500,
-                                      controller: _scrollController,
-                                      slivers: [
-                                        CupertinoSliverRefreshControl(
-                                          onRefresh: () => viewModel.onRefresh(
-                                              viewModel.selectedChannelId),
-                                        ),
-                                        SliverList(
-                                            delegate:
-                                                SliverChildBuilderDelegate(
-                                                    (context, index) {
-                                          if (index ==
-                                              viewModel.threads.length) {
-                                            return ListLoadingSkeletonCell();
-                                          } else {
-                                            return Visibility(
-                                              visible: !viewModel.blockedUserIds
-                                                  .contains(viewModel
-                                                      .threads[index]
-                                                      .replies[0]
-                                                      .author
-                                                      .userId),
-                                              child: ThreadCell(
-                                                key: ValueKey(viewModel
-                                                    .threads[index].threadId),
-                                                thread:
-                                                    viewModel.threads[index],
-                                                onTap: () => _loadThread(
-                                                    viewModel.threads[index]),
-                                                onLongPress: () => _jumpToPage(
-                                                    viewModel.threads[index]),
-                                              ),
-                                            );
-                                          }
-                                        },
-                                                    childCount: viewModel
-                                                            .threads.length +
-                                                        1))
-                                      ],
-                                    )
-                                  : RefreshIndicator(
-                                      backgroundColor: Colors.white,
-                                      strokeWidth: 2.5,
-                                      child: ListView.builder(
-                                        //cacheExtent: 500,
-                                        controller: _scrollController,
-                                        itemCount: viewModel.threads.length + 1,
-                                        itemBuilder: (context, index) {
-                                          if (index ==
-                                              viewModel.threads.length) {
-                                            return ListLoadingSkeletonCell();
-                                          } else {
-                                            return Visibility(
-                                              visible: !viewModel.blockedUserIds
-                                                  .contains(viewModel
-                                                      .threads[index]
-                                                      .replies[0]
-                                                      .author
-                                                      .userId),
-                                              child: ThreadCell(
-                                                key: ValueKey(viewModel
-                                                    .threads[index].threadId),
-                                                thread:
-                                                    viewModel.threads[index],
-                                                onTap: () => _loadThread(
-                                                    viewModel.threads[index]),
-                                                onLongPress: () => _jumpToPage(
-                                                    viewModel.threads[index]),
-                                              ),
-                                            );
-                                          }
-                                        },
-                                      ),
+                          : Theme.of(context).platform == TargetPlatform.iOS
+                              ? CustomScrollView(
+                                  //cacheExtent: 500,
+                                  controller: _scrollController,
+                                  slivers: [
+                                    CupertinoSliverRefreshControl(
                                       onRefresh: () => viewModel.onRefresh(
-                                          viewModel.selectedChannelId)),
-                            ),
+                                          viewModel.selectedChannelId),
+                                    ),
+                                    SliverList(
+                                        delegate: SliverChildBuilderDelegate(
+                                            (context, index) {
+                                      if (index == viewModel.threads.length) {
+                                        return ListLoadingSkeletonCell();
+                                      } else {
+                                        return Visibility(
+                                          visible: !viewModel.blockedUserIds
+                                              .contains(viewModel.threads[index]
+                                                  .replies[0].author.userId),
+                                          child: ThreadCell(
+                                            key: ValueKey(viewModel
+                                                .threads[index].threadId),
+                                            thread: viewModel.threads[index],
+                                            onTap: () => _loadThread(
+                                                viewModel.threads[index]),
+                                            onLongPress: () => _jumpToPage(
+                                                viewModel.threads[index]),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                            childCount:
+                                                viewModel.threads.length + 1))
+                                  ],
+                                )
+                              : RefreshIndicator(
+                                  backgroundColor: Colors.white,
+                                  strokeWidth: 2.5,
+                                  child: ListView.builder(
+                                    //cacheExtent: 500,
+                                    controller: _scrollController,
+                                    itemCount: viewModel.threads.length + 1,
+                                    itemBuilder: (context, index) {
+                                      if (index == viewModel.threads.length) {
+                                        return ListLoadingSkeletonCell();
+                                      } else {
+                                        return Visibility(
+                                          visible: !viewModel.blockedUserIds
+                                              .contains(viewModel.threads[index]
+                                                  .replies[0].author.userId),
+                                          child: ThreadCell(
+                                            key: ValueKey(viewModel
+                                                .threads[index].threadId),
+                                            thread: viewModel.threads[index],
+                                            onTap: () => _loadThread(
+                                                viewModel.threads[index]),
+                                            onLongPress: () => _jumpToPage(
+                                                viewModel.threads[index]),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                  onRefresh: () => viewModel
+                                      .onRefresh(viewModel.selectedChannelId)),
                     ),
                   ),
                 ),

@@ -172,39 +172,36 @@ class _ThreadPageState extends State<ThreadPage> {
                 preferredSize: Size.fromHeight(kToolbarHeight)),
             body: viewModel.isLoading && viewModel.isInitialLoad
                 ? ThreadPageLoadingSkeleton()
-                : Scrollbar(
-                    child: CustomScrollView(
-                      //cacheExtent: 2500,
-                      center: centerKey,
-                      controller: _scrollController,
-                      slivers: <Widget>[
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              return _generatePreviousPageSliver(
-                                  viewModel, index, arguments.page);
-                            },
-                            childCount:
-                                viewModel.previousPageReplies.length == 0
-                                    ? 1
-                                    : viewModel.previousPageReplies.length,
-                            // addAutomaticKeepAlives: false,
-                            // addRepaintBoundaries: false
-                          ),
+                : CustomScrollView(
+                    //cacheExtent: 2500,
+                    center: centerKey,
+                    controller: _scrollController,
+                    slivers: <Widget>[
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return _generatePreviousPageSliver(
+                                viewModel, index, arguments.page);
+                          },
+                          childCount: viewModel.previousPageReplies.length == 0
+                              ? 1
+                              : viewModel.previousPageReplies.length,
+                          // addAutomaticKeepAlives: false,
+                          // addRepaintBoundaries: false
                         ),
-                        SliverList(
-                          key: centerKey,
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              return _generatePageSliver(viewModel, index);
-                            },
-                            childCount: viewModel.replies.length,
-                            addAutomaticKeepAlives: false,
-                            addRepaintBoundaries: false,
-                          ),
+                      ),
+                      SliverList(
+                        key: centerKey,
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return _generatePageSliver(viewModel, index);
+                          },
+                          childCount: viewModel.replies.length,
+                          addAutomaticKeepAlives: false,
+                          addRepaintBoundaries: false,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
             floatingActionButton: _fabIsHidden ||
                     viewModel.status == 'locked' ||

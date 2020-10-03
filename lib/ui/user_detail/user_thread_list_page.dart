@@ -19,35 +19,33 @@ class UserThreadListPage extends StatelessWidget {
         converter: (store) => UserThreadListViewModel.create(store),
         builder: (context, viewModel) => viewModel.isLoading
             ? UserThreadListLoadingSkeleton()
-            : Scrollbar(
-                child: ListView.builder(
-                    itemCount: viewModel.userThreads.length,
-                    itemBuilder: (context, index) => Column(
-                          children: <Widget>[
-                            ListTile(
-                                title: Text(
-                                  viewModel.userThreads[index].title,
-                                ),
-                                trailing: Chip(
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  visualDensity: VisualDensity.compact,
-                                  label: Text(
-                                    '#${viewModel.userThreads[index].tagName}',
-                                    strutStyle: StrutStyle(height: 1.25),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .caption
-                                        .copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w700),
-                                  ),
-                                  backgroundColor:
-                                      viewModel.userThreads[index].tagColor,
-                                )),
-                            Divider(indent: 8, height: 1, thickness: 1),
-                          ],
-                        )),
-              ),
+            : ListView.builder(
+                itemCount: viewModel.userThreads.length,
+                itemBuilder: (context, index) => Column(
+                      children: <Widget>[
+                        ListTile(
+                            title: Text(
+                              viewModel.userThreads[index].title,
+                            ),
+                            trailing: Chip(
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                              visualDensity: VisualDensity.compact,
+                              label: Text(
+                                '#${viewModel.userThreads[index].tagName}',
+                                strutStyle: StrutStyle(height: 1.25),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .caption
+                                    .copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700),
+                              ),
+                              backgroundColor:
+                                  viewModel.userThreads[index].tagColor,
+                            )),
+                        Divider(indent: 8, height: 1, thickness: 1),
+                      ],
+                    )),
       );
 }
