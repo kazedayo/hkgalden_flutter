@@ -736,11 +736,9 @@ packages:
   zefyr:
     dependency: "direct main"
     description:
-      path: "packages/zefyr"
-      ref: "1.0-dev"
-      resolved-ref: eb8d4a091904f07065df2d704e95df5e0a334fea
-      url: "https://github.com/memspace/zefyr.git"
-    source: git
+      name: zefyr
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "1.0.0-dev.1.0"
   zone_local:
     dependency: transitive
@@ -750,5 +748,5 @@ packages:
     source: hosted
     version: "0.1.2"
 sdks:
-  dart: ">=2.10.0-136.0.dev <2.11.0"
+  dart: ">=2.10.0 <2.11.0"
   flutter: ">=1.20.0 <2.0.0"
