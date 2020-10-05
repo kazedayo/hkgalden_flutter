@@ -50,7 +50,7 @@ class ThreadCell extends StatelessWidget {
                           Text.rich(
                             TextSpan(children: [
                               WidgetSpan(
-                                  child: Icon(Icons.face, size: 13),
+                                  child: Icon(Icons.face_rounded, size: 13),
                                   alignment: PlaceholderAlignment.middle),
                               WidgetSpan(
                                   child: SizedBox(
@@ -68,7 +68,7 @@ class ThreadCell extends StatelessWidget {
                           Text.rich(
                             TextSpan(children: [
                               WidgetSpan(
-                                  child: Icon(Icons.reply, size: 13),
+                                  child: Icon(Icons.reply_rounded, size: 13),
                                   alignment: PlaceholderAlignment.middle),
                               WidgetSpan(
                                   child: SizedBox(
@@ -84,7 +84,8 @@ class ThreadCell extends StatelessWidget {
                           Text.rich(
                             TextSpan(children: [
                               WidgetSpan(
-                                  child: Icon(Icons.access_time, size: 13),
+                                  child:
+                                      Icon(Icons.access_time_rounded, size: 13),
                                   alignment: PlaceholderAlignment.middle),
                               WidgetSpan(
                                   child: SizedBox(

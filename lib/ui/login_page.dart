@@ -30,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
           automaticallyImplyLeading: false,
           actions: <Widget>[
             IconButton(
-              icon: const Icon(Icons.close),
+              icon: const Icon(Icons.close_rounded),
               onPressed: () => Navigator.pop(context),
             ),
           ],

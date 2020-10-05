@@ -91,7 +91,7 @@ class _CommentCellState extends State<CommentCell> {
                               visible: !widget.threadLocked,
                               child: IconButton(
                                   visualDensity: VisualDensity.compact,
-                                  icon: Icon(Icons.format_quote),
+                                  icon: Icon(Icons.format_quote_rounded),
                                   onPressed: () => widget.canReply
                                       ? Navigator.of(context)
                                           .pushNamed('/Compose',
@@ -180,7 +180,8 @@ class _CommentCellState extends State<CommentCell> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.block, color: Colors.redAccent),
+                        icon:
+                            Icon(Icons.block_rounded, color: Colors.redAccent),
                         onPressed: _blockedButtonPressed ||
                                 StoreProvider.of<AppState>(context)
                                         .state
@@ -214,7 +215,7 @@ class _CommentCellState extends State<CommentCell> {
                       ),
                       IconButton(
                         icon: Icon(
-                          Icons.account_box,
+                          Icons.account_box_rounded,
                           color: Colors.black87,
                         ),
                         onPressed: () {

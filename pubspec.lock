@@ -342,7 +342,7 @@ packages:
       name: notus
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0-dev.1.0"
+    version: "1.0.0-dev.2.0"
   octo_image:
     dependency: transitive
     description:
@@ -572,13 +572,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.19-nullsafety.2"
-  transparent_image:
-    dependency: "direct main"
-    description:
-      name: transparent_image
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.0"
   typed_data:
     dependency: transitive
     description:

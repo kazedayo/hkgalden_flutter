@@ -69,7 +69,7 @@ class _ComposePageState extends State<ComposePage> {
         centerTitle:
             Theme.of(context).platform == TargetPlatform.iOS ? true : false,
         leading: IconButton(
-            icon: Icon(Icons.close),
+            icon: Icon(Icons.close_rounded),
             onPressed: () => Navigator.of(context).pop()),
         title: Text(
           arguments.composeMode == ComposeMode.newPost
@@ -87,7 +87,7 @@ class _ComposePageState extends State<ComposePage> {
           ActionBarSpinner(isVisible: _isSending),
           Builder(
             builder: (context) => IconButton(
-              icon: const Icon(Icons.send),
+              icon: const Icon(Icons.send_rounded),
               onPressed: _isSending
                   ? null
                   : () async {
@@ -239,6 +239,7 @@ class _ComposePageState extends State<ComposePage> {
                   )
                 : SizedBox(),
             SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 4),
               scrollDirection: Axis.horizontal,
               child: ZefyrToolbar.basic(controller: _controller),
             ),

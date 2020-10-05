@@ -136,8 +136,8 @@ class _ThreadPageState extends State<ThreadPage> {
                   leading: IconButton(
                       icon: Icon(
                           Theme.of(context).platform == TargetPlatform.iOS
-                              ? Icons.arrow_back_ios
-                              : Icons.arrow_back),
+                              ? Icons.arrow_back_ios_rounded
+                              : Icons.arrow_back_rounded),
                       onPressed: () => Navigator.of(context).pop()),
                   title: SizedBox(
                     height: kToolbarHeight * 0.85,
@@ -164,7 +164,7 @@ class _ThreadPageState extends State<ThreadPage> {
                     Visibility(
                         child: Padding(
                           padding: const EdgeInsets.only(right: 16.0),
-                          child: Icon(Icons.lock),
+                          child: Icon(Icons.lock_rounded),
                         ),
                         visible: arguments.locked)
                   ],
@@ -206,7 +206,7 @@ class _ThreadPageState extends State<ThreadPage> {
                     (viewModel.isLoading && viewModel.isInitialLoad)
                 ? null
                 : FloatingActionButton(
-                    child: Icon(Icons.reply),
+                    child: Icon(Icons.reply_rounded),
                     onPressed: () => !_canReply
                         ? showModal<void>(
                             context: context,

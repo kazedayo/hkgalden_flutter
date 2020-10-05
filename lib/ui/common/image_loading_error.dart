@@ -12,7 +12,7 @@ class ImageLoadingError extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(
-          Icons.error,
+          Icons.error_rounded,
           color: Colors.grey,
         ),
         SizedBox(

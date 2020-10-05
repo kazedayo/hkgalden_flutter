@@ -151,7 +151,7 @@ class _HomePageState extends State<HomePage>
                                 xOffset: -185,
                                 yOffset: 0,
                                 closedChild: IconButton(
-                                    icon: Icon(Icons.apps),
+                                    icon: Icon(Icons.apps_rounded),
                                     onPressed: () =>
                                         _contextMenuButtonController
                                             .toggleMenu()),
@@ -163,7 +163,7 @@ class _HomePageState extends State<HomePage>
                                     children: [
                                       IconButton(
                                           icon: Icon(
-                                            Icons.account_box,
+                                            Icons.account_box_rounded,
                                             color: Colors.black87,
                                           ),
                                           onPressed: () {
@@ -183,7 +183,7 @@ class _HomePageState extends State<HomePage>
                                           }),
                                       IconButton(
                                           icon: Icon(
-                                            Icons.settings,
+                                            Icons.settings_rounded,
                                             color: Colors.black87,
                                           ),
                                           onPressed: () async {
@@ -215,7 +215,7 @@ class _HomePageState extends State<HomePage>
                                           }),
                                       IconButton(
                                           icon: Icon(
-                                            Icons.exit_to_app,
+                                            Icons.logout,
                                             color: Colors.redAccent,
                                           ),
                                           onPressed: () {
@@ -228,7 +228,7 @@ class _HomePageState extends State<HomePage>
                                           }),
                                       IconButton(
                                           icon: Icon(
-                                            Icons.block,
+                                            Icons.block_rounded,
                                             color: Colors.black87,
                                           ),
                                           onPressed: () => null),
@@ -237,7 +237,7 @@ class _HomePageState extends State<HomePage>
                                 ),
                               )
                             : IconButton(
-                                icon: Icon(Icons.exit_to_app),
+                                icon: Icon(Icons.login_rounded),
                                 onPressed: () => Navigator.of(context).push(
                                     SlideInFromBottomRoute(page: LoginPage())))
                       ],
@@ -331,7 +331,7 @@ class _HomePageState extends State<HomePage>
                     ? null
                     : FloatingActionButton(
                         highlightElevation: 1,
-                        child: Icon(Icons.create),
+                        child: Icon(Icons.create_rounded),
                         onPressed: () => viewModel.isLoggedIn
                             ? navigatorKey.currentState.pushNamed('/Compose',
                                 arguments: ComposePageArguments(
