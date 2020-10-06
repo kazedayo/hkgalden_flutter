@@ -25,7 +25,8 @@ class HKGaldenHtmlParser {
     ]);
 
   String parse(String htmlString) {
-    final htmlDocument = parseHtmlDocument(htmlString);
+    final htmlDocument = parseHtmlDocument(htmlString.replaceAll(
+        'p data-nodetype', 'p class')); //hacky way to parse center / right
 
     List<Element> childElement = htmlDocument.body.children;
     _elementParsing(childElement);
@@ -98,17 +99,17 @@ class HKGaldenHtmlParser {
           ..setInnerHtml(parse(element.innerHtml), validator: validator);
         break;
       //parse center alignment
-      case 'center':
-        return Element.div()
-          ..setAttribute('class', 'center')
-          ..setInnerHtml(parse(element.innerHtml), validator: validator);
-        break;
+      // case 'center':
+      //   return Element.div()
+      //     ..setAttribute('class', 'center')
+      //     ..setInnerHtml(parse(element.innerHtml), validator: validator);
+      //   break;
       //parse right alignment
-      case 'right':
-        return Element.div()
-          ..setAttribute('class', 'right')
-          ..setInnerHtml(parse(element.innerHtml), validator: validator);
-        break;
+      // case 'right':
+      //   return Element.div()
+      //     ..setAttribute('class', 'right')
+      //     ..setInnerHtml(parse(element.innerHtml), validator: validator);
+      //   break;
       //parse h1
       case 'h1':
         return Element.span()

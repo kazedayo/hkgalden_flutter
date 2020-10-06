@@ -137,6 +137,8 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
             margin: EdgeInsets.zero,
           ),
           "p": Style(margin: EdgeInsets.symmetric(vertical: 0)),
+          "p.center": Style(textAlign: TextAlign.center),
+          "p.right": Style(textAlign: TextAlign.right),
           "img": Style(display: Display.INLINE)
         },
         onLinkTap: (url) => _launchURL(url),
