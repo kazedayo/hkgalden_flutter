@@ -1,4 +1,3 @@
-import 'package:animations/animations.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -8,6 +7,7 @@ import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/thread/thread_action.dart';
+import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/thread/comment_cell.dart';
@@ -17,6 +17,7 @@ import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleto
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/viewmodels/thread_page_view_model.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class ThreadPage extends StatefulWidget {
   @override
@@ -214,14 +215,16 @@ class _ThreadPageState extends State<ThreadPage> {
                                   title: '未登入',
                                   content: '請先登入',
                                 ))
-                        : Navigator.of(context).pushNamed('/Compose',
-                            arguments: ComposePageArguments(
+                        : showBarModalBottomSheet(
+                            context: context,
+                            builder: (context, controller) => ComposePage(
                               composeMode: ComposeMode.reply,
                               threadId: viewModel.threadId,
                               onSent: (reply) {
                                 _onReplySuccess(viewModel, reply);
                               },
-                            ))),
+                            ),
+                          )),
           ),
         ),
       ),

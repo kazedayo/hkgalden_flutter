@@ -27,20 +27,17 @@ class CustomAlertDialog extends StatelessWidget {
                 ],
               ))
           : AlertDialog(
-              backgroundColor: Colors.white,
               title: Text(
                 title,
-                style: TextStyle(color: Colors.black87),
               ),
               content: Text(
                 content,
-                style: TextStyle(color: Colors.black87),
               ),
               actions: <Widget>[
                 FlatButton(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
-                  highlightColor: Colors.grey[300],
+                  highlightColor: Colors.grey[800],
                   child: Text(
                     'OK',
                     style: TextStyle(color: Theme.of(context).accentColor),

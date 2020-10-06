@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:animations/animations.dart';
 import 'package:backdrop/scaffold.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
+import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
 import 'package:hkgalden_flutter/ui/common/context_menu_button.dart';
@@ -25,6 +25,7 @@ import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/viewmodels/home/home_page_view_model.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:package_info/package_info.dart';
 
 class HomePage extends StatefulWidget {
@@ -171,12 +172,15 @@ class _HomePageState extends State<HomePage>
                                                 .toggleMenu();
                                             // Navigator.of(context)
                                             //     .pushNamed('/User');
-                                            showModalBottomSheet(
+                                            showMaterialModalBottomSheet(
+                                                enableDrag: false,
                                                 backgroundColor:
                                                     Colors.transparent,
                                                 barrierColor: Colors.black87,
                                                 context: context,
-                                                builder: (context) => UserPage(
+                                                builder: (context,
+                                                        controller) =>
+                                                    UserPage(
                                                       user:
                                                           viewModel.sessionUser,
                                                     ));
@@ -328,12 +332,14 @@ class _HomePageState extends State<HomePage>
                         highlightElevation: 1,
                         child: Icon(Icons.create_rounded),
                         onPressed: () => viewModel.isLoggedIn
-                            ? navigatorKey.currentState.pushNamed('/Compose',
-                                arguments: ComposePageArguments(
+                            ? showBarModalBottomSheet(
+                                context: context,
+                                builder: (context, controller) => ComposePage(
                                   composeMode: ComposeMode.newPost,
                                   onCreateThread: (channelId) =>
                                       viewModel.onCreateThread(channelId),
-                                ))
+                                ),
+                              )
                             : showCustomDialog(
                                 context: context,
                                 builder: (context) => CustomAlertDialog(
@@ -373,12 +379,12 @@ class _HomePageState extends State<HomePage>
 
   void _jumpToPage(Thread thread) {
     HapticFeedback.mediumImpact();
-    showModalBottomSheet(
-      backgroundColor: Colors.white,
-      isScrollControlled: true,
+    showMaterialModalBottomSheet(
+      enableDrag: false,
+      barrierColor: Colors.black.withOpacity(0.5),
       context: context,
-      builder: (context) => Theme(
-        data: Theme.of(context).copyWith(highlightColor: Colors.grey[300]),
+      builder: (context, controller) => Theme(
+        data: Theme.of(context).copyWith(highlightColor: Colors.grey[800]),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -388,40 +394,44 @@ class _HomePageState extends State<HomePage>
                   const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
               child: Text(
                 thread.title,
-                style: Theme.of(context).textTheme.headline6.copyWith(
-                    color: Colors.black87, fontWeight: FontWeight.bold),
+                style: Theme.of(context)
+                    .textTheme
+                    .headline6
+                    .copyWith(fontWeight: FontWeight.bold),
               ),
             ),
             ConstrainedBox(
               constraints:
                   BoxConstraints(maxHeight: displayHeight(context) / 2),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: (thread.replies.last.floor.toDouble() / 50.0).ceil(),
-                itemBuilder: (context, index) => Card(
-                  color: Colors.transparent,
-                  elevation: 0,
-                  clipBehavior: Clip.hardEdge,
-                  margin: EdgeInsets.symmetric(horizontal: 8),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  child: SimpleDialogOption(
-                    padding: EdgeInsets.all(16.0),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      navigatorKey.currentState.pushNamed('/Thread',
-                          arguments: ThreadPageArguments(
-                              threadId: thread.threadId,
-                              title: thread.title,
-                              page: index + 1,
-                              locked: thread.status == 'locked'));
-                    },
-                    child: Text(
-                      '第 ${index + 1} 頁',
-                      style: Theme.of(context)
-                          .textTheme
-                          .subtitle1
-                          .copyWith(color: Colors.black87),
+              child: SafeArea(
+                top: false,
+                child: ListView.builder(
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount:
+                      (thread.replies.last.floor.toDouble() / 50.0).ceil(),
+                  itemBuilder: (context, index) => Card(
+                    color: Colors.transparent,
+                    elevation: 0,
+                    clipBehavior: Clip.hardEdge,
+                    margin: EdgeInsets.symmetric(horizontal: 8),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                    child: SimpleDialogOption(
+                      padding: EdgeInsets.all(16.0),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        navigatorKey.currentState.pushNamed('/Thread',
+                            arguments: ThreadPageArguments(
+                                threadId: thread.threadId,
+                                title: thread.title,
+                                page: index + 1,
+                                locked: thread.status == 'locked'));
+                      },
+                      child: Text(
+                        '第 ${index + 1} 頁',
+                        style: Theme.of(context).textTheme.subtitle1,
+                      ),
                     ),
                   ),
                 ),

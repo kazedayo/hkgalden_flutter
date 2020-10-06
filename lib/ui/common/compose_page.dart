@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/style.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
+import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/tag.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
@@ -15,11 +15,25 @@ import 'package:hkgalden_flutter/ui/common/context_menu_button.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
-import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/viewmodels/tag_selector_view_model.dart';
 import 'package:zefyr/zefyr.dart';
 
 class ComposePage extends StatefulWidget {
+  final ComposeMode composeMode;
+  final int threadId;
+  final Reply parentReply;
+  final Function(Reply) onSent;
+  final Function(String) onCreateThread;
+
+  const ComposePage(
+      {Key key,
+      @required this.composeMode,
+      this.threadId,
+      this.parentReply,
+      this.onSent,
+      this.onCreateThread})
+      : super(key: key);
+
   @override
   _ComposePageState createState() => _ComposePageState();
 }
@@ -62,21 +76,16 @@ class _ComposePageState extends State<ComposePage> {
 
   @override
   Widget build(BuildContext context) {
-    final ComposePageArguments arguments =
-        ModalRoute.of(context).settings.arguments;
     return Scaffold(
       appBar: AppBar(
         centerTitle:
             Theme.of(context).platform == TargetPlatform.iOS ? true : false,
-        leading: IconButton(
-            icon: Icon(Icons.close_rounded),
-            onPressed: () => Navigator.of(context).pop()),
         title: Text(
-          arguments.composeMode == ComposeMode.newPost
+          widget.composeMode == ComposeMode.newPost
               ? '發表主題'
-              : arguments.composeMode == ComposeMode.reply
+              : widget.composeMode == ComposeMode.reply
                   ? '回覆主題'
-                  : '引用回覆 (#${arguments.parentReply.floor})',
+                  : '引用回覆 (#${widget.parentReply.floor})',
           style: Theme.of(context)
               .textTheme
               .subtitle1
@@ -94,7 +103,7 @@ class _ComposePageState extends State<ComposePage> {
                       setState(() {
                         _isSending = true;
                       });
-                      arguments.composeMode == ComposeMode.newPost
+                      widget.composeMode == ComposeMode.newPost
                           ? _title == '' ||
                                   _controller.document.toString() == '/n'
                               ? showCustomDialog(
@@ -107,8 +116,8 @@ class _ComposePageState extends State<ComposePage> {
                                         title: '注意!', content: '內文/標題不能為空');
                                   },
                                 )
-                              : _createThread(context, arguments)
-                          : _sendReply(context, arguments);
+                              : _createThread(context)
+                          : _sendReply(context);
                       // await DeltaJsonParser()
                       //     .toGaldenHtml(json.decode(_getZefyrEditorContent()));
                     },
@@ -150,7 +159,7 @@ class _ComposePageState extends State<ComposePage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            arguments.composeMode == ComposeMode.newPost
+            widget.composeMode == ComposeMode.newPost
                 ? Container(
                     height: 34,
                     margin: EdgeInsets.fromLTRB(12, 8, 12, 0),
@@ -221,7 +230,7 @@ class _ComposePageState extends State<ComposePage> {
                       ],
                     ))
                 : SizedBox(),
-            arguments.composeMode == ComposeMode.quotedReply
+            widget.composeMode == ComposeMode.quotedReply
                 ? ConstrainedBox(
                     constraints:
                         BoxConstraints(maxHeight: displayHeight(context) / 4),
@@ -231,9 +240,9 @@ class _ComposePageState extends State<ComposePage> {
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       child: StyledHtmlView(
                         htmlString: HKGaldenHtmlParser().replyWithQuotes(
-                            arguments.parentReply,
+                            widget.parentReply,
                             StoreProvider.of<AppState>(context)),
-                        floor: arguments.parentReply.floor,
+                        floor: widget.parentReply.floor,
                       ),
                     ),
                   )
@@ -266,8 +275,7 @@ class _ComposePageState extends State<ComposePage> {
     return json.encode(content);
   }
 
-  Future<void> _createThread(
-      BuildContext context, ComposePageArguments arguments) async {
+  Future<void> _createThread(BuildContext context) async {
     HKGaldenApi()
         .createThread(
             _title,
@@ -279,7 +287,7 @@ class _ComposePageState extends State<ComposePage> {
         _isSending = false;
         if (threadId != null) {
           Navigator.pop(context);
-          arguments.onCreateThread(_channelId);
+          widget.onCreateThread(_channelId);
         } else {
           Scaffold.of(context).showSnackBar(SnackBar(content: Text('主題發表失敗!')));
         }
@@ -287,15 +295,14 @@ class _ComposePageState extends State<ComposePage> {
     });
   }
 
-  Future<void> _sendReply(
-      BuildContext context, ComposePageArguments arguments) async {
+  Future<void> _sendReply(BuildContext context) async {
     HKGaldenApi()
         .sendReply(
-      arguments.threadId,
+      widget.threadId,
       await DeltaJsonParser()
           .toGaldenHtml(json.decode(_getZefyrEditorContent())),
-      parentId: arguments.composeMode == ComposeMode.quotedReply
-          ? arguments.parentReply.replyId
+      parentId: widget.composeMode == ComposeMode.quotedReply
+          ? widget.parentReply.replyId
           : '',
     )
         .then((sentReply) {
@@ -303,7 +310,7 @@ class _ComposePageState extends State<ComposePage> {
         _isSending = false;
         if (sentReply != null) {
           Navigator.pop(context);
-          arguments.onSent(sentReply);
+          widget.onSent(sentReply);
         } else {
           Scaffold.of(context).showSnackBar(SnackBar(content: Text('回覆發送失敗!')));
         }

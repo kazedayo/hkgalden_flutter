@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:animations/animations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
@@ -13,14 +12,15 @@ import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
+import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/context_menu_button.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
-import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class CommentCell extends StatefulWidget {
   final int threadId;
@@ -93,17 +93,19 @@ class _CommentCellState extends State<CommentCell> {
                                   visualDensity: VisualDensity.compact,
                                   icon: Icon(Icons.format_quote_rounded),
                                   onPressed: () => widget.canReply
-                                      ? Navigator.of(context)
-                                          .pushNamed('/Compose',
-                                              arguments: ComposePageArguments(
-                                                composeMode:
-                                                    ComposeMode.quotedReply,
-                                                threadId: widget.threadId,
-                                                parentReply: widget.reply,
-                                                onSent: (reply) {
-                                                  widget.onSent(reply);
-                                                },
-                                              ))
+                                      ? showBarModalBottomSheet(
+                                          context: context,
+                                          builder: (context, controller) =>
+                                              ComposePage(
+                                            composeMode:
+                                                ComposeMode.quotedReply,
+                                            threadId: widget.threadId,
+                                            parentReply: widget.reply,
+                                            onSent: (reply) {
+                                              widget.onSent(reply);
+                                            },
+                                          ),
+                                        )
                                       : showCustomDialog(
                                           context: context,
                                           builder: (context) =>
@@ -220,11 +222,12 @@ class _CommentCellState extends State<CommentCell> {
                         ),
                         onPressed: () {
                           _controller.toggleMenu();
-                          showModalBottomSheet(
+                          showMaterialModalBottomSheet(
                               backgroundColor: Colors.transparent,
                               barrierColor: Colors.black87,
                               context: context,
-                              builder: (context) => UserPage(
+                              enableDrag: false,
+                              builder: (context, controller) => UserPage(
                                     user: widget.reply.author,
                                   ));
                         },

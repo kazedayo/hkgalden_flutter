@@ -24,8 +24,8 @@ class NestedNavigator extends StatelessWidget {
             case '/Compose':
               builder = (context) => ComposePage();
               break;
-              break;
             default:
+              break;
           }
           if (settings.name == '/Compose') {
             return CupertinoPageRoute(

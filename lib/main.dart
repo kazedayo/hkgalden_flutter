@@ -74,10 +74,10 @@ class MyApp extends StatelessWidget {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(6))),
       bottomSheetTheme: BottomSheetThemeData(
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16), topRight: Radius.circular(16))),
-          backgroundColor: Colors.white),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16), topRight: Radius.circular(16))),
+      ),
       brightness: Brightness.dark,
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
@@ -94,9 +94,8 @@ class MyApp extends StatelessWidget {
       cupertinoOverrideTheme:
           CupertinoThemeData(primaryColor: Color(0xff45c17c)),
       snackBarTheme: SnackBarThemeData(
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.white,
-          contentTextStyle: TextStyle(color: Colors.black87)),
+        behavior: SnackBarBehavior.floating,
+      ),
       pageTransitionsTheme: PageTransitionsTheme(builders: {
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         TargetPlatform.android: SharedAxisPageTransitionsBuilder(
