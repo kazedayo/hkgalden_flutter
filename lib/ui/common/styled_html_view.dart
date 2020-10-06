@@ -84,8 +84,8 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
           'span': (context, child, attributes, element) {
             if (element.className == ('color')) {
               Style newStyle = context.style.copyWith(
-                  color: Color(int.parse('FF${attributes['hex']}', radix: 16)),
-                  fontSize: FontSize.large);
+                color: Color(int.parse('FF${attributes['hex']}', radix: 16)),
+              );
               return Transform.translate(
                 offset: Offset(0, 1),
                 child: ContainerSpan(
@@ -121,8 +121,6 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
               fontSize: FontSize.smaller,
               color: Colors.grey,
               margin: EdgeInsets.symmetric(vertical: 4)),
-          "div.center": Style(alignment: Alignment.center),
-          "div.right": Style(alignment: Alignment.centerRight),
           "span.h1": Style(
             fontSize: FontSize(33),
             fontWeight: FontWeight.normal,
