@@ -97,7 +97,7 @@ class _ComposePageState extends State<ComposePage> {
                       arguments.composeMode == ComposeMode.newPost
                           ? _title == '' ||
                                   _controller.document.toString() == '/n'
-                              ? showModal(
+                              ? showCustomDialog(
                                   context: context,
                                   builder: (context) {
                                     setState(() {

@@ -79,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
     return JavascriptChannel(
         name: 'Alert',
         onMessageReceived: (JavascriptMessage message) {
-          showModal<void>(
+          showCustomDialog(
             context: context,
             builder: (BuildContext context) {
               // return object of type Dialog

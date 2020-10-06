@@ -208,7 +208,7 @@ class _ThreadPageState extends State<ThreadPage> {
                 : FloatingActionButton(
                     child: Icon(Icons.reply_rounded),
                     onPressed: () => !_canReply
-                        ? showModal<void>(
+                        ? showCustomDialog(
                             context: context,
                             builder: (context) => CustomAlertDialog(
                                   title: '未登入',

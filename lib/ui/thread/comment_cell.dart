@@ -104,7 +104,7 @@ class _CommentCellState extends State<CommentCell> {
                                                   widget.onSent(reply);
                                                 },
                                               ))
-                                      : showModal<void>(
+                                      : showCustomDialog(
                                           context: context,
                                           builder: (context) =>
                                               CustomAlertDialog(

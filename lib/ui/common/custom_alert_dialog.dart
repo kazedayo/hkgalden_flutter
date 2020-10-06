@@ -1,3 +1,5 @@
+import 'package:animations/animations.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CustomAlertDialog extends StatelessWidget {
@@ -9,27 +11,53 @@ class CustomAlertDialog extends StatelessWidget {
       : super(key: key);
 
   @override
-  Widget build(BuildContext context) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: Text(
-          title,
-          style: TextStyle(color: Colors.black87),
-        ),
-        content: Text(
-          content,
-          style: TextStyle(color: Colors.black87),
-        ),
-        actions: <Widget>[
-          FlatButton(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            highlightColor: Colors.grey[300],
-            child: Text(
-              'OK',
-              style: TextStyle(color: Theme.of(context).accentColor),
-            ),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      );
+  Widget build(BuildContext context) =>
+      Theme.of(context).platform == TargetPlatform.iOS
+          ? CupertinoTheme(
+              data: CupertinoTheme.of(context)
+                  .copyWith(brightness: Brightness.light),
+              child: CupertinoAlertDialog(
+                title: Text(title),
+                content: Text(content),
+                actions: [
+                  CupertinoDialogAction(
+                    child: Text('OK'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  )
+                ],
+              ))
+          : AlertDialog(
+              backgroundColor: Colors.white,
+              title: Text(
+                title,
+                style: TextStyle(color: Colors.black87),
+              ),
+              content: Text(
+                content,
+                style: TextStyle(color: Colors.black87),
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  highlightColor: Colors.grey[300],
+                  child: Text(
+                    'OK',
+                    style: TextStyle(color: Theme.of(context).accentColor),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            );
 }
+
+void showCustomDialog({BuildContext context, Function(BuildContext) builder}) =>
+    Theme.of(context).platform == TargetPlatform.iOS
+        ? showCupertinoDialog(
+            context: context,
+            builder: builder,
+          )
+        : showModal(
+            context: context,
+            builder: builder,
+          );

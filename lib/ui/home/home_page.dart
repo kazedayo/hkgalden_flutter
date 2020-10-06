@@ -183,7 +183,7 @@ class _HomePageState extends State<HomePage>
                                           }),
                                       IconButton(
                                           icon: Icon(
-                                            Icons.settings_rounded,
+                                            Icons.copyright_rounded,
                                             color: Colors.black87,
                                           ),
                                           onPressed: () async {
@@ -191,26 +191,20 @@ class _HomePageState extends State<HomePage>
                                                 .toggleMenu();
                                             PackageInfo info = await PackageInfo
                                                 .fromPlatform();
-                                            showModal(
+                                            showLicensePage(
                                               context: context,
-                                              builder: (context) => Theme(
-                                                data: ThemeData.light(),
-                                                child: AboutDialog(
-                                                  applicationName: 'hkGalden',
-                                                  applicationIcon:
-                                                      SvgPicture.asset(
-                                                    'assets/icon-hkgalden.svg',
-                                                    width: 50,
-                                                    height: 50,
-                                                    color: Theme.of(context)
-                                                        .accentColor,
-                                                  ),
-                                                  applicationVersion:
-                                                      '${info.version}+${info.buildNumber}',
-                                                  applicationLegalese:
-                                                      '© hkGalden & 1080',
-                                                ),
+                                              applicationName: 'hkGalden',
+                                              applicationIcon: SvgPicture.asset(
+                                                'assets/icon-hkgalden.svg',
+                                                width: 50,
+                                                height: 50,
+                                                color: Theme.of(context)
+                                                    .accentColor,
                                               ),
+                                              applicationVersion:
+                                                  '${info.version}+${info.buildNumber}',
+                                              applicationLegalese:
+                                                  '© hkGalden & 1080',
                                             );
                                           }),
                                       IconButton(
@@ -340,7 +334,7 @@ class _HomePageState extends State<HomePage>
                                   onCreateThread: (channelId) =>
                                       viewModel.onCreateThread(channelId),
                                 ))
-                            : showModal<void>(
+                            : showCustomDialog(
                                 context: context,
                                 builder: (context) => CustomAlertDialog(
                                       title: '未登入',
