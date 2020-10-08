@@ -94,6 +94,8 @@ class _CommentCellState extends State<CommentCell> {
                                   icon: Icon(Icons.format_quote_rounded),
                                   onPressed: () => widget.canReply
                                       ? showBarModalBottomSheet(
+                                          duration: Duration(milliseconds: 300),
+                                          animationCurve: Curves.easeOut,
                                           context: context,
                                           builder: (context, controller) =>
                                               ComposePage(
@@ -223,6 +225,8 @@ class _CommentCellState extends State<CommentCell> {
                         onPressed: () {
                           _controller.toggleMenu();
                           showMaterialModalBottomSheet(
+                              duration: Duration(milliseconds: 200),
+                              animationCurve: Curves.easeOut,
                               backgroundColor: Colors.transparent,
                               barrierColor: Colors.black87,
                               context: context,

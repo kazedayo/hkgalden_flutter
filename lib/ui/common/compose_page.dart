@@ -167,8 +167,8 @@ class _ComposePageState extends State<ComposePage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         ContextMenuButton(
-                          width: 240,
-                          height: 210,
+                          width: displayWidth(context) - 24,
+                          height: displayHeight(context) / 2,
                           xOffset: 0,
                           yOffset: 8,
                           controller: _menuButtonController,

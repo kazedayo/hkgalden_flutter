@@ -173,6 +173,9 @@ class _HomePageState extends State<HomePage>
                                             // Navigator.of(context)
                                             //     .pushNamed('/User');
                                             showMaterialModalBottomSheet(
+                                                duration:
+                                                    Duration(milliseconds: 200),
+                                                animationCurve: Curves.easeOut,
                                                 enableDrag: false,
                                                 backgroundColor:
                                                     Colors.transparent,
@@ -333,6 +336,8 @@ class _HomePageState extends State<HomePage>
                         child: Icon(Icons.create_rounded),
                         onPressed: () => viewModel.isLoggedIn
                             ? showBarModalBottomSheet(
+                                duration: Duration(milliseconds: 300),
+                                animationCurve: Curves.easeOut,
                                 context: context,
                                 builder: (context, controller) => ComposePage(
                                   composeMode: ComposeMode.newPost,
@@ -380,6 +385,8 @@ class _HomePageState extends State<HomePage>
   void _jumpToPage(Thread thread) {
     HapticFeedback.mediumImpact();
     showMaterialModalBottomSheet(
+      duration: Duration(milliseconds: 200),
+      animationCurve: Curves.easeOut,
       enableDrag: false,
       barrierColor: Colors.black.withOpacity(0.5),
       context: context,
