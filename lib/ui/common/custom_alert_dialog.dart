@@ -13,19 +13,16 @@ class CustomAlertDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       Theme.of(context).platform == TargetPlatform.iOS
-          ? CupertinoTheme(
-              data: CupertinoTheme.of(context)
-                  .copyWith(brightness: Brightness.light),
-              child: CupertinoAlertDialog(
-                title: Text(title),
-                content: Text(content),
-                actions: [
-                  CupertinoDialogAction(
-                    child: Text('OK'),
-                    onPressed: () => Navigator.of(context).pop(),
-                  )
-                ],
-              ))
+          ? CupertinoAlertDialog(
+              title: Text(title),
+              content: Text(content),
+              actions: [
+                CupertinoDialogAction(
+                  child: Text('OK'),
+                  onPressed: () => Navigator.of(context).pop(),
+                )
+              ],
+            )
           : AlertDialog(
               title: Text(
                 title,
