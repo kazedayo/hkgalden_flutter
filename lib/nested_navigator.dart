@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/home/home_page.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
@@ -20,9 +19,6 @@ class NestedNavigator extends StatelessWidget {
               break;
             case '/Thread':
               builder = (context) => ThreadPage();
-              break;
-            case '/Compose':
-              builder = (context) => ComposePage();
               break;
             default:
               break;

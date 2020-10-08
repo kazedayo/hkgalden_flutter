@@ -216,6 +216,8 @@ class _ThreadPageState extends State<ThreadPage> {
                                   content: '請先登入',
                                 ))
                         : showBarModalBottomSheet(
+                            duration: Duration(milliseconds: 300),
+                            animationCurve: Curves.easeOut,
                             context: context,
                             builder: (context, controller) => ComposePage(
                               composeMode: ComposeMode.reply,
