@@ -26,33 +26,33 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  cupertino_icons: ^1.0.0
+  cupertino_icons: 
   zefyr: ^1.0.0-dev.1.0
-  flutter_svg: ^0.19.0
+  flutter_svg: 
   graphql: ^3.1.0
-  redux: ^4.0.0+3
-  flutter_redux: ^0.6.0
-  webview_flutter: ^1.0.0
-  flutter_secure_storage: ^3.3.4
-  equatable: ^1.2.5
-  flutter_html: ^1.0.2
-  date_time_format: ^1.1.0
-  universal_html: ^1.2.3
-  url_launcher: ^5.7.2
-  cached_network_image: ^2.3.2+1
-  animations: ^1.1.2
-  image_downloader: ^0.20.1
-  auto_size_text: ^2.1.0
-  shimmer: ^1.1.1
-  image_picker: ^0.6.7+11
-  backdrop: ^0.4.6
-  package_info: ^0.4.3
-  modal_bottom_sheet: ^0.2.2
+  redux: 
+  flutter_redux: 
+  webview_flutter: 
+  flutter_secure_storage: 
+  equatable: 
+  flutter_html: 
+  date_time_format: 
+  universal_html: 
+  url_launcher: 
+  cached_network_image: 
+  animations: 
+  image_downloader: 
+  auto_size_text: 
+  shimmer: 
+  image_picker: 
+  backdrop: 
+  package_info: 
+  modal_bottom_sheet: 
 
 dependency_overrides:
   cupertino_icons: '1.0.0'
   flutter_svg: '0.19.0'
-  webview_flutter: '1.0.0'
+  webview_flutter: '1.0.1'
 
 dev_dependencies:
   flutter_test:

@@ -258,7 +258,7 @@ class _HomePageState extends State<HomePage>
                                   controller: _scrollController,
                                   slivers: [
                                     CupertinoSliverRefreshControl(
-                                      refreshTriggerPullDistance: 135,
+                                      refreshTriggerPullDistance: 120,
                                       onRefresh: () => viewModel.onRefresh(
                                           viewModel.selectedChannelId),
                                     ),
