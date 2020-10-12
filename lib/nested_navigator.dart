@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:hkgalden_flutter/ui/home/home_page.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class NestedNavigator extends StatelessWidget {
   @override
@@ -23,13 +24,8 @@ class NestedNavigator extends StatelessWidget {
             default:
               break;
           }
-          if (settings.name == '/Compose') {
-            return CupertinoPageRoute(
-                builder: builder, settings: settings, fullscreenDialog: true);
-          } else {
-            return MaterialPageRoute(
-                builder: builder, settings: settings, fullscreenDialog: false);
-          }
+          return MaterialWithModalsPageRoute(
+              builder: builder, settings: settings);
         },
       ),
       onWillPop: () async {

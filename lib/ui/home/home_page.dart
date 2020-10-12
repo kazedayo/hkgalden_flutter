@@ -128,10 +128,30 @@ class _HomePageState extends State<HomePage>
                               alignment: PlaceholderAlignment.middle,
                               child: Hero(
                                   tag: 'logo',
-                                  child: SvgPicture.asset(
-                                    'assets/icon-hkgalden.svg',
-                                    width: 27,
-                                    height: 27,
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      PackageInfo info =
+                                          await PackageInfo.fromPlatform();
+                                      showLicensePage(
+                                        context: context,
+                                        applicationName: 'hkGalden',
+                                        applicationIcon: SvgPicture.asset(
+                                          'assets/icon-hkgalden.svg',
+                                          width: 50,
+                                          height: 50,
+                                          color: Theme.of(context).accentColor,
+                                        ),
+                                        applicationVersion:
+                                            '${info.version}+${info.buildNumber}',
+                                        applicationLegalese:
+                                            '© hkGalden & 1080',
+                                      );
+                                    },
+                                    child: SvgPicture.asset(
+                                      'assets/icon-hkgalden.svg',
+                                      width: 27,
+                                      height: 27,
+                                    ),
                                   ))),
                           WidgetSpan(
                               child: SizedBox(
@@ -148,8 +168,8 @@ class _HomePageState extends State<HomePage>
                             ? ContextMenuButton(
                                 controller: _contextMenuButtonController,
                                 height: 70,
-                                width: 220,
-                                xOffset: -185,
+                                width: 180,
+                                xOffset: -145,
                                 yOffset: 0,
                                 closedChild: IconButton(
                                     icon: Icon(Icons.apps_rounded),
@@ -157,7 +177,7 @@ class _HomePageState extends State<HomePage>
                                         _contextMenuButtonController
                                             .toggleMenu()),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(16.0),
                                   child: Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -188,32 +208,38 @@ class _HomePageState extends State<HomePage>
                                                           viewModel.sessionUser,
                                                     ));
                                           }),
+                                      // IconButton(
+                                      //     icon: Icon(
+                                      //       Icons.copyright_rounded,
+                                      //       color: Colors.black87,
+                                      //     ),
+                                      //     onPressed: () async {
+                                      //       _contextMenuButtonController
+                                      //           .toggleMenu();
+                                      //       PackageInfo info = await PackageInfo
+                                      //           .fromPlatform();
+                                      //       showLicensePage(
+                                      //         context: context,
+                                      //         applicationName: 'hkGalden',
+                                      //         applicationIcon: SvgPicture.asset(
+                                      //           'assets/icon-hkgalden.svg',
+                                      //           width: 50,
+                                      //           height: 50,
+                                      //           color: Theme.of(context)
+                                      //               .accentColor,
+                                      //         ),
+                                      //         applicationVersion:
+                                      //             '${info.version}+${info.buildNumber}',
+                                      //         applicationLegalese:
+                                      //             '© hkGalden & 1080',
+                                      //       );
+                                      //     }),
                                       IconButton(
                                           icon: Icon(
-                                            Icons.copyright_rounded,
+                                            Icons.block_rounded,
                                             color: Colors.black87,
                                           ),
-                                          onPressed: () async {
-                                            _contextMenuButtonController
-                                                .toggleMenu();
-                                            PackageInfo info = await PackageInfo
-                                                .fromPlatform();
-                                            showLicensePage(
-                                              context: context,
-                                              applicationName: 'hkGalden',
-                                              applicationIcon: SvgPicture.asset(
-                                                'assets/icon-hkgalden.svg',
-                                                width: 50,
-                                                height: 50,
-                                                color: Theme.of(context)
-                                                    .accentColor,
-                                              ),
-                                              applicationVersion:
-                                                  '${info.version}+${info.buildNumber}',
-                                              applicationLegalese:
-                                                  '© hkGalden & 1080',
-                                            );
-                                          }),
+                                          onPressed: () => null),
                                       IconButton(
                                           icon: Icon(
                                             Icons.logout,
@@ -227,12 +253,6 @@ class _HomePageState extends State<HomePage>
                                                 Duration(milliseconds: 170),
                                                 () => viewModel.onLogout());
                                           }),
-                                      IconButton(
-                                          icon: Icon(
-                                            Icons.block_rounded,
-                                            color: Colors.black87,
-                                          ),
-                                          onPressed: () => null),
                                     ],
                                   ),
                                 ),
@@ -335,16 +355,30 @@ class _HomePageState extends State<HomePage>
                         highlightElevation: 1,
                         child: Icon(Icons.create_rounded),
                         onPressed: () => viewModel.isLoggedIn
-                            ? showBarModalBottomSheet(
-                                duration: Duration(milliseconds: 300),
-                                animationCurve: Curves.easeOut,
-                                context: context,
-                                builder: (context, controller) => ComposePage(
-                                  composeMode: ComposeMode.newPost,
-                                  onCreateThread: (channelId) =>
-                                      viewModel.onCreateThread(channelId),
-                                ),
-                              )
+                            ? Theme.of(context).platform == TargetPlatform.iOS
+                                ? showCupertinoModalBottomSheet(
+                                    barrierColor: Colors.black.withOpacity(0.5),
+                                    duration: Duration(milliseconds: 300),
+                                    animationCurve: Curves.easeOut,
+                                    context: context,
+                                    builder: (context, controller) =>
+                                        ComposePage(
+                                      composeMode: ComposeMode.newPost,
+                                      onCreateThread: (channelId) =>
+                                          viewModel.onCreateThread(channelId),
+                                    ),
+                                  )
+                                : showBarModalBottomSheet(
+                                    duration: Duration(milliseconds: 300),
+                                    animationCurve: Curves.easeOut,
+                                    context: context,
+                                    builder: (context, controller) =>
+                                        ComposePage(
+                                      composeMode: ComposeMode.newPost,
+                                      onCreateThread: (channelId) =>
+                                          viewModel.onCreateThread(channelId),
+                                    ),
+                                  )
                             : showCustomDialog(
                                 context: context,
                                 builder: (context) => CustomAlertDialog(

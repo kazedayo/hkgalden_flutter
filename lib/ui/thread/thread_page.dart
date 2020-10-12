@@ -215,18 +215,32 @@ class _ThreadPageState extends State<ThreadPage> {
                                   title: '未登入',
                                   content: '請先登入',
                                 ))
-                        : showBarModalBottomSheet(
-                            duration: Duration(milliseconds: 300),
-                            animationCurve: Curves.easeOut,
-                            context: context,
-                            builder: (context, controller) => ComposePage(
-                              composeMode: ComposeMode.reply,
-                              threadId: viewModel.threadId,
-                              onSent: (reply) {
-                                _onReplySuccess(viewModel, reply);
-                              },
-                            ),
-                          )),
+                        : Theme.of(context).platform == TargetPlatform.iOS
+                            ? showCupertinoModalBottomSheet(
+                                barrierColor: Colors.black.withOpacity(0.5),
+                                duration: Duration(milliseconds: 300),
+                                animationCurve: Curves.easeOut,
+                                context: context,
+                                builder: (context, controller) => ComposePage(
+                                  composeMode: ComposeMode.reply,
+                                  threadId: viewModel.threadId,
+                                  onSent: (reply) {
+                                    _onReplySuccess(viewModel, reply);
+                                  },
+                                ),
+                              )
+                            : showBarModalBottomSheet(
+                                duration: Duration(milliseconds: 300),
+                                animationCurve: Curves.easeOut,
+                                context: context,
+                                builder: (context, controller) => ComposePage(
+                                  composeMode: ComposeMode.reply,
+                                  threadId: viewModel.threadId,
+                                  onSent: (reply) {
+                                    _onReplySuccess(viewModel, reply);
+                                  },
+                                ),
+                              )),
           ),
         ),
       ),

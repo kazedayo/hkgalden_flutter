@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:date_time_format/date_time_format.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -91,23 +92,44 @@ class _CommentCellState extends State<CommentCell> {
                               visible: !widget.threadLocked,
                               child: IconButton(
                                   visualDensity: VisualDensity.compact,
-                                  icon: Icon(Icons.format_quote_rounded),
+                                  icon: Icon(Icons.format_quote),
                                   onPressed: () => widget.canReply
-                                      ? showBarModalBottomSheet(
-                                          duration: Duration(milliseconds: 300),
-                                          animationCurve: Curves.easeOut,
-                                          context: context,
-                                          builder: (context, controller) =>
-                                              ComposePage(
-                                            composeMode:
-                                                ComposeMode.quotedReply,
-                                            threadId: widget.threadId,
-                                            parentReply: widget.reply,
-                                            onSent: (reply) {
-                                              widget.onSent(reply);
-                                            },
-                                          ),
-                                        )
+                                      ? Theme.of(context).platform ==
+                                              TargetPlatform.iOS
+                                          ? showCupertinoModalBottomSheet(
+                                              barrierColor:
+                                                  Colors.black.withOpacity(0.5),
+                                              duration:
+                                                  Duration(milliseconds: 300),
+                                              animationCurve: Curves.easeOut,
+                                              context: context,
+                                              builder: (context, controller) =>
+                                                  ComposePage(
+                                                composeMode:
+                                                    ComposeMode.quotedReply,
+                                                threadId: widget.threadId,
+                                                parentReply: widget.reply,
+                                                onSent: (reply) {
+                                                  widget.onSent(reply);
+                                                },
+                                              ),
+                                            )
+                                          : showBarModalBottomSheet(
+                                              duration:
+                                                  Duration(milliseconds: 300),
+                                              animationCurve: Curves.easeOut,
+                                              context: context,
+                                              builder: (context, controller) =>
+                                                  ComposePage(
+                                                composeMode:
+                                                    ComposeMode.quotedReply,
+                                                threadId: widget.threadId,
+                                                parentReply: widget.reply,
+                                                onSent: (reply) {
+                                                  widget.onSent(reply);
+                                                },
+                                              ),
+                                            )
                                       : showCustomDialog(
                                           context: context,
                                           builder: (context) =>
