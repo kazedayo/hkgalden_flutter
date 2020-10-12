@@ -11,7 +11,6 @@ import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
-import 'package:hkgalden_flutter/ui/common/context_menu_button.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
@@ -48,8 +47,6 @@ class _ComposePageState extends State<ComposePage> {
   FocusNode _titleFocusNode;
   FocusNode _currentFocusNode;
   bool _isSending;
-  final ContextMenuButtonController _menuButtonController =
-      ContextMenuButtonController();
 
   @override
   void initState() {
@@ -168,41 +165,35 @@ class _ComposePageState extends State<ComposePage> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            ContextMenuButton(
-                              width: displayWidth(context) - 24,
-                              height: displayHeight(context) / 2,
-                              xOffset: 0,
-                              yOffset: 8,
-                              controller: _menuButtonController,
-                              closedChild: InputChip(
-                                  label: Text('#${_tag.name}',
-                                      strutStyle: StrutStyle(height: 1.25),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .caption
-                                          .copyWith(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w700)),
-                                  backgroundColor: _tag.color,
-                                  onPressed: () {
-                                    _currentFocusNode =
-                                        FocusScope.of(context).focusedChild;
-                                    FocusScope.of(context).unfocus();
-                                    _menuButtonController.toggleMenu();
-                                  }),
-                              child: _TagSelectDialog(
-                                onTagSelect: (tag, channelId) {
-                                  FocusScope.of(context)
-                                      .requestFocus(_currentFocusNode);
-                                  _menuButtonController.toggleMenu();
-                                  setState(() {
-                                    _tag = tag;
-                                    _channelId = channelId;
-                                  });
-                                },
+                            PopupMenuButton(
+                              itemBuilder: (context) => [
+                                PopupMenuItem(
+                                    child: SizedBox(
+                                  height: displayHeight(context) / 2,
+                                  child: _TagSelectDialog(
+                                    onTagSelect: (tag, channelId) {
+                                      Navigator.of(context).pop();
+                                      FocusScope.of(context)
+                                          .requestFocus(_currentFocusNode);
+                                      setState(() {
+                                        _tag = tag;
+                                        _channelId = channelId;
+                                      });
+                                    },
+                                  ),
+                                ))
+                              ],
+                              child: Chip(
+                                label: Text('#${_tag.name}',
+                                    strutStyle: StrutStyle(height: 1.25),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .caption
+                                        .copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700)),
+                                backgroundColor: _tag.color,
                               ),
-                              onBarrierDismiss: () => FocusScope.of(context)
-                                  .requestFocus(_currentFocusNode),
                             ),
                             SizedBox(
                               width: 12,
@@ -343,11 +334,12 @@ class _TagSelectDialog extends StatelessWidget {
         distinct: true,
         converter: (store) => TagSelectorViewModel.create(store),
         builder: (context, viewModel) => SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          //padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: viewModel.channels
                 .map((channel) => Container(
+                      padding: EdgeInsets.symmetric(vertical: 4),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
@@ -355,7 +347,7 @@ class _TagSelectDialog extends StatelessWidget {
                               style: Theme.of(context)
                                   .textTheme
                                   .caption
-                                  .copyWith(color: Colors.black45)),
+                                  .copyWith(color: Colors.white60)),
                           Wrap(
                             spacing: 8,
                             children: channel.tags

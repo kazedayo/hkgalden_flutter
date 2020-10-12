@@ -14,7 +14,6 @@ import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page.dart';
-import 'package:hkgalden_flutter/ui/common/context_menu_button.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
@@ -47,7 +46,6 @@ class CommentCell extends StatefulWidget {
 
 class _CommentCellState extends State<CommentCell> {
   final FullScreenPhotoView photoView = FullScreenPhotoView();
-  final ContextMenuButtonController _controller = ContextMenuButtonController();
   bool _blockedButtonPressed;
 
   @override
@@ -178,14 +176,88 @@ class _CommentCellState extends State<CommentCell> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ContextMenuButton(
-                  controller: _controller,
-                  width: 125,
-                  height: 70,
-                  xOffset: 0,
-                  yOffset: 0,
-                  closedChild: AvatarWidget(
-                    //舊膠登icon死link會炒async #dead#
+                PopupMenuButton(
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      textStyle: Theme.of(context)
+                          .textTheme
+                          .caption
+                          .copyWith(color: Colors.white),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Flexible(
+                              flex: 1, child: Icon(Icons.account_box_rounded)),
+                          Flexible(flex: 4, child: Text('會員檔案'))
+                        ],
+                      ),
+                      value: _MenuItem.memberinfo,
+                    ),
+                    PopupMenuItem(
+                      textStyle: Theme.of(context)
+                          .textTheme
+                          .caption
+                          .copyWith(color: Colors.white),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Flexible(
+                              flex: 1,
+                              child: Icon(
+                                Icons.block_rounded,
+                                color: Colors.redAccent,
+                              )),
+                          Flexible(flex: 4, child: Text('封鎖會員'))
+                        ],
+                      ),
+                      value: _MenuItem.block,
+                    ),
+                  ],
+                  onSelected: (value) {
+                    switch (value) {
+                      case _MenuItem.memberinfo:
+                        showMaterialModalBottomSheet(
+                            duration: Duration(milliseconds: 200),
+                            animationCurve: Curves.easeOut,
+                            backgroundColor: Colors.transparent,
+                            barrierColor: Colors.black87,
+                            context: context,
+                            enableDrag: false,
+                            builder: (context, controller) => UserPage(
+                                  user: widget.reply.author,
+                                ));
+                        break;
+                      case _MenuItem.block:
+                        StoreProvider.of<AppState>(context)
+                                    .state
+                                    .sessionUserState
+                                    .isLoggedIn ==
+                                false
+                            ? showCustomDialog(
+                                builder: (context) => CustomAlertDialog(
+                                    title: "未登入", content: "請先登入"),
+                              )
+                            : HKGaldenApi()
+                                .blockUser(widget.reply.author.userId)
+                                .then((isSuccess) {
+                                setState(() {
+                                  _blockedButtonPressed =
+                                      !_blockedButtonPressed;
+                                });
+                                if (isSuccess) {
+                                  StoreProvider.of<AppState>(context).dispatch(
+                                      AppendUserToBlockListAction(
+                                          widget.reply.author.userId));
+                                  scaffoldKey.currentState.showSnackBar(SnackBar(
+                                      content: Text(
+                                          '已封鎖會員 ${widget.reply.authorNickname}')));
+                                } else {}
+                              });
+                        break;
+                      default:
+                    }
+                  },
+                  child: AvatarWidget(
                     avatarImage: widget.reply.author.avatar == ''
                         ? SvgPicture.asset('assets/icon-hkgalden.svg',
                             width: 25, height: 25, color: Colors.grey)
@@ -200,65 +272,6 @@ class _CommentCellState extends State<CommentCell> {
                     userGroup: widget.reply.author.userGroup == null
                         ? []
                         : widget.reply.author.userGroup,
-                    onTap: _controller.toggleMenu,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon:
-                            Icon(Icons.block_rounded, color: Colors.redAccent),
-                        onPressed: _blockedButtonPressed ||
-                                StoreProvider.of<AppState>(context)
-                                        .state
-                                        .sessionUserState
-                                        .isLoggedIn ==
-                                    false
-                            ? null
-                            : () {
-                                _controller.toggleMenu();
-                                setState(() {
-                                  _blockedButtonPressed =
-                                      !_blockedButtonPressed;
-                                });
-                                HKGaldenApi()
-                                    .blockUser(widget.reply.author.userId)
-                                    .then((isSuccess) {
-                                  setState(() {
-                                    _blockedButtonPressed =
-                                        !_blockedButtonPressed;
-                                  });
-                                  if (isSuccess) {
-                                    StoreProvider.of<AppState>(context)
-                                        .dispatch(AppendUserToBlockListAction(
-                                            widget.reply.author.userId));
-                                    scaffoldKey.currentState.showSnackBar(SnackBar(
-                                        content: Text(
-                                            '已封鎖會員 ${widget.reply.authorNickname}')));
-                                  } else {}
-                                });
-                              },
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.account_box_rounded,
-                          color: Colors.black87,
-                        ),
-                        onPressed: () {
-                          _controller.toggleMenu();
-                          showMaterialModalBottomSheet(
-                              duration: Duration(milliseconds: 200),
-                              animationCurve: Curves.easeOut,
-                              backgroundColor: Colors.transparent,
-                              barrierColor: Colors.black87,
-                              context: context,
-                              enableDrag: false,
-                              builder: (context, controller) => UserPage(
-                                    user: widget.reply.author,
-                                  ));
-                        },
-                      )
-                    ],
                   ),
                 ),
                 Column(
@@ -287,4 +300,9 @@ class _CommentCellState extends State<CommentCell> {
           )
         ],
       );
+}
+
+enum _MenuItem {
+  memberinfo,
+  block,
 }
