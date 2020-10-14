@@ -79,8 +79,11 @@ class MyApp extends StatelessWidget {
                 topLeft: Radius.circular(16), topRight: Radius.circular(16))),
       ),
       brightness: Brightness.dark,
-      splashColor: Colors.transparent,
-      highlightColor: Colors.transparent,
+      // splashColor: Colors.transparent,
+      // highlightColor: Colors.transparent,
+      popupMenuTheme: PopupMenuThemeData(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
       dividerColor: Colors.grey[800],
       primaryColor: Color(0xff2e3533),
       scaffoldBackgroundColor: Color(0xff1b1f1e),

@@ -24,8 +24,12 @@ class NestedNavigator extends StatelessWidget {
             default:
               break;
           }
-          return MaterialWithModalsPageRoute(
-              builder: builder, settings: settings);
+          if (Theme.of(context).platform == TargetPlatform.iOS) {
+            return MaterialWithModalsPageRoute(
+                builder: builder, settings: settings);
+          } else {
+            return MaterialPageRoute(builder: builder, settings: settings);
+          }
         },
       ),
       onWillPop: () async {

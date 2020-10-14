@@ -261,13 +261,16 @@ class _ComposePageState extends State<ComposePage> {
             ),
           ),
         ),
-        Center(
-          heightFactor: 3.5,
-          child: Container(
-            height: 6,
-            width: 40,
-            decoration: BoxDecoration(
-                color: Colors.grey, borderRadius: BorderRadius.circular(6)),
+        Visibility(
+          visible: Theme.of(context).platform == TargetPlatform.iOS,
+          child: Center(
+            heightFactor: 3.5,
+            child: Container(
+              height: 6,
+              width: 40,
+              decoration: BoxDecoration(
+                  color: Colors.grey, borderRadius: BorderRadius.circular(6)),
+            ),
           ),
         ),
       ],

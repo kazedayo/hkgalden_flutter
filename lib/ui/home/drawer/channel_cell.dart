@@ -15,6 +15,7 @@ class ChannelCell extends StatelessWidget {
         margin: EdgeInsets.symmetric(horizontal: 8),
         child: Center(
           child: Material(
+            clipBehavior: Clip.hardEdge,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             elevation: viewModel.selectedChannelId == channel.channelId ? 6 : 0,

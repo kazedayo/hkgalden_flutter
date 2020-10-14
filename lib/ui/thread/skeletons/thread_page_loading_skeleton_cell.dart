@@ -11,46 +11,47 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
         child: Column(
           children: <Widget>[
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  width: 50,
-                  height: 50,
+                  width: 45,
+                  height: 45,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.grey,
                   ),
                 ),
-                SizedBox(width: 10),
-                Container(
-                  width: 100,
-                  height: 25,
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                Spacer(),
+                SizedBox(width: 15),
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Container(
-                      width: 50,
-                      height: 25,
+                      width: 100,
+                      height: 20,
                       decoration: BoxDecoration(
                         color: Colors.grey,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(100),
                       ),
                     ),
                     SizedBox(height: 5),
                     Container(
-                      width: 125,
-                      height: 25,
+                      width: 50,
+                      height: 20,
                       decoration: BoxDecoration(
                         color: Colors.grey,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(100),
                       ),
                     ),
                   ],
+                ),
+                Spacer(),
+                Container(
+                  width: 100,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(100),
+                  ),
                 ),
               ],
             ),
@@ -63,7 +64,7 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
                   width: displayWidth(context),
                   decoration: BoxDecoration(
                     color: Colors.grey,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(100),
                   ),
                 ),
                 SizedBox(height: 10),
@@ -72,7 +73,7 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
                   width: displayWidth(context) / 2,
                   decoration: BoxDecoration(
                     color: Colors.grey,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(100),
                   ),
                 ),
               ],

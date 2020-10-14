@@ -142,129 +142,104 @@ class _HomePageState extends State<HomePage>
                       ),
                       actions: [
                         viewModel.isLoggedIn
-                            ? PopupMenuButton(
-                                itemBuilder: (context) => [
-                                  PopupMenuItem(
-                                    textStyle: Theme.of(context)
-                                        .textTheme
-                                        .caption
-                                        .copyWith(color: Colors.white),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Flexible(
-                                            flex: 1,
-                                            child: Icon(
-                                                Icons.account_box_rounded)),
-                                        Flexible(flex: 4, child: Text('個人檔案'))
-                                      ],
-                                    ),
-                                    value: _MenuItem.account,
-                                  ),
-                                  PopupMenuItem(
-                                    textStyle: Theme.of(context)
-                                        .textTheme
-                                        .caption
-                                        .copyWith(color: Colors.white),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Flexible(
-                                            flex: 1,
-                                            child: Icon(Icons.block_rounded)),
-                                        Flexible(flex: 4, child: Text('封鎖名單'))
-                                      ],
-                                    ),
-                                    value: _MenuItem.blocklist,
-                                  ),
-                                  PopupMenuItem(
-                                    textStyle: Theme.of(context)
-                                        .textTheme
-                                        .caption
-                                        .copyWith(color: Colors.white),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Flexible(
-                                            flex: 1,
-                                            child:
-                                                Icon(Icons.copyright_rounded)),
-                                        Flexible(flex: 4, child: Text('版權資訊'))
-                                      ],
-                                    ),
-                                    value: _MenuItem.licences,
-                                  ),
-                                  PopupMenuItem(
-                                    textStyle: Theme.of(context)
-                                        .textTheme
-                                        .caption
-                                        .copyWith(color: Colors.white),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Flexible(
-                                          flex: 1,
-                                          child: Icon(
-                                            Icons.logout,
-                                            color: Colors.redAccent,
+                            ? Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 4),
+                                child: PopupMenuButton(
+                                    itemBuilder: (context) => [
+                                          PopupMenuItem(
+                                            child: ListTile(
+                                              dense: true,
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                              leading: Icon(
+                                                  Icons.account_box_rounded),
+                                              title: Text('個人檔案'),
+                                            ),
+                                            value: _MenuItem.account,
                                           ),
-                                        ),
-                                        Flexible(
-                                            flex: 4, child: Text('  登 出  '))
-                                      ],
-                                    ),
-                                    value: _MenuItem.logout,
-                                  ),
-                                ],
-                                onSelected: (value) async {
-                                  switch (value) {
-                                    case _MenuItem.account:
-                                      showMaterialModalBottomSheet(
-                                          duration: Duration(milliseconds: 200),
-                                          animationCurve: Curves.easeOut,
-                                          enableDrag: false,
-                                          backgroundColor: Colors.transparent,
-                                          barrierColor: Colors.black87,
-                                          context: context,
-                                          builder: (context, controller) =>
-                                              UserPage(
-                                                user: viewModel.sessionUser,
-                                              ));
-                                      break;
-                                    case _MenuItem.licences:
-                                      PackageInfo info =
-                                          await PackageInfo.fromPlatform();
-                                      showLicensePage(
-                                        context: context,
-                                        applicationName: 'hkGalden',
-                                        applicationIcon: SvgPicture.asset(
-                                          'assets/icon-hkgalden.svg',
-                                          width: 50,
-                                          height: 50,
-                                          color: Theme.of(context).accentColor,
-                                        ),
-                                        applicationVersion:
-                                            '${info.version}+${info.buildNumber}',
-                                        applicationLegalese:
-                                            '© hkGalden & 1080',
-                                      );
-                                      break;
-                                    case _MenuItem.logout:
-                                      viewModel.onLogout();
-                                      break;
-                                    default:
-                                  }
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Icon(Icons.apps_rounded),
-                                ),
+                                          PopupMenuItem(
+                                            child: ListTile(
+                                              dense: true,
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                              leading:
+                                                  Icon(Icons.block_rounded),
+                                              title: Text('封鎖名單'),
+                                            ),
+                                            value: _MenuItem.blocklist,
+                                          ),
+                                          PopupMenuItem(
+                                            child: ListTile(
+                                              dense: true,
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                              leading:
+                                                  Icon(Icons.copyright_rounded),
+                                              title: Text('版權資訊'),
+                                            ),
+                                            value: _MenuItem.licences,
+                                          ),
+                                          PopupMenuItem(
+                                            child: ListTile(
+                                              dense: true,
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                              leading: Icon(
+                                                Icons.logout,
+                                                color: Colors.redAccent,
+                                              ),
+                                              title: Text('登出'),
+                                            ),
+                                            value: _MenuItem.logout,
+                                          ),
+                                        ],
+                                    onSelected: (value) async {
+                                      switch (value) {
+                                        case _MenuItem.account:
+                                          showMaterialModalBottomSheet(
+                                              duration:
+                                                  Duration(milliseconds: 200),
+                                              animationCurve: Curves.easeOut,
+                                              enableDrag: false,
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                              barrierColor: Colors.black87,
+                                              context: context,
+                                              builder: (context, controller) =>
+                                                  UserPage(
+                                                    user: viewModel.sessionUser,
+                                                  ));
+                                          break;
+                                        case _MenuItem.licences:
+                                          PackageInfo info =
+                                              await PackageInfo.fromPlatform();
+                                          showLicensePage(
+                                            context: context,
+                                            applicationName: 'hkGalden',
+                                            applicationIcon: SvgPicture.asset(
+                                              'assets/icon-hkgalden.svg',
+                                              width: 50,
+                                              height: 50,
+                                              color:
+                                                  Theme.of(context).accentColor,
+                                            ),
+                                            applicationVersion:
+                                                '${info.version}+${info.buildNumber}',
+                                            applicationLegalese:
+                                                '© hkGalden & 1080',
+                                          );
+                                          break;
+                                        case _MenuItem.logout:
+                                          viewModel.onLogout();
+                                          break;
+                                        default:
+                                      }
+                                    },
+                                    icon: Icon(Icons.apps_rounded)),
                               )
                             : IconButton(
+                                visualDensity: VisualDensity.compact,
                                 icon: Icon(Icons.login_rounded),
                                 onPressed: () => Navigator.of(context).push(
                                     SlideInFromBottomRoute(page: LoginPage())))

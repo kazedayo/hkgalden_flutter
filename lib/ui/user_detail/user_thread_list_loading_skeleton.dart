@@ -7,12 +7,12 @@ class UserThreadListLoadingSkeleton extends StatelessWidget {
       child: ListView.builder(
           physics: NeverScrollableScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: 12),
-          itemCount: 5,
+          itemCount: 10,
           itemBuilder: (context, index) => ListTile(
                 title: Container(
                   height: 30,
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(100),
                       color: Colors.grey),
                 ),
                 trailing: Chip(label: Text('haha')),
