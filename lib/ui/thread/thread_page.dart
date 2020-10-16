@@ -452,6 +452,9 @@ class _PageFooter extends StatelessWidget {
                     height: 85,
                     child: Center(
                       child: FlatButton.icon(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(100)),
+                          clipBehavior: Clip.hardEdge,
                           onPressed: () => onTap(),
                           icon: isLoading
                               ? ProgressSpinner()
