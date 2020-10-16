@@ -176,10 +176,10 @@ class _CommentCellState extends State<CommentCell> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Theme(
-                  data: Theme.of(context).copyWith(
-                      splashColor: Colors.transparent,
-                      highlightColor: Colors.transparent),
+                Material(
+                  elevation: 6,
+                  shape: CircleBorder(),
+                  clipBehavior: Clip.hardEdge,
                   child: PopupMenuButton(
                     itemBuilder: (context) => [
                       PopupMenuItem(
@@ -270,9 +270,15 @@ class _CommentCellState extends State<CommentCell> {
                     ),
                   ),
                 ),
+                SizedBox(
+                  width: 5,
+                ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    SizedBox(
+                      height: 3,
+                    ),
                     Text(
                       widget.reply.authorNickname,
                       style: Theme.of(context).textTheme.caption.copyWith(
@@ -286,9 +292,6 @@ class _CommentCellState extends State<CommentCell> {
                     ),
                     Text('#${widget.reply.floor}',
                         style: Theme.of(context).textTheme.caption),
-                    SizedBox(
-                      height: 6,
-                    )
                   ],
                 )
               ],

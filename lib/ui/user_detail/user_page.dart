@@ -35,7 +35,7 @@ class UserPage extends StatelessWidget {
             left: 16,
             top: 16,
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AvatarWidget(
                   avatarImage: user.avatar == ''
@@ -57,6 +57,9 @@ class UserPage extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    SizedBox(
+                      height: 3,
+                    ),
                     Text(
                       user.nickName,
                       style: Theme.of(context).textTheme.bodyText1.copyWith(
@@ -69,9 +72,6 @@ class UserPage extends StatelessWidget {
                     ),
                     Text(user.userId,
                         style: Theme.of(context).textTheme.caption),
-                    SizedBox(
-                      height: 13,
-                    )
                   ],
                 ),
               ],
