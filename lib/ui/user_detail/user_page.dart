@@ -40,10 +40,10 @@ class UserPage extends StatelessWidget {
                 AvatarWidget(
                   avatarImage: user.avatar == ''
                       ? SvgPicture.asset('assets/icon-hkgalden.svg',
-                          width: 30, height: 30, color: Colors.grey)
+                          width: 25, height: 25, color: Colors.grey)
                       : CachedNetworkImage(
-                          width: 30,
-                          height: 30,
+                          width: 25,
+                          height: 25,
                           imageUrl: user.avatar,
                           placeholder: (context, url) => SizedBox.fromSize(
                             size: Size.square(30),

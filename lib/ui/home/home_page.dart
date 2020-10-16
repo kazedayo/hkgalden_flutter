@@ -19,6 +19,7 @@ import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton_cell.da
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
 import 'package:hkgalden_flutter/ui/login_page.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
+import 'package:hkgalden_flutter/ui/user_detail/block_list_page.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
@@ -210,6 +211,19 @@ class _HomePageState extends State<HomePage>
                                                   UserPage(
                                                     user: viewModel.sessionUser,
                                                   ));
+                                          break;
+                                        case _MenuItem.blocklist:
+                                          showMaterialModalBottomSheet(
+                                              duration:
+                                                  Duration(milliseconds: 200),
+                                              animationCurve: Curves.easeOut,
+                                              enableDrag: false,
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                              barrierColor: Colors.black87,
+                                              context: context,
+                                              builder: (context, controller) =>
+                                                  BlockListPage());
                                           break;
                                         case _MenuItem.licences:
                                           PackageInfo info =
@@ -426,35 +440,32 @@ class _HomePageState extends State<HomePage>
             ConstrainedBox(
               constraints:
                   BoxConstraints(maxHeight: displayHeight(context) / 2),
-              child: SafeArea(
-                top: false,
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  shrinkWrap: true,
-                  itemCount:
-                      (thread.replies.last.floor.toDouble() / 50.0).ceil(),
-                  itemBuilder: (context, index) => Card(
-                    color: Colors.transparent,
-                    elevation: 0,
-                    clipBehavior: Clip.hardEdge,
-                    margin: EdgeInsets.symmetric(horizontal: 8),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    child: SimpleDialogOption(
-                      padding: EdgeInsets.all(16.0),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        navigatorKey.currentState.pushNamed('/Thread',
-                            arguments: ThreadPageArguments(
-                                threadId: thread.threadId,
-                                title: thread.title,
-                                page: index + 1,
-                                locked: thread.status == 'locked'));
-                      },
-                      child: Text(
-                        '第 ${index + 1} 頁',
-                        style: Theme.of(context).textTheme.subtitle1,
-                      ),
+              child: ListView.builder(
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).padding.bottom),
+                shrinkWrap: true,
+                itemCount: (thread.replies.last.floor.toDouble() / 50.0).ceil(),
+                itemBuilder: (context, index) => Card(
+                  color: Colors.transparent,
+                  elevation: 0,
+                  clipBehavior: Clip.hardEdge,
+                  margin: EdgeInsets.symmetric(horizontal: 8),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  child: SimpleDialogOption(
+                    padding: EdgeInsets.all(16.0),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      navigatorKey.currentState.pushNamed('/Thread',
+                          arguments: ThreadPageArguments(
+                              threadId: thread.threadId,
+                              title: thread.title,
+                              page: index + 1,
+                              locked: thread.status == 'locked'));
+                    },
+                    child: Text(
+                      '第 ${index + 1} 頁',
+                      style: Theme.of(context).textTheme.subtitle1,
                     ),
                   ),
                 ),

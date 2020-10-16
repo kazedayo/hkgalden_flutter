@@ -5,8 +5,9 @@ class BlockedUsersLoadingSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Shimmer.fromColors(
       child: ListView.builder(
+        padding: EdgeInsets.zero,
         physics: NeverScrollableScrollPhysics(),
-        itemCount: 4,
+        itemCount: 10,
         itemBuilder: (context, index) => ListTile(
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           leading: Container(
