@@ -66,7 +66,6 @@ class MyApp extends StatelessWidget {
 
   ThemeData _generateTheme(BuildContext context) {
     var baseTheme = ThemeData(
-      //fontFamily: "NotoSansTC",
       chipTheme: Theme.of(context).chipTheme.copyWith(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(6))),
@@ -79,8 +78,6 @@ class MyApp extends StatelessWidget {
                 topLeft: Radius.circular(16), topRight: Radius.circular(16))),
       ),
       brightness: Brightness.dark,
-      // splashColor: Colors.transparent,
-      // highlightColor: Colors.transparent,
       popupMenuTheme: PopupMenuThemeData(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),

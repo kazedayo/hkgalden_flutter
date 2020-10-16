@@ -44,17 +44,11 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
             return ContainerSpan(
               shrinkWrap: true,
               newContext: context,
-              child: GestureDetector(
-                  onTap: () => _imageLoadingHasError
-                      ? null
-                      : _showImageView(
-                          context.buildContext,
-                          attributes['src'],
-                          '${widget.floor}_${attributes['src']}_$_randomHash',
-                        ),
-                  child: Hero(
-                    tag: '${widget.floor}_${attributes['src']}_$_randomHash',
-                    child: CachedNetworkImage(
+              child: Hero(
+                tag: '${widget.floor}_${attributes['src']}_$_randomHash',
+                child: Stack(
+                  children: [
+                    CachedNetworkImage(
                       //memCacheWidth: displayWidth(context.buildContext).toInt(),
                       imageUrl: attributes['src'],
                       placeholder: (context, url) => Padding(
@@ -66,7 +60,22 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                         return ImageLoadingError(error.toString());
                       },
                     ),
-                  )),
+                    Positioned.fill(
+                        child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => _imageLoadingHasError
+                            ? null
+                            : _showImageView(
+                                context.buildContext,
+                                attributes['src'],
+                                '${widget.floor}_${attributes['src']}_$_randomHash',
+                              ),
+                      ),
+                    ))
+                  ],
+                ),
+              ),
             );
           },
           'icon': (context, __, attributes, ____) {

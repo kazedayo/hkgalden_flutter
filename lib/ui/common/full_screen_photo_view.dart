@@ -41,7 +41,9 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
               Spacer(),
               ActionBarSpinner(isVisible: _isDownloadingImage),
               Builder(
-                builder: (context) => GestureDetector(
+                builder: (context) => FlatButton(
+                    shape: CircleBorder(),
+                    clipBehavior: Clip.hardEdge,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text.rich(
@@ -55,7 +57,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
                         ]),
                       ),
                     ),
-                    onTap: _isDownloadingImage
+                    onPressed: _isDownloadingImage
                         ? null
                         : () => _saveImage(context, widget.url)),
               ),
