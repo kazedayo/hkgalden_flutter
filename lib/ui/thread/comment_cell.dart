@@ -89,7 +89,6 @@ class _CommentCellState extends State<CommentCell> {
                             child: Visibility(
                               visible: !widget.threadLocked,
                               child: IconButton(
-                                  visualDensity: VisualDensity.compact,
                                   icon: Icon(Icons.format_quote),
                                   onPressed: () => widget.canReply
                                       ? Theme.of(context).platform ==
@@ -138,7 +137,6 @@ class _CommentCellState extends State<CommentCell> {
                             ),
                           ),
                           // IconButton(
-                          //     visualDensity: VisualDensity.compact,
                           //     icon: Icon(Icons.flag),
                           //     onPressed: () => showModal<void>(
                           //           context: context,
@@ -189,7 +187,6 @@ class _CommentCellState extends State<CommentCell> {
                             .copyWith(color: Colors.white),
                         child: ListTile(
                           dense: true,
-                          visualDensity: VisualDensity.compact,
                           leading: Icon(Icons.account_box_rounded),
                           title: Text('會員檔案'),
                         ),
@@ -198,7 +195,6 @@ class _CommentCellState extends State<CommentCell> {
                       PopupMenuItem(
                         child: ListTile(
                           dense: true,
-                          visualDensity: VisualDensity.compact,
                           leading: Icon(
                             Icons.block_outlined,
                             color: Colors.redAccent,

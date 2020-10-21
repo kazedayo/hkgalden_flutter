@@ -28,8 +28,6 @@ class ListLoadingSkeletonCell extends StatelessWidget {
                     ),
                     Spacer(),
                     Chip(
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      visualDensity: VisualDensity.compact,
                       label: Text('#哈哈'),
                       //labelPadding: EdgeInsets.zero,
                       backgroundColor: Colors.grey,

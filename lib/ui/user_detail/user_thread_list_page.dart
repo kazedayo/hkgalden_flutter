@@ -32,9 +32,6 @@ class UserThreadListPage extends StatelessWidget {
                                 viewModel.userThreads[index].title,
                               ),
                               trailing: Chip(
-                                materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                visualDensity: VisualDensity.compact,
                                 label: Text(
                                   '#${viewModel.userThreads[index].tagName}',
                                   strutStyle: StrutStyle(height: 1.25),

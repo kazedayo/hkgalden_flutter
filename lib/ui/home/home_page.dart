@@ -151,8 +151,6 @@ class _HomePageState extends State<HomePage>
                                           PopupMenuItem(
                                             child: ListTile(
                                               dense: true,
-                                              visualDensity:
-                                                  VisualDensity.compact,
                                               leading: Icon(
                                                   Icons.account_box_rounded),
                                               title: Text('個人檔案'),
@@ -162,8 +160,6 @@ class _HomePageState extends State<HomePage>
                                           PopupMenuItem(
                                             child: ListTile(
                                               dense: true,
-                                              visualDensity:
-                                                  VisualDensity.compact,
                                               leading:
                                                   Icon(Icons.block_rounded),
                                               title: Text('封鎖名單'),
@@ -173,8 +169,6 @@ class _HomePageState extends State<HomePage>
                                           PopupMenuItem(
                                             child: ListTile(
                                               dense: true,
-                                              visualDensity:
-                                                  VisualDensity.compact,
                                               leading:
                                                   Icon(Icons.copyright_rounded),
                                               title: Text('版權資訊'),
@@ -184,8 +178,6 @@ class _HomePageState extends State<HomePage>
                                           PopupMenuItem(
                                             child: ListTile(
                                               dense: true,
-                                              visualDensity:
-                                                  VisualDensity.compact,
                                               leading: Icon(
                                                 Icons.logout,
                                                 color: Colors.redAccent,
@@ -253,7 +245,6 @@ class _HomePageState extends State<HomePage>
                                     icon: Icon(Icons.apps_rounded)),
                               )
                             : IconButton(
-                                visualDensity: VisualDensity.compact,
                                 icon: Icon(Icons.login_rounded),
                                 onPressed: () => Navigator.of(context).push(
                                     SlideInFromBottomRoute(page: LoginPage())))
@@ -481,7 +472,6 @@ class _HomePageState extends State<HomePage>
 class _LeadingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => IconButton(
-        //visualDensity: VisualDensity.compact,
         icon: AnimatedIcon(
           icon: AnimatedIcons.close_menu,
           progress: Backdrop.of(context).controller.view,

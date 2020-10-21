@@ -66,6 +66,9 @@ class MyApp extends StatelessWidget {
 
   ThemeData _generateTheme(BuildContext context) {
     var baseTheme = ThemeData(
+      visualDensity: VisualDensity.compact,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      splashFactory: InkRipple.splashFactory,
       chipTheme: Theme.of(context).chipTheme.copyWith(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(6))),

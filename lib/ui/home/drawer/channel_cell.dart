@@ -23,7 +23,6 @@ class ChannelCell extends StatelessWidget {
                 ? Theme.of(context).primaryColor
                 : Theme.of(context).scaffoldBackgroundColor,
             child: FlatButton(
-              visualDensity: VisualDensity.compact,
               disabledTextColor: Colors.white,
               onPressed: viewModel.selectedChannelId == channel.channelId
                   ? null
