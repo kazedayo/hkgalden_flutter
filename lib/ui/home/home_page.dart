@@ -406,6 +406,7 @@ class _HomePageState extends State<HomePage>
   void _jumpToPage(Thread thread) {
     HapticFeedback.mediumImpact();
     showMaterialModalBottomSheet(
+      useRootNavigator: true,
       duration: Duration(milliseconds: 200),
       animationCurve: Curves.easeOut,
       enableDrag: false,
