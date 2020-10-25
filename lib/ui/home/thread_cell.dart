@@ -103,6 +103,8 @@ class ThreadCell extends StatelessWidget {
                           Spacer(),
                           Chip(
                             padding: EdgeInsets.zero,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
                             label: Text('#${thread.tagName}',
                                 style: Theme.of(context)
                                     .textTheme
