@@ -211,8 +211,7 @@ class _ComposePageState extends State<ComposePage> {
                                         borderRadius: BorderRadius.circular(6)),
                                     labelText: '標題',
                                     contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 7, vertical: 6.8),
-                                    isDense: true),
+                                        horizontal: 7, vertical: 6.8)),
                                 onChanged: (value) {
                                   setState(() {
                                     _title = value;
