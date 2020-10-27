@@ -73,206 +73,190 @@ class _ComposePageState extends State<ComposePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Scaffold(
-          appBar: AppBar(
-            centerTitle:
-                Theme.of(context).platform == TargetPlatform.iOS ? true : false,
-            title: Text(
-              widget.composeMode == ComposeMode.newPost
-                  ? '發表主題'
-                  : widget.composeMode == ComposeMode.reply
-                      ? '回覆主題'
-                      : '引用回覆 (#${widget.parentReply.floor})',
-              style: Theme.of(context)
-                  .textTheme
-                  .subtitle1
-                  .copyWith(fontWeight: FontWeight.bold),
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle:
+            Theme.of(context).platform == TargetPlatform.iOS ? true : false,
+        title: Text(
+          widget.composeMode == ComposeMode.newPost
+              ? '發表主題'
+              : widget.composeMode == ComposeMode.reply
+                  ? '回覆主題'
+                  : '引用回覆 (#${widget.parentReply.floor})',
+          style: Theme.of(context)
+              .textTheme
+              .subtitle1
+              .copyWith(fontWeight: FontWeight.bold),
+        ),
+        automaticallyImplyLeading: false,
+        actions: <Widget>[
+          ActionBarSpinner(isVisible: _isSending),
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.send_rounded),
+              onPressed: _isSending
+                  ? null
+                  : () async {
+                      setState(() {
+                        _isSending = true;
+                      });
+                      widget.composeMode == ComposeMode.newPost
+                          ? _title == '' ||
+                                  _controller.document.toString() == '/n'
+                              ? showCustomDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    setState(() {
+                                      _isSending = false;
+                                    });
+                                    return CustomAlertDialog(
+                                        title: '注意!', content: '內文/標題不能為空');
+                                  },
+                                )
+                              : _createThread(context)
+                          : _sendReply(context);
+                      // await DeltaJsonParser()
+                      //     .toGaldenHtml(json.decode(_getZefyrEditorContent()));
+                    },
             ),
-            automaticallyImplyLeading: false,
-            actions: <Widget>[
-              ActionBarSpinner(isVisible: _isSending),
-              Builder(
-                builder: (context) => IconButton(
-                  icon: const Icon(Icons.send_rounded),
-                  onPressed: _isSending
-                      ? null
-                      : () async {
-                          setState(() {
-                            _isSending = true;
-                          });
-                          widget.composeMode == ComposeMode.newPost
-                              ? _title == '' ||
-                                      _controller.document.toString() == '/n'
-                                  ? showCustomDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        setState(() {
-                                          _isSending = false;
-                                        });
-                                        return CustomAlertDialog(
-                                            title: '注意!', content: '內文/標題不能為空');
-                                      },
-                                    )
-                                  : _createThread(context)
-                              : _sendReply(context);
-                          // await DeltaJsonParser()
-                          //     .toGaldenHtml(json.decode(_getZefyrEditorContent()));
-                        },
-                ),
-              ),
-            ],
           ),
-          body: ZefyrTheme(
-            data: ZefyrThemeData(
-              paragraph: TextBlockTheme(
-                spacing: VerticalSpacing.zero(),
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText2
-                    .copyWith(fontSize: FontSize.large.size, height: 1.25),
-              ),
-              link: TextStyle(
-                  decoration: TextDecoration.none, color: Colors.blueAccent),
-              heading1: TextBlockTheme(
-                spacing: VerticalSpacing.zero(),
-                style: Theme.of(context).textTheme.bodyText2.copyWith(
-                    fontWeight: FontWeight.normal, fontSize: 33, height: 1.25),
-              ),
-              heading2: TextBlockTheme(
-                spacing: VerticalSpacing.zero(),
-                style: Theme.of(context).textTheme.bodyText2.copyWith(
-                    fontWeight: FontWeight.normal,
-                    fontSize: FontSize.xxLarge.size,
-                    height: 1.25),
-              ),
-              heading3: TextBlockTheme(
-                spacing: VerticalSpacing.zero(),
-                style: Theme.of(context).textTheme.bodyText2.copyWith(
-                    fontWeight: FontWeight.normal,
-                    fontSize: FontSize.xLarge.size,
-                    height: 1.25),
-              ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                widget.composeMode == ComposeMode.newPost
-                    ? Container(
-                        height: 34,
-                        margin: EdgeInsets.fromLTRB(12, 8, 12, 0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            PopupMenuButton(
-                              itemBuilder: (context) => [
-                                PopupMenuItem(
-                                    child: SizedBox(
-                                  height: displayHeight(context) / 2,
-                                  child: _TagSelectDialog(
-                                    onTagSelect: (tag, channelId) {
-                                      Navigator.of(context).pop();
-                                      FocusScope.of(context)
-                                          .requestFocus(_currentFocusNode);
-                                      setState(() {
-                                        _tag = tag;
-                                        _channelId = channelId;
-                                      });
-                                    },
-                                  ),
-                                ))
-                              ],
-                              child: Chip(
-                                label: Text('#${_tag.name}',
-                                    strutStyle: StrutStyle(height: 1.25),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .caption
-                                        .copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w700)),
-                                backgroundColor: _tag.color,
-                              ),
-                            ),
-                            SizedBox(
-                              width: 12,
-                            ),
-                            Expanded(
-                              child: TextField(
-                                style: TextStyle(fontSize: 14),
-                                strutStyle: StrutStyle(height: 1.25),
-                                controller: _titleFieldController,
-                                focusNode: _titleFocusNode,
-                                decoration: InputDecoration(
-                                    floatingLabelBehavior:
-                                        FloatingLabelBehavior.never,
-                                    border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(6)),
-                                    labelText: '標題',
-                                    contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 7, vertical: 6.8)),
-                                onChanged: (value) {
+        ],
+      ),
+      body: ZefyrTheme(
+        data: ZefyrThemeData(
+          paragraph: TextBlockTheme(
+            spacing: VerticalSpacing.zero(),
+            style: Theme.of(context)
+                .textTheme
+                .bodyText2
+                .copyWith(fontSize: FontSize.large.size, height: 1.25),
+          ),
+          link: TextStyle(
+              decoration: TextDecoration.none, color: Colors.blueAccent),
+          heading1: TextBlockTheme(
+            spacing: VerticalSpacing.zero(),
+            style: Theme.of(context).textTheme.bodyText2.copyWith(
+                fontWeight: FontWeight.normal, fontSize: 33, height: 1.25),
+          ),
+          heading2: TextBlockTheme(
+            spacing: VerticalSpacing.zero(),
+            style: Theme.of(context).textTheme.bodyText2.copyWith(
+                fontWeight: FontWeight.normal,
+                fontSize: FontSize.xxLarge.size,
+                height: 1.25),
+          ),
+          heading3: TextBlockTheme(
+            spacing: VerticalSpacing.zero(),
+            style: Theme.of(context).textTheme.bodyText2.copyWith(
+                fontWeight: FontWeight.normal,
+                fontSize: FontSize.xLarge.size,
+                height: 1.25),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            widget.composeMode == ComposeMode.newPost
+                ? Container(
+                    height: 34,
+                    margin: EdgeInsets.fromLTRB(12, 8, 12, 0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        PopupMenuButton(
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                                child: SizedBox(
+                              height: displayHeight(context) / 2,
+                              child: _TagSelectDialog(
+                                onTagSelect: (tag, channelId) {
+                                  Navigator.of(context).pop();
+                                  FocusScope.of(context)
+                                      .requestFocus(_currentFocusNode);
                                   setState(() {
-                                    _title = value;
+                                    _tag = tag;
+                                    _channelId = channelId;
                                   });
                                 },
                               ),
-                            )
+                            ))
                           ],
-                        ))
-                    : SizedBox(),
-                widget.composeMode == ComposeMode.quotedReply
-                    ? ConstrainedBox(
-                        constraints: BoxConstraints(
-                            maxHeight: displayHeight(context) / 4),
-                        child: SingleChildScrollView(
-                          reverse: true,
-                          scrollDirection: Axis.vertical,
-                          padding: const EdgeInsets.symmetric(horizontal: 14),
-                          child: StyledHtmlView(
-                            htmlString: HKGaldenHtmlParser().replyWithQuotes(
-                                widget.parentReply,
-                                StoreProvider.of<AppState>(context)),
-                            floor: widget.parentReply.floor,
+                          child: Chip(
+                            label: Text('#${_tag.name}',
+                                strutStyle: StrutStyle(height: 1.25),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .caption
+                                    .copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700)),
+                            backgroundColor: _tag.color,
                           ),
                         ),
-                      )
-                    : SizedBox(),
-                SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: 4),
-                  scrollDirection: Axis.horizontal,
-                  child: ZefyrToolbar.basic(controller: _controller),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: ZefyrEditor(
-                      controller: _controller,
-                      focusNode: _focusNode,
-                      expands: true,
-                      autofocus: true,
-                      keyboardAppearance: Brightness.dark,
+                        SizedBox(
+                          width: 12,
+                        ),
+                        Expanded(
+                          child: TextField(
+                            style: TextStyle(fontSize: 14),
+                            strutStyle: StrutStyle(height: 1.25),
+                            controller: _titleFieldController,
+                            focusNode: _titleFocusNode,
+                            decoration: InputDecoration(
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.never,
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(6)),
+                                labelText: '標題',
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 7, vertical: 6.8)),
+                            onChanged: (value) {
+                              setState(() {
+                                _title = value;
+                              });
+                            },
+                          ),
+                        )
+                      ],
+                    ))
+                : SizedBox(),
+            widget.composeMode == ComposeMode.quotedReply
+                ? ConstrainedBox(
+                    constraints:
+                        BoxConstraints(maxHeight: displayHeight(context) / 4),
+                    child: SingleChildScrollView(
+                      reverse: true,
+                      scrollDirection: Axis.vertical,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      child: StyledHtmlView(
+                        htmlString: HKGaldenHtmlParser().replyWithQuotes(
+                            widget.parentReply,
+                            StoreProvider.of<AppState>(context)),
+                        floor: widget.parentReply.floor,
+                      ),
                     ),
-                  ),
+                  )
+                : SizedBox(),
+            SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 4),
+              scrollDirection: Axis.horizontal,
+              child: ZefyrToolbar.basic(controller: _controller),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: ZefyrEditor(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  expands: true,
+                  autofocus: true,
+                  keyboardAppearance: Brightness.dark,
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
-        Visibility(
-          visible: Theme.of(context).platform == TargetPlatform.iOS,
-          child: Center(
-            heightFactor: 3.5,
-            child: Container(
-              height: 6,
-              width: 40,
-              decoration: BoxDecoration(
-                  color: Colors.grey, borderRadius: BorderRadius.circular(6)),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 

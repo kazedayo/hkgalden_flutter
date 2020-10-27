@@ -342,30 +342,16 @@ class _HomePageState extends State<HomePage>
                         highlightElevation: 1,
                         child: Icon(Icons.create_rounded),
                         onPressed: () => viewModel.isLoggedIn
-                            ? Theme.of(context).platform == TargetPlatform.iOS
-                                ? showCupertinoModalBottomSheet(
-                                    barrierColor: Colors.black.withOpacity(0.5),
-                                    duration: Duration(milliseconds: 300),
-                                    animationCurve: Curves.easeOut,
-                                    context: context,
-                                    builder: (context, controller) =>
-                                        ComposePage(
-                                      composeMode: ComposeMode.newPost,
-                                      onCreateThread: (channelId) =>
-                                          viewModel.onCreateThread(channelId),
-                                    ),
-                                  )
-                                : showBarModalBottomSheet(
-                                    duration: Duration(milliseconds: 300),
-                                    animationCurve: Curves.easeOut,
-                                    context: context,
-                                    builder: (context, controller) =>
-                                        ComposePage(
-                                      composeMode: ComposeMode.newPost,
-                                      onCreateThread: (channelId) =>
-                                          viewModel.onCreateThread(channelId),
-                                    ),
-                                  )
+                            ? showBarModalBottomSheet(
+                                duration: Duration(milliseconds: 300),
+                                animationCurve: Curves.easeOut,
+                                context: context,
+                                builder: (context, controller) => ComposePage(
+                                  composeMode: ComposeMode.newPost,
+                                  onCreateThread: (channelId) =>
+                                      viewModel.onCreateThread(channelId),
+                                ),
+                              )
                             : showCustomDialog(
                                 context: context,
                                 builder: (context) => CustomAlertDialog(
