@@ -92,6 +92,7 @@ class MyApp extends StatelessWidget {
       cursorColor: Color(0xff45c17c),
       textSelectionColor: Color(0xff2d8052),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
+        focusElevation: 1,
         foregroundColor: Colors.white,
       ),
       cupertinoOverrideTheme:

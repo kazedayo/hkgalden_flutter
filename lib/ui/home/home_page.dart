@@ -338,9 +338,10 @@ class _HomePageState extends State<HomePage>
                     Theme.of(context).scaffoldBackgroundColor,
                 floatingActionButton: _fabIsHidden
                     ? null
-                    : FloatingActionButton(
+                    : FloatingActionButton.extended(
                         highlightElevation: 1,
-                        child: Icon(Icons.create_rounded),
+                        icon: Icon(Icons.create_rounded),
+                        label: Text('發表主題'),
                         onPressed: () => viewModel.isLoggedIn
                             ? Theme.of(context).platform == TargetPlatform.iOS
                                 ? showCupertinoModalBottomSheet(
