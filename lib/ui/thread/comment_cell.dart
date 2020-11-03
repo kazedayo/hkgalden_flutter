@@ -91,42 +91,21 @@ class _CommentCellState extends State<CommentCell> {
                               child: IconButton(
                                   icon: Icon(Icons.format_quote),
                                   onPressed: () => widget.canReply
-                                      ? Theme.of(context).platform ==
-                                              TargetPlatform.iOS
-                                          ? showCupertinoModalBottomSheet(
-                                              barrierColor:
-                                                  Colors.black.withOpacity(0.5),
-                                              duration:
-                                                  Duration(milliseconds: 300),
-                                              animationCurve: Curves.easeOut,
-                                              context: context,
-                                              builder: (context, controller) =>
-                                                  ComposePage(
-                                                composeMode:
-                                                    ComposeMode.quotedReply,
-                                                threadId: widget.threadId,
-                                                parentReply: widget.reply,
-                                                onSent: (reply) {
-                                                  widget.onSent(reply);
-                                                },
-                                              ),
-                                            )
-                                          : showBarModalBottomSheet(
-                                              duration:
-                                                  Duration(milliseconds: 300),
-                                              animationCurve: Curves.easeOut,
-                                              context: context,
-                                              builder: (context, controller) =>
-                                                  ComposePage(
-                                                composeMode:
-                                                    ComposeMode.quotedReply,
-                                                threadId: widget.threadId,
-                                                parentReply: widget.reply,
-                                                onSent: (reply) {
-                                                  widget.onSent(reply);
-                                                },
-                                              ),
-                                            )
+                                      ? showBarModalBottomSheet(
+                                          duration: Duration(milliseconds: 300),
+                                          animationCurve: Curves.easeOut,
+                                          context: context,
+                                          builder: (context, controller) =>
+                                              ComposePage(
+                                            composeMode:
+                                                ComposeMode.quotedReply,
+                                            threadId: widget.threadId,
+                                            parentReply: widget.reply,
+                                            onSent: (reply) {
+                                              widget.onSent(reply);
+                                            },
+                                          ),
+                                        )
                                       : showCustomDialog(
                                           context: context,
                                           builder: (context) =>
