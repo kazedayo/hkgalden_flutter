@@ -338,10 +338,8 @@ class _HomePageState extends State<HomePage>
                     Theme.of(context).scaffoldBackgroundColor,
                 floatingActionButton: _fabIsHidden
                     ? null
-                    : FloatingActionButton.extended(
-                        highlightElevation: 1,
-                        icon: Icon(Icons.create_rounded),
-                        label: Text('發表主題'),
+                    : FloatingActionButton(
+                        child: Icon(Icons.create_rounded),
                         onPressed: () => viewModel.isLoggedIn
                             ? showBarModalBottomSheet(
                                 duration: Duration(milliseconds: 300),

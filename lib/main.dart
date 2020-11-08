@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -19,6 +20,7 @@ import 'package:redux/redux.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  GestureBinding.instance.resamplingEnabled = true;
   runApp(MyApp());
 }
 
@@ -91,6 +93,7 @@ class MyApp extends StatelessWidget {
       textSelectionColor: Color(0xff2d8052),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         focusElevation: 1,
+        highlightElevation: 1,
         foregroundColor: Colors.white,
       ),
       cupertinoOverrideTheme:

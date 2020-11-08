@@ -202,12 +202,12 @@ class _ThreadPageState extends State<ThreadPage> {
                       ),
                     ],
                   ),
-            floatingActionButton: _fabIsHidden || viewModel.status == 'locked'
-                //|| (viewModel.isLoading && viewModel.isInitialLoad)
+            floatingActionButton: _fabIsHidden ||
+                    viewModel.status == 'locked' ||
+                    (viewModel.isLoading && viewModel.isInitialLoad)
                 ? null
-                : FloatingActionButton.extended(
-                    icon: Icon(Icons.reply_rounded),
-                    label: Text('回覆'),
+                : FloatingActionButton(
+                    child: Icon(Icons.reply_rounded),
                     onPressed: () => !_canReply
                         ? showCustomDialog(
                             context: context,
