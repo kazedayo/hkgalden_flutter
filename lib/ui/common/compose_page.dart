@@ -13,6 +13,7 @@ import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
+import 'package:hkgalden_flutter/utils/custom_icons.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:hkgalden_flutter/viewmodels/tag_selector_view_model.dart';
 import 'package:zefyr/zefyr.dart';
@@ -159,7 +160,7 @@ class _ComposePageState extends State<ComposePage> {
             widget.composeMode == ComposeMode.newPost
                 ? Container(
                     height: 34,
-                    margin: EdgeInsets.fromLTRB(12, 8, 12, 0),
+                    margin: EdgeInsets.fromLTRB(12, 8, 12, 8),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
@@ -194,7 +195,7 @@ class _ComposePageState extends State<ComposePage> {
                           ),
                         ),
                         SizedBox(
-                          width: 12,
+                          width: 8,
                         ),
                         Expanded(
                           child: TextField(
@@ -237,22 +238,48 @@ class _ComposePageState extends State<ComposePage> {
                     ),
                   )
                 : SizedBox(),
-            SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 4),
-              scrollDirection: Axis.horizontal,
-              child: ZefyrToolbar.basic(controller: _controller),
-            ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: ZefyrEditor(
                   controller: _controller,
                   focusNode: _focusNode,
+                  textCapitalization: TextCapitalization.none,
                   expands: true,
                   autofocus: true,
                   keyboardAppearance: Brightness.dark,
                 ),
               ),
+            ),
+            ZefyrToolbar(
+              children: [
+                ToggleStyleButton(
+                    attribute: NotusAttribute.bold,
+                    icon: Icons.format_bold,
+                    controller: _controller),
+                ToggleStyleButton(
+                    attribute: NotusAttribute.italic,
+                    icon: Icons.format_italic,
+                    controller: _controller),
+                VerticalDivider(
+                    indent: 16, endIndent: 16, color: Colors.grey.shade400),
+                ToggleStyleButton(
+                  attribute: NotusAttribute.h1,
+                  icon: CustomIcons.format_header_1,
+                  controller: _controller,
+                ),
+                ToggleStyleButton(
+                    attribute: NotusAttribute.h2,
+                    icon: CustomIcons.format_header_2,
+                    controller: _controller),
+                ToggleStyleButton(
+                    attribute: NotusAttribute.h3,
+                    icon: CustomIcons.format_header_3,
+                    controller: _controller),
+                VerticalDivider(
+                    indent: 16, endIndent: 16, color: Colors.grey.shade400),
+                LinkStyleButton(controller: _controller)
+              ],
             ),
           ],
         ),
