@@ -125,6 +125,7 @@ class _ComposePageState extends State<ComposePage> {
       ),
       body: ZefyrTheme(
         data: ZefyrThemeData(
+          strikethrough: TextStyle(decoration: TextDecoration.lineThrough),
           paragraph: TextBlockTheme(
             spacing: VerticalSpacing.zero(),
             style: Theme.of(context)
@@ -262,6 +263,15 @@ class _ComposePageState extends State<ComposePage> {
                   ToggleStyleButton(
                       attribute: NotusAttribute.italic,
                       icon: Icons.format_italic,
+                      controller: _controller),
+                  ToggleStyleButton(
+                    attribute: NotusAttribute.underline,
+                    icon: Icons.format_underline,
+                    controller: _controller,
+                  ),
+                  ToggleStyleButton(
+                      attribute: NotusAttribute.strikethrough,
+                      icon: Icons.format_strikethrough,
                       controller: _controller),
                   VerticalDivider(
                       indent: 16, endIndent: 16, color: Colors.grey.shade400),
