@@ -219,7 +219,7 @@ class _ThreadPageState extends State<ThreadPage> {
                             duration: Duration(milliseconds: 300),
                             animationCurve: Curves.easeOut,
                             context: context,
-                            builder: (context, controller) => ComposePage(
+                            builder: (context) => ComposePage(
                               composeMode: ComposeMode.reply,
                               threadId: viewModel.threadId,
                               onSent: (reply) {

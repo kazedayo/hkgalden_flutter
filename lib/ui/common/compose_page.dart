@@ -251,36 +251,39 @@ class _ComposePageState extends State<ComposePage> {
                 ),
               ),
             ),
-            ZefyrToolbar(
-              children: [
-                ToggleStyleButton(
-                    attribute: NotusAttribute.bold,
-                    icon: Icons.format_bold,
-                    controller: _controller),
-                ToggleStyleButton(
-                    attribute: NotusAttribute.italic,
-                    icon: Icons.format_italic,
-                    controller: _controller),
-                VerticalDivider(
-                    indent: 16, endIndent: 16, color: Colors.grey.shade400),
-                ToggleStyleButton(
-                  attribute: NotusAttribute.h1,
-                  icon: CustomIcons.format_header_1,
-                  controller: _controller,
-                ),
-                ToggleStyleButton(
-                    attribute: NotusAttribute.h2,
-                    icon: CustomIcons.format_header_2,
-                    controller: _controller),
-                ToggleStyleButton(
-                    attribute: NotusAttribute.h3,
-                    icon: CustomIcons.format_header_3,
-                    controller: _controller),
-                VerticalDivider(
-                    indent: 16, endIndent: 16, color: Colors.grey.shade400),
-                LinkStyleButton(controller: _controller)
-              ],
-            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: ZefyrToolbar(
+                children: [
+                  ToggleStyleButton(
+                      attribute: NotusAttribute.bold,
+                      icon: Icons.format_bold,
+                      controller: _controller),
+                  ToggleStyleButton(
+                      attribute: NotusAttribute.italic,
+                      icon: Icons.format_italic,
+                      controller: _controller),
+                  VerticalDivider(
+                      indent: 16, endIndent: 16, color: Colors.grey.shade400),
+                  ToggleStyleButton(
+                    attribute: NotusAttribute.h1,
+                    icon: CustomIcons.format_header_1,
+                    controller: _controller,
+                  ),
+                  ToggleStyleButton(
+                      attribute: NotusAttribute.h2,
+                      icon: CustomIcons.format_header_2,
+                      controller: _controller),
+                  ToggleStyleButton(
+                      attribute: NotusAttribute.h3,
+                      icon: CustomIcons.format_header_3,
+                      controller: _controller),
+                  VerticalDivider(
+                      indent: 16, endIndent: 16, color: Colors.grey.shade400),
+                  LinkStyleButton(controller: _controller)
+                ],
+              ),
+            )
           ],
         ),
       ),
