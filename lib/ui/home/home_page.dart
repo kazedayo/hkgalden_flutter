@@ -199,8 +199,7 @@ class _HomePageState extends State<HomePage>
                                                   Colors.transparent,
                                               barrierColor: Colors.black87,
                                               context: context,
-                                              builder: (context, controller) =>
-                                                  UserPage(
+                                              builder: (context) => UserPage(
                                                     user: viewModel.sessionUser,
                                                   ));
                                           break;
@@ -214,7 +213,7 @@ class _HomePageState extends State<HomePage>
                                                   Colors.transparent,
                                               barrierColor: Colors.black87,
                                               context: context,
-                                              builder: (context, controller) =>
+                                              builder: (context) =>
                                                   BlockListPage());
                                           break;
                                         case _MenuItem.licences:
@@ -345,7 +344,7 @@ class _HomePageState extends State<HomePage>
                                 duration: Duration(milliseconds: 300),
                                 animationCurve: Curves.easeOut,
                                 context: context,
-                                builder: (context, controller) => ComposePage(
+                                builder: (context) => ComposePage(
                                   composeMode: ComposeMode.newPost,
                                   onCreateThread: (channelId) =>
                                       viewModel.onCreateThread(channelId),
@@ -397,7 +396,7 @@ class _HomePageState extends State<HomePage>
       enableDrag: false,
       barrierColor: Colors.black.withOpacity(0.5),
       context: context,
-      builder: (context, controller) => Theme(
+      builder: (context) => Theme(
         data: Theme.of(context).copyWith(highlightColor: Colors.grey[800]),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -30,6 +30,12 @@ class DeltaJsonParser {
               case 'i':
                 styledInsert = '<span data-nodetype="i">$styledInsert</span>';
                 break;
+              case 'u':
+                styledInsert = '<span data-nodetype="u">$styledInsert</span>';
+                break;
+              case 's':
+                styledInsert = '<span data-nodetype="s">$styledInsert</span>';
+                break;
               case 'heading':
                 //heading自成一行
                 row = '';

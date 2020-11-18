@@ -95,8 +95,7 @@ class _CommentCellState extends State<CommentCell> {
                                           duration: Duration(milliseconds: 300),
                                           animationCurve: Curves.easeOut,
                                           context: context,
-                                          builder: (context, controller) =>
-                                              ComposePage(
+                                          builder: (context) => ComposePage(
                                             composeMode:
                                                 ComposeMode.quotedReply,
                                             threadId: widget.threadId,
@@ -193,7 +192,7 @@ class _CommentCellState extends State<CommentCell> {
                               barrierColor: Colors.black87,
                               context: context,
                               enableDrag: false,
-                              builder: (context, controller) => UserPage(
+                              builder: (context) => UserPage(
                                     user: widget.reply.author,
                                   ));
                           break;
