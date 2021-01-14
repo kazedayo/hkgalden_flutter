@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -100,12 +99,9 @@ class MyApp extends StatelessWidget {
           CupertinoThemeData(primaryColor: Color(0xff45c17c)),
       pageTransitionsTheme: PageTransitionsTheme(builders: {
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-        TargetPlatform.android: SharedAxisPageTransitionsBuilder(
-            transitionType: SharedAxisTransitionType.horizontal,
-            fillColor: Color(0xff1b1f1e)),
+        TargetPlatform.android: ZoomPageTransitionsBuilder(),
       }),
     );
-
     return baseTheme;
   }
 }

@@ -160,7 +160,7 @@ class _ComposePageState extends State<ComposePage> {
           children: <Widget>[
             widget.composeMode == ComposeMode.newPost
                 ? Container(
-                    height: 34,
+                    height: 37,
                     margin: EdgeInsets.fromLTRB(12, 8, 12, 8),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
