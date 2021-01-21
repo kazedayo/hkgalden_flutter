@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/html_parser.dart';
@@ -9,6 +8,8 @@ import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/common/image_loading_error.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
+import 'package:octo_image/octo_image.dart';
+import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class StyledHtmlView extends StatefulWidget {
@@ -48,14 +49,13 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                 tag: '${widget.floor}_${attributes['src']}_$_randomHash',
                 child: Stack(
                   children: [
-                    CachedNetworkImage(
-                      //memCacheWidth: displayWidth(context.buildContext).toInt(),
-                      imageUrl: attributes['src'],
-                      placeholder: (context, url) => Padding(
+                    OctoImage(
+                      image: PCacheImage(attributes['src']),
+                      placeholderBuilder: (context) => Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: ProgressSpinner(),
                       ),
-                      errorWidget: (context, error, stackTrace) {
+                      errorBuilder: (context, error, stackTrace) {
                         _imageLoadingHasError = true;
                         return ImageLoadingError(error.toString());
                       },
@@ -84,9 +84,9 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                 newContext: context,
                 child: Padding(
                   padding: const EdgeInsets.all(3.0),
-                  child: CachedNetworkImage(
-                    imageUrl: attributes['src'],
-                    placeholder: (context, url) => SizedBox(),
+                  child: OctoImage(
+                    image: PCacheImage(attributes['src']),
+                    placeholderBuilder: (context) => SizedBox(),
                   ),
                 ));
           },

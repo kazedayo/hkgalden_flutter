@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -6,6 +5,8 @@ import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_page.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
+import 'package:octo_image/octo_image.dart';
+import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 
 class UserPage extends StatelessWidget {
   final User user;
@@ -41,11 +42,11 @@ class UserPage extends StatelessWidget {
                   avatarImage: user.avatar == ''
                       ? SvgPicture.asset('assets/icon-hkgalden.svg',
                           width: 25, height: 25, color: Colors.grey)
-                      : CachedNetworkImage(
+                      : OctoImage(
                           width: 25,
                           height: 25,
-                          imageUrl: user.avatar,
-                          placeholder: (context, url) => SizedBox.fromSize(
+                          image: PCacheImage(user.avatar),
+                          placeholderBuilder: (context) => SizedBox.fromSize(
                             size: Size.square(30),
                           ),
                         ),

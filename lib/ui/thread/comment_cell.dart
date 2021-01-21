@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +20,8 @@ import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:octo_image/octo_image.dart';
+import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 
 class CommentCell extends StatefulWidget {
   final int threadId;
@@ -230,11 +231,12 @@ class _CommentCellState extends State<CommentCell> {
                       avatarImage: widget.reply.author.avatar == ''
                           ? SvgPicture.asset('assets/icon-hkgalden.svg',
                               width: 25, height: 25, color: Colors.grey)
-                          : CachedNetworkImage(
-                              placeholder: (context, url) => SizedBox.fromSize(
+                          : OctoImage(
+                              placeholderBuilder: (context) =>
+                                  SizedBox.fromSize(
                                 size: Size.square(30),
                               ),
-                              imageUrl: widget.reply.author.avatar,
+                              image: PCacheImage(widget.reply.author.avatar),
                               width: 25,
                               height: 25,
                             ),

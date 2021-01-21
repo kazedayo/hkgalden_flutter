@@ -16,9 +16,11 @@ import 'package:hkgalden_flutter/redux/user_thread_list/user_thread_list_middlew
 import 'package:hkgalden_flutter/ui/startup_animation.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:redux/redux.dart';
+import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await PCacheImage.init(enableInMemory: true);
   GestureBinding.instance.resamplingEnabled = true;
   runApp(MyApp());
 }

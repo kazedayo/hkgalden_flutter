@@ -39,7 +39,8 @@ dependencies:
   date_time_format: 
   universal_html: 
   url_launcher: 
-  cached_network_image: 
+  octo_image: 
+  paulonia_cache_image: 
   animations: 
   image_downloader: 
   auto_size_text: 
