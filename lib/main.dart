@@ -18,7 +18,7 @@ import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:redux/redux.dart';
 import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PCacheImage.init(enableInMemory: true);
   GestureBinding.instance.resamplingEnabled = true;
@@ -47,18 +47,18 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         home: StartupScreen(),
         theme: _generateTheme(context),
-        locale: Locale.fromSubtags(
+        locale: const Locale.fromSubtags(
             languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
-        localizationsDelegates: [
+        localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        supportedLocales: [
-          const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
-          const Locale.fromSubtags(
+        supportedLocales: const [
+          Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+          Locale.fromSubtags(
               languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
-          const Locale.fromSubtags(
+          Locale.fromSubtags(
               languageCode: 'zh', scriptCode: 'Hant', countryCode: 'TW'),
         ],
       ),
@@ -66,7 +66,7 @@ class MyApp extends StatelessWidget {
   }
 
   ThemeData _generateTheme(BuildContext context) {
-    var baseTheme = ThemeData(
+    final baseTheme = ThemeData(
       visualDensity: VisualDensity.compact,
       //materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       splashFactory: InkRipple.splashFactory,
@@ -76,7 +76,7 @@ class MyApp extends StatelessWidget {
       dialogTheme: DialogTheme(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(6))),
-      bottomSheetTheme: BottomSheetThemeData(
+      bottomSheetTheme: const BottomSheetThemeData(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(16), topRight: Radius.circular(16))),
@@ -86,20 +86,20 @@ class MyApp extends StatelessWidget {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
       dividerColor: Colors.grey[800],
-      primaryColor: Color(0xff2e3533),
-      scaffoldBackgroundColor: Color(0xff1b1f1e),
-      appBarTheme: AppBarTheme(color: Color(0xff1b1f1e), elevation: 0),
-      accentColor: Color(0xff45c17c),
-      cursorColor: Color(0xff45c17c),
-      textSelectionColor: Color(0xff2d8052),
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
+      primaryColor: const Color(0xff2e3533),
+      scaffoldBackgroundColor: const Color(0xff1b1f1e),
+      appBarTheme: const AppBarTheme(color: Color(0xff1b1f1e), elevation: 0),
+      accentColor: const Color(0xff45c17c),
+      cursorColor: const Color(0xff45c17c),
+      textSelectionColor: const Color(0xff2d8052),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
         focusElevation: 1,
         highlightElevation: 1,
         foregroundColor: Colors.white,
       ),
       cupertinoOverrideTheme:
-          CupertinoThemeData(primaryColor: Color(0xff45c17c)),
-      pageTransitionsTheme: PageTransitionsTheme(builders: {
+          const CupertinoThemeData(primaryColor: Color(0xff45c17c)),
+      pageTransitionsTheme: const PageTransitionsTheme(builders: {
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         TargetPlatform.android: ZoomPageTransitionsBuilder(),
       }),

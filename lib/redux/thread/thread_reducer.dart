@@ -54,7 +54,7 @@ ThreadState updateThreadReducer(ThreadState state, UpdateThreadAction action) {
 
 ThreadState appendReplyToThreadReducer(
     ThreadState state, AppendReplyToThreadAction action) {
-  List<Reply> replies = state.thread.replies.toList();
+  final List<Reply> replies = state.thread.replies.toList();
   replies.add(action.reply);
   return state.copyWith(thread: state.thread.copyWith(replies: replies));
 }

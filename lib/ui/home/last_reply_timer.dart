@@ -18,7 +18,7 @@ class _LastReplyTimerState extends State<LastReplyTimer> {
 
   @override
   void initState() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _time = DateTimeFormat.relative(widget.time, abbr: true);
       });

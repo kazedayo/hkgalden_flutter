@@ -27,7 +27,7 @@ SessionUserState updateSessionUserReducer(
 
 SessionUserState appendUserToBlockListReducer(
     SessionUserState state, AppendUserToBlockListAction action) {
-  List<String> blockedUsers = state.sessionUser.blockedUsers.toList();
+  final List<String> blockedUsers = state.sessionUser.blockedUsers.toList();
   blockedUsers.add(action.userId);
   return state.copyWith(
       sessionUser: state.sessionUser.copyWith(blockedUsers: blockedUsers));
@@ -38,7 +38,7 @@ SessionUserState removeSessionUserReducer(
   return state.copyWith(
       isLoading: false,
       isLoggedIn: false,
-      sessionUser: User(
+      sessionUser: const User(
         userId: '',
         nickName: '',
         avatar: '',

@@ -7,7 +7,7 @@ import 'package:hkgalden_flutter/redux/thread_list/thread_list_reducer.dart';
 import 'package:hkgalden_flutter/redux/user_thread_list/user_thread_list_reducer.dart';
 
 AppState appReducer(AppState state, dynamic action) {
-  return new AppState(
+  return AppState(
     threadListState: threadListReducer(state.threadListState, action),
     threadState: threadReducer(state.threadState, action),
     channelState: channelReducer(state.channelState, action),

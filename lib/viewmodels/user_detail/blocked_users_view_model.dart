@@ -7,7 +7,7 @@ class BlockedUsersViewModel extends Equatable {
   final bool isLoading;
   final List<User> blockedUsers;
 
-  BlockedUsersViewModel({
+  const BlockedUsersViewModel({
     this.isLoading,
     this.blockedUsers,
   });
@@ -18,5 +18,6 @@ class BlockedUsersViewModel extends Equatable {
         blockedUsers: store.state.blockedUsersState.blockedUsers,
       );
 
+  @override
   List<Object> get props => [isLoading, blockedUsers];
 }

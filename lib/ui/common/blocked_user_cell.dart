@@ -9,7 +9,7 @@ import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 class BlockedUserCell extends StatefulWidget {
   final User user;
 
-  BlockedUserCell({this.user});
+  const BlockedUserCell({this.user});
 
   @override
   _BlockedUserCellState createState() => _BlockedUserCellState();
@@ -32,7 +32,7 @@ class _BlockedUserCellState extends State<BlockedUserCell> {
           });
         },
         child: ListTile(
-          contentPadding: EdgeInsets.symmetric(vertical: 8),
+          contentPadding: const EdgeInsets.symmetric(vertical: 8),
           leading: AvatarWidget(
             avatarImage: widget.user.avatar == ''
                 ? SvgPicture.asset('assets/icon-hkgalden.svg',
@@ -42,7 +42,7 @@ class _BlockedUserCellState extends State<BlockedUserCell> {
                     height: 30,
                     image: PCacheImage(widget.user.avatar),
                     placeholderBuilder: (context) => SizedBox.fromSize(
-                      size: Size.square(30),
+                      size: const Size.square(30),
                     ),
                   ),
             userGroup: widget.user.userGroup,

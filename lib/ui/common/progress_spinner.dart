@@ -29,15 +29,15 @@ class ProgressSpinner extends StatelessWidget {
     //     );
     // }
     return SizedBox.fromSize(
-      size: Size.square(15),
+      size: const Size.square(15),
       child: AspectRatio(
         aspectRatio: 1.0,
         child: Theme.of(context).platform == TargetPlatform.iOS
-            ? CupertinoActivityIndicator()
+            ? const CupertinoActivityIndicator()
             : CircularProgressIndicator(
                 value: value,
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.grey)),
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.grey)),
       ),
     );
   }

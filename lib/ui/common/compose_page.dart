@@ -52,7 +52,7 @@ class _ComposePageState extends State<ComposePage> {
   @override
   void initState() {
     //default to tag '吹水'
-    _tag = Tag(id: '02NP3MVYm', name: '吹水', color: Color(0xff457cb0));
+    _tag = const Tag(id: '02NP3MVYm', name: '吹水', color: Color(0xff457cb0));
     _channelId = '';
     _title = '';
     _controller = ZefyrController(NotusDocument());
@@ -110,7 +110,7 @@ class _ComposePageState extends State<ComposePage> {
                                     setState(() {
                                       _isSending = false;
                                     });
-                                    return CustomAlertDialog(
+                                    return const CustomAlertDialog(
                                         title: '注意!', content: '內文/標題不能為空');
                                   },
                                 )
@@ -125,30 +125,31 @@ class _ComposePageState extends State<ComposePage> {
       ),
       body: ZefyrTheme(
         data: ZefyrThemeData(
-          strikethrough: TextStyle(decoration: TextDecoration.lineThrough),
+          strikethrough:
+              const TextStyle(decoration: TextDecoration.lineThrough),
           paragraph: TextBlockTheme(
-            spacing: VerticalSpacing.zero(),
+            spacing: const VerticalSpacing.zero(),
             style: Theme.of(context)
                 .textTheme
                 .bodyText2
                 .copyWith(fontSize: FontSize.large.size, height: 1.25),
           ),
-          link: TextStyle(
+          link: const TextStyle(
               decoration: TextDecoration.none, color: Colors.blueAccent),
           heading1: TextBlockTheme(
-            spacing: VerticalSpacing.zero(),
+            spacing: const VerticalSpacing.zero(),
             style: Theme.of(context).textTheme.bodyText2.copyWith(
                 fontWeight: FontWeight.normal, fontSize: 33, height: 1.25),
           ),
           heading2: TextBlockTheme(
-            spacing: VerticalSpacing.zero(),
+            spacing: const VerticalSpacing.zero(),
             style: Theme.of(context).textTheme.bodyText2.copyWith(
                 fontWeight: FontWeight.normal,
                 fontSize: FontSize.xxLarge.size,
                 height: 1.25),
           ),
           heading3: TextBlockTheme(
-            spacing: VerticalSpacing.zero(),
+            spacing: const VerticalSpacing.zero(),
             style: Theme.of(context).textTheme.bodyText2.copyWith(
                 fontWeight: FontWeight.normal,
                 fontSize: FontSize.xLarge.size,
@@ -158,87 +159,87 @@ class _ComposePageState extends State<ComposePage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            widget.composeMode == ComposeMode.newPost
-                ? Container(
-                    height: 37,
-                    margin: EdgeInsets.fromLTRB(12, 8, 12, 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        PopupMenuButton(
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                                child: SizedBox(
-                              height: displayHeight(context) / 2,
-                              child: _TagSelectDialog(
-                                onTagSelect: (tag, channelId) {
-                                  Navigator.of(context).pop();
-                                  FocusScope.of(context)
-                                      .requestFocus(_currentFocusNode);
-                                  setState(() {
-                                    _tag = tag;
-                                    _channelId = channelId;
-                                  });
-                                },
-                              ),
-                            ))
-                          ],
-                          child: Chip(
-                            label: Text('#${_tag.name}',
-                                strutStyle: StrutStyle(height: 1.25),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .caption
-                                    .copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700)),
-                            backgroundColor: _tag.color,
-                          ),
+            if (widget.composeMode == ComposeMode.newPost)
+              Container(
+                  height: 37,
+                  margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                  child: Row(
+                    children: <Widget>[
+                      PopupMenuButton(
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                              child: SizedBox(
+                            height: displayHeight(context) / 2,
+                            child: _TagSelectDialog(
+                              onTagSelect: (tag, channelId) {
+                                Navigator.of(context).pop();
+                                FocusScope.of(context)
+                                    .requestFocus(_currentFocusNode);
+                                setState(() {
+                                  _tag = tag;
+                                  _channelId = channelId;
+                                });
+                              },
+                            ),
+                          ))
+                        ],
+                        child: Chip(
+                          label: Text('#${_tag.name}',
+                              strutStyle: const StrutStyle(height: 1.25),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .caption
+                                  .copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700)),
+                          backgroundColor: _tag.color,
                         ),
-                        SizedBox(
-                          width: 8,
-                        ),
-                        Expanded(
-                          child: TextField(
-                            style: TextStyle(fontSize: 14),
-                            strutStyle: StrutStyle(height: 1.25),
-                            controller: _titleFieldController,
-                            focusNode: _titleFocusNode,
-                            decoration: InputDecoration(
-                                floatingLabelBehavior:
-                                    FloatingLabelBehavior.never,
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6)),
-                                labelText: '標題',
-                                contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 7, vertical: 6.8)),
-                            onChanged: (value) {
-                              setState(() {
-                                _title = value;
-                              });
-                            },
-                          ),
-                        )
-                      ],
-                    ))
-                : SizedBox(),
-            widget.composeMode == ComposeMode.quotedReply
-                ? ConstrainedBox(
-                    constraints:
-                        BoxConstraints(maxHeight: displayHeight(context) / 4),
-                    child: SingleChildScrollView(
-                      reverse: true,
-                      scrollDirection: Axis.vertical,
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                      child: StyledHtmlView(
-                        htmlString: HKGaldenHtmlParser().replyWithQuotes(
-                            widget.parentReply,
-                            StoreProvider.of<AppState>(context)),
-                        floor: widget.parentReply.floor,
                       ),
-                    ),
-                  )
-                : SizedBox(),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      Expanded(
+                        child: TextField(
+                          style: const TextStyle(fontSize: 14),
+                          strutStyle: const StrutStyle(height: 1.25),
+                          controller: _titleFieldController,
+                          focusNode: _titleFocusNode,
+                          decoration: InputDecoration(
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.never,
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(6)),
+                              labelText: '標題',
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 6.8)),
+                          onChanged: (value) {
+                            setState(() {
+                              _title = value;
+                            });
+                          },
+                        ),
+                      )
+                    ],
+                  ))
+            else
+              const SizedBox(),
+            if (widget.composeMode == ComposeMode.quotedReply)
+              ConstrainedBox(
+                constraints:
+                    BoxConstraints(maxHeight: displayHeight(context) / 4),
+                child: SingleChildScrollView(
+                  reverse: true,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  child: StyledHtmlView(
+                    htmlString: HKGaldenHtmlParser().replyWithQuotes(
+                        widget.parentReply,
+                        StoreProvider.of<AppState>(context)),
+                    floor: widget.parentReply.floor,
+                  ),
+                ),
+              )
+            else
+              const SizedBox(),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -277,16 +278,16 @@ class _ComposePageState extends State<ComposePage> {
                       indent: 16, endIndent: 16, color: Colors.grey.shade400),
                   ToggleStyleButton(
                     attribute: NotusAttribute.h1,
-                    icon: CustomIcons.format_header_1,
+                    icon: CustomIcons.formatHeader1,
                     controller: _controller,
                   ),
                   ToggleStyleButton(
                       attribute: NotusAttribute.h2,
-                      icon: CustomIcons.format_header_2,
+                      icon: CustomIcons.formatHeader2,
                       controller: _controller),
                   ToggleStyleButton(
                       attribute: NotusAttribute.h3,
-                      icon: CustomIcons.format_header_3,
+                      icon: CustomIcons.formatHeader3,
                       controller: _controller),
                   VerticalDivider(
                       indent: 16, endIndent: 16, color: Colors.grey.shade400),
@@ -310,8 +311,8 @@ class _ComposePageState extends State<ComposePage> {
         .createThread(
             _title,
             [_tag.id],
-            await DeltaJsonParser()
-                .toGaldenHtml(json.decode(_getZefyrEditorContent())))
+            await DeltaJsonParser().toGaldenHtml(
+                json.decode(_getZefyrEditorContent()) as List<dynamic>))
         .then((threadId) {
       setState(() {
         _isSending = false;
@@ -319,7 +320,8 @@ class _ComposePageState extends State<ComposePage> {
           Navigator.pop(context);
           widget.onCreateThread(_channelId);
         } else {
-          Scaffold.of(context).showSnackBar(SnackBar(content: Text('主題發表失敗!')));
+          Scaffold.of(context)
+              .showSnackBar(const SnackBar(content: Text('主題發表失敗!')));
         }
       });
     });
@@ -330,7 +332,7 @@ class _ComposePageState extends State<ComposePage> {
         .sendReply(
       widget.threadId,
       await DeltaJsonParser()
-          .toGaldenHtml(json.decode(_getZefyrEditorContent())),
+          .toGaldenHtml(json.decode(_getZefyrEditorContent()) as List<dynamic>),
       parentId: widget.composeMode == ComposeMode.quotedReply
           ? widget.parentReply.replyId
           : '',
@@ -342,7 +344,8 @@ class _ComposePageState extends State<ComposePage> {
           Navigator.pop(context);
           widget.onSent(sentReply);
         } else {
-          Scaffold.of(context).showSnackBar(SnackBar(content: Text('回覆發送失敗!')));
+          Scaffold.of(context)
+              .showSnackBar(const SnackBar(content: Text('回覆發送失敗!')));
         }
       });
     });
@@ -352,7 +355,7 @@ class _ComposePageState extends State<ComposePage> {
 class _TagSelectDialog extends StatelessWidget {
   final Function(Tag, String) onTagSelect;
 
-  _TagSelectDialog({this.onTagSelect});
+  const _TagSelectDialog({this.onTagSelect});
 
   @override
   Widget build(BuildContext context) =>
@@ -365,7 +368,7 @@ class _TagSelectDialog extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: viewModel.channels
                 .map((channel) => Container(
-                      padding: EdgeInsets.symmetric(vertical: 4),
+                      padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
@@ -379,7 +382,8 @@ class _TagSelectDialog extends StatelessWidget {
                             children: channel.tags
                                 .map((tag) => InputChip(
                                       label: Text('#${tag.name}',
-                                          strutStyle: StrutStyle(height: 1.25),
+                                          strutStyle:
+                                              const StrutStyle(height: 1.25),
                                           style: Theme.of(context)
                                               .textTheme
                                               .caption

@@ -13,7 +13,7 @@ class Thread extends Equatable {
   final String tagName;
   final Color tagColor;
 
-  Thread(
+  const Thread(
       {this.threadId,
       this.title,
       this.status,
@@ -22,19 +22,19 @@ class Thread extends Equatable {
       this.tagName,
       this.tagColor});
 
-  factory Thread.fromJson(Map<String, dynamic> json) => new Thread(
-        threadId: json['id'],
-        title: json['title'],
-        status: json['status'],
+  factory Thread.fromJson(Map<String, dynamic> json) => Thread(
+        threadId: json['id'] as int,
+        title: json['title'] as String,
+        status: json['status'] as String,
         replies: (json['replies'] as List<dynamic>)
             .map((reply) => Reply.fromJson(reply))
             .toList(),
-        totalReplies: json['totalReplies'],
-        tagName: json['tags'][0]['name'],
+        totalReplies: json['totalReplies'] as int,
+        tagName: json['tags'][0]['name'] as String,
         tagColor: Color(int.parse('FF${json['tags'][0]['color']}', radix: 16)),
       );
 
-  factory Thread.initial() => Thread(
+  factory Thread.initial() => const Thread(
         threadId: 0,
         title: '',
         status: '',
@@ -64,6 +64,7 @@ class Thread extends Equatable {
     );
   }
 
+  @override
   List<Object> get props =>
       [threadId, title, status, replies, totalReplies, tagName, tagColor];
 }

@@ -51,8 +51,8 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                   children: [
                     OctoImage(
                       image: PCacheImage(attributes['src']),
-                      placeholderBuilder: (context) => Padding(
-                        padding: const EdgeInsets.all(8.0),
+                      placeholderBuilder: (context) => const Padding(
+                        padding: EdgeInsets.all(8.0),
                         child: ProgressSpinner(),
                       ),
                       errorBuilder: (context, error, stackTrace) {
@@ -86,17 +86,17 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                   padding: const EdgeInsets.all(3.0),
                   child: OctoImage(
                     image: PCacheImage(attributes['src']),
-                    placeholderBuilder: (context) => SizedBox(),
+                    placeholderBuilder: (context) => const SizedBox(),
                   ),
                 ));
           },
           'span': (context, child, attributes, element) {
             if (element.className == ('color')) {
-              Style newStyle = context.style.copyWith(
+              final Style newStyle = context.style.copyWith(
                 color: Color(int.parse('FF${attributes['hex']}', radix: 16)),
               );
               return Transform.translate(
-                offset: Offset(0, 1),
+                offset: const Offset(0, 1),
                 child: ContainerSpan(
                   shrinkWrap: true,
                   newContext: RenderContext(
@@ -114,24 +114,24 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
         },
         style: {
           "html": Style(
-            backgroundColor: Colors.transparent,
             fontSize: FontSize.large,
           ),
           "body": Style(
-              margin: EdgeInsets.symmetric(vertical: 15),
+              margin: const EdgeInsets.symmetric(vertical: 15),
               padding: EdgeInsets.zero),
           "a": Style(
               color: Colors.blueAccent, textDecoration: TextDecoration.none),
           "blockquote": Style(
-              border: Border(left: BorderSide(color: Colors.grey, width: 2.3)),
-              padding: EdgeInsets.only(left: 8),
-              margin: EdgeInsets.only(left: 10, right: 0, bottom: 15, top: 0)),
+              border: const Border(
+                  left: BorderSide(color: Colors.grey, width: 2.3)),
+              padding: const EdgeInsets.only(left: 8),
+              margin: const EdgeInsets.only(left: 10, bottom: 15)),
           "div.quoteName": Style(
               fontSize: FontSize.smaller,
               color: Colors.grey,
-              margin: EdgeInsets.symmetric(vertical: 4)),
+              margin: const EdgeInsets.symmetric(vertical: 4)),
           "span.h1": Style(
-            fontSize: FontSize(33),
+            fontSize: const FontSize(33),
             fontWeight: FontWeight.normal,
             margin: EdgeInsets.zero,
           ),
@@ -145,7 +145,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
             fontWeight: FontWeight.normal,
             margin: EdgeInsets.zero,
           ),
-          "p": Style(margin: EdgeInsets.symmetric(vertical: 0)),
+          "p": Style(margin: const EdgeInsets.symmetric()),
           "p.center": Style(textAlign: TextAlign.center),
           "p.right": Style(textAlign: TextAlign.right),
           "img": Style(display: Display.INLINE)
@@ -155,7 +155,8 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
     );
   }
 
-  _launchURL(String url) async {
+  // ignore: always_declare_return_types
+  Future<void> _launchURL(String url) async {
     if (await canLaunch(url)) {
       await launch(url,
           statusBarBrightness: MediaQuery.of(context).platformBrightness);
@@ -164,7 +165,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
     }
   }
 
-  _showImageView(BuildContext context, String url, String heroTag) {
+  void _showImageView(BuildContext context, String url, String heroTag) {
     Navigator.of(context).push(FadeRoute(
         page: FullScreenPhotoView(
       heroTag: heroTag,

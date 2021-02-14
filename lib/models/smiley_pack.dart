@@ -6,18 +6,19 @@ class SmileyPack extends Equatable {
   final String title;
   final List<Smiley> smilies;
 
-  SmileyPack({
+  const SmileyPack({
     this.id,
     this.title,
     this.smilies,
   });
 
   factory SmileyPack.fromJson(Map<String, dynamic> json) => SmileyPack(
-      id: json['id'],
-      title: json['title'],
+      id: json['id'] as String,
+      title: json['title'] as String,
       smilies: (json['smilies'] as List<dynamic>)
-          .map((smiley) => Smiley.fromJson(smiley))
+          .map((smiley) => Smiley.fromJson(smiley as Map<String, dynamic>))
           .toList());
 
+  @override
   List<Object> get props => [id, title, smilies];
 }

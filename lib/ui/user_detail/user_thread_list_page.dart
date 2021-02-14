@@ -9,7 +9,7 @@ import 'package:hkgalden_flutter/viewmodels/user_detail/user_thread_list_view_mo
 class UserThreadListPage extends StatelessWidget {
   final String userId;
 
-  UserThreadListPage({this.userId});
+  const UserThreadListPage({this.userId});
 
   @override
   Widget build(BuildContext context) => ConstrainedBox(
@@ -34,7 +34,7 @@ class UserThreadListPage extends StatelessWidget {
                               trailing: Chip(
                                 label: Text(
                                   '#${viewModel.userThreads[index].tagName}',
-                                  strutStyle: StrutStyle(height: 1.25),
+                                  strutStyle: const StrutStyle(height: 1.25),
                                   style: Theme.of(context)
                                       .textTheme
                                       .caption
@@ -45,7 +45,7 @@ class UserThreadListPage extends StatelessWidget {
                                 backgroundColor:
                                     viewModel.userThreads[index].tagColor,
                               )),
-                          Divider(indent: 8, height: 1, thickness: 1),
+                          const Divider(indent: 8, height: 1, thickness: 1),
                         ],
                       )),
         ),

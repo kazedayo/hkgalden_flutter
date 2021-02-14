@@ -31,7 +31,7 @@ class CommentCell extends StatefulWidget {
   final bool canReply;
   final bool threadLocked;
 
-  CommentCell(
+  const CommentCell(
       {Key key,
       this.threadId,
       this.reply,
@@ -46,7 +46,7 @@ class CommentCell extends StatefulWidget {
 }
 
 class _CommentCellState extends State<CommentCell> {
-  final FullScreenPhotoView photoView = FullScreenPhotoView();
+  final FullScreenPhotoView photoView = const FullScreenPhotoView();
   bool _blockedButtonPressed;
 
   @override
@@ -60,17 +60,17 @@ class _CommentCellState extends State<CommentCell> {
         children: [
           Column(
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 33,
               ),
               Card(
                 elevation: 3,
-                margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
                 color: Theme.of(context).primaryColor,
                 child: Container(
-                  padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -90,10 +90,11 @@ class _CommentCellState extends State<CommentCell> {
                             child: Visibility(
                               visible: !widget.threadLocked,
                               child: IconButton(
-                                  icon: Icon(Icons.format_quote),
+                                  icon: const Icon(Icons.format_quote),
                                   onPressed: () => widget.canReply
                                       ? showBarModalBottomSheet(
-                                          duration: Duration(milliseconds: 300),
+                                          duration:
+                                              const Duration(milliseconds: 300),
                                           animationCurve: Curves.easeOut,
                                           context: context,
                                           builder: (context) => ComposePage(
@@ -109,7 +110,7 @@ class _CommentCellState extends State<CommentCell> {
                                       : showCustomDialog(
                                           context: context,
                                           builder: (context) =>
-                                              CustomAlertDialog(
+                                              const CustomAlertDialog(
                                                 title: '未登入',
                                                 content: '請先登入',
                                               ))),
@@ -155,7 +156,7 @@ class _CommentCellState extends State<CommentCell> {
               children: [
                 Material(
                   elevation: 6,
-                  shape: CircleBorder(),
+                  shape: const CircleBorder(),
                   clipBehavior: Clip.hardEdge,
                   child: PopupMenuButton(
                     itemBuilder: (context) => [
@@ -164,14 +165,15 @@ class _CommentCellState extends State<CommentCell> {
                             .textTheme
                             .caption
                             .copyWith(color: Colors.white),
-                        child: ListTile(
+                        value: _MenuItem.memberinfo,
+                        child: const ListTile(
                           dense: true,
                           leading: Icon(Icons.account_box_rounded),
                           title: Text('會員檔案'),
                         ),
-                        value: _MenuItem.memberinfo,
                       ),
-                      PopupMenuItem(
+                      const PopupMenuItem(
+                        value: _MenuItem.block,
                         child: ListTile(
                           dense: true,
                           leading: Icon(
@@ -180,14 +182,13 @@ class _CommentCellState extends State<CommentCell> {
                           ),
                           title: Text('封鎖會員'),
                         ),
-                        value: _MenuItem.block,
                       ),
                     ],
                     onSelected: (value) {
-                      switch (value) {
+                      switch (value as _MenuItem) {
                         case _MenuItem.memberinfo:
                           showMaterialModalBottomSheet(
-                              duration: Duration(milliseconds: 200),
+                              duration: const Duration(milliseconds: 200),
                               animationCurve: Curves.easeOut,
                               backgroundColor: Colors.transparent,
                               barrierColor: Colors.black87,
@@ -204,7 +205,7 @@ class _CommentCellState extends State<CommentCell> {
                                       .isLoggedIn ==
                                   false
                               ? showCustomDialog(
-                                  builder: (context) => CustomAlertDialog(
+                                  builder: (context) => const CustomAlertDialog(
                                       title: "未登入", content: "請先登入"),
                                 )
                               : HKGaldenApi()
@@ -234,25 +235,23 @@ class _CommentCellState extends State<CommentCell> {
                           : OctoImage(
                               placeholderBuilder: (context) =>
                                   SizedBox.fromSize(
-                                size: Size.square(30),
+                                size: const Size.square(30),
                               ),
                               image: PCacheImage(widget.reply.author.avatar),
                               width: 25,
                               height: 25,
                             ),
-                      userGroup: widget.reply.author.userGroup == null
-                          ? []
-                          : widget.reply.author.userGroup,
+                      userGroup: widget.reply.author.userGroup ?? [],
                     ),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 5,
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       height: 3,
                     ),
                     Text(
@@ -263,7 +262,7 @@ class _CommentCellState extends State<CommentCell> {
                                 : Theme.of(context).colorScheme.sisterColor,
                           ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 3,
                     ),
                     Text('#${widget.reply.floor}',

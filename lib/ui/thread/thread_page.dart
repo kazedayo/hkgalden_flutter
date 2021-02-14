@@ -50,7 +50,7 @@ class _ThreadPageState extends State<ThreadPage> {
   Widget build(BuildContext context) {
     const Key centerKey = ValueKey('second-sliver-list');
     final ThreadPageArguments arguments =
-        ModalRoute.of(context).settings.arguments;
+        ModalRoute.of(context).settings.arguments as ThreadPageArguments;
     return Scaffold(
       body: Builder(
         builder: (context) => StoreConnector<AppState, ThreadPageViewModel>(
@@ -62,55 +62,54 @@ class _ThreadPageState extends State<ThreadPage> {
                 page: arguments.page,
                 isInitialLoad: true));
             _scrollController = PrimaryScrollController.of(context);
-            _scrollController
-              ..addListener(() {
-                if (_scrollController.position.pixels ==
-                    _scrollController.position.maxScrollExtent) {
-                  if (!_onLastPage) {
-                    store.dispatch(RequestThreadAction(
-                      threadId: store.state.threadState.thread.threadId,
-                      page: store.state.threadState.currentPage + 1,
-                      isInitialLoad: false,
-                    ));
-                  }
-                } else if (_scrollController.position.pixels ==
-                    _scrollController.position.minScrollExtent) {
-                  if (store.state.threadState.currentPage != 1 &&
-                      store.state.threadState.endPage <= arguments.page) {
-                    store.dispatch(
-                      RequestThreadAction(
-                          threadId: store.state.threadState.thread.threadId,
-                          page: store.state.threadState.currentPage - 1,
-                          isInitialLoad: false),
-                    );
-                  }
+            _scrollController.addListener(() {
+              if (_scrollController.position.pixels ==
+                  _scrollController.position.maxScrollExtent) {
+                if (!_onLastPage) {
+                  store.dispatch(RequestThreadAction(
+                    threadId: store.state.threadState.thread.threadId,
+                    page: store.state.threadState.currentPage + 1,
+                    isInitialLoad: false,
+                  ));
                 }
-                if (_scrollController.position.userScrollDirection ==
-                        ScrollDirection.reverse &&
-                    !_fabIsHidden) {
-                  setState(() {
-                    _fabIsHidden = true;
-                  });
-                } else if ((_scrollController.position.userScrollDirection ==
-                            ScrollDirection.forward ||
-                        _scrollController.position.pixels ==
-                            _scrollController.position.maxScrollExtent ||
-                        _scrollController.position.pixels == 0.0) &&
-                    _fabIsHidden) {
-                  setState(() {
-                    _fabIsHidden = false;
-                  });
+              } else if (_scrollController.position.pixels ==
+                  _scrollController.position.minScrollExtent) {
+                if (store.state.threadState.currentPage != 1 &&
+                    store.state.threadState.endPage <= arguments.page) {
+                  store.dispatch(
+                    RequestThreadAction(
+                        threadId: store.state.threadState.thread.threadId,
+                        page: store.state.threadState.currentPage - 1,
+                        isInitialLoad: false),
+                  );
                 }
-                double newElevation = _scrollController.position.pixels >
-                        _scrollController.position.minScrollExtent
-                    ? 4.0
-                    : 0.0;
-                if (newElevation != _elevation) {
-                  setState(() {
-                    _elevation = newElevation;
-                  });
-                }
-              });
+              }
+              if (_scrollController.position.userScrollDirection ==
+                      ScrollDirection.reverse &&
+                  !_fabIsHidden) {
+                setState(() {
+                  _fabIsHidden = true;
+                });
+              } else if ((_scrollController.position.userScrollDirection ==
+                          ScrollDirection.forward ||
+                      _scrollController.position.pixels ==
+                          _scrollController.position.maxScrollExtent ||
+                      _scrollController.position.pixels == 0.0) &&
+                  _fabIsHidden) {
+                setState(() {
+                  _fabIsHidden = false;
+                });
+              }
+              final double newElevation = _scrollController.position.pixels >
+                      _scrollController.position.minScrollExtent
+                  ? 4.0
+                  : 0.0;
+              if (newElevation != _elevation) {
+                setState(() {
+                  _elevation = newElevation;
+                });
+              }
+            });
           },
           onDidChange: (viewModel) {
             if ((viewModel.totalReplies.toDouble() / 50.0).ceil() >
@@ -131,46 +130,45 @@ class _ThreadPageState extends State<ThreadPage> {
             resizeToAvoidBottomInset: false,
             key: scaffoldKey,
             appBar: PreferredSize(
-                child: AppBar(
-                  elevation: _elevation,
-                  automaticallyImplyLeading: false,
-                  leading: IconButton(
-                      icon: Icon(
-                          Theme.of(context).platform == TargetPlatform.iOS
-                              ? Icons.arrow_back_ios_rounded
-                              : Icons.arrow_back_rounded),
-                      onPressed: () => Navigator.of(context).pop()),
-                  title: SizedBox(
-                    height: kToolbarHeight * 0.85,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Flexible(
-                          fit: FlexFit.loose,
-                          child: AutoSizeText(
-                            arguments.title,
-                            style: TextStyle(fontWeight: FontWeight.w700),
-                            maxLines: 2,
-                            minFontSize: 14,
-                            maxFontSize: 19,
-                            //overflow: TextOverflow.ellipsis
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    Visibility(
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 16.0),
-                          child: Icon(Icons.lock_rounded),
+              preferredSize: const Size.fromHeight(kToolbarHeight),
+              child: AppBar(
+                elevation: _elevation,
+                automaticallyImplyLeading: false,
+                leading: IconButton(
+                    icon: Icon(Theme.of(context).platform == TargetPlatform.iOS
+                        ? Icons.arrow_back_ios_rounded
+                        : Icons.arrow_back_rounded),
+                    onPressed: () => Navigator.of(context).pop()),
+                title: SizedBox(
+                  height: kToolbarHeight * 0.85,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Flexible(
+                        child: AutoSizeText(
+                          arguments.title,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                          maxLines: 2,
+                          minFontSize: 14,
+                          maxFontSize: 19,
+                          //overflow: TextOverflow.ellipsis
                         ),
-                        visible: arguments.locked)
-                  ],
+                      )
+                    ],
+                  ),
                 ),
-                preferredSize: Size.fromHeight(kToolbarHeight)),
+                actions: [
+                  Visibility(
+                    visible: arguments.locked,
+                    child: const Padding(
+                      padding: EdgeInsets.only(right: 16.0),
+                      child: Icon(Icons.lock_rounded),
+                    ),
+                  )
+                ],
+              ),
+            ),
             body: viewModel.isLoading && viewModel.isInitialLoad
                 ? ThreadPageLoadingSkeleton()
                 : CustomScrollView(
@@ -182,10 +180,9 @@ class _ThreadPageState extends State<ThreadPage> {
                           return _generatePreviousPageSliver(
                               viewModel, index, arguments.page);
                         },
-                            childCount:
-                                viewModel.previousPageReplies.length == 0
-                                    ? 1
-                                    : viewModel.previousPageReplies.length,
+                            childCount: viewModel.previousPageReplies.isEmpty
+                                ? 1
+                                : viewModel.previousPageReplies.length,
                             addAutomaticKeepAlives: false,
                             addRepaintBoundaries: false),
                       ),
@@ -207,16 +204,15 @@ class _ThreadPageState extends State<ThreadPage> {
                     (viewModel.isLoading && viewModel.isInitialLoad)
                 ? null
                 : FloatingActionButton(
-                    child: Icon(Icons.reply_rounded),
                     onPressed: () => !_canReply
                         ? showCustomDialog(
                             context: context,
-                            builder: (context) => CustomAlertDialog(
+                            builder: (context) => const CustomAlertDialog(
                                   title: '未登入',
                                   content: '請先登入',
                                 ))
                         : showBarModalBottomSheet(
-                            duration: Duration(milliseconds: 300),
+                            duration: const Duration(milliseconds: 300),
                             animationCurve: Curves.easeOut,
                             context: context,
                             builder: (context) => ComposePage(
@@ -226,7 +222,9 @@ class _ThreadPageState extends State<ThreadPage> {
                                 _onReplySuccess(viewModel, reply);
                               },
                             ),
-                          )),
+                          ),
+                    child: const Icon(Icons.reply_rounded),
+                  ),
           ),
         ),
       ),
@@ -234,12 +232,13 @@ class _ThreadPageState extends State<ThreadPage> {
   }
 
   void _onReplySuccess(ThreadPageViewModel viewModel, Reply reply) {
-    scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('回覆發送成功!')));
+    scaffoldKey.currentState
+        .showSnackBar(const SnackBar(content: Text('回覆發送成功!')));
     if (_onLastPage) {
       viewModel.appendReply(reply);
       SchedulerBinding.instance.addPostFrameCallback((_) {
         _scrollController.animateTo(_scrollController.position.maxScrollExtent,
-            duration: Duration(milliseconds: 500), curve: Curves.easeOut);
+            duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
       });
     }
   }
@@ -411,10 +410,10 @@ class _PageHeader extends StatelessWidget {
   const _PageHeader({Key key, this.floor}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => SizedBox(
         height: 50,
         child: Center(
-          child: Text(floor == 1 ? '第 1 頁' : '第 ${((floor + 49) ~/ 50)} 頁'),
+          child: Text(floor == 1 ? '第 1 頁' : '第 ${(floor + 49) ~/ 50} 頁'),
         ),
       );
 }
@@ -434,7 +433,7 @@ class _PageFooter extends StatelessWidget {
             ? ThreadPageLoadingSkeletonHeader()
             : Column(
                 children: [
-                  Container(
+                  SizedBox(
                     height: 85,
                     child: Center(
                       child: FlatButton.icon(
@@ -443,8 +442,8 @@ class _PageFooter extends StatelessWidget {
                           clipBehavior: Clip.hardEdge,
                           onPressed: () => onTap(),
                           icon: isLoading
-                              ? ProgressSpinner()
-                              : Icon(
+                              ? const ProgressSpinner()
+                              : const Icon(
                                   Icons.refresh,
                                   size: 25,
                                   color: Colors.grey,
@@ -452,8 +451,8 @@ class _PageFooter extends StatelessWidget {
                           label: Text(
                             isLoading ? '撈緊...' : '重新整理',
                             style: Theme.of(context).textTheme.caption,
-                            strutStyle:
-                                StrutStyle(height: 1.1, forceStrutHeight: true),
+                            strutStyle: const StrutStyle(
+                                height: 1.1, forceStrutHeight: true),
                           )),
                     ),
                   ),

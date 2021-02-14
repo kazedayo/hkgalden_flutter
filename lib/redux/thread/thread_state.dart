@@ -11,7 +11,7 @@ class ThreadState extends Equatable {
   final int endPage;
   final bool isInitialLoad;
 
-  ThreadState(
+  const ThreadState(
       {this.threadIsLoading,
       this.thread,
       this.previousPages,
@@ -46,6 +46,7 @@ class ThreadState extends Equatable {
     );
   }
 
+  @override
   List<Object> get props => [
         threadIsLoading,
         thread,

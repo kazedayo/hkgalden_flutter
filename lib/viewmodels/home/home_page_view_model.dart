@@ -20,7 +20,7 @@ class HomePageViewModel extends Equatable {
   final List<String> blockedUserIds;
   final User sessionUser;
 
-  HomePageViewModel(
+  const HomePageViewModel(
       {this.isLoggedIn,
       this.threads,
       this.title,
@@ -62,6 +62,7 @@ class HomePageViewModel extends Equatable {
         sessionUser: store.state.sessionUserState.sessionUser);
   }
 
+  @override
   List<Object> get props => [
         isLoggedIn,
         threads,

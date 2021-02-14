@@ -14,18 +14,13 @@ class AvatarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-        shape: CircleBorder(),
+        shape: const CircleBorder(),
         elevation: 6,
         clipBehavior: Clip.hardEdge,
         child: Container(
           width: 50,
           height: 50,
           alignment: Alignment.center,
-          child: CircleAvatar(
-            radius: 22,
-            child: avatarImage,
-            backgroundColor: Theme.of(context).primaryColor,
-          ),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.grey[700],
@@ -35,14 +30,21 @@ class AvatarWidget extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      userGroup.first.groupId == 'ADMIN'
-                          ? Color(0xff7435a0)
-                          : Color(0xffe0561d),
-                      userGroup.first.groupId == 'ADMIN'
-                          ? Color(0xff4a72d3)
-                          : Color(0xffd8529a)
+                      if (userGroup.first.groupId == 'ADMIN')
+                        const Color(0xff7435a0)
+                      else
+                        const Color(0xffe0561d),
+                      if (userGroup.first.groupId == 'ADMIN')
+                        const Color(0xff4a72d3)
+                      else
+                        const Color(0xffd8529a)
                     ],
                   ),
+          ),
+          child: CircleAvatar(
+            radius: 22,
+            backgroundColor: Theme.of(context).primaryColor,
+            child: avatarImage,
           ),
         ),
       );

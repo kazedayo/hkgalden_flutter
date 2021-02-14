@@ -8,9 +8,9 @@ class UserThreadListState extends Equatable {
   final int page;
   final List<Thread> userThreadList;
 
-  UserThreadListState({this.isLoading, this.page, this.userThreadList});
+  const UserThreadListState({this.isLoading, this.page, this.userThreadList});
 
-  factory UserThreadListState.initial() => UserThreadListState(
+  factory UserThreadListState.initial() => const UserThreadListState(
         isLoading: true,
         page: 1,
         userThreadList: [],
@@ -27,5 +27,6 @@ class UserThreadListState extends Equatable {
         userThreadList: userThreadList ?? this.userThreadList,
       );
 
+  @override
   List<Object> get props => [isLoading, page, userThreadList];
 }

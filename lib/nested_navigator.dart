@@ -8,6 +8,13 @@ import 'package:hkgalden_flutter/utils/keys.dart';
 class NestedNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) => WillPopScope(
+      onWillPop: () async {
+        navigatorKey.currentState.canPop()
+            ? navigatorKey.currentState.pop()
+            : SystemNavigator.pop();
+        //navigatorKey.currentState.pop();
+        return false;
+      },
       child: Navigator(
         key: navigatorKey,
         observers: [HeroController()],
@@ -15,7 +22,7 @@ class NestedNavigator extends StatelessWidget {
           WidgetBuilder builder;
           switch (settings.name) {
             case '/':
-              builder = (context) => HomePage();
+              builder = (context) => const HomePage();
               break;
             case '/Thread':
               builder = (context) => ThreadPage();
@@ -25,12 +32,5 @@ class NestedNavigator extends StatelessWidget {
           }
           return MaterialPageRoute(builder: builder, settings: settings);
         },
-      ),
-      onWillPop: () async {
-        navigatorKey.currentState.canPop()
-            ? navigatorKey.currentState.pop()
-            : SystemNavigator.pop();
-        //navigatorKey.currentState.pop();
-        return false;
-      });
+      ));
 }

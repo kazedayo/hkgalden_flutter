@@ -26,10 +26,10 @@ class _StartupScreenState extends State<StartupScreen>
 
   @override
   void initState() {
-    ParagraphBuilder pb =
+    final ParagraphBuilder pb =
         ParagraphBuilder(ParagraphStyle(locale: window.locale));
     pb.addText('\ud83d\ude01'); // smiley face emoji
-    pb.build().layout(ParagraphConstraints(width: 100));
+    pb.build().layout(const ParagraphConstraints(width: 100));
     super.initState();
     TokenSecureStorage().readToken(onFinish: (value) {
       if (value == null) {
@@ -40,7 +40,7 @@ class _StartupScreenState extends State<StartupScreen>
         });
       } else {
         setState(() {
-          token = value;
+          token = value as String;
         });
       }
     });
@@ -63,7 +63,7 @@ class _StartupScreenState extends State<StartupScreen>
           if (viewModel.threadIsLoading == false &&
               viewModel.channelIsLoading == false &&
               viewModel.sessionUserIsLoading == false) {
-            SizeRoute route = SizeRoute(page: NestedNavigator());
+            final SizeRoute route = SizeRoute(page: NestedNavigator());
             Navigator.of(context).pushReplacement(route);
           }
         },
@@ -83,7 +83,7 @@ class _StartupScreenState extends State<StartupScreen>
         converter: (store) => StartupAnimationViewModel.create(store),
         builder: (BuildContext context, StartupAnimationViewModel viewModel) =>
             Center(
-          child: Container(
+          child: SizedBox(
             width: 300,
             height: 300,
             child: StaggerAnimation(controller: _controller),
@@ -102,7 +102,7 @@ class StaggerAnimation extends StatelessWidget {
         ).animate(
           CurvedAnimation(
             parent: controller,
-            curve: Interval(
+            curve: const Interval(
               0.5,
               0.7,
               curve: Curves.ease,
@@ -115,7 +115,7 @@ class StaggerAnimation extends StatelessWidget {
         ).animate(
           CurvedAnimation(
             parent: controller,
-            curve: Interval(
+            curve: const Interval(
               0.0,
               0.5,
               curve: Curves.bounceOut,
@@ -129,12 +129,13 @@ class StaggerAnimation extends StatelessWidget {
   final Animation<double> size;
 
   Widget _buildAnimation(BuildContext context, Widget child) {
+    // ignore: avoid_unnecessary_containers
     return Container(
       child: Column(
         children: <Widget>[
-          Spacer(),
+          const Spacer(),
           Padding(
-            padding: EdgeInsets.only(bottom: 20),
+            padding: const EdgeInsets.only(bottom: 20),
             child: SizedBox(
               width: size.value,
               height: size.value,
@@ -145,9 +146,9 @@ class StaggerAnimation extends StatelessWidget {
           ),
           Opacity(
             opacity: opacity.value,
-            child: ProgressSpinner(),
+            child: const ProgressSpinner(),
           ),
-          Spacer(),
+          const Spacer(),
         ],
       ),
     );

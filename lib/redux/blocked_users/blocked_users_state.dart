@@ -7,9 +7,9 @@ class BlockedUsersState extends Equatable {
   final bool isLoading;
   final List<User> blockedUsers;
 
-  BlockedUsersState({this.isLoading, this.blockedUsers});
+  const BlockedUsersState({this.isLoading, this.blockedUsers});
 
-  factory BlockedUsersState.initial() => BlockedUsersState(
+  factory BlockedUsersState.initial() => const BlockedUsersState(
         isLoading: true,
         blockedUsers: [],
       );
@@ -23,5 +23,6 @@ class BlockedUsersState extends Equatable {
         blockedUsers: blockedUsers ?? this.blockedUsers,
       );
 
+  @override
   List<Object> get props => [isLoading, blockedUsers];
 }

@@ -4,18 +4,18 @@ import 'package:flutter/material.dart';
 class ImageLoadingError extends StatelessWidget {
   final String error;
 
-  ImageLoadingError(this.error);
+  const ImageLoadingError(this.error);
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
+        const Icon(
           Icons.error_rounded,
           color: Colors.grey,
         ),
-        SizedBox(
+        const SizedBox(
           width: 10,
         ),
         Expanded(

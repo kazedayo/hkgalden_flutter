@@ -18,8 +18,8 @@ class CustomAlertDialog extends StatelessWidget {
               content: Text(content),
               actions: [
                 CupertinoDialogAction(
-                  child: Text('OK'),
                   onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
                 )
               ],
             )
@@ -35,17 +35,18 @@ class CustomAlertDialog extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                   highlightColor: Colors.grey[800],
+                  onPressed: () => Navigator.of(context).pop(),
                   child: Text(
                     'OK',
                     style: TextStyle(color: Theme.of(context).accentColor),
                   ),
-                  onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
             );
 }
 
-void showCustomDialog({BuildContext context, Function(BuildContext) builder}) =>
+void showCustomDialog(
+        {BuildContext context, Widget Function(BuildContext) builder}) =>
     Theme.of(context).platform == TargetPlatform.iOS
         ? showCupertinoDialog(
             context: context,

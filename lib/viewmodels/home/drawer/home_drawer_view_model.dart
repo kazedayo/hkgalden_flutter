@@ -11,7 +11,7 @@ class HomeDrawerViewModel extends Equatable {
   final Function(String) onTap;
   final bool isLoggedIn;
 
-  HomeDrawerViewModel(
+  const HomeDrawerViewModel(
       {this.channels, this.selectedChannelId, this.onTap, this.isLoggedIn});
 
   factory HomeDrawerViewModel.create(Store<AppState> store) {
@@ -26,5 +26,6 @@ class HomeDrawerViewModel extends Equatable {
         isLoggedIn: store.state.sessionUserState.isLoggedIn);
   }
 
+  @override
   List<Object> get props => [channels, selectedChannelId];
 }

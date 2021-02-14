@@ -6,10 +6,11 @@ import 'package:redux/redux.dart';
 
 class ChannelMiddleware extends MiddlewareClass<AppState> {
   @override
-  void call(Store<AppState> store, dynamic action, NextDispatcher next) async {
+  Future<void> call(
+      Store<AppState> store, dynamic action, NextDispatcher next) async {
     next(action);
     if (action is RequestChannelAction) {
-      List<Channel> channels = await HKGaldenApi().getChannelsQuery();
+      final List<Channel> channels = await HKGaldenApi().getChannelsQuery();
       channels == null
           ? next(RequestChannelErrorAction())
           : next(UpdateChannelAction(channels: channels));

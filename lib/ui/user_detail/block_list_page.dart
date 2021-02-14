@@ -17,11 +17,11 @@ class BlockListPage extends StatelessWidget {
           margin: EdgeInsets.zero,
           clipBehavior: Clip.hardEdge,
           color: Theme.of(context).primaryColor,
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(10), topRight: Radius.circular(10))),
           elevation: 6,
-          child: Container(
+          child: SizedBox(
             height: displayHeight(context) / 2,
             child: viewModel.isLoading
                 ? BlockedUsersLoadingSkeleton()

@@ -16,7 +16,7 @@ class AppState extends Equatable {
   final BlockedUsersState blockedUsersState;
   final UserThreadListState userThreadListState;
 
-  AppState({
+  const AppState({
     @required this.threadListState,
     @required this.threadState,
     @required this.channelState,
@@ -53,6 +53,7 @@ class AppState extends Equatable {
     );
   }
 
+  @override
   List<Object> get props => [
         threadListState,
         threadState,

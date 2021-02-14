@@ -19,8 +19,10 @@ class ThreadCell extends StatelessWidget {
         child: Column(
           children: <Widget>[
             InkWell(
+              onTap: () => onTap(),
+              onLongPress: () => onLongPress(),
               child: Container(
-                padding: EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -29,19 +31,20 @@ class ThreadCell extends StatelessWidget {
                           TextSpan(text: thread.title),
                           WidgetSpan(
                               child: thread.status == 'locked'
-                                  ? Icon(
+                                  ? const Icon(
                                       Icons.lock,
                                       size: 15,
                                       color: Colors.grey,
                                     )
-                                  : SizedBox())
+                                  : const SizedBox())
                         ]),
                         style: Theme.of(context).textTheme.subtitle1.copyWith(
                             fontWeight: FontWeight.w500,
                             color: thread.status == 'locked'
                                 ? Colors.grey
                                 : Colors.white)),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
+                    // ignore: avoid_unnecessary_containers
                     Container(
                       //constraints: BoxConstraints.expand(height: 20),
                       child: Row(
@@ -49,10 +52,10 @@ class ThreadCell extends StatelessWidget {
                         children: <Widget>[
                           Text.rich(
                             TextSpan(children: [
-                              WidgetSpan(
+                              const WidgetSpan(
                                   child: Icon(Icons.face_rounded, size: 13),
                                   alignment: PlaceholderAlignment.middle),
-                              WidgetSpan(
+                              const WidgetSpan(
                                   child: SizedBox(
                                 width: 5,
                               )),
@@ -64,13 +67,13 @@ class ThreadCell extends StatelessWidget {
                               )
                             ]),
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text.rich(
                             TextSpan(children: [
-                              WidgetSpan(
+                              const WidgetSpan(
                                   child: Icon(Icons.reply_rounded, size: 13),
                                   alignment: PlaceholderAlignment.middle),
-                              WidgetSpan(
+                              const WidgetSpan(
                                   child: SizedBox(
                                 width: 5,
                               )),
@@ -80,14 +83,14 @@ class ThreadCell extends StatelessWidget {
                               )
                             ]),
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text.rich(
                             TextSpan(children: [
-                              WidgetSpan(
+                              const WidgetSpan(
                                   child:
                                       Icon(Icons.access_time_rounded, size: 13),
                                   alignment: PlaceholderAlignment.middle),
-                              WidgetSpan(
+                              const WidgetSpan(
                                   child: SizedBox(
                                 width: 5,
                               )),
@@ -100,7 +103,7 @@ class ThreadCell extends StatelessWidget {
                               )
                             ]),
                           ),
-                          Spacer(),
+                          const Spacer(),
                           Chip(
                             padding: EdgeInsets.zero,
                             materialTapTargetSize:
@@ -121,10 +124,8 @@ class ThreadCell extends StatelessWidget {
                   ],
                 ),
               ),
-              onTap: () => onTap(),
-              onLongPress: () => onLongPress(),
             ),
-            Divider(height: 1, thickness: 1),
+            const Divider(height: 1, thickness: 1),
           ],
         ),
       );

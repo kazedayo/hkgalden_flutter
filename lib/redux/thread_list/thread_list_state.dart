@@ -10,7 +10,7 @@ class ThreadListState extends Equatable {
   final String currentChannelId;
   final int currentPage;
 
-  ThreadListState({
+  const ThreadListState({
     this.threadListIsLoading,
     this.threads,
     this.isRefresh,
@@ -19,7 +19,7 @@ class ThreadListState extends Equatable {
   });
 
   factory ThreadListState.initial() {
-    return ThreadListState(
+    return const ThreadListState(
       threadListIsLoading: false,
       threads: [],
       isRefresh: false,
@@ -44,5 +44,7 @@ class ThreadListState extends Equatable {
     );
   }
 
-  List<Object> get props => [threadListIsLoading, threads, isRefresh, currentChannelId, currentPage];
+  @override
+  List<Object> get props =>
+      [threadListIsLoading, threads, isRefresh, currentChannelId, currentPage];
 }

@@ -17,7 +17,7 @@ class ThreadPageViewModel extends Equatable {
   final String status;
   final Function(Reply) appendReply;
 
-  ThreadPageViewModel({
+  const ThreadPageViewModel({
     this.threadId,
     this.previousPageReplies,
     this.replies,
@@ -55,6 +55,7 @@ class ThreadPageViewModel extends Equatable {
             store.dispatch(AppendReplyToThreadAction(reply: reply)));
   }
 
+  @override
   List<Object> get props => [
         threadId,
         previousPageReplies,

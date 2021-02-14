@@ -12,7 +12,7 @@ class ChannelCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        margin: EdgeInsets.symmetric(horizontal: 8),
+        margin: const EdgeInsets.symmetric(horizontal: 8),
         child: Center(
           child: Material(
             clipBehavior: Clip.hardEdge,
@@ -36,14 +36,13 @@ class ChannelCell extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Spacer(flex: 1),
+                    const Spacer(),
                     Text(
                       channel.channelName,
                       style: Theme.of(context).textTheme.subtitle2.copyWith(),
                     ),
-                    Spacer(flex: 3),
+                    const Spacer(flex: 3),
                     Container(
                       width: 10,
                       height: 10,
@@ -52,7 +51,7 @@ class ChannelCell extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                     ),
-                    Spacer(flex: 1)
+                    const Spacer()
                   ],
                 ),
               ),

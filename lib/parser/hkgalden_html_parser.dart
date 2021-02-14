@@ -28,7 +28,7 @@ class HKGaldenHtmlParser {
     final htmlDocument = parseHtmlDocument(htmlString.replaceAll(
         'p data-nodetype', 'p class')); //hacky way to parse center / right
 
-    List<Element> childElement = htmlDocument.body.children;
+    final List<Element> childElement = htmlDocument.body.children;
     _elementParsing(childElement);
     return htmlDocument.body.innerHtml;
   }
@@ -151,19 +151,20 @@ class HKGaldenHtmlParser {
         if (rootParent.parent.parent != null &&
             !store.state.sessionUserState.sessionUser.blockedUsers
                 .contains(rootParent.parent.parent.author.userId)) {
-          htmlDoc.body.setInnerHtml(
-              '''<blockquote style><blockquote><blockquote>
-          <div class="quoteName">${rootParent.parent.parent.authorNickname} 說:</div>
-          ${rootParent.parent.parent.content}</blockquote>
-          <div class="quoteName">${rootParent.parent.authorNickname} 說:</div>
-          ${rootParent.parent.content}</blockquote>
-          <div class="quoteName">${rootParent.authorNickname} 說:</div>
-          ${rootParent.content}</blockquote>${htmlDoc.body.innerHtml}''',
-              validator: validator);
+          htmlDoc.body.setInnerHtml('''
+                <blockquote style><blockquote><blockquote>
+                <div class="quoteName">${rootParent.parent.parent.authorNickname} 說:</div>
+                ${rootParent.parent.parent.content}</blockquote>
+                <div class="quoteName">${rootParent.parent.authorNickname} 說:</div>
+                ${rootParent.parent.content}</blockquote>
+                <div class="quoteName">${rootParent.authorNickname} 說:</div>
+                ${rootParent.content}</blockquote>${htmlDoc.body.innerHtml}
+              ''', validator: validator);
           //print('result: ${htmlDoc.body.innerHtml}');
           return htmlDoc.body.innerHtml;
         }
-        htmlDoc.body.setInnerHtml('''<blockquote><blockquote>
+        htmlDoc.body.setInnerHtml('''
+            <blockquote><blockquote>
             <div class="quoteName">${rootParent.parent.authorNickname} 說:</div>
             ${rootParent.parent.content}</blockquote>
             <div class="quoteName">${rootParent.authorNickname} 說:</div>
@@ -172,7 +173,8 @@ class HKGaldenHtmlParser {
         //print('result: ${htmlDoc.body.innerHtml}');
         return htmlDoc.body.innerHtml;
       }
-      htmlDoc.body.setInnerHtml('''<blockquote>
+      htmlDoc.body.setInnerHtml('''
+          <blockquote>
           <div class="quoteName">${rootParent.authorNickname} 說:</div>
           ${rootParent.content}</blockquote>${htmlDoc.body.innerHtml}''',
           validator: validator);
@@ -194,8 +196,8 @@ class HKGaldenHtmlParser {
         if (reply.parent.parent != null &&
             !store.state.sessionUserState.sessionUser.blockedUsers
                 .contains(reply.parent.parent.author.userId)) {
-          htmlDoc.body.setInnerHtml(
-              '''<blockquote style><blockquote><blockquote>
+          htmlDoc.body.setInnerHtml('''
+            <blockquote style><blockquote><blockquote>
             <div class="quoteName">${reply.parent.parent.authorNickname} 說:</div>
             ${reply.parent.parent.content}</blockquote>
             <div class="quoteName">${reply.parent.authorNickname} 說:</div>
@@ -206,7 +208,8 @@ class HKGaldenHtmlParser {
           //print('result: ${htmlDoc.body.innerHtml}');
           return htmlDoc.body.innerHtml;
         }
-        htmlDoc.body.setInnerHtml('''<blockquote><blockquote>
+        htmlDoc.body.setInnerHtml('''
+              <blockquote><blockquote>
               <div class="quoteName">${reply.parent.authorNickname} 說:</div>
               ${reply.parent.content}</blockquote>
               <div class="quoteName">${reply.authorNickname} 說:</div>
@@ -215,7 +218,8 @@ class HKGaldenHtmlParser {
         //print('result: ${htmlDoc.body.innerHtml}');
         return htmlDoc.body.innerHtml;
       }
-      htmlDoc.body.setInnerHtml('''<blockquote>
+      htmlDoc.body.setInnerHtml('''
+            <blockquote>
             <div class="quoteName">${reply.authorNickname} 說:</div>
             ${reply.content}</blockquote>${htmlDoc.body.innerHtml}''',
           validator: validator);
@@ -227,6 +231,7 @@ class HKGaldenHtmlParser {
 }
 
 class _AllowAllUriPolicy implements UriPolicy {
+  @override
   bool allowsUri(String uri) {
     return true;
   }

@@ -5,21 +5,22 @@ import 'package:flutter/material.dart';
 
 class DeltaJsonParser {
   Future<String> toGaldenHtml(List<dynamic> json) async {
-    print(json);
     String result = '';
     String row = '';
     String styledInsert = '';
     await Future.forEach(json, (element) async {
       //print(element);
-      if (!element['insert'].contains('\n') || element['insert'] == '\n') {
-        styledInsert =
-            element['insert'] == '\n' ? styledInsert : element['insert'];
+      if (element['insert'].contains('\n') == false ||
+          element['insert'] == '\n') {
+        styledInsert = element['insert'] == '\n'
+            ? styledInsert
+            : element['insert'] as String;
         if (element['attributes'] != null) {
           //print(element['insert']);
           await Future.forEach(
               (element['attributes'] as Map<String, dynamic>).entries,
               (entry) async {
-            switch (entry.key) {
+            switch (entry.key as String) {
               case 'a':
                 styledInsert =
                     '<span data-nodetype="a" data-href="${entry.value}">$styledInsert</span>';
@@ -44,8 +45,8 @@ class DeltaJsonParser {
                 break;
               case 'embed':
                 if (entry.value['type'] == 'image') {
-                  await _getImageDimension(entry.value['source']).then(
-                      (image) => styledInsert =
+                  await _getImageDimension(entry.value['source'] as String)
+                      .then((image) => styledInsert =
                           '<span data-nodetype="img" data-src="${entry.value['source']}" data-sx="${image.width}" data-sy="${image.height}"></span>');
                 }
                 break;
@@ -60,10 +61,11 @@ class DeltaJsonParser {
           }
         } else {
           //for 混排
-          row += element['insert'];
+          row += element['insert'] as String;
         }
       } else {
-        List<String> texts = element['insert'].split('\n');
+        final List<String> texts =
+            element['insert'].split('\n') as List<String>;
         //print(texts.length);
         if (texts.length == 2) {
           row += texts.first;
@@ -81,15 +83,14 @@ class DeltaJsonParser {
         }
       }
     });
-    print('<div id="pmc">${result.replaceAll('<p></p>', '')}</div>');
     return '<div id="pmc">${result.replaceAll('<p></p>', '')}</div>';
   }
 
   Future<ui.Image> _getImageDimension(String url) {
-    Completer<ui.Image> imageCompleter = Completer<ui.Image>();
+    final Completer<ui.Image> imageCompleter = Completer<ui.Image>();
     Image.network(url)
         .image
-        .resolve(ImageConfiguration())
+        .resolve(const ImageConfiguration())
         .addListener(ImageStreamListener((ImageInfo info, bool _) {
       imageCompleter.complete(info.image);
     }));

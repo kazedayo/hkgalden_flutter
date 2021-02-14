@@ -19,12 +19,12 @@ class UserPage extends StatelessWidget {
           Card(
             clipBehavior: Clip.hardEdge,
             color: Theme.of(context).primaryColor,
-            shape: RoundedRectangleBorder(
+            shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(10),
                     topRight: Radius.circular(10))),
             elevation: 6,
-            margin: EdgeInsets.only(top: 40),
+            margin: const EdgeInsets.only(top: 40),
             child: Padding(
               padding: const EdgeInsets.only(top: 30),
               child: UserThreadListPage(
@@ -47,18 +47,18 @@ class UserPage extends StatelessWidget {
                           height: 25,
                           image: PCacheImage(user.avatar),
                           placeholderBuilder: (context) => SizedBox.fromSize(
-                            size: Size.square(30),
+                            size: const Size.square(30),
                           ),
                         ),
                   userGroup: user.userGroup,
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 5,
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       height: 3,
                     ),
                     Text(
@@ -68,7 +68,7 @@ class UserPage extends StatelessWidget {
                               ? Theme.of(context).colorScheme.brotherColor
                               : Theme.of(context).colorScheme.sisterColor),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 5,
                     ),
                     Text(user.userId,

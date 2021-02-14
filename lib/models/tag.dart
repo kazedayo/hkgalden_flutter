@@ -8,12 +8,13 @@ class Tag extends Equatable {
   final String name;
   final Color color;
 
-  Tag({this.id, this.name, this.color});
+  const Tag({this.id, this.name, this.color});
 
   factory Tag.fromJson(Map<String, dynamic> json) => Tag(
-      id: json['id'],
-      name: json['name'],
-      color: Color(int.parse('FF' + json['color'], radix: 16)));
+      id: json['id'] as String,
+      name: json['name'] as String,
+      color: Color(int.parse('FF${json['color']}', radix: 16)));
 
+  @override
   List<Object> get props => [id, name, color];
 }

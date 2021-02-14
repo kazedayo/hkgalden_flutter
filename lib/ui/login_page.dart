@@ -38,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
           initialUrl:
               'https://hkgalden.org/oauth/v1/authorize?client_id=${HKGaldenApi.clientId}',
           javascriptMode: JavascriptMode.unrestricted,
-          onWebViewCreated: (controller) => this._controller = controller,
+          onWebViewCreated: (controller) => _controller = controller,
           navigationDelegate: (NavigationRequest request) {
             if (request.url.startsWith('http://localhost/callback')) {
               TokenSecureStorage().writeToken(request.url.substring(32),
@@ -61,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
           },
           onPageFinished: (url) async {
             try {
-              var javascript = '''
+              const javascript = '''
             window.alert = function (e){
               Alert.postMessage(e);
             }
@@ -69,8 +69,9 @@ class _LoginPageState extends State<LoginPage> {
               await _controller?.evaluateJavascript(javascript);
             } catch (_) {}
           },
-          javascriptChannels:
-              <JavascriptChannel>[_alertJavascriptChannel(context)].toSet(),
+          javascriptChannels: <JavascriptChannel>{
+            _alertJavascriptChannel(context)
+          },
         ),
       );
 

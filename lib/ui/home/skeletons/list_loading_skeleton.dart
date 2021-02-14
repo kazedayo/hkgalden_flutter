@@ -5,13 +5,14 @@ import 'package:shimmer/shimmer.dart';
 class ListLoadingSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
-        margin: EdgeInsets.only(top: 10),
+        margin: const EdgeInsets.only(top: 10),
         child: Shimmer.fromColors(
-            child: ListView(
-                physics: NeverScrollableScrollPhysics(),
-                children:
-                    List.generate(10, (index) => ListLoadingSkeletonCell())),
-            baseColor: Theme.of(context).primaryColor,
-            highlightColor: Theme.of(context).scaffoldBackgroundColor),
+          baseColor: Theme.of(context).primaryColor,
+          highlightColor: Theme.of(context).scaffoldBackgroundColor,
+          child: ListView(
+              physics: const NeverScrollableScrollPhysics(),
+              children:
+                  List.generate(10, (index) => ListLoadingSkeletonCell())),
+        ),
       );
 }

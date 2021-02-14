@@ -38,28 +38,29 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
           color: Colors.transparent,
           child: Row(
             children: [
-              Spacer(),
+              const Spacer(),
               ActionBarSpinner(isVisible: _isDownloadingImage),
               Builder(
                 builder: (context) => FlatButton(
-                    shape: CircleBorder(),
-                    clipBehavior: Clip.hardEdge,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text.rich(
-                        TextSpan(children: [
-                          TextSpan(
-                              text: String.fromCharCode(0xe9a2),
-                              style: TextStyle(
-                                  fontSize: 25,
-                                  shadows: [Shadow(blurRadius: 5)],
-                                  fontFamily: 'MaterialIcons'))
-                        ]),
-                      ),
+                  shape: const CircleBorder(),
+                  clipBehavior: Clip.hardEdge,
+                  onPressed: _isDownloadingImage
+                      ? null
+                      : () => _saveImage(context, widget.url),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text.rich(
+                      TextSpan(children: [
+                        TextSpan(
+                            text: String.fromCharCode(0xe9a2),
+                            style: const TextStyle(
+                                fontSize: 25,
+                                shadows: [Shadow(blurRadius: 5)],
+                                fontFamily: 'MaterialIcons'))
+                      ]),
                     ),
-                    onPressed: _isDownloadingImage
-                        ? null
-                        : () => _saveImage(context, widget.url)),
+                  ),
+                ),
               ),
             ],
           ),
@@ -86,7 +87,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
         ),
       );
 
-  _saveImage(BuildContext context, String url) async {
+  Future<void> _saveImage(BuildContext context, String url) async {
     setState(() {
       _isDownloadingImage = true;
     });
@@ -95,10 +96,12 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
         _isDownloadingImage = false;
       });
       if (id == null) {
-        Scaffold.of(context).showSnackBar(SnackBar(content: Text('圖片下載失敗!')));
+        Scaffold.of(context)
+            .showSnackBar(const SnackBar(content: Text('圖片下載失敗!')));
         return;
       }
-      Scaffold.of(context).showSnackBar(SnackBar(content: Text('圖片下載成功!')));
+      Scaffold.of(context)
+          .showSnackBar(const SnackBar(content: Text('圖片下載成功!')));
     });
   }
 }

@@ -6,15 +6,16 @@ class UserGroup extends Equatable {
   final String groupId;
   final String groupName;
 
-  UserGroup({
+  const UserGroup({
     this.groupId,
     this.groupName,
   });
 
   factory UserGroup.fromJson(Map<String, dynamic> json) => UserGroup(
-    groupId: json['id'],
-    groupName: json['name'],
-  );
+        groupId: json['id'] as String,
+        groupName: json['name'] as String,
+      );
 
+  @override
   List<Object> get props => [groupId, groupName];
 }

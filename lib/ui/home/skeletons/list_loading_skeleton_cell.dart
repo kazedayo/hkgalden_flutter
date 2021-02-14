@@ -5,6 +5,8 @@ class ListLoadingSkeletonCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SafeArea(
         child: Shimmer.fromColors(
+            baseColor: Theme.of(context).primaryColor,
+            highlightColor: Theme.of(context).scaffoldBackgroundColor,
             child: Column(
               children: <Widget>[
                 Container(
@@ -12,7 +14,7 @@ class ListLoadingSkeletonCell extends StatelessWidget {
                       borderRadius: BorderRadius.circular(100),
                       color: Colors.grey,
                     ),
-                    margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                    margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                     height: 30),
                 Row(
                   children: <Widget>[
@@ -23,21 +25,19 @@ class ListLoadingSkeletonCell extends StatelessWidget {
                             borderRadius: BorderRadius.circular(100),
                             color: Colors.grey,
                           ),
-                          margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                          margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                           height: 25),
                     ),
-                    Spacer(),
-                    Chip(
+                    const Spacer(),
+                    const Chip(
                       label: Text('#哈哈'),
                       //labelPadding: EdgeInsets.zero,
                       backgroundColor: Colors.grey,
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                   ],
                 ),
               ],
-            ),
-            baseColor: Theme.of(context).primaryColor,
-            highlightColor: Theme.of(context).scaffoldBackgroundColor),
+            )),
       );
 }

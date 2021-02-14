@@ -6,10 +6,11 @@ import 'package:redux/redux.dart';
 
 class BlockedUsersMiddleware extends MiddlewareClass<AppState> {
   @override
-  call(Store<AppState> store, dynamic action, NextDispatcher next) async {
+  Future<void> call(
+      Store<AppState> store, dynamic action, NextDispatcher next) async {
     next(action);
     if (action is RequestBlockedUsersAction) {
-      List<User> blockedUsers = await HKGaldenApi().getBlockedUser();
+      final List<User> blockedUsers = await HKGaldenApi().getBlockedUser();
       next(UpdateBlockedUsersAction(blockedUsers));
     }
   }

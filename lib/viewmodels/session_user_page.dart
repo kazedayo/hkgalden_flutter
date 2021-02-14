@@ -15,7 +15,7 @@ class SessionUserPageViewModel extends Equatable {
   final String sessionUserGender;
   final List<UserGroup> sessionUserGroup;
 
-  SessionUserPageViewModel({
+  const SessionUserPageViewModel({
     this.sessionUser,
     this.sessionUserName,
     this.sessionUserAvatar,
@@ -36,7 +36,7 @@ class SessionUserPageViewModel extends Equatable {
               image:
                   PCacheImage(store.state.sessionUserState.sessionUser.avatar),
               placeholderBuilder: (context) => SizedBox.fromSize(
-                size: Size.square(30),
+                size: const Size.square(30),
               ),
             ),
       sessionUserGender: store.state.sessionUserState.sessionUser.gender,
@@ -44,6 +44,7 @@ class SessionUserPageViewModel extends Equatable {
     );
   }
 
+  @override
   List<Object> get props => [
         sessionUser,
         sessionUserName,

@@ -31,7 +31,7 @@ import 'package:package_info/package_info.dart';
 class HomePage extends StatefulWidget {
   final String title;
 
-  HomePage({Key key, this.title}) : super(key: key);
+  const HomePage({Key key, this.title}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -49,8 +49,8 @@ class _HomePageState extends State<HomePage>
     //_scrollController = ScrollController();
     _backgroundBlurAnimationController = AnimationController(
         vsync: this,
-        duration: Duration(milliseconds: 150),
-        reverseDuration: Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 150),
+        reverseDuration: const Duration(milliseconds: 200),
         value: 0.0,
         upperBound: 0.5)
       ..addStatusListener((status) {
@@ -87,30 +87,29 @@ class _HomePageState extends State<HomePage>
           distinct: true,
           onInit: (store) {
             _scrollController = PrimaryScrollController.of(context);
-            _scrollController
-              ..addListener(() {
-                if (_scrollController.position.pixels ==
-                    _scrollController.position.maxScrollExtent) {
-                  store.dispatch(RequestThreadListAction(
-                      channelId: store.state.threadListState.currentChannelId,
-                      page: store.state.threadListState.currentPage + 1,
-                      isRefresh: true));
-                }
-                if ((_scrollController.position.userScrollDirection ==
-                            ScrollDirection.forward ||
-                        _scrollController.position.pixels == 0.0) &&
-                    _fabIsHidden) {
-                  setState(() {
-                    _fabIsHidden = false;
-                  });
-                } else if (_scrollController.position.userScrollDirection ==
-                        ScrollDirection.reverse &&
-                    !_fabIsHidden) {
-                  setState(() {
-                    _fabIsHidden = true;
-                  });
-                }
-              });
+            _scrollController.addListener(() {
+              if (_scrollController.position.pixels ==
+                  _scrollController.position.maxScrollExtent) {
+                store.dispatch(RequestThreadListAction(
+                    channelId: store.state.threadListState.currentChannelId,
+                    page: store.state.threadListState.currentPage + 1,
+                    isRefresh: true));
+              }
+              if ((_scrollController.position.userScrollDirection ==
+                          ScrollDirection.forward ||
+                      _scrollController.position.pixels == 0.0) &&
+                  _fabIsHidden) {
+                setState(() {
+                  _fabIsHidden = false;
+                });
+              } else if (_scrollController.position.userScrollDirection ==
+                      ScrollDirection.reverse &&
+                  !_fabIsHidden) {
+                setState(() {
+                  _fabIsHidden = true;
+                });
+              }
+            });
           },
           builder: (BuildContext context, HomePageViewModel viewModel) => Stack(
             fit: StackFit.expand,
@@ -118,141 +117,135 @@ class _HomePageState extends State<HomePage>
               BackdropScaffold(
                 resizeToAvoidBottomInset: false,
                 appBar: PreferredSize(
-                    child: AppBar(
-                      leading: _LeadingButton(),
-                      title: Text.rich(
-                        TextSpan(children: [
-                          WidgetSpan(
-                              alignment: PlaceholderAlignment.middle,
-                              child: Hero(
-                                  tag: 'logo',
-                                  child: SvgPicture.asset(
-                                    'assets/icon-hkgalden.svg',
-                                    width: 27,
-                                    height: 27,
-                                  ))),
-                          WidgetSpan(
-                              child: SizedBox(
-                            width: 5,
-                          )),
-                          TextSpan(
-                              text: viewModel.title,
-                              style: TextStyle(
-                                  fontSize: 19, fontWeight: FontWeight.w700))
-                        ]),
-                      ),
-                      actions: [
-                        viewModel.isLoggedIn
-                            ? Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 4),
-                                child: PopupMenuButton(
-                                    itemBuilder: (context) => [
-                                          PopupMenuItem(
-                                            child: ListTile(
-                                              dense: true,
-                                              leading: Icon(
-                                                  Icons.account_box_rounded),
-                                              title: Text('個人檔案'),
-                                            ),
-                                            value: _MenuItem.account,
-                                          ),
-                                          PopupMenuItem(
-                                            child: ListTile(
-                                              dense: true,
-                                              leading:
-                                                  Icon(Icons.block_rounded),
-                                              title: Text('封鎖名單'),
-                                            ),
-                                            value: _MenuItem.blocklist,
-                                          ),
-                                          PopupMenuItem(
-                                            child: ListTile(
-                                              dense: true,
-                                              leading:
-                                                  Icon(Icons.copyright_rounded),
-                                              title: Text('版權資訊'),
-                                            ),
-                                            value: _MenuItem.licences,
-                                          ),
-                                          PopupMenuItem(
-                                            child: ListTile(
-                                              dense: true,
-                                              leading: Icon(
-                                                Icons.logout,
-                                                color: Colors.redAccent,
-                                              ),
-                                              title: Text('登出'),
-                                            ),
-                                            value: _MenuItem.logout,
-                                          ),
-                                        ],
-                                    onSelected: (value) async {
-                                      switch (value) {
-                                        case _MenuItem.account:
-                                          showMaterialModalBottomSheet(
-                                              duration:
-                                                  Duration(milliseconds: 200),
-                                              animationCurve: Curves.easeOut,
-                                              enableDrag: false,
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                              barrierColor: Colors.black87,
-                                              context: context,
-                                              builder: (context) => UserPage(
-                                                    user: viewModel.sessionUser,
-                                                  ));
-                                          break;
-                                        case _MenuItem.blocklist:
-                                          showMaterialModalBottomSheet(
-                                              duration:
-                                                  Duration(milliseconds: 200),
-                                              animationCurve: Curves.easeOut,
-                                              enableDrag: false,
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                              barrierColor: Colors.black87,
-                                              context: context,
-                                              builder: (context) =>
-                                                  BlockListPage());
-                                          break;
-                                        case _MenuItem.licences:
-                                          PackageInfo info =
-                                              await PackageInfo.fromPlatform();
-                                          showLicensePage(
-                                            context: context,
-                                            applicationName: 'hkGalden',
-                                            applicationIcon: SvgPicture.asset(
-                                              'assets/icon-hkgalden.svg',
-                                              width: 50,
-                                              height: 50,
-                                              color:
-                                                  Theme.of(context).accentColor,
-                                            ),
-                                            applicationVersion:
-                                                '${info.version}+${info.buildNumber}',
-                                            applicationLegalese:
-                                                '© hkGalden & 1080',
-                                          );
-                                          break;
-                                        case _MenuItem.logout:
-                                          viewModel.onLogout();
-                                          break;
-                                        default:
-                                      }
-                                    },
-                                    icon: Icon(Icons.apps_rounded)),
-                              )
-                            : IconButton(
-                                icon: Icon(Icons.login_rounded),
-                                onPressed: () => Navigator.of(context).push(
-                                    SlideInFromBottomRoute(page: LoginPage())))
-                      ],
+                  preferredSize: const Size.fromHeight(kToolbarHeight),
+                  child: AppBar(
+                    leading: _LeadingButton(),
+                    title: Text.rich(
+                      TextSpan(children: [
+                        WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: Hero(
+                                tag: 'logo',
+                                child: SvgPicture.asset(
+                                  'assets/icon-hkgalden.svg',
+                                  width: 27,
+                                  height: 27,
+                                ))),
+                        const WidgetSpan(
+                            child: SizedBox(
+                          width: 5,
+                        )),
+                        TextSpan(
+                            text: viewModel.title,
+                            style: const TextStyle(
+                                fontSize: 19, fontWeight: FontWeight.w700))
+                      ]),
                     ),
-                    preferredSize: Size.fromHeight(kToolbarHeight)),
+                    actions: [
+                      if (viewModel.isLoggedIn)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: PopupMenuButton(
+                              itemBuilder: (context) => [
+                                    const PopupMenuItem(
+                                      value: _MenuItem.account,
+                                      child: ListTile(
+                                        dense: true,
+                                        leading:
+                                            Icon(Icons.account_box_rounded),
+                                        title: Text('個人檔案'),
+                                      ),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: _MenuItem.blocklist,
+                                      child: ListTile(
+                                        dense: true,
+                                        leading: Icon(Icons.block_rounded),
+                                        title: Text('封鎖名單'),
+                                      ),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: _MenuItem.licences,
+                                      child: ListTile(
+                                        dense: true,
+                                        leading: Icon(Icons.copyright_rounded),
+                                        title: Text('版權資訊'),
+                                      ),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: _MenuItem.logout,
+                                      child: ListTile(
+                                        dense: true,
+                                        leading: Icon(
+                                          Icons.logout,
+                                          color: Colors.redAccent,
+                                        ),
+                                        title: Text('登出'),
+                                      ),
+                                    ),
+                                  ],
+                              onSelected: (value) async {
+                                switch (value as _MenuItem) {
+                                  case _MenuItem.account:
+                                    showMaterialModalBottomSheet(
+                                        duration:
+                                            const Duration(milliseconds: 200),
+                                        animationCurve: Curves.easeOut,
+                                        enableDrag: false,
+                                        backgroundColor: Colors.transparent,
+                                        barrierColor: Colors.black87,
+                                        context: context,
+                                        builder: (context) => UserPage(
+                                              user: viewModel.sessionUser,
+                                            ));
+                                    break;
+                                  case _MenuItem.blocklist:
+                                    showMaterialModalBottomSheet(
+                                        duration:
+                                            const Duration(milliseconds: 200),
+                                        animationCurve: Curves.easeOut,
+                                        enableDrag: false,
+                                        backgroundColor: Colors.transparent,
+                                        barrierColor: Colors.black87,
+                                        context: context,
+                                        builder: (context) => BlockListPage());
+                                    break;
+                                  case _MenuItem.licences:
+                                    final PackageInfo info =
+                                        await PackageInfo.fromPlatform();
+                                    showLicensePage(
+                                      context: context,
+                                      applicationName: 'hkGalden',
+                                      applicationIcon: SvgPicture.asset(
+                                        'assets/icon-hkgalden.svg',
+                                        width: 50,
+                                        height: 50,
+                                        color: Theme.of(context).accentColor,
+                                      ),
+                                      applicationVersion:
+                                          '${info.version}+${info.buildNumber}',
+                                      applicationLegalese: '© hkGalden & 1080',
+                                    );
+                                    break;
+                                  case _MenuItem.logout:
+                                    viewModel.onLogout();
+                                    break;
+                                  default:
+                                }
+                              },
+                              icon: const Icon(Icons.apps_rounded)),
+                        )
+                      else
+                        IconButton(
+                            icon: const Icon(Icons.login_rounded),
+                            onPressed: () => Navigator.of(context).push(
+                                SlideInFromBottomRoute(page: LoginPage())))
+                    ],
+                  ),
+                ),
                 frontLayer: Theme(
                   data: Theme.of(context)
-                      .copyWith(highlightColor: Color(0xff373d3c)),
+                      .copyWith(highlightColor: const Color(0xff373d3c)),
                   child: Material(
                     color: Theme.of(context).primaryColor,
                     child: Container(
@@ -266,7 +259,8 @@ class _HomePageState extends State<HomePage>
                                     CupertinoSliverRefreshControl(
                                       refreshTriggerPullDistance: 120,
                                       onRefresh: () => viewModel.onRefresh(
-                                          viewModel.selectedChannelId),
+                                              viewModel.selectedChannelId)
+                                          as Future<void>,
                                     ),
                                     SliverList(
                                         delegate: SliverChildBuilderDelegate(
@@ -299,6 +293,9 @@ class _HomePageState extends State<HomePage>
                               : RefreshIndicator(
                                   backgroundColor: Colors.white,
                                   strokeWidth: 2.5,
+                                  onRefresh: () => viewModel.onRefresh(
+                                          viewModel.selectedChannelId)
+                                      as Future<void>,
                                   child: ListView.builder(
                                     addAutomaticKeepAlives: false,
                                     addRepaintBoundaries: false,
@@ -325,8 +322,7 @@ class _HomePageState extends State<HomePage>
                                       }
                                     },
                                   ),
-                                  onRefresh: () => viewModel
-                                      .onRefresh(viewModel.selectedChannelId)),
+                                ),
                     ),
                   ),
                 ),
@@ -338,10 +334,9 @@ class _HomePageState extends State<HomePage>
                 floatingActionButton: _fabIsHidden
                     ? null
                     : FloatingActionButton(
-                        child: Icon(Icons.create_rounded),
                         onPressed: () => viewModel.isLoggedIn
                             ? showBarModalBottomSheet(
-                                duration: Duration(milliseconds: 300),
+                                duration: const Duration(milliseconds: 300),
                                 animationCurve: Curves.easeOut,
                                 context: context,
                                 builder: (context) => ComposePage(
@@ -352,10 +347,11 @@ class _HomePageState extends State<HomePage>
                               )
                             : showCustomDialog(
                                 context: context,
-                                builder: (context) => CustomAlertDialog(
+                                builder: (context) => const CustomAlertDialog(
                                       title: '未登入',
                                       content: '請先登入',
                                     )),
+                        child: const Icon(Icons.create_rounded),
                       ),
               ),
               Visibility(
@@ -391,7 +387,7 @@ class _HomePageState extends State<HomePage>
     HapticFeedback.mediumImpact();
     showMaterialModalBottomSheet(
       useRootNavigator: true,
-      duration: Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 200),
       animationCurve: Curves.easeOut,
       enableDrag: false,
       barrierColor: Colors.black.withOpacity(0.5),
@@ -425,11 +421,11 @@ class _HomePageState extends State<HomePage>
                   color: Colors.transparent,
                   elevation: 0,
                   clipBehavior: Clip.hardEdge,
-                  margin: EdgeInsets.symmetric(horizontal: 8),
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                   child: SimpleDialogOption(
-                    padding: EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(16.0),
                     onPressed: () {
                       Navigator.of(context).pop();
                       navigatorKey.currentState.pushNamed('/Thread',

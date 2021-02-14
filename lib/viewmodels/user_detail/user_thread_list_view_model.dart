@@ -8,7 +8,8 @@ class UserThreadListViewModel extends Equatable {
   final List<Thread> userThreads;
   final int currentPage;
 
-  UserThreadListViewModel({this.isLoading, this.userThreads, this.currentPage});
+  const UserThreadListViewModel(
+      {this.isLoading, this.userThreads, this.currentPage});
 
   factory UserThreadListViewModel.create(Store<AppState> store) =>
       UserThreadListViewModel(
@@ -17,5 +18,6 @@ class UserThreadListViewModel extends Equatable {
         currentPage: store.state.userThreadListState.page,
       );
 
+  @override
   List<Object> get props => [isLoading, userThreads, currentPage];
 }

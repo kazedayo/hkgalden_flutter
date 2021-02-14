@@ -8,13 +8,13 @@ class SessionUserState extends Equatable {
   final bool isLoggedIn;
   final User sessionUser;
 
-  SessionUserState({
+  const SessionUserState({
     this.isLoading,
     this.isLoggedIn,
     this.sessionUser,
   });
 
-  factory SessionUserState.initial() => SessionUserState(
+  factory SessionUserState.initial() => const SessionUserState(
         isLoading: false,
         isLoggedIn: false,
         sessionUser: User(
@@ -38,5 +38,6 @@ class SessionUserState extends Equatable {
     );
   }
 
+  @override
   List<Object> get props => [isLoading, isLoggedIn, sessionUser];
 }

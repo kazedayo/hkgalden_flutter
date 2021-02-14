@@ -6,10 +6,11 @@ import 'package:redux/redux.dart';
 
 class UserThreadListMiddleware extends MiddlewareClass<AppState> {
   @override
-  call(Store<AppState> store, dynamic action, NextDispatcher next) async {
+  Future<void> call(
+      Store<AppState> store, dynamic action, NextDispatcher next) async {
     next(action);
     if (action is RequestUserThreadListAction) {
-      List<Thread> userThreadList =
+      final List<Thread> userThreadList =
           await HKGaldenApi().getUserThreadList(action.userId, action.page);
       next(UpdateUserThreadListAction(threads: userThreadList));
     }

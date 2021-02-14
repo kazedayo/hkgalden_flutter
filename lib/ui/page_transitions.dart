@@ -5,7 +5,7 @@ class SizeRoute extends PageRouteBuilder {
 
   SizeRoute({this.page})
       : super(
-          transitionDuration: Duration(milliseconds: 650),
+          transitionDuration: const Duration(milliseconds: 650),
           pageBuilder: (
             BuildContext context,
             Animation<double> animation,
@@ -31,7 +31,7 @@ class FadeRoute extends PageRouteBuilder {
   final Widget page;
   FadeRoute({this.page})
       : super(
-          transitionDuration: Duration(milliseconds: 300),
+          transitionDuration: const Duration(milliseconds: 300),
           pageBuilder: (
             BuildContext context,
             Animation<double> animation,
@@ -67,12 +67,12 @@ class SlideInFromBottomRoute extends PageRouteBuilder {
             Animation<double> secondaryAnimation,
             Widget child,
           ) {
-            var begin = Offset(0.0, 1.0);
-            var end = Offset.zero;
-            var curve = Curves.easeOut;
-            var tween =
+            const begin = Offset(0.0, 1.0);
+            const end = Offset.zero;
+            const curve = Curves.easeOut;
+            final tween =
                 Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-            var offsetAnimation = animation.drive(tween);
+            final offsetAnimation = animation.drive(tween);
             return SlideTransition(position: offsetAnimation, child: child);
           },
         );

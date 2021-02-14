@@ -5,8 +5,10 @@ import 'package:shimmer/shimmer.dart';
 class ThreadPageLoadingSkeletonCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Shimmer.fromColors(
+      baseColor: Theme.of(context).scaffoldBackgroundColor,
+      highlightColor: Theme.of(context).primaryColor,
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         height: 200,
         child: Column(
           children: <Widget>[
@@ -16,12 +18,12 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
                 Container(
                   width: 45,
                   height: 45,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.grey,
                   ),
                 ),
-                SizedBox(width: 15),
+                const SizedBox(width: 15),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -33,7 +35,7 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
                         borderRadius: BorderRadius.circular(100),
                       ),
                     ),
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
                     Container(
                       width: 50,
                       height: 20,
@@ -44,7 +46,7 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
                     ),
                   ],
                 ),
-                Spacer(),
+                const Spacer(),
                 Container(
                   width: 100,
                   height: 20,
@@ -55,7 +57,7 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
                 ),
               ],
             ),
-            Spacer(flex: 1),
+            const Spacer(),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -67,7 +69,7 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
                     borderRadius: BorderRadius.circular(100),
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Container(
                   height: 25,
                   width: displayWidth(context) / 2,
@@ -78,10 +80,8 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
                 ),
               ],
             ),
-            Spacer(flex: 2)
+            const Spacer(flex: 2)
           ],
         ),
-      ),
-      baseColor: Theme.of(context).scaffoldBackgroundColor,
-      highlightColor: Theme.of(context).primaryColor);
+      ));
 }

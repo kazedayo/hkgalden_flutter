@@ -7,7 +7,7 @@ class StartupAnimationViewModel extends Equatable {
   final bool channelIsLoading;
   final bool sessionUserIsLoading;
 
-  StartupAnimationViewModel({
+  const StartupAnimationViewModel({
     this.threadIsLoading,
     this.channelIsLoading,
     this.sessionUserIsLoading,
@@ -21,6 +21,7 @@ class StartupAnimationViewModel extends Equatable {
     );
   }
 
+  @override
   List<Object> get props =>
       [threadIsLoading, channelIsLoading, sessionUserIsLoading];
 }

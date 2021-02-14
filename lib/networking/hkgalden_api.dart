@@ -6,11 +6,12 @@ import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 
 class HKGaldenApi {
-  static final String clientId = '15897154848030720.apis.hkgalden.org';
+  static const String clientId = '15897154848030720.apis.hkgalden.org';
   static final HttpLink _api = HttpLink(uri: 'https://hkgalden.org/_');
 
   static final AuthLink _bearerToken = AuthLink(getToken: () async {
-    String tokenString = await TokenSecureStorage().storage.read(key: 'token');
+    final String tokenString =
+        await TokenSecureStorage().storage.read(key: 'token');
     //print(tokenString);
     return 'Bearer $tokenString';
   });
@@ -23,7 +24,7 @@ class HKGaldenApi {
   );
 
   Future<List<Channel>> getChannelsQuery() async {
-    const String query = r'''
+    const String query = '''
       query GetChannels {
         channels {
           id
@@ -48,15 +49,16 @@ class HKGaldenApi {
       final List<dynamic> result =
           queryResult.data['channels'] as List<dynamic>;
 
-      final List<Channel> threads =
-          result.map((thread) => Channel.fromJson(thread)).toList();
+      final List<Channel> threads = result
+          .map((thread) => Channel.fromJson(thread as Map<String, dynamic>))
+          .toList();
 
       return threads;
     }
   }
 
   Future<User> getSessionUserQuery() async {
-    const String query = r'''
+    const String query = '''
       query GetSessionUser {
         sessionUser {
           id
@@ -83,7 +85,7 @@ class HKGaldenApi {
     } else {
       final dynamic result = queryResult.data['sessionUser'] as dynamic;
 
-      final User sessionUser = User.fromJson(result);
+      final User sessionUser = User.fromJson(result as Map<String, dynamic>);
 
       return sessionUser;
     }
@@ -158,7 +160,7 @@ class HKGaldenApi {
     } else {
       final dynamic result = queryResult.data['thread'] as dynamic;
 
-      final Thread thread = Thread.fromJson(result);
+      final Thread thread = Thread.fromJson(result as Map<String, dynamic>);
 
       return thread;
     }
@@ -212,15 +214,16 @@ class HKGaldenApi {
       final List<dynamic> result =
           queryResult.data['threadsByChannel'] as List<dynamic>;
 
-      final List<Thread> threads =
-          result.map((thread) => Thread.fromJson(thread)).toList();
+      final List<Thread> threads = result
+          .map((thread) => Thread.fromJson(thread as Map<String, dynamic>))
+          .toList();
 
       return threads;
     }
   }
 
   Future<List<User>> getBlockedUser() async {
-    const String query = r'''
+    const String query = '''
       query GetBlockedUser {
         blockedUsers {
           id
@@ -245,15 +248,16 @@ class HKGaldenApi {
       final List<dynamic> result =
           queryResult.data['blockedUsers'] as List<dynamic>;
 
-      final List<User> blockedUsers =
-          result.map((user) => User.fromJson(user)).toList();
+      final List<User> blockedUsers = result
+          .map((user) => User.fromJson(user as Map<String, dynamic>))
+          .toList();
 
       return blockedUsers;
     }
   }
 
   Future<List<Thread>> getUserThreadList(String userId, int page) async {
-    final String query = r'''
+    const String query = r'''
       query GetUserThreadList($userId: String!, $page: Int!) {
         threadsByUser(userId: $userId, page: $page) {
           id
@@ -296,15 +300,16 @@ class HKGaldenApi {
       final List<dynamic> result =
           queryResult.data['threadsByUser'] as List<dynamic>;
 
-      final List<Thread> userThreads =
-          result.map((e) => Thread.fromJson(e)).toList();
+      final List<Thread> userThreads = result
+          .map((e) => Thread.fromJson(e as Map<String, dynamic>))
+          .toList();
 
       return userThreads;
     }
   }
 
   Future<Reply> sendReply(int threadId, String html, {String parentId}) async {
-    final String mutation = r'''
+    const String mutation = r'''
       mutation SendReply($threadId: Int!, $parentId: String, $html: String!) {
         replyThread(threadId: $threadId, parentId: $parentId, html: $html) {
           ...CommentsRecursive
@@ -357,17 +362,16 @@ class HKGaldenApi {
     final QueryResult result = await _client.mutate(options);
 
     if (result.hasException) {
-      print(result.exception.toString());
       return null;
     } else {
-      dynamic resultJson = result.data['replyThread'] as dynamic;
-      Reply sentReply = Reply.fromJson(resultJson);
+      final dynamic resultJson = result.data['replyThread'] as dynamic;
+      final Reply sentReply = Reply.fromJson(resultJson);
       return sentReply;
     }
   }
 
   Future<int> createThread(String title, List<String> tags, String html) async {
-    final String mutation = r'''
+    const String mutation = r'''
       mutation CreateThread($title: String!, $tags: [String!]!, $html: String!) {
         createThread(title: $title, tags: $tags, html: $html)
       }
@@ -384,16 +388,15 @@ class HKGaldenApi {
     final QueryResult result = await _client.mutate(options);
 
     if (result.hasException) {
-      print(result.exception.toString());
       return null;
     } else {
-      int threadId = result.data['createThread'] as int;
+      final int threadId = result.data['createThread'] as int;
       return threadId;
     }
   }
 
   Future<bool> unblockUser(String userId) async {
-    final String mutation = r'''
+    const String mutation = r'''
       mutation UnblockUser($userId: String!) {
         unblockUser(id: $userId)
       }
@@ -408,13 +411,13 @@ class HKGaldenApi {
     if (result.hasException) {
       return null;
     } else {
-      bool isSuccess = result.data['unblockUser'] as bool;
+      final bool isSuccess = result.data['unblockUser'] as bool;
       return isSuccess;
     }
   }
 
   Future<bool> blockUser(String userId) async {
-    final String mutation = r'''
+    const String mutation = r'''
       mutation BlockUser($userId: String!) {
         blockUser(id: $userId)
       }
@@ -429,7 +432,7 @@ class HKGaldenApi {
     if (result.hasException) {
       return null;
     } else {
-      bool isSuccess = result.data['blockUser'] as bool;
+      final bool isSuccess = result.data['blockUser'] as bool;
       return isSuccess;
     }
   }

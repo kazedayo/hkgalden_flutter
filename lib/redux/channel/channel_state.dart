@@ -8,17 +8,17 @@ class ChannelState extends Equatable {
   final List<Channel> channels;
   final String selectedChannelId;
 
-  ChannelState({
+  const ChannelState({
     this.isLoading,
     this.channels,
     this.selectedChannelId,
   });
 
-  factory ChannelState.initial() => ChannelState(
-    isLoading: false,
-    channels: const [],
-    selectedChannelId: 'bw',
-  );
+  factory ChannelState.initial() => const ChannelState(
+        isLoading: false,
+        channels: [],
+        selectedChannelId: 'bw',
+      );
 
   ChannelState copyWith({
     bool isLoading,
@@ -32,5 +32,6 @@ class ChannelState extends Equatable {
     );
   }
 
+  @override
   List<Object> get props => [isLoading, channels, selectedChannelId];
 }
