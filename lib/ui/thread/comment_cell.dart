@@ -17,11 +17,9 @@ import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
-import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:octo_image/octo_image.dart';
-import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 
 class CommentCell extends StatefulWidget {
   final int threadId;
@@ -219,9 +217,10 @@ class _CommentCellState extends State<CommentCell> {
                                     StoreProvider.of<AppState>(context)
                                         .dispatch(AppendUserToBlockListAction(
                                             widget.reply.author.userId));
-                                    scaffoldKey.currentState.showSnackBar(SnackBar(
-                                        content: Text(
-                                            '已封鎖會員 ${widget.reply.authorNickname}')));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                '已封鎖會員 ${widget.reply.authorNickname}')));
                                   } else {}
                                 });
                           break;
@@ -237,7 +236,7 @@ class _CommentCellState extends State<CommentCell> {
                                   SizedBox.fromSize(
                                 size: const Size.square(30),
                               ),
-                              image: PCacheImage(widget.reply.author.avatar),
+                              image: NetworkImage(widget.reply.author.avatar),
                               width: 25,
                               height: 25,
                             ),

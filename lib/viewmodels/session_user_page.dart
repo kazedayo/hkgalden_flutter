@@ -5,7 +5,7 @@ import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/models/user_group.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:octo_image/octo_image.dart';
-import 'package:paulonia_cache_image/paulonia_cache_image.dart';
+
 import 'package:redux/redux.dart';
 
 class SessionUserPageViewModel extends Equatable {
@@ -34,7 +34,7 @@ class SessionUserPageViewModel extends Equatable {
               width: 30,
               height: 30,
               image:
-                  PCacheImage(store.state.sessionUserState.sessionUser.avatar),
+                  NetworkImage(store.state.sessionUserState.sessionUser.avatar),
               placeholderBuilder: (context) => SizedBox.fromSize(
                 size: const Size.square(30),
               ),

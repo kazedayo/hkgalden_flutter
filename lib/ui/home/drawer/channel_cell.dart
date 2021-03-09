@@ -12,7 +12,7 @@ class ChannelCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8),
+        margin: const EdgeInsets.symmetric(horizontal: 4),
         child: Center(
           child: Material(
             clipBehavior: Clip.hardEdge,
@@ -22,8 +22,7 @@ class ChannelCell extends StatelessWidget {
             color: viewModel.selectedChannelId == channel.channelId
                 ? Theme.of(context).primaryColor
                 : Theme.of(context).scaffoldBackgroundColor,
-            child: FlatButton(
-              disabledTextColor: Colors.white,
+            child: TextButton(
               onPressed: viewModel.selectedChannelId == channel.channelId
                   ? null
                   : () {
@@ -33,7 +32,7 @@ class ChannelCell extends StatelessWidget {
                       Backdrop.of(context).concealBackLayer();
                     },
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                padding: const EdgeInsets.all(12),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

@@ -7,7 +7,7 @@ import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 
 class HKGaldenApi {
   static const String clientId = '15897154848030720.apis.hkgalden.org';
-  static final HttpLink _api = HttpLink(uri: 'https://hkgalden.org/_');
+  static final HttpLink _api = HttpLink('https://hkgalden.org/_');
 
   static final AuthLink _bearerToken = AuthLink(getToken: () async {
     final String tokenString =
@@ -19,7 +19,7 @@ class HKGaldenApi {
   static final Link _link = _bearerToken.concat(_api);
 
   final GraphQLClient _client = GraphQLClient(
-    cache: InMemoryCache(),
+    cache: GraphQLCache(),
     link: _link,
   );
 
@@ -38,7 +38,7 @@ class HKGaldenApi {
     ''';
 
     final QueryOptions options = QueryOptions(
-      documentNode: gql(query),
+      document: gql(query),
     );
 
     final QueryResult queryResult = await _client.query(options);
@@ -75,7 +75,7 @@ class HKGaldenApi {
     ''';
 
     final QueryOptions options = QueryOptions(
-      documentNode: gql(query),
+      document: gql(query),
     );
 
     final QueryResult queryResult = await _client.query(options);
@@ -146,7 +146,7 @@ class HKGaldenApi {
     ''';
 
     final QueryOptions options = QueryOptions(
-      documentNode: gql(query),
+      document: gql(query),
       variables: <String, dynamic>{
         'id': threadId,
         'page': page,
@@ -198,7 +198,7 @@ class HKGaldenApi {
     ''';
 
     final QueryOptions options = QueryOptions(
-      documentNode: gql(query),
+      document: gql(query),
       variables: <String, dynamic>{
         //hardcoded value for now
         'channelId': channelId,
@@ -238,7 +238,7 @@ class HKGaldenApi {
       }
     ''';
 
-    final QueryOptions options = QueryOptions(documentNode: gql(query));
+    final QueryOptions options = QueryOptions(document: gql(query));
 
     final QueryResult queryResult = await _client.query(options);
 
@@ -287,7 +287,7 @@ class HKGaldenApi {
     ''';
 
     final QueryOptions options =
-        QueryOptions(documentNode: gql(query), variables: <String, dynamic>{
+        QueryOptions(document: gql(query), variables: <String, dynamic>{
       'userId': userId,
       'page': page,
     });
@@ -351,13 +351,12 @@ class HKGaldenApi {
       }
     ''';
 
-    final MutationOptions options = MutationOptions(
-        documentNode: gql(mutation),
-        variables: <String, dynamic>{
-          'threadId': threadId,
-          'parentId': parentId,
-          'html': html,
-        });
+    final MutationOptions options =
+        MutationOptions(document: gql(mutation), variables: <String, dynamic>{
+      'threadId': threadId,
+      'parentId': parentId,
+      'html': html,
+    });
 
     final QueryResult result = await _client.mutate(options);
 
@@ -377,13 +376,12 @@ class HKGaldenApi {
       }
     ''';
 
-    final MutationOptions options = MutationOptions(
-        documentNode: gql(mutation),
-        variables: <String, dynamic>{
-          'title': title,
-          'tags': tags,
-          'html': html,
-        });
+    final MutationOptions options =
+        MutationOptions(document: gql(mutation), variables: <String, dynamic>{
+      'title': title,
+      'tags': tags,
+      'html': html,
+    });
 
     final QueryResult result = await _client.mutate(options);
 
@@ -403,7 +401,7 @@ class HKGaldenApi {
     ''';
 
     final MutationOptions options = MutationOptions(
-        documentNode: gql(mutation),
+        document: gql(mutation),
         variables: <String, dynamic>{'userId': userId});
 
     final QueryResult result = await _client.mutate(options);
@@ -424,7 +422,7 @@ class HKGaldenApi {
     ''';
 
     final MutationOptions options = MutationOptions(
-        documentNode: gql(mutation),
+        document: gql(mutation),
         variables: <String, dynamic>{'userId': userId});
 
     final QueryResult result = await _client.mutate(options);

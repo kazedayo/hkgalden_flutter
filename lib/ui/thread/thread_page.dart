@@ -232,7 +232,7 @@ class _ThreadPageState extends State<ThreadPage> {
   }
 
   void _onReplySuccess(ThreadPageViewModel viewModel, Reply reply) {
-    scaffoldKey.currentState
+    ScaffoldMessenger.of(context)
         .showSnackBar(const SnackBar(content: Text('回覆發送成功!')));
     if (_onLastPage) {
       viewModel.appendReply(reply);
@@ -436,9 +436,7 @@ class _PageFooter extends StatelessWidget {
                   SizedBox(
                     height: 85,
                     child: Center(
-                      child: FlatButton.icon(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(100)),
+                      child: TextButton.icon(
                           clipBehavior: Clip.hardEdge,
                           onPressed: () => onTap(),
                           icon: isLoading

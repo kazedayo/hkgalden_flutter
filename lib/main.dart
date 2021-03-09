@@ -16,11 +16,9 @@ import 'package:hkgalden_flutter/redux/user_thread_list/user_thread_list_middlew
 import 'package:hkgalden_flutter/ui/startup_animation.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:redux/redux.dart';
-import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await PCacheImage.init(enableInMemory: true);
   GestureBinding.instance.resamplingEnabled = true;
   runApp(MyApp());
 }
@@ -90,8 +88,8 @@ class MyApp extends StatelessWidget {
       scaffoldBackgroundColor: const Color(0xff1b1f1e),
       appBarTheme: const AppBarTheme(color: Color(0xff1b1f1e), elevation: 0),
       accentColor: const Color(0xff45c17c),
-      cursorColor: const Color(0xff45c17c),
-      textSelectionColor: const Color(0xff2d8052),
+      textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: Color(0xff45c17c), selectionColor: Color(0xff2d8052)),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         focusElevation: 1,
         highlightElevation: 1,

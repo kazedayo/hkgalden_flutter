@@ -27,9 +27,9 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: 
-  zefyr: ^1.0.0-dev.2.0
   flutter_svg: 
-  graphql: ^3.1.0
+  flutter_quill: ^1.0.0
+  graphql: 
   redux: 
   flutter_redux: 
   webview_flutter: 
@@ -40,7 +40,6 @@ dependencies:
   universal_html: 
   url_launcher: 
   octo_image: 
-  paulonia_cache_image: 
   animations: 
   image_downloader: 
   auto_size_text: 

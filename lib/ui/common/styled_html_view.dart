@@ -9,7 +9,7 @@ import 'package:hkgalden_flutter/ui/common/image_loading_error.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:octo_image/octo_image.dart';
-import 'package:paulonia_cache_image/paulonia_cache_image.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 
 class StyledHtmlView extends StatefulWidget {
@@ -50,7 +50,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                 child: Stack(
                   children: [
                     OctoImage(
-                      image: PCacheImage(attributes['src']),
+                      image: NetworkImage(attributes['src']),
                       placeholderBuilder: (context) => const Padding(
                         padding: EdgeInsets.all(8.0),
                         child: ProgressSpinner(),
@@ -85,7 +85,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                 child: Padding(
                   padding: const EdgeInsets.all(3.0),
                   child: OctoImage(
-                    image: PCacheImage(attributes['src']),
+                    image: NetworkImage(attributes['src']),
                     placeholderBuilder: (context) => const SizedBox(),
                   ),
                 ));

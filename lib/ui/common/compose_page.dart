@@ -1,6 +1,10 @@
 import 'dart:convert';
+import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_html/style.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
@@ -16,7 +20,13 @@ import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/utils/custom_icons.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:hkgalden_flutter/viewmodels/tag_selector_view_model.dart';
-import 'package:zefyr/zefyr.dart';
+import 'package:flutter_quill/models/documents/attribute.dart';
+import 'package:flutter_quill/models/documents/document.dart';
+import 'package:flutter_quill/widgets/controller.dart';
+import 'package:flutter_quill/widgets/default_styles.dart';
+import 'package:flutter_quill/widgets/editor.dart';
+import 'package:flutter_quill/widgets/toolbar.dart';
+import 'package:tuple/tuple.dart';
 
 class ComposePage extends StatefulWidget {
   final ComposeMode composeMode;
@@ -42,7 +52,7 @@ class _ComposePageState extends State<ComposePage> {
   Tag _tag;
   String _channelId;
   String _title;
-  ZefyrController _controller;
+  QuillController _controller;
   TextEditingController _titleFieldController;
   FocusNode _focusNode;
   FocusNode _titleFocusNode;
@@ -55,7 +65,7 @@ class _ComposePageState extends State<ComposePage> {
     _tag = const Tag(id: '02NP3MVYm', name: '吹水', color: Color(0xff457cb0));
     _channelId = '';
     _title = '';
-    _controller = ZefyrController(NotusDocument());
+    _controller = QuillController.basic();
     _titleFieldController = TextEditingController();
     _focusNode = FocusNode();
     _titleFocusNode = FocusNode();
@@ -123,180 +133,137 @@ class _ComposePageState extends State<ComposePage> {
           ),
         ],
       ),
-      body: ZefyrTheme(
-        data: ZefyrThemeData(
-          strikethrough:
-              const TextStyle(decoration: TextDecoration.lineThrough),
-          paragraph: TextBlockTheme(
-            spacing: const VerticalSpacing.zero(),
-            style: Theme.of(context)
-                .textTheme
-                .bodyText2
-                .copyWith(fontSize: FontSize.large.size, height: 1.25),
-          ),
-          link: const TextStyle(
-              decoration: TextDecoration.none, color: Colors.blueAccent),
-          heading1: TextBlockTheme(
-            spacing: const VerticalSpacing.zero(),
-            style: Theme.of(context).textTheme.bodyText2.copyWith(
-                fontWeight: FontWeight.normal, fontSize: 33, height: 1.25),
-          ),
-          heading2: TextBlockTheme(
-            spacing: const VerticalSpacing.zero(),
-            style: Theme.of(context).textTheme.bodyText2.copyWith(
-                fontWeight: FontWeight.normal,
-                fontSize: FontSize.xxLarge.size,
-                height: 1.25),
-          ),
-          heading3: TextBlockTheme(
-            spacing: const VerticalSpacing.zero(),
-            style: Theme.of(context).textTheme.bodyText2.copyWith(
-                fontWeight: FontWeight.normal,
-                fontSize: FontSize.xLarge.size,
-                height: 1.25),
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            if (widget.composeMode == ComposeMode.newPost)
-              Container(
-                  height: 37,
-                  margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                  child: Row(
-                    children: <Widget>[
-                      PopupMenuButton(
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                              child: SizedBox(
-                            height: displayHeight(context) / 2,
-                            child: _TagSelectDialog(
-                              onTagSelect: (tag, channelId) {
-                                Navigator.of(context).pop();
-                                FocusScope.of(context)
-                                    .requestFocus(_currentFocusNode);
-                                setState(() {
-                                  _tag = tag;
-                                  _channelId = channelId;
-                                });
-                              },
-                            ),
-                          ))
-                        ],
-                        child: Chip(
-                          label: Text('#${_tag.name}',
-                              strutStyle: const StrutStyle(height: 1.25),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .caption
-                                  .copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700)),
-                          backgroundColor: _tag.color,
-                        ),
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          if (widget.composeMode == ComposeMode.newPost)
+            Container(
+                height: 37,
+                margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                child: Row(
+                  children: <Widget>[
+                    PopupMenuButton(
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                            child: SizedBox(
+                          height: displayHeight(context) / 2,
+                          child: _TagSelectDialog(
+                            onTagSelect: (tag, channelId) {
+                              Navigator.of(context).pop();
+                              FocusScope.of(context)
+                                  .requestFocus(_currentFocusNode);
+                              setState(() {
+                                _tag = tag;
+                                _channelId = channelId;
+                              });
+                            },
+                          ),
+                        ))
+                      ],
+                      child: Chip(
+                        label: Text('#${_tag.name}',
+                            strutStyle: const StrutStyle(height: 1.25),
+                            style: Theme.of(context).textTheme.caption.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700)),
+                        backgroundColor: _tag.color,
                       ),
-                      const SizedBox(
-                        width: 8,
+                    ),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    Expanded(
+                      child: TextField(
+                        style: const TextStyle(fontSize: 14),
+                        strutStyle: const StrutStyle(height: 1.25),
+                        controller: _titleFieldController,
+                        focusNode: _titleFocusNode,
+                        decoration: InputDecoration(
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(6)),
+                            labelText: '標題',
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 7, vertical: 6.8)),
+                        onChanged: (value) {
+                          setState(() {
+                            _title = value;
+                          });
+                        },
                       ),
-                      Expanded(
-                        child: TextField(
-                          style: const TextStyle(fontSize: 14),
-                          strutStyle: const StrutStyle(height: 1.25),
-                          controller: _titleFieldController,
-                          focusNode: _titleFocusNode,
-                          decoration: InputDecoration(
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.never,
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(6)),
-                              labelText: '標題',
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 7, vertical: 6.8)),
-                          onChanged: (value) {
-                            setState(() {
-                              _title = value;
-                            });
-                          },
-                        ),
-                      )
-                    ],
-                  ))
-            else
-              const SizedBox(),
-            if (widget.composeMode == ComposeMode.quotedReply)
-              ConstrainedBox(
-                constraints:
-                    BoxConstraints(maxHeight: displayHeight(context) / 4),
-                child: SingleChildScrollView(
-                  reverse: true,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  child: StyledHtmlView(
-                    htmlString: HKGaldenHtmlParser().replyWithQuotes(
-                        widget.parentReply,
-                        StoreProvider.of<AppState>(context)),
-                    floor: widget.parentReply.floor,
-                  ),
+                    )
+                  ],
+                ))
+          else
+            const SizedBox(),
+          if (widget.composeMode == ComposeMode.quotedReply)
+            ConstrainedBox(
+              constraints:
+                  BoxConstraints(maxHeight: displayHeight(context) / 4),
+              child: SingleChildScrollView(
+                reverse: true,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: StyledHtmlView(
+                  htmlString: HKGaldenHtmlParser().replyWithQuotes(
+                      widget.parentReply, StoreProvider.of<AppState>(context)),
+                  floor: widget.parentReply.floor,
                 ),
-              )
-            else
-              const SizedBox(),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: ZefyrEditor(
-                  controller: _controller,
-                  focusNode: _focusNode,
-                  textCapitalization: TextCapitalization.none,
-                  expands: true,
-                  autofocus: true,
-                  keyboardAppearance: Brightness.dark,
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: ZefyrToolbar(
-                children: [
-                  ToggleStyleButton(
-                      attribute: NotusAttribute.bold,
-                      icon: Icons.format_bold,
-                      controller: _controller),
-                  ToggleStyleButton(
-                      attribute: NotusAttribute.italic,
-                      icon: Icons.format_italic,
-                      controller: _controller),
-                  ToggleStyleButton(
-                    attribute: NotusAttribute.underline,
-                    icon: Icons.format_underline,
-                    controller: _controller,
-                  ),
-                  ToggleStyleButton(
-                      attribute: NotusAttribute.strikethrough,
-                      icon: Icons.format_strikethrough,
-                      controller: _controller),
-                  VerticalDivider(
-                      indent: 16, endIndent: 16, color: Colors.grey.shade400),
-                  ToggleStyleButton(
-                    attribute: NotusAttribute.h1,
-                    icon: CustomIcons.formatHeader1,
-                    controller: _controller,
-                  ),
-                  ToggleStyleButton(
-                      attribute: NotusAttribute.h2,
-                      icon: CustomIcons.formatHeader2,
-                      controller: _controller),
-                  ToggleStyleButton(
-                      attribute: NotusAttribute.h3,
-                      icon: CustomIcons.formatHeader3,
-                      controller: _controller),
-                  VerticalDivider(
-                      indent: 16, endIndent: 16, color: Colors.grey.shade400),
-                  LinkStyleButton(controller: _controller)
-                ],
               ),
             )
-          ],
-        ),
+          else
+            const SizedBox(),
+          Expanded(
+            child: QuillEditor(
+              controller: _controller,
+              focusNode: _focusNode,
+              autoFocus: true,
+              textCapitalization: TextCapitalization.none,
+              expands: true,
+              keyboardAppearance: Brightness.dark,
+              scrollable: true,
+              scrollController: ScrollController(),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              readOnly: false,
+              enableInteractiveSelection: true,
+              customStyles: DefaultStyles(
+                  h1: DefaultTextBlockStyle(
+                      Theme.of(context).textTheme.bodyText2.copyWith(
+                          fontWeight: FontWeight.normal,
+                          fontSize: 33,
+                          height: 1.25),
+                      const Tuple2(0.0, 0.0),
+                      const Tuple2(0.0, 0.0),
+                      null),
+                  h2: DefaultTextBlockStyle(
+                      Theme.of(context).textTheme.bodyText2.copyWith(
+                          fontWeight: FontWeight.normal,
+                          fontSize: FontSize.xxLarge.size,
+                          height: 1.25),
+                      const Tuple2(0.0, 0.0),
+                      const Tuple2(0.0, 0.0),
+                      null),
+                  h3: DefaultTextBlockStyle(
+                      Theme.of(context).textTheme.bodyText2.copyWith(
+                          fontWeight: FontWeight.normal,
+                          fontSize: FontSize.xLarge.size,
+                          height: 1.25),
+                      const Tuple2(0.0, 0.0),
+                      const Tuple2(0.0, 0.0),
+                      null),
+                  strikeThrough:
+                      const TextStyle(decoration: TextDecoration.lineThrough),
+                  paragraph: DefaultTextBlockStyle(
+                      Theme.of(context).textTheme.bodyText2.copyWith(
+                          fontWeight: FontWeight.normal,
+                          fontSize: FontSize.large.size,
+                          height: 1.25),
+                      const Tuple2(0.0, 0.0),
+                      const Tuple2(0.0, 0.0),
+                      null)),
+            ),
+          ),
+          QuillToolbar.basic(controller: _controller)
+        ],
       ),
     );
   }
@@ -320,7 +287,7 @@ class _ComposePageState extends State<ComposePage> {
           Navigator.pop(context);
           widget.onCreateThread(_channelId);
         } else {
-          Scaffold.of(context)
+          ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text('主題發表失敗!')));
         }
       });
@@ -344,7 +311,7 @@ class _ComposePageState extends State<ComposePage> {
           Navigator.pop(context);
           widget.onSent(sentReply);
         } else {
-          Scaffold.of(context)
+          ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text('回覆發送失敗!')));
         }
       });

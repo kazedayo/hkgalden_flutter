@@ -326,7 +326,7 @@ class _HomePageState extends State<HomePage>
                     ),
                   ),
                 ),
-                inactiveOverlayColor: Colors.black,
+                frontLayerScrim: Colors.black.withAlpha(177),
                 stickyFrontLayer: true,
                 backLayer: HomeDrawer(),
                 backLayerBackgroundColor:
@@ -455,7 +455,7 @@ class _LeadingButton extends StatelessWidget {
   Widget build(BuildContext context) => IconButton(
         icon: AnimatedIcon(
           icon: AnimatedIcons.close_menu,
-          progress: Backdrop.of(context).controller.view,
+          progress: Backdrop.of(context).animationController.view,
         ),
         onPressed: () => Backdrop.of(context).fling(),
       );

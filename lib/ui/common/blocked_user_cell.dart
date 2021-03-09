@@ -4,7 +4,6 @@ import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 import 'package:octo_image/octo_image.dart';
-import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 
 class BlockedUserCell extends StatefulWidget {
   final User user;
@@ -25,7 +24,7 @@ class _BlockedUserCellState extends State<BlockedUserCell> {
   }
 
   @override
-  Widget build(BuildContext context) => FlatButton(
+  Widget build(BuildContext context) => TextButton(
         onPressed: () {
           setState(() {
             _unblock = !_unblock;
@@ -40,7 +39,7 @@ class _BlockedUserCellState extends State<BlockedUserCell> {
                 : OctoImage(
                     width: 30,
                     height: 30,
-                    image: PCacheImage(widget.user.avatar),
+                    image: NetworkImage(widget.user.avatar),
                     placeholderBuilder: (context) => SizedBox.fromSize(
                       size: const Size.square(30),
                     ),

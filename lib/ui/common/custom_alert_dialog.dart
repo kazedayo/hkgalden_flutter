@@ -31,10 +31,7 @@ class CustomAlertDialog extends StatelessWidget {
                 content,
               ),
               actions: <Widget>[
-                FlatButton(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  highlightColor: Colors.grey[800],
+                TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(
                     'OK',

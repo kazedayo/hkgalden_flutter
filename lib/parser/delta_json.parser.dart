@@ -88,8 +88,7 @@ class DeltaJsonParser {
 
   Future<ui.Image> _getImageDimension(String url) {
     final Completer<ui.Image> imageCompleter = Completer<ui.Image>();
-    Image.network(url)
-        .image
+    NetworkImage(url)
         .resolve(const ImageConfiguration())
         .addListener(ImageStreamListener((ImageInfo info, bool _) {
       imageCompleter.complete(info.image);

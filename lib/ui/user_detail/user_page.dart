@@ -6,7 +6,6 @@ import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_page.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 import 'package:octo_image/octo_image.dart';
-import 'package:paulonia_cache_image/paulonia_cache_image.dart';
 
 class UserPage extends StatelessWidget {
   final User user;
@@ -45,7 +44,7 @@ class UserPage extends StatelessWidget {
                       : OctoImage(
                           width: 25,
                           height: 25,
-                          image: PCacheImage(user.avatar),
+                          image: NetworkImage(user.avatar),
                           placeholderBuilder: (context) => SizedBox.fromSize(
                             size: const Size.square(30),
                           ),
