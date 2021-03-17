@@ -65,7 +65,26 @@ class _ComposePageState extends State<ComposePage> {
     _focusNode = FocusNode();
     _titleFocusNode = FocusNode();
     _isSending = false;
+    _focusNode.addListener(() {
+      _focusListener(_focusNode);
+    });
+    _titleFocusNode.addListener(() {
+      _focusListener(_titleFocusNode);
+    });
     super.initState();
+  }
+
+  void _focusListener(FocusNode node) {
+    if (node.hasFocus) {
+      _currentFocusNode = node;
+    }
+    if (!_focusNode.hasFocus && !_titleFocusNode.hasFocus) {
+      _retainFocus();
+    }
+  }
+
+  void _retainFocus() {
+    FocusScope.of(context).requestFocus(_currentFocusNode);
   }
 
   @override
@@ -80,6 +99,7 @@ class _ComposePageState extends State<ComposePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         centerTitle:
             Theme.of(context).platform == TargetPlatform.iOS ? true : false,
@@ -133,62 +153,63 @@ class _ComposePageState extends State<ComposePage> {
         children: <Widget>[
           if (widget.composeMode == ComposeMode.newPost)
             Container(
-                height: 37,
-                margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                child: Row(
-                  children: <Widget>[
-                    PopupMenuButton(
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                            child: SizedBox(
-                          height: displayHeight(context) / 2,
-                          child: _TagSelectDialog(
-                            onTagSelect: (tag, channelId) {
-                              Navigator.of(context).pop();
-                              FocusScope.of(context)
-                                  .requestFocus(_currentFocusNode);
-                              setState(() {
-                                _tag = tag;
-                                _channelId = channelId;
-                              });
-                            },
-                          ),
-                        ))
-                      ],
-                      child: Chip(
-                        label: Text('#${_tag.name}',
-                            strutStyle: const StrutStyle(height: 1.25),
-                            style: Theme.of(context).textTheme.caption.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700)),
-                        backgroundColor: _tag.color,
-                      ),
+              height: 29,
+              margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              child: Row(
+                children: <Widget>[
+                  PopupMenuButton(
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                          child: SizedBox(
+                        height: displayHeight(context) / 3,
+                        child: _TagSelectDialog(
+                          onTagSelect: (tag, channelId) {
+                            Navigator.of(context).pop();
+                            FocusScope.of(context)
+                                .requestFocus(_currentFocusNode);
+                            setState(() {
+                              _tag = tag;
+                              _channelId = channelId;
+                            });
+                          },
+                        ),
+                      ))
+                    ],
+                    child: Chip(
+                      label: Text('#${_tag.name}',
+                          strutStyle: const StrutStyle(height: 1.25),
+                          style: Theme.of(context).textTheme.caption.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700)),
+                      backgroundColor: _tag.color,
                     ),
-                    const SizedBox(
-                      width: 8,
+                  ),
+                  const SizedBox(
+                    width: 8,
+                  ),
+                  Expanded(
+                    child: TextField(
+                      style: const TextStyle(fontSize: 14),
+                      strutStyle: const StrutStyle(height: 1.25),
+                      controller: _titleFieldController,
+                      focusNode: _titleFocusNode,
+                      decoration: InputDecoration(
+                          floatingLabelBehavior: FloatingLabelBehavior.never,
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(6)),
+                          labelText: '標題',
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 7, vertical: 6.8)),
+                      onChanged: (value) {
+                        setState(() {
+                          _title = value;
+                        });
+                      },
                     ),
-                    Expanded(
-                      child: TextField(
-                        style: const TextStyle(fontSize: 14),
-                        strutStyle: const StrutStyle(height: 1.25),
-                        controller: _titleFieldController,
-                        focusNode: _titleFocusNode,
-                        decoration: InputDecoration(
-                            floatingLabelBehavior: FloatingLabelBehavior.never,
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(6)),
-                            labelText: '標題',
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 7, vertical: 6.8)),
-                        onChanged: (value) {
-                          setState(() {
-                            _title = value;
-                          });
-                        },
-                      ),
-                    )
-                  ],
-                ))
+                  )
+                ],
+              ),
+            )
           else
             const SizedBox(),
           if (widget.composeMode == ComposeMode.quotedReply)
@@ -207,6 +228,17 @@ class _ComposePageState extends State<ComposePage> {
             )
           else
             const SizedBox(),
+          Container(
+            height: 30,
+            child: QuillToolbar.basic(
+              controller: _controller,
+              showBackgroundColorButton: false,
+              showCodeBlock: false,
+              showListCheck: false,
+              showIndent: false,
+              showQuote: false,
+            ),
+          ),
           Expanded(
             child: QuillEditor(
               controller: _controller,
@@ -217,7 +249,7 @@ class _ComposePageState extends State<ComposePage> {
               keyboardAppearance: Brightness.dark,
               scrollable: true,
               scrollController: ScrollController(),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.only(left: 12, right: 12, top: 6),
               readOnly: false,
               enableInteractiveSelection: true,
               customStyles: DefaultStyles(
@@ -257,7 +289,6 @@ class _ComposePageState extends State<ComposePage> {
                       null)),
             ),
           ),
-          QuillToolbar.basic(controller: _controller)
         ],
       ),
     );

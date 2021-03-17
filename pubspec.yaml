@@ -21,38 +21,37 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
+  animations:
+  auto_size_text:  
+  backdrop: 
+  cupertino_icons: 
+  date_time_format: 
+  equatable: 
   flutter:
     sdk: flutter
+  flutter_html: 
   flutter_localizations:
     sdk: flutter
-
-  cupertino_icons: 
-  flutter_svg: 
   flutter_quill: ^1.0.0
-  graphql: ^4.0.0
-  redux: 
   flutter_redux: 
-  webview_flutter: 
   flutter_secure_storage: 
-  equatable: 
-  flutter_html: 
-  date_time_format: 
+  flutter_svg: 
+  graphql: ^4.0.0
+  image_downloader:
+  image_picker: 
+  modal_bottom_sheet: 
+  octo_image: 
+  package_info: 
+  redux: 
+  shimmer: 
   universal_html: 
   url_launcher: 
-  octo_image: 
-  animations: 
-  image_downloader: 
-  auto_size_text: 
-  shimmer: 
-  image_picker: 
-  backdrop: 
-  package_info: 
-  modal_bottom_sheet: 
+  webview_flutter: 
 
 dev_dependencies:
+  flutter_launcher_icons:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons:
   lint: ^1.0.0
 
 # For information on the generic Dart part of this file, see the

@@ -17,9 +17,9 @@ import 'package:hkgalden_flutter/ui/startup_animation.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:redux/redux.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  GestureBinding.instance.resamplingEnabled = true;
+void main() {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // GestureBinding.instance.resamplingEnabled = true;
   runApp(MyApp());
 }
 
@@ -85,6 +85,7 @@ class MyApp extends StatelessWidget {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
       dividerColor: Colors.grey[800],
       primaryColor: const Color(0xff2e3533),
+      canvasColor: const Color(0xff1b1f1e),
       scaffoldBackgroundColor: const Color(0xff1b1f1e),
       appBarTheme: const AppBarTheme(color: Color(0xff1b1f1e), elevation: 0),
       accentColor: const Color(0xff45c17c),
