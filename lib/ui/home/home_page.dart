@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage>
 
   @override
   void initState() {
-    //_scrollController = ScrollController();
+    _scrollController = ScrollController();
     _backgroundBlurAnimationController = AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 150),
@@ -81,294 +81,290 @@ class _HomePageState extends State<HomePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Builder(
-        builder: (context) => StoreConnector<AppState, HomePageViewModel>(
-          converter: (store) => HomePageViewModel.create(store),
-          distinct: true,
-          onInit: (store) {
-            _scrollController = PrimaryScrollController.of(context);
-            _scrollController.addListener(() {
-              if (_scrollController.position.pixels ==
-                  _scrollController.position.maxScrollExtent) {
-                store.dispatch(RequestThreadListAction(
-                    channelId: store.state.threadListState.currentChannelId,
-                    page: store.state.threadListState.currentPage + 1,
-                    isRefresh: true));
-              }
-              if ((_scrollController.position.userScrollDirection ==
-                          ScrollDirection.forward ||
-                      _scrollController.position.pixels == 0.0) &&
-                  _fabIsHidden) {
-                setState(() {
-                  _fabIsHidden = false;
-                });
-              } else if (_scrollController.position.userScrollDirection ==
-                      ScrollDirection.reverse &&
-                  !_fabIsHidden) {
-                setState(() {
-                  _fabIsHidden = true;
-                });
-              }
-            });
-          },
-          builder: (BuildContext context, HomePageViewModel viewModel) => Stack(
-            fit: StackFit.expand,
-            children: [
-              BackdropScaffold(
-                resizeToAvoidBottomInset: false,
-                appBar: PreferredSize(
-                  preferredSize: const Size.fromHeight(kToolbarHeight),
-                  child: AppBar(
-                    leading: _LeadingButton(),
-                    title: Text.rich(
-                      TextSpan(children: [
-                        WidgetSpan(
-                            alignment: PlaceholderAlignment.middle,
-                            child: Hero(
-                                tag: 'logo',
-                                child: SvgPicture.asset(
-                                  'assets/icon-hkgalden.svg',
-                                  width: 27,
-                                  height: 27,
-                                ))),
-                        const WidgetSpan(
-                            child: SizedBox(
-                          width: 5,
-                        )),
-                        TextSpan(
-                            text: viewModel.title,
-                            style: const TextStyle(
-                                fontSize: 19, fontWeight: FontWeight.w700))
-                      ]),
-                    ),
-                    actions: [
-                      if (viewModel.isLoggedIn)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: PopupMenuButton(
-                              itemBuilder: (context) => [
-                                    const PopupMenuItem(
-                                      value: _MenuItem.account,
-                                      child: ListTile(
-                                        dense: true,
-                                        leading:
-                                            Icon(Icons.account_box_rounded),
-                                        title: Text('個人檔案'),
-                                      ),
-                                    ),
-                                    const PopupMenuItem(
-                                      value: _MenuItem.blocklist,
-                                      child: ListTile(
-                                        dense: true,
-                                        leading: Icon(Icons.block_rounded),
-                                        title: Text('封鎖名單'),
-                                      ),
-                                    ),
-                                    const PopupMenuItem(
-                                      value: _MenuItem.licences,
-                                      child: ListTile(
-                                        dense: true,
-                                        leading: Icon(Icons.copyright_rounded),
-                                        title: Text('版權資訊'),
-                                      ),
-                                    ),
-                                    const PopupMenuItem(
-                                      value: _MenuItem.logout,
-                                      child: ListTile(
-                                        dense: true,
-                                        leading: Icon(
-                                          Icons.logout,
-                                          color: Colors.redAccent,
-                                        ),
-                                        title: Text('登出'),
-                                      ),
-                                    ),
-                                  ],
-                              onSelected: (value) async {
-                                switch (value as _MenuItem) {
-                                  case _MenuItem.account:
-                                    showMaterialModalBottomSheet(
-                                        duration:
-                                            const Duration(milliseconds: 200),
-                                        animationCurve: Curves.easeOut,
-                                        enableDrag: false,
-                                        backgroundColor: Colors.transparent,
-                                        barrierColor: Colors.black87,
-                                        context: context,
-                                        builder: (context) => UserPage(
-                                              user: viewModel.sessionUser,
-                                            ));
-                                    break;
-                                  case _MenuItem.blocklist:
-                                    showMaterialModalBottomSheet(
-                                        duration:
-                                            const Duration(milliseconds: 200),
-                                        animationCurve: Curves.easeOut,
-                                        enableDrag: false,
-                                        backgroundColor: Colors.transparent,
-                                        barrierColor: Colors.black87,
-                                        context: context,
-                                        builder: (context) => BlockListPage());
-                                    break;
-                                  case _MenuItem.licences:
-                                    final PackageInfo info =
-                                        await PackageInfo.fromPlatform();
-                                    showLicensePage(
-                                      context: context,
-                                      applicationName: 'hkGalden',
-                                      applicationIcon: SvgPicture.asset(
-                                        'assets/icon-hkgalden.svg',
-                                        width: 50,
-                                        height: 50,
-                                        color: Theme.of(context).accentColor,
-                                      ),
-                                      applicationVersion:
-                                          '${info.version}+${info.buildNumber}',
-                                      applicationLegalese: '© hkGalden & 1080',
-                                    );
-                                    break;
-                                  case _MenuItem.logout:
-                                    viewModel.onLogout();
-                                    break;
-                                  default:
-                                }
-                              },
-                              icon: const Icon(Icons.apps_rounded)),
-                        )
-                      else
-                        IconButton(
-                            icon: const Icon(Icons.login_rounded),
-                            onPressed: () => Navigator.of(context).push(
-                                SlideInFromBottomRoute(page: LoginPage())))
-                    ],
+      body: StoreConnector<AppState, HomePageViewModel>(
+        converter: (store) => HomePageViewModel.create(store),
+        distinct: true,
+        onInit: (store) {
+          _scrollController.addListener(() {
+            if (_scrollController.position.pixels ==
+                _scrollController.position.maxScrollExtent) {
+              store.dispatch(RequestThreadListAction(
+                  channelId: store.state.threadListState.currentChannelId,
+                  page: store.state.threadListState.currentPage + 1,
+                  isRefresh: true));
+            }
+            if ((_scrollController.position.userScrollDirection ==
+                        ScrollDirection.forward ||
+                    _scrollController.position.pixels == 0.0) &&
+                _fabIsHidden) {
+              setState(() {
+                _fabIsHidden = false;
+              });
+            } else if (_scrollController.position.userScrollDirection ==
+                    ScrollDirection.reverse &&
+                !_fabIsHidden) {
+              setState(() {
+                _fabIsHidden = true;
+              });
+            }
+          });
+        },
+        builder: (BuildContext context, HomePageViewModel viewModel) => Stack(
+          fit: StackFit.expand,
+          children: [
+            BackdropScaffold(
+              resizeToAvoidBottomInset: false,
+              appBar: PreferredSize(
+                preferredSize: const Size.fromHeight(kToolbarHeight),
+                child: AppBar(
+                  leading: _LeadingButton(),
+                  title: Text.rich(
+                    TextSpan(children: [
+                      WidgetSpan(
+                          alignment: PlaceholderAlignment.middle,
+                          child: Hero(
+                              tag: 'logo',
+                              child: SvgPicture.asset(
+                                'assets/icon-hkgalden.svg',
+                                width: 27,
+                                height: 27,
+                              ))),
+                      const WidgetSpan(
+                          child: SizedBox(
+                        width: 5,
+                      )),
+                      TextSpan(
+                          text: viewModel.title,
+                          style: const TextStyle(
+                              fontSize: 19, fontWeight: FontWeight.w700))
+                    ]),
                   ),
-                ),
-                frontLayer: Theme(
-                  data: Theme.of(context)
-                      .copyWith(highlightColor: const Color(0xff373d3c)),
-                  child: Material(
-                    color: Theme.of(context).primaryColor,
-                    child: Container(
-                      child: viewModel.isThreadLoading &&
-                              viewModel.isRefresh == false
-                          ? ListLoadingSkeleton()
-                          : Theme.of(context).platform == TargetPlatform.iOS
-                              ? CustomScrollView(
-                                  controller: _scrollController,
-                                  slivers: [
-                                    CupertinoSliverRefreshControl(
-                                      refreshTriggerPullDistance: 120,
-                                      onRefresh: () => viewModel.onRefresh(
-                                              viewModel.selectedChannelId)
-                                          as Future<void>,
+                  actions: [
+                    if (viewModel.isLoggedIn)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: PopupMenuButton(
+                            itemBuilder: (context) => [
+                                  const PopupMenuItem(
+                                    value: _MenuItem.account,
+                                    child: ListTile(
+                                      dense: true,
+                                      leading: Icon(Icons.account_box_rounded),
+                                      title: Text('個人檔案'),
                                     ),
-                                    SliverList(
-                                        delegate: SliverChildBuilderDelegate(
-                                            (context, index) {
-                                      if (index == viewModel.threads.length) {
-                                        return ListLoadingSkeletonCell();
-                                      } else {
-                                        return Visibility(
-                                          visible: !viewModel.blockedUserIds
-                                              .contains(viewModel.threads[index]
-                                                  .replies[0].author.userId),
-                                          child: ThreadCell(
-                                            key: ValueKey(viewModel
-                                                .threads[index].threadId),
-                                            thread: viewModel.threads[index],
-                                            onTap: () => _loadThread(
-                                                viewModel.threads[index]),
-                                            onLongPress: () => _jumpToPage(
-                                                viewModel.threads[index]),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                            childCount:
-                                                viewModel.threads.length + 1,
-                                            addAutomaticKeepAlives: false,
-                                            addRepaintBoundaries: false))
-                                  ],
-                                )
-                              : RefreshIndicator(
-                                  backgroundColor: Colors.white,
-                                  strokeWidth: 2.5,
-                                  onRefresh: () => viewModel.onRefresh(
-                                          viewModel.selectedChannelId)
-                                      as Future<void>,
-                                  child: ListView.builder(
-                                    addAutomaticKeepAlives: false,
-                                    addRepaintBoundaries: false,
-                                    controller: _scrollController,
-                                    itemCount: viewModel.threads.length + 1,
-                                    itemBuilder: (context, index) {
-                                      if (index == viewModel.threads.length) {
-                                        return ListLoadingSkeletonCell();
-                                      } else {
-                                        return Visibility(
-                                          visible: !viewModel.blockedUserIds
-                                              .contains(viewModel.threads[index]
-                                                  .replies[0].author.userId),
-                                          child: ThreadCell(
-                                            key: ValueKey(viewModel
-                                                .threads[index].threadId),
-                                            thread: viewModel.threads[index],
-                                            onTap: () => _loadThread(
-                                                viewModel.threads[index]),
-                                            onLongPress: () => _jumpToPage(
-                                                viewModel.threads[index]),
-                                          ),
-                                        );
-                                      }
-                                    },
                                   ),
-                                ),
-                    ),
-                  ),
+                                  const PopupMenuItem(
+                                    value: _MenuItem.blocklist,
+                                    child: ListTile(
+                                      dense: true,
+                                      leading: Icon(Icons.block_rounded),
+                                      title: Text('封鎖名單'),
+                                    ),
+                                  ),
+                                  const PopupMenuItem(
+                                    value: _MenuItem.licences,
+                                    child: ListTile(
+                                      dense: true,
+                                      leading: Icon(Icons.copyright_rounded),
+                                      title: Text('版權資訊'),
+                                    ),
+                                  ),
+                                  const PopupMenuItem(
+                                    value: _MenuItem.logout,
+                                    child: ListTile(
+                                      dense: true,
+                                      leading: Icon(
+                                        Icons.logout,
+                                        color: Colors.redAccent,
+                                      ),
+                                      title: Text('登出'),
+                                    ),
+                                  ),
+                                ],
+                            onSelected: (value) async {
+                              switch (value as _MenuItem) {
+                                case _MenuItem.account:
+                                  showMaterialModalBottomSheet(
+                                      duration:
+                                          const Duration(milliseconds: 200),
+                                      animationCurve: Curves.easeOut,
+                                      enableDrag: false,
+                                      backgroundColor: Colors.transparent,
+                                      barrierColor: Colors.black87,
+                                      context: context,
+                                      builder: (context) => UserPage(
+                                            user: viewModel.sessionUser,
+                                          ));
+                                  break;
+                                case _MenuItem.blocklist:
+                                  showMaterialModalBottomSheet(
+                                      duration:
+                                          const Duration(milliseconds: 200),
+                                      animationCurve: Curves.easeOut,
+                                      enableDrag: false,
+                                      backgroundColor: Colors.transparent,
+                                      barrierColor: Colors.black87,
+                                      context: context,
+                                      builder: (context) => BlockListPage());
+                                  break;
+                                case _MenuItem.licences:
+                                  final PackageInfo info =
+                                      await PackageInfo.fromPlatform();
+                                  showLicensePage(
+                                    context: context,
+                                    applicationName: 'hkGalden',
+                                    applicationIcon: SvgPicture.asset(
+                                      'assets/icon-hkgalden.svg',
+                                      width: 50,
+                                      height: 50,
+                                      color: Theme.of(context).accentColor,
+                                    ),
+                                    applicationVersion:
+                                        '${info.version}+${info.buildNumber}',
+                                    applicationLegalese: '© hkGalden & 1080',
+                                  );
+                                  break;
+                                case _MenuItem.logout:
+                                  viewModel.onLogout();
+                                  break;
+                                default:
+                              }
+                            },
+                            icon: const Icon(Icons.apps_rounded)),
+                      )
+                    else
+                      IconButton(
+                          icon: const Icon(Icons.login_rounded),
+                          onPressed: () => Navigator.of(context)
+                              .push(SlideInFromBottomRoute(page: LoginPage())))
+                  ],
                 ),
-                frontLayerScrim: Colors.black.withAlpha(177),
-                stickyFrontLayer: true,
-                backLayer: HomeDrawer(),
-                backLayerBackgroundColor:
-                    Theme.of(context).scaffoldBackgroundColor,
-                floatingActionButton: _fabIsHidden
-                    ? null
-                    : FloatingActionButton(
-                        onPressed: () => viewModel.isLoggedIn
-                            ? showBarModalBottomSheet(
-                                duration: const Duration(milliseconds: 300),
-                                animationCurve: Curves.easeOut,
-                                context: context,
-                                builder: (context) => ComposePage(
-                                  composeMode: ComposeMode.newPost,
-                                  onCreateThread: (channelId) =>
-                                      viewModel.onCreateThread(channelId),
-                                ),
-                              )
-                            : showCustomDialog(
-                                context: context,
-                                builder: (context) => const CustomAlertDialog(
-                                      title: '未登入',
-                                      content: '請先登入',
-                                    )),
-                        child: const Icon(Icons.create_rounded),
-                      ),
               ),
-              Visibility(
-                visible: _menuIsShowing,
-                child: AnimatedBuilder(
-                  animation: _backgroundBlurAnimationController,
-                  builder: (context, child) => BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                    child: Container(
-                      color: Colors.black.withOpacity(
-                          _backgroundBlurAnimationController.value),
-                    ),
+              frontLayer: Theme(
+                data: Theme.of(context)
+                    .copyWith(highlightColor: const Color(0xff373d3c)),
+                child: Material(
+                  color: Theme.of(context).primaryColor,
+                  child: Container(
+                    child: viewModel.isThreadLoading &&
+                            viewModel.isRefresh == false
+                        ? ListLoadingSkeleton()
+                        : Theme.of(context).platform == TargetPlatform.iOS
+                            ? CustomScrollView(
+                                controller: _scrollController,
+                                slivers: [
+                                  CupertinoSliverRefreshControl(
+                                    refreshTriggerPullDistance: 120,
+                                    onRefresh: () => viewModel.onRefresh(
+                                            viewModel.selectedChannelId)
+                                        as Future<void>,
+                                  ),
+                                  SliverList(
+                                      delegate: SliverChildBuilderDelegate(
+                                          (context, index) {
+                                    if (index == viewModel.threads.length) {
+                                      return ListLoadingSkeletonCell();
+                                    } else {
+                                      return Visibility(
+                                        visible: !viewModel.blockedUserIds
+                                            .contains(viewModel.threads[index]
+                                                .replies[0].author.userId),
+                                        child: ThreadCell(
+                                          key: ValueKey(viewModel
+                                              .threads[index].threadId),
+                                          thread: viewModel.threads[index],
+                                          onTap: () => _loadThread(
+                                              viewModel.threads[index]),
+                                          onLongPress: () => _jumpToPage(
+                                              viewModel.threads[index]),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                          childCount:
+                                              viewModel.threads.length + 1,
+                                          addAutomaticKeepAlives: false,
+                                          addRepaintBoundaries: false))
+                                ],
+                              )
+                            : RefreshIndicator(
+                                backgroundColor: Colors.white,
+                                strokeWidth: 2.5,
+                                onRefresh: () => viewModel
+                                        .onRefresh(viewModel.selectedChannelId)
+                                    as Future<void>,
+                                child: ListView.builder(
+                                  addAutomaticKeepAlives: false,
+                                  addRepaintBoundaries: false,
+                                  controller: _scrollController,
+                                  itemCount: viewModel.threads.length + 1,
+                                  itemBuilder: (context, index) {
+                                    if (index == viewModel.threads.length) {
+                                      return ListLoadingSkeletonCell();
+                                    } else {
+                                      return Visibility(
+                                        visible: !viewModel.blockedUserIds
+                                            .contains(viewModel.threads[index]
+                                                .replies[0].author.userId),
+                                        child: ThreadCell(
+                                          key: ValueKey(viewModel
+                                              .threads[index].threadId),
+                                          thread: viewModel.threads[index],
+                                          onTap: () => _loadThread(
+                                              viewModel.threads[index]),
+                                          onLongPress: () => _jumpToPage(
+                                              viewModel.threads[index]),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
                   ),
                 ),
-              )
-            ],
-          ),
+              ),
+              frontLayerScrim: Colors.black.withAlpha(177),
+              stickyFrontLayer: true,
+              backLayer: HomeDrawer(),
+              backLayerBackgroundColor:
+                  Theme.of(context).scaffoldBackgroundColor,
+              floatingActionButton: _fabIsHidden
+                  ? null
+                  : FloatingActionButton(
+                      onPressed: () => viewModel.isLoggedIn
+                          ? showBarModalBottomSheet(
+                              duration: const Duration(milliseconds: 300),
+                              animationCurve: Curves.easeOut,
+                              context: context,
+                              builder: (context) => ComposePage(
+                                composeMode: ComposeMode.newPost,
+                                onCreateThread: (channelId) =>
+                                    viewModel.onCreateThread(channelId),
+                              ),
+                            )
+                          : showCustomDialog(
+                              context: context,
+                              builder: (context) => const CustomAlertDialog(
+                                    title: '未登入',
+                                    content: '請先登入',
+                                  )),
+                      child: const Icon(Icons.create_rounded),
+                    ),
+            ),
+            Visibility(
+              visible: _menuIsShowing,
+              child: AnimatedBuilder(
+                animation: _backgroundBlurAnimationController,
+                builder: (context, child) => BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                  child: Container(
+                    color: Colors.black
+                        .withOpacity(_backgroundBlurAnimationController.value),
+                  ),
+                ),
+              ),
+            )
+          ],
         ),
       ),
     );
