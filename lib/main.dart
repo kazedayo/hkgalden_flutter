@@ -82,6 +82,11 @@ class MyApp extends StatelessWidget {
       popupMenuTheme: PopupMenuThemeData(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
+      textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+              primary: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100)))),
       dividerColor: Colors.grey[800],
       primaryColor: const Color(0xff2e3533),
       canvasColor: const Color(0xff1b1f1e),

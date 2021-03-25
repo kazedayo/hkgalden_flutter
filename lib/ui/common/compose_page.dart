@@ -228,7 +228,7 @@ class _ComposePageState extends State<ComposePage> {
             )
           else
             const SizedBox(),
-          Container(
+          SizedBox(
             height: 30,
             child: QuillToolbar.basic(
               controller: _controller,

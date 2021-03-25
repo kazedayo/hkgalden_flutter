@@ -12,47 +12,48 @@ class ChannelCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        child: Center(
-          child: Material(
-            clipBehavior: Clip.hardEdge,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            elevation: viewModel.selectedChannelId == channel.channelId ? 6 : 0,
-            color: viewModel.selectedChannelId == channel.channelId
-                ? Theme.of(context).primaryColor
-                : Theme.of(context).scaffoldBackgroundColor,
-            child: TextButton(
-              onPressed: viewModel.selectedChannelId == channel.channelId
-                  ? null
-                  : () {
-                      HapticFeedback.mediumImpact();
-                      viewModel.onTap(channel.channelId);
-                      //Navigator.pop(context);
-                      Backdrop.of(context).concealBackLayer();
-                    },
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Spacer(),
-                    Text(
-                      channel.channelName,
-                      style: Theme.of(context).textTheme.subtitle2.copyWith(),
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        child: Material(
+          clipBehavior: Clip.hardEdge,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          elevation: viewModel.selectedChannelId == channel.channelId ? 6 : 0,
+          color: viewModel.selectedChannelId == channel.channelId
+              ? Theme.of(context).primaryColor
+              : Theme.of(context).scaffoldBackgroundColor,
+          child: TextButton(
+            style: TextButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10))),
+            onPressed: viewModel.selectedChannelId == channel.channelId
+                ? null
+                : () {
+                    HapticFeedback.mediumImpact();
+                    viewModel.onTap(channel.channelId);
+                    //Navigator.pop(context);
+                    Backdrop.of(context).concealBackLayer();
+                  },
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Spacer(),
+                  Text(
+                    channel.channelName,
+                    style: Theme.of(context).textTheme.subtitle2.copyWith(),
+                  ),
+                  const Spacer(flex: 3),
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: channel.channelColor,
+                      shape: BoxShape.circle,
                     ),
-                    const Spacer(flex: 3),
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: channel.channelColor,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const Spacer()
-                  ],
-                ),
+                  ),
+                  const Spacer()
+                ],
               ),
             ),
           ),

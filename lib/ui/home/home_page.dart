@@ -249,77 +249,39 @@ class _HomePageState extends State<HomePage>
                     child: viewModel.isThreadLoading &&
                             viewModel.isRefresh == false
                         ? ListLoadingSkeleton()
-                        : Theme.of(context).platform == TargetPlatform.iOS
-                            ? CustomScrollView(
-                                controller: _scrollController,
-                                slivers: [
-                                  CupertinoSliverRefreshControl(
-                                    refreshTriggerPullDistance: 120,
-                                    onRefresh: () => viewModel.onRefresh(
-                                            viewModel.selectedChannelId)
-                                        as Future<void>,
-                                  ),
-                                  SliverList(
-                                      delegate: SliverChildBuilderDelegate(
-                                          (context, index) {
-                                    if (index == viewModel.threads.length) {
-                                      return ListLoadingSkeletonCell();
-                                    } else {
-                                      return Visibility(
-                                        visible: !viewModel.blockedUserIds
-                                            .contains(viewModel.threads[index]
-                                                .replies[0].author.userId),
-                                        child: ThreadCell(
-                                          key: ValueKey(viewModel
-                                              .threads[index].threadId),
-                                          thread: viewModel.threads[index],
-                                          onTap: () => _loadThread(
-                                              viewModel.threads[index]),
-                                          onLongPress: () => _jumpToPage(
-                                              viewModel.threads[index]),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                          childCount:
-                                              viewModel.threads.length + 1,
-                                          addAutomaticKeepAlives: false,
-                                          addRepaintBoundaries: false))
-                                ],
-                              )
-                            : RefreshIndicator(
-                                backgroundColor: Colors.white,
-                                strokeWidth: 2.5,
-                                onRefresh: () => viewModel
-                                        .onRefresh(viewModel.selectedChannelId)
+                        : RefreshIndicator(
+                            backgroundColor: Colors.white,
+                            strokeWidth: 2.5,
+                            onRefresh: () =>
+                                viewModel.onRefresh(viewModel.selectedChannelId)
                                     as Future<void>,
-                                child: ListView.builder(
-                                  addAutomaticKeepAlives: false,
-                                  addRepaintBoundaries: false,
-                                  controller: _scrollController,
-                                  itemCount: viewModel.threads.length + 1,
-                                  itemBuilder: (context, index) {
-                                    if (index == viewModel.threads.length) {
-                                      return ListLoadingSkeletonCell();
-                                    } else {
-                                      return Visibility(
-                                        visible: !viewModel.blockedUserIds
-                                            .contains(viewModel.threads[index]
-                                                .replies[0].author.userId),
-                                        child: ThreadCell(
-                                          key: ValueKey(viewModel
-                                              .threads[index].threadId),
-                                          thread: viewModel.threads[index],
-                                          onTap: () => _loadThread(
-                                              viewModel.threads[index]),
-                                          onLongPress: () => _jumpToPage(
-                                              viewModel.threads[index]),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                ),
-                              ),
+                            child: ListView.builder(
+                              addAutomaticKeepAlives: false,
+                              addRepaintBoundaries: false,
+                              controller: _scrollController,
+                              itemCount: viewModel.threads.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index == viewModel.threads.length) {
+                                  return ListLoadingSkeletonCell();
+                                } else {
+                                  return Visibility(
+                                    visible: !viewModel.blockedUserIds.contains(
+                                        viewModel.threads[index].replies[0]
+                                            .author.userId),
+                                    child: ThreadCell(
+                                      key: ValueKey(
+                                          viewModel.threads[index].threadId),
+                                      thread: viewModel.threads[index],
+                                      onTap: () =>
+                                          _loadThread(viewModel.threads[index]),
+                                      onLongPress: () =>
+                                          _jumpToPage(viewModel.threads[index]),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ),
                   ),
                 ),
               ),
