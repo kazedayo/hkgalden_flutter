@@ -25,14 +25,14 @@ import 'package:tuple/tuple.dart';
 
 class ComposePage extends StatefulWidget {
   final ComposeMode composeMode;
-  final int threadId;
-  final Reply parentReply;
-  final Function(Reply) onSent;
-  final Function(String) onCreateThread;
+  final int? threadId;
+  final Reply? parentReply;
+  final Function(Reply)? onSent;
+  final Function(String)? onCreateThread;
 
   const ComposePage(
-      {Key key,
-      @required this.composeMode,
+      {Key? key,
+      required this.composeMode,
       this.threadId,
       this.parentReply,
       this.onSent,
@@ -44,15 +44,15 @@ class ComposePage extends StatefulWidget {
 }
 
 class _ComposePageState extends State<ComposePage> {
-  Tag _tag;
-  String _channelId;
-  String _title;
-  QuillController _controller;
-  TextEditingController _titleFieldController;
-  FocusNode _focusNode;
-  FocusNode _titleFocusNode;
-  FocusNode _currentFocusNode;
-  bool _isSending;
+  late Tag _tag;
+  late String _channelId;
+  late String _title;
+  late QuillController _controller;
+  late TextEditingController _titleFieldController;
+  late FocusNode _focusNode;
+  late FocusNode _titleFocusNode;
+  late FocusNode _currentFocusNode;
+  late bool _isSending;
 
   @override
   void initState() {
@@ -108,10 +108,10 @@ class _ComposePageState extends State<ComposePage> {
               ? '發表主題'
               : widget.composeMode == ComposeMode.reply
                   ? '回覆主題'
-                  : '引用回覆 (#${widget.parentReply.floor})',
+                  : '引用回覆 (#${widget.parentReply!.floor})',
           style: Theme.of(context)
               .textTheme
-              .subtitle1
+              .subtitle1!
               .copyWith(fontWeight: FontWeight.bold),
         ),
         automaticallyImplyLeading: false,
@@ -178,7 +178,7 @@ class _ComposePageState extends State<ComposePage> {
                     child: Chip(
                       label: Text('#${_tag.name}',
                           strutStyle: const StrutStyle(height: 1.25),
-                          style: Theme.of(context).textTheme.caption.copyWith(
+                          style: Theme.of(context).textTheme.caption!.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w700)),
                       backgroundColor: _tag.color,
@@ -221,8 +221,9 @@ class _ComposePageState extends State<ComposePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: StyledHtmlView(
                   htmlString: HKGaldenHtmlParser().replyWithQuotes(
-                      widget.parentReply, StoreProvider.of<AppState>(context)),
-                  floor: widget.parentReply.floor,
+                      widget.parentReply!,
+                      StoreProvider.of<AppState>(context))!,
+                  floor: widget.parentReply!.floor,
                 ),
               ),
             )
@@ -251,10 +252,9 @@ class _ComposePageState extends State<ComposePage> {
               scrollController: ScrollController(),
               padding: const EdgeInsets.only(left: 12, right: 12, top: 6),
               readOnly: false,
-              enableInteractiveSelection: true,
               customStyles: DefaultStyles(
                   h1: DefaultTextBlockStyle(
-                      Theme.of(context).textTheme.bodyText2.copyWith(
+                      Theme.of(context).textTheme.bodyText2!.copyWith(
                           fontWeight: FontWeight.normal,
                           fontSize: 33,
                           height: 1.25),
@@ -262,7 +262,7 @@ class _ComposePageState extends State<ComposePage> {
                       const Tuple2(0.0, 0.0),
                       null),
                   h2: DefaultTextBlockStyle(
-                      Theme.of(context).textTheme.bodyText2.copyWith(
+                      Theme.of(context).textTheme.bodyText2!.copyWith(
                           fontWeight: FontWeight.normal,
                           fontSize: FontSize.xxLarge.size,
                           height: 1.25),
@@ -270,7 +270,7 @@ class _ComposePageState extends State<ComposePage> {
                       const Tuple2(0.0, 0.0),
                       null),
                   h3: DefaultTextBlockStyle(
-                      Theme.of(context).textTheme.bodyText2.copyWith(
+                      Theme.of(context).textTheme.bodyText2!.copyWith(
                           fontWeight: FontWeight.normal,
                           fontSize: FontSize.xLarge.size,
                           height: 1.25),
@@ -280,7 +280,7 @@ class _ComposePageState extends State<ComposePage> {
                   strikeThrough:
                       const TextStyle(decoration: TextDecoration.lineThrough),
                   paragraph: DefaultTextBlockStyle(
-                      Theme.of(context).textTheme.bodyText2.copyWith(
+                      Theme.of(context).textTheme.bodyText2!.copyWith(
                           fontWeight: FontWeight.normal,
                           fontSize: FontSize.large.size,
                           height: 1.25),
@@ -303,7 +303,7 @@ class _ComposePageState extends State<ComposePage> {
     HKGaldenApi()
         .createThread(
             _title,
-            [_tag.id],
+            [_tag.id!],
             await DeltaJsonParser().toGaldenHtml(
                 json.decode(_getZefyrEditorContent()) as List<dynamic>))
         .then((threadId) {
@@ -311,7 +311,7 @@ class _ComposePageState extends State<ComposePage> {
         _isSending = false;
         if (threadId != null) {
           Navigator.pop(context);
-          widget.onCreateThread(_channelId);
+          widget.onCreateThread!(_channelId);
         } else {
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text('主題發表失敗!')));
@@ -323,11 +323,11 @@ class _ComposePageState extends State<ComposePage> {
   Future<void> _sendReply(BuildContext context) async {
     HKGaldenApi()
         .sendReply(
-      widget.threadId,
+      widget.threadId!,
       await DeltaJsonParser()
           .toGaldenHtml(json.decode(_getZefyrEditorContent()) as List<dynamic>),
       parentId: widget.composeMode == ComposeMode.quotedReply
-          ? widget.parentReply.replyId
+          ? widget.parentReply!.replyId
           : '',
     )
         .then((sentReply) {
@@ -335,7 +335,7 @@ class _ComposePageState extends State<ComposePage> {
         _isSending = false;
         if (sentReply != null) {
           Navigator.pop(context);
-          widget.onSent(sentReply);
+          widget.onSent!(sentReply);
         } else {
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text('回覆發送失敗!')));
@@ -348,7 +348,7 @@ class _ComposePageState extends State<ComposePage> {
 class _TagSelectDialog extends StatelessWidget {
   final Function(Tag, String) onTagSelect;
 
-  const _TagSelectDialog({this.onTagSelect});
+  const _TagSelectDialog({required this.onTagSelect});
 
   @override
   Widget build(BuildContext context) =>
@@ -368,7 +368,7 @@ class _TagSelectDialog extends StatelessWidget {
                           Text(channel.channelName,
                               style: Theme.of(context)
                                   .textTheme
-                                  .caption
+                                  .caption!
                                   .copyWith(color: Colors.white60)),
                           Wrap(
                             spacing: 8,
@@ -379,7 +379,7 @@ class _TagSelectDialog extends StatelessWidget {
                                               const StrutStyle(height: 1.25),
                                           style: Theme.of(context)
                                               .textTheme
-                                              .caption
+                                              .caption!
                                               .copyWith(
                                                   color: Colors.white,
                                                   fontWeight: FontWeight.w700)),

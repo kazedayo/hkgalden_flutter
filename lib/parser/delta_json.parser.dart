@@ -10,20 +10,20 @@ class DeltaJsonParser {
     String styledInsert = '';
     await Future.forEach(json, (element) async {
       //print(element);
-      if (element['insert'].contains('\n') == false ||
-          element['insert'] == '\n') {
-        styledInsert = element['insert'] == '\n'
-            ? styledInsert
-            : element['insert'] as String;
-        if (element['attributes'] != null) {
+      final dynamic el = element;
+      if (el['insert'].contains('\n') == false || el['insert'] == '\n') {
+        styledInsert =
+            el['insert'] == '\n' ? styledInsert : el['insert'] as String;
+        if (el['attributes'] != null) {
           //print(element['insert']);
           await Future.forEach(
-              (element['attributes'] as Map<String, dynamic>).entries,
+              (el['attributes'] as Map<String, dynamic>).entries,
               (entry) async {
-            switch (entry.key as String) {
+            final dynamic en = entry;
+            switch (en.key as String) {
               case 'a':
                 styledInsert =
-                    '<span data-nodetype="a" data-href="${entry.value}">$styledInsert</span>';
+                    '<span data-nodetype="a" data-href="${en.value}">$styledInsert</span>';
                 break;
               case 'b':
                 styledInsert = '<span data-nodetype="b">$styledInsert</span>';
@@ -41,31 +41,30 @@ class DeltaJsonParser {
                 //heading自成一行
                 row = '';
                 styledInsert =
-                    '<span data-nodetype="h${entry.value}">$styledInsert</span>';
+                    '<span data-nodetype="h${en.value}">$styledInsert</span>';
                 break;
               case 'embed':
-                if (entry.value['type'] == 'image') {
-                  await _getImageDimension(entry.value['source'] as String)
-                      .then((image) => styledInsert =
-                          '<span data-nodetype="img" data-src="${entry.value['source']}" data-sx="${image.width}" data-sy="${image.height}"></span>');
+                if (en.value['type'] == 'image') {
+                  await _getImageDimension(en.value['source'] as String).then(
+                      (image) => styledInsert =
+                          '<span data-nodetype="img" data-src="${en.value['source']}" data-sx="${image.width}" data-sy="${image.height}"></span>');
                 }
                 break;
               default:
             }
           });
           row += styledInsert;
-          if (element['insert'] == '\n') {
+          if (el['insert'] == '\n') {
             //heading自成一行
             result += '<p>$row</p>';
             row = '';
           }
         } else {
           //for 混排
-          row += element['insert'] as String;
+          row += el['insert'] as String;
         }
       } else {
-        final List<String> texts =
-            element['insert'].split('\n') as List<String>;
+        final List<String> texts = el['insert'].split('\n') as List<String>;
         //print(texts.length);
         if (texts.length == 2) {
           row += texts.first;
@@ -73,12 +72,12 @@ class DeltaJsonParser {
           result += '<p>$row</p>';
           row = '';
         } else {
-          texts.forEach((element) {
+          texts.forEach((el) {
             //save old row and start new row
             result += '<p>$row</p>';
             row = '';
-            //print(element);
-            result += '<p>$element</p>';
+            //print(el);
+            result += '<p>$el</p>';
           });
         }
       }

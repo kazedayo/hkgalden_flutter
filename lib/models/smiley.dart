@@ -6,7 +6,11 @@ class Smiley extends Equatable {
   final int width;
   final int height;
 
-  const Smiley({this.id, this.alt, this.width, this.height});
+  const Smiley(
+      {required this.id,
+      required this.alt,
+      required this.width,
+      required this.height});
 
   factory Smiley.fromJson(Map<String, dynamic> json) => Smiley(
       id: json['id'] as String,

@@ -25,11 +25,11 @@ class ThreadPage extends StatefulWidget {
 }
 
 class _ThreadPageState extends State<ThreadPage> {
-  ScrollController _scrollController;
-  bool _onLastPage;
-  bool _canReply;
-  bool _fabIsHidden;
-  double _elevation;
+  late ScrollController _scrollController;
+  late bool _onLastPage;
+  late bool _canReply;
+  late bool _fabIsHidden;
+  late double _elevation;
 
   @override
   void initState() {
@@ -50,7 +50,7 @@ class _ThreadPageState extends State<ThreadPage> {
   Widget build(BuildContext context) {
     const Key centerKey = ValueKey('second-sliver-list');
     final ThreadPageArguments arguments =
-        ModalRoute.of(context).settings.arguments as ThreadPageArguments;
+        ModalRoute.of(context)!.settings.arguments! as ThreadPageArguments;
     return Scaffold(
       body: Builder(
         builder: (context) => StoreConnector<AppState, ThreadPageViewModel>(
@@ -61,7 +61,7 @@ class _ThreadPageState extends State<ThreadPage> {
                 threadId: arguments.threadId,
                 page: arguments.page,
                 isInitialLoad: true));
-            _scrollController = PrimaryScrollController.of(context);
+            _scrollController = PrimaryScrollController.of(context)!;
             _scrollController.addListener(() {
               if (_scrollController.position.pixels ==
                   _scrollController.position.maxScrollExtent) {
@@ -111,7 +111,7 @@ class _ThreadPageState extends State<ThreadPage> {
               }
             });
           },
-          onDidChange: (viewModel) {
+          onDidChange: (_, viewModel) {
             if ((viewModel.totalReplies.toDouble() / 50.0).ceil() >
                 viewModel.endPage) {
               setState(() {
@@ -236,7 +236,7 @@ class _ThreadPageState extends State<ThreadPage> {
         .showSnackBar(const SnackBar(content: Text('回覆發送成功!')));
     if (_onLastPage) {
       viewModel.appendReply(reply);
-      SchedulerBinding.instance.addPostFrameCallback((_) {
+      SchedulerBinding.instance!.addPostFrameCallback((_) {
         _scrollController.animateTo(_scrollController.position.maxScrollExtent,
             duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
       });
@@ -407,7 +407,7 @@ class _ThreadPageState extends State<ThreadPage> {
 class _PageHeader extends StatelessWidget {
   final int floor;
 
-  const _PageHeader({Key key, this.floor}) : super(key: key);
+  const _PageHeader({Key? key, required this.floor}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -423,7 +423,11 @@ class _PageFooter extends StatelessWidget {
   final bool isLoading;
   final Function onTap;
 
-  const _PageFooter({Key key, this.onLastPage, this.isLoading, this.onTap})
+  const _PageFooter(
+      {Key? key,
+      required this.onLastPage,
+      required this.isLoading,
+      required this.onTap})
       : super(key: key);
 
   @override

@@ -9,16 +9,16 @@ class User extends Equatable {
   final String nickName;
   final String avatar;
   final List<UserGroup> userGroup;
-  final String gender;
+  final String? gender;
   final List<String> blockedUsers;
 
   const User({
-    this.userId,
-    this.nickName,
-    this.avatar,
-    this.userGroup,
+    required this.userId,
+    required this.nickName,
+    required this.avatar,
+    required this.userGroup,
     this.gender,
-    this.blockedUsers,
+    required this.blockedUsers,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
@@ -31,7 +31,7 @@ class User extends Equatable {
                 .map((group) =>
                     UserGroup.fromJson(group as Map<String, dynamic>))
                 .toList(),
-        gender: json['gender'] as String,
+        gender: json['gender'] as String?,
         blockedUsers: json['blockedUserIds'] == null
             ? []
             : (json['blockedUserIds'] as List<dynamic>)
@@ -40,12 +40,12 @@ class User extends Equatable {
       );
 
   User copyWith({
-    String userId,
-    String nickName,
-    String avatar,
-    List<UserGroup> userGroup,
-    String gender,
-    List<String> blockedUsers,
+    String? userId,
+    String? nickName,
+    String? avatar,
+    List<UserGroup>? userGroup,
+    String? gender,
+    List<String>? blockedUsers,
   }) =>
       User(
           userId: userId ?? this.userId,
@@ -56,6 +56,5 @@ class User extends Equatable {
           blockedUsers: blockedUsers ?? this.blockedUsers);
 
   @override
-  List<Object> get props =>
-      [userId, nickName, avatar, userGroup, gender, blockedUsers];
+  List<Object> get props => [userId, nickName, avatar, userGroup, blockedUsers];
 }

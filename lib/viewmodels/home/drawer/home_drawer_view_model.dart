@@ -12,7 +12,10 @@ class HomeDrawerViewModel extends Equatable {
   final bool isLoggedIn;
 
   const HomeDrawerViewModel(
-      {this.channels, this.selectedChannelId, this.onTap, this.isLoggedIn});
+      {required this.channels,
+      required this.selectedChannelId,
+      required this.onTap,
+      required this.isLoggedIn});
 
   factory HomeDrawerViewModel.create(Store<AppState> store) {
     return HomeDrawerViewModel(

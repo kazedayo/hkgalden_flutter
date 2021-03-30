@@ -10,7 +10,7 @@ class SessionUserMiddleware extends MiddlewareClass<AppState> {
       Store<AppState> store, dynamic action, NextDispatcher next) async {
     next(action);
     if (action is RequestSessionUserAction) {
-      final User sessionUser = await HKGaldenApi().getSessionUserQuery();
+      final User? sessionUser = await HKGaldenApi().getSessionUserQuery();
       sessionUser == null
           ? next(RequestSessionUserErrorAction())
           : next(UpdateSessionUserAction(sessionUser: sessionUser));

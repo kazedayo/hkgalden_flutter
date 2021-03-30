@@ -10,8 +10,8 @@ class BlockedUsersMiddleware extends MiddlewareClass<AppState> {
       Store<AppState> store, dynamic action, NextDispatcher next) async {
     next(action);
     if (action is RequestBlockedUsersAction) {
-      final List<User> blockedUsers = await HKGaldenApi().getBlockedUser();
-      next(UpdateBlockedUsersAction(blockedUsers));
+      final List<User>? blockedUsers = await HKGaldenApi().getBlockedUser();
+      next(UpdateBlockedUsersAction(blockedUsers!));
     }
   }
 }

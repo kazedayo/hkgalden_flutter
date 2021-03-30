@@ -5,9 +5,7 @@ class RequestChannelAction {}
 class UpdateChannelAction {
   final List<Channel> channels;
 
-  UpdateChannelAction({
-    this.channels
-  });
+  UpdateChannelAction({required this.channels});
 }
 
 class RequestChannelErrorAction {}
@@ -15,7 +13,5 @@ class RequestChannelErrorAction {}
 class SetSelectedChannelId {
   final String channelId;
 
-  SetSelectedChannelId({
-    this.channelId
-  });
+  SetSelectedChannelId({required this.channelId});
 }

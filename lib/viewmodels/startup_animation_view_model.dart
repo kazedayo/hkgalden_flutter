@@ -8,9 +8,9 @@ class StartupAnimationViewModel extends Equatable {
   final bool sessionUserIsLoading;
 
   const StartupAnimationViewModel({
-    this.threadIsLoading,
-    this.channelIsLoading,
-    this.sessionUserIsLoading,
+    required this.threadIsLoading,
+    required this.channelIsLoading,
+    required this.sessionUserIsLoading,
   });
 
   factory StartupAnimationViewModel.create(Store<AppState> store) {

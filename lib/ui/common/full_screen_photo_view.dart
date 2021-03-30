@@ -4,10 +4,10 @@ import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:image_downloader/image_downloader.dart';
 
 class FullScreenPhotoView extends StatefulWidget {
-  final String url;
-  final String heroTag;
+  final String? url;
+  final String? heroTag;
 
-  const FullScreenPhotoView({Key key, this.heroTag, this.url})
+  const FullScreenPhotoView({Key? key, this.heroTag, this.url})
       : super(key: key);
 
   @override
@@ -15,7 +15,7 @@ class FullScreenPhotoView extends StatefulWidget {
 }
 
 class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
-  bool _isDownloadingImage;
+  late bool _isDownloadingImage;
 
   @override
   void initState() {
@@ -44,7 +44,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
                 clipBehavior: Clip.hardEdge,
                 onPressed: _isDownloadingImage
                     ? null
-                    : () => _saveImage(context, widget.url),
+                    : () => _saveImage(context, widget.url!),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text.rich(
@@ -78,8 +78,8 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
             maxScale: 3.0,
             minScale: 1.0,
             child: Hero(
-              tag: widget.heroTag,
-              child: Image.network(widget.url),
+              tag: widget.heroTag!,
+              child: Image.network(widget.url!),
             ),
           ),
         ),

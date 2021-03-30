@@ -8,14 +8,14 @@ import 'package:octo_image/octo_image.dart';
 class BlockedUserCell extends StatefulWidget {
   final User user;
 
-  const BlockedUserCell({this.user});
+  const BlockedUserCell({required this.user});
 
   @override
   _BlockedUserCellState createState() => _BlockedUserCellState();
 }
 
 class _BlockedUserCellState extends State<BlockedUserCell> {
-  bool _unblock;
+  late bool _unblock;
 
   @override
   void initState() {
@@ -47,7 +47,7 @@ class _BlockedUserCellState extends State<BlockedUserCell> {
             userGroup: widget.user.userGroup,
           ),
           title: Text(widget.user.nickName,
-              style: Theme.of(context).textTheme.bodyText1.copyWith(
+              style: Theme.of(context).textTheme.bodyText1!.copyWith(
                   decoration: _unblock
                       ? TextDecoration.lineThrough
                       : TextDecoration.none,

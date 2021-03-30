@@ -9,9 +9,9 @@ class ChannelState extends Equatable {
   final String selectedChannelId;
 
   const ChannelState({
-    this.isLoading,
-    this.channels,
-    this.selectedChannelId,
+    required this.isLoading,
+    required this.channels,
+    required this.selectedChannelId,
   });
 
   factory ChannelState.initial() => const ChannelState(
@@ -21,9 +21,9 @@ class ChannelState extends Equatable {
       );
 
   ChannelState copyWith({
-    bool isLoading,
-    List<Channel> channels,
-    String selectedChannelId,
+    bool? isLoading,
+    List<Channel>? channels,
+    String? selectedChannelId,
   }) {
     return ChannelState(
       isLoading: isLoading ?? this.isLoading,

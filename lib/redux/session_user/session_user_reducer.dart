@@ -43,6 +43,6 @@ SessionUserState removeSessionUserReducer(
         nickName: '',
         avatar: '',
         userGroup: [],
-        blockedUsers: [],
+        blockedUsers: [], gender: '',
       ));
 }

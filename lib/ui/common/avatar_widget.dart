@@ -6,9 +6,9 @@ class AvatarWidget extends StatelessWidget {
   final List<UserGroup> userGroup;
 
   const AvatarWidget({
-    Key key,
-    @required this.avatarImage,
-    @required this.userGroup,
+    Key? key,
+    required this.avatarImage,
+    required this.userGroup,
   }) : super(key: key);
 
   @override

@@ -9,7 +9,7 @@ import 'package:octo_image/octo_image.dart';
 class UserPage extends StatelessWidget {
   final User user;
 
-  const UserPage({Key key, @required this.user}) : super(key: key);
+  const UserPage({Key? key, required this.user}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => Stack(
@@ -61,7 +61,7 @@ class UserPage extends StatelessWidget {
                     ),
                     Text(
                       user.nickName,
-                      style: Theme.of(context).textTheme.bodyText1.copyWith(
+                      style: Theme.of(context).textTheme.bodyText1!.copyWith(
                           color: user.gender == 'M'
                               ? Theme.of(context).colorScheme.brotherColor
                               : Theme.of(context).colorScheme.sisterColor),

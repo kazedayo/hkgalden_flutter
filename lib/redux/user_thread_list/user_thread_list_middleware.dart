@@ -11,7 +11,7 @@ class UserThreadListMiddleware extends MiddlewareClass<AppState> {
     next(action);
     if (action is RequestUserThreadListAction) {
       final List<Thread> userThreadList =
-          await HKGaldenApi().getUserThreadList(action.userId, action.page);
+          (await HKGaldenApi().getUserThreadList(action.userId, action.page))!;
       next(UpdateUserThreadListAction(threads: userThreadList));
     }
   }

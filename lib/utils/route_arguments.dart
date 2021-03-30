@@ -7,18 +7,22 @@ class ThreadPageArguments {
   final int page;
   final bool locked;
 
-  ThreadPageArguments({this.title, this.threadId, this.page, this.locked});
+  ThreadPageArguments(
+      {required this.title,
+      required this.threadId,
+      required this.page,
+      required this.locked});
 }
 
 class ComposePageArguments {
   final ComposeMode composeMode;
-  final int threadId;
-  final Reply parentReply;
-  final Function(Reply) onSent;
-  final Function(String) onCreateThread;
+  final int? threadId;
+  final Reply? parentReply;
+  final Function(Reply)? onSent;
+  final Function(String)? onCreateThread;
 
   ComposePageArguments(
-      {this.composeMode,
+      {required this.composeMode,
       this.threadId,
       this.parentReply,
       this.onSent,

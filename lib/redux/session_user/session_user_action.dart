@@ -6,7 +6,7 @@ class UpdateSessionUserAction {
   final User sessionUser;
 
   UpdateSessionUserAction({
-    this.sessionUser,
+    required this.sessionUser,
   });
 }
 

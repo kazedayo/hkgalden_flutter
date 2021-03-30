@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 class ProgressSpinner extends StatelessWidget {
-  final double value;
+  final double? value;
 
-  const ProgressSpinner({Key key, this.value}) : super(key: key);
+  const ProgressSpinner({Key? key, this.value}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -8,7 +8,10 @@ class ThreadCell extends StatelessWidget {
   final Function onLongPress;
 
   const ThreadCell(
-      {Key key, this.onTap, this.onLongPress, @required this.thread})
+      {Key? key,
+      required this.onTap,
+      required this.onLongPress,
+      required this.thread})
       : super(key: key);
 
   @override
@@ -38,7 +41,7 @@ class ThreadCell extends StatelessWidget {
                                     )
                                   : const SizedBox())
                         ]),
-                        style: Theme.of(context).textTheme.subtitle1.copyWith(
+                        style: Theme.of(context).textTheme.subtitle1!.copyWith(
                             fontWeight: FontWeight.w500,
                             color: thread.status == 'locked'
                                 ? Colors.grey
@@ -111,7 +114,7 @@ class ThreadCell extends StatelessWidget {
                             label: Text('#${thread.tagName}',
                                 style: Theme.of(context)
                                     .textTheme
-                                    .overline
+                                    .overline!
                                     .copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w600)),

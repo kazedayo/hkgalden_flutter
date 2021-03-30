@@ -5,15 +5,15 @@ class RequestUserThreadListAction {
   final int page;
 
   RequestUserThreadListAction({
-    this.userId,
-    this.page,
+    required this.userId,
+    required this.page,
   });
 }
 
 class UpdateUserThreadListAction {
   final List<Thread> threads;
 
-  UpdateUserThreadListAction({this.threads});
+  UpdateUserThreadListAction({required this.threads});
 }
 
 class RequestUserThreadListErrorAction {}

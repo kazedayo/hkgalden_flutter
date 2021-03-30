@@ -10,7 +10,7 @@ class ChannelMiddleware extends MiddlewareClass<AppState> {
       Store<AppState> store, dynamic action, NextDispatcher next) async {
     next(action);
     if (action is RequestChannelAction) {
-      final List<Channel> channels = await HKGaldenApi().getChannelsQuery();
+      final List<Channel>? channels = await HKGaldenApi().getChannelsQuery();
       channels == null
           ? next(RequestChannelErrorAction())
           : next(UpdateChannelAction(channels: channels));

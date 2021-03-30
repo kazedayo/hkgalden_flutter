@@ -10,7 +10,7 @@ class ThreadListMiddleware extends MiddlewareClass<AppState> {
       Store<AppState> store, dynamic action, NextDispatcher next) async {
     next(action);
     if (action is RequestThreadListAction) {
-      final List<Thread> threads = await HKGaldenApi()
+      final List<Thread>? threads = await HKGaldenApi()
           .getThreadListQuery(action.channelId, action.page, action.isRefresh);
       threads == null
           ? next(RequestThreadListErrorAction(

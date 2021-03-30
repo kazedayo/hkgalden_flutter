@@ -8,8 +8,8 @@ class NestedNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) => WillPopScope(
       onWillPop: () async {
-        navigatorKey.currentState.canPop()
-            ? navigatorKey.currentState.pop()
+        navigatorKey.currentState!.canPop()
+            ? navigatorKey.currentState!.pop()
             : SystemNavigator.pop();
         //navigatorKey.currentState.pop();
         return false;
@@ -18,7 +18,7 @@ class NestedNavigator extends StatelessWidget {
         key: navigatorKey,
         observers: [HeroController()],
         onGenerateRoute: (settings) {
-          WidgetBuilder builder;
+          late WidgetBuilder builder;
           switch (settings.name) {
             case '/':
               builder = (context) => const HomePage();

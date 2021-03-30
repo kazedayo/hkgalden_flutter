@@ -18,17 +18,17 @@ class ThreadPageViewModel extends Equatable {
   final Function(Reply) appendReply;
 
   const ThreadPageViewModel({
-    this.threadId,
-    this.previousPageReplies,
-    this.replies,
-    this.isLoading,
-    this.isInitialLoad,
-    this.blockedUserIds,
-    this.totalReplies,
-    this.currentPage,
-    this.endPage,
-    this.status,
-    this.appendReply,
+    required this.threadId,
+    required this.previousPageReplies,
+    required this.replies,
+    required this.isLoading,
+    required this.isInitialLoad,
+    required this.blockedUserIds,
+    required this.totalReplies,
+    required this.currentPage,
+    required this.endPage,
+    required this.status,
+    required this.appendReply,
   });
 
   factory ThreadPageViewModel.create(Store<AppState> store) {

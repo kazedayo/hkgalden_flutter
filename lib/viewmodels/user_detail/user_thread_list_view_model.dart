@@ -9,7 +9,9 @@ class UserThreadListViewModel extends Equatable {
   final int currentPage;
 
   const UserThreadListViewModel(
-      {this.isLoading, this.userThreads, this.currentPage});
+      {required this.isLoading,
+      required this.userThreads,
+      required this.currentPage});
 
   factory UserThreadListViewModel.create(Store<AppState> store) =>
       UserThreadListViewModel(

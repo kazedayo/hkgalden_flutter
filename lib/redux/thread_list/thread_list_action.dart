@@ -5,11 +5,8 @@ class RequestThreadListAction {
   final int page;
   final bool isRefresh;
 
-  RequestThreadListAction({
-    this.channelId,
-    this.page,
-    this.isRefresh
-  });
+  RequestThreadListAction(
+      {required this.channelId, required this.page, required this.isRefresh});
 }
 
 class UpdateThreadListAction {
@@ -18,9 +15,9 @@ class UpdateThreadListAction {
   final bool isRefresh;
 
   UpdateThreadListAction({
-    this.threads,
-    this.page,
-    this.isRefresh,
+    required this.threads,
+    required this.page,
+    required this.isRefresh,
   });
 }
 

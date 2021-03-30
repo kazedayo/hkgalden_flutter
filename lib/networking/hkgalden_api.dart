@@ -10,7 +10,7 @@ class HKGaldenApi {
   static final HttpLink _api = HttpLink('https://hkgalden.org/_');
 
   static final AuthLink _bearerToken = AuthLink(getToken: () async {
-    final String tokenString =
+    final String? tokenString =
         await TokenSecureStorage().storage.read(key: 'token');
     //print(tokenString);
     return 'Bearer $tokenString';
@@ -23,7 +23,7 @@ class HKGaldenApi {
     link: _link,
   );
 
-  Future<List<Channel>> getChannelsQuery() async {
+  Future<List<Channel>?> getChannelsQuery() async {
     const String query = '''
       query GetChannels {
         channels {
@@ -47,7 +47,7 @@ class HKGaldenApi {
       return null;
     } else {
       final List<dynamic> result =
-          queryResult.data['channels'] as List<dynamic>;
+          queryResult.data!['channels'] as List<dynamic>;
 
       final List<Channel> threads = result
           .map((thread) => Channel.fromJson(thread as Map<String, dynamic>))
@@ -57,7 +57,7 @@ class HKGaldenApi {
     }
   }
 
-  Future<User> getSessionUserQuery() async {
+  Future<User?> getSessionUserQuery() async {
     const String query = '''
       query GetSessionUser {
         sessionUser {
@@ -83,7 +83,7 @@ class HKGaldenApi {
     if (queryResult.hasException) {
       return null;
     } else {
-      final dynamic result = queryResult.data['sessionUser'] as dynamic;
+      final dynamic result = queryResult.data!['sessionUser'] as dynamic;
 
       final User sessionUser = User.fromJson(result as Map<String, dynamic>);
 
@@ -91,7 +91,7 @@ class HKGaldenApi {
     }
   }
 
-  Future<Thread> getThreadQuery(
+  Future<Thread?> getThreadQuery(
       int threadId, int page, bool isInitialLoad) async {
     const String query = r'''
       query GetThreadContent($id: Int!, $page: Int!) {
@@ -158,7 +158,7 @@ class HKGaldenApi {
     if (queryResult.hasException) {
       return null;
     } else {
-      final dynamic result = queryResult.data['thread'] as dynamic;
+      final dynamic result = queryResult.data!['thread'] as dynamic;
 
       final Thread thread = Thread.fromJson(result as Map<String, dynamic>);
 
@@ -166,7 +166,7 @@ class HKGaldenApi {
     }
   }
 
-  Future<List<Thread>> getThreadListQuery(
+  Future<List<Thread>?> getThreadListQuery(
       String channelId, int page, bool isRefresh) async {
     const String query = r'''
       query GetThreadListQuery($channelId: String!, $page: Int!) {
@@ -212,7 +212,7 @@ class HKGaldenApi {
       return null;
     } else {
       final List<dynamic> result =
-          queryResult.data['threadsByChannel'] as List<dynamic>;
+          queryResult.data!['threadsByChannel'] as List<dynamic>;
 
       final List<Thread> threads = result
           .map((thread) => Thread.fromJson(thread as Map<String, dynamic>))
@@ -222,7 +222,7 @@ class HKGaldenApi {
     }
   }
 
-  Future<List<User>> getBlockedUser() async {
+  Future<List<User>?> getBlockedUser() async {
     const String query = '''
       query GetBlockedUser {
         blockedUsers {
@@ -246,7 +246,7 @@ class HKGaldenApi {
       return null;
     } else {
       final List<dynamic> result =
-          queryResult.data['blockedUsers'] as List<dynamic>;
+          queryResult.data!['blockedUsers'] as List<dynamic>;
 
       final List<User> blockedUsers = result
           .map((user) => User.fromJson(user as Map<String, dynamic>))
@@ -256,7 +256,7 @@ class HKGaldenApi {
     }
   }
 
-  Future<List<Thread>> getUserThreadList(String userId, int page) async {
+  Future<List<Thread>?> getUserThreadList(String userId, int page) async {
     const String query = r'''
       query GetUserThreadList($userId: String!, $page: Int!) {
         threadsByUser(userId: $userId, page: $page) {
@@ -298,7 +298,7 @@ class HKGaldenApi {
       return null;
     } else {
       final List<dynamic> result =
-          queryResult.data['threadsByUser'] as List<dynamic>;
+          queryResult.data!['threadsByUser'] as List<dynamic>;
 
       final List<Thread> userThreads = result
           .map((e) => Thread.fromJson(e as Map<String, dynamic>))
@@ -308,7 +308,8 @@ class HKGaldenApi {
     }
   }
 
-  Future<Reply> sendReply(int threadId, String html, {String parentId}) async {
+  Future<Reply?> sendReply(int threadId, String html,
+      {String? parentId}) async {
     const String mutation = r'''
       mutation SendReply($threadId: Int!, $parentId: String, $html: String!) {
         replyThread(threadId: $threadId, parentId: $parentId, html: $html) {
@@ -363,13 +364,14 @@ class HKGaldenApi {
     if (result.hasException) {
       return null;
     } else {
-      final dynamic resultJson = result.data['replyThread'] as dynamic;
+      final dynamic resultJson = result.data!['replyThread'] as dynamic;
       final Reply sentReply = Reply.fromJson(resultJson);
       return sentReply;
     }
   }
 
-  Future<int> createThread(String title, List<String> tags, String html) async {
+  Future<int?> createThread(
+      String title, List<String> tags, String html) async {
     const String mutation = r'''
       mutation CreateThread($title: String!, $tags: [String!]!, $html: String!) {
         createThread(title: $title, tags: $tags, html: $html)
@@ -388,12 +390,12 @@ class HKGaldenApi {
     if (result.hasException) {
       return null;
     } else {
-      final int threadId = result.data['createThread'] as int;
+      final int threadId = result.data!['createThread'] as int;
       return threadId;
     }
   }
 
-  Future<bool> unblockUser(String userId) async {
+  Future<bool?> unblockUser(String userId) async {
     const String mutation = r'''
       mutation UnblockUser($userId: String!) {
         unblockUser(id: $userId)
@@ -409,12 +411,12 @@ class HKGaldenApi {
     if (result.hasException) {
       return null;
     } else {
-      final bool isSuccess = result.data['unblockUser'] as bool;
+      final bool isSuccess = result.data!['unblockUser'] as bool;
       return isSuccess;
     }
   }
 
-  Future<bool> blockUser(String userId) async {
+  Future<bool?> blockUser(String userId) async {
     const String mutation = r'''
       mutation BlockUser($userId: String!) {
         blockUser(id: $userId)
@@ -430,7 +432,7 @@ class HKGaldenApi {
     if (result.hasException) {
       return null;
     } else {
-      final bool isSuccess = result.data['blockUser'] as bool;
+      final bool isSuccess = result.data!['blockUser'] as bool;
       return isSuccess;
     }
   }

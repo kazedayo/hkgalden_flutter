@@ -6,15 +6,15 @@ import 'package:flutter/material.dart';
 class LastReplyTimer extends StatefulWidget {
   final DateTime time;
 
-  const LastReplyTimer({Key key, @required this.time}) : super(key: key);
+  const LastReplyTimer({Key? key, required this.time}) : super(key: key);
 
   @override
   _LastReplyTimerState createState() => _LastReplyTimerState();
 }
 
 class _LastReplyTimerState extends State<LastReplyTimer> {
-  Timer _timer;
-  String _time;
+  late Timer _timer;
+  late String _time;
 
   @override
   void initState() {

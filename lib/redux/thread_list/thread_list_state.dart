@@ -11,11 +11,11 @@ class ThreadListState extends Equatable {
   final int currentPage;
 
   const ThreadListState({
-    this.threadListIsLoading,
-    this.threads,
-    this.isRefresh,
-    this.currentChannelId,
-    this.currentPage,
+    required this.threadListIsLoading,
+    required this.threads,
+    required this.isRefresh,
+    required this.currentChannelId,
+    required this.currentPage,
   });
 
   factory ThreadListState.initial() {
@@ -29,11 +29,11 @@ class ThreadListState extends Equatable {
   }
 
   ThreadListState copyWith({
-    bool threadListIsLoading,
-    List<Thread> threads,
-    bool isRefresh,
-    String currentChannelId,
-    int currentPage,
+    bool? threadListIsLoading,
+    List<Thread>? threads,
+    bool? isRefresh,
+    String? currentChannelId,
+    int? currentPage,
   }) {
     return ThreadListState(
       threadListIsLoading: threadListIsLoading ?? this.threadListIsLoading,

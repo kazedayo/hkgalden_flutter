@@ -8,7 +8,10 @@ class UserThreadListState extends Equatable {
   final int page;
   final List<Thread> userThreadList;
 
-  const UserThreadListState({this.isLoading, this.page, this.userThreadList});
+  const UserThreadListState(
+      {required this.isLoading,
+      required this.page,
+      required this.userThreadList});
 
   factory UserThreadListState.initial() => const UserThreadListState(
         isLoading: true,
@@ -17,9 +20,9 @@ class UserThreadListState extends Equatable {
       );
 
   UserThreadListState copyWith({
-    bool isLoading,
-    int page,
-    List<Thread> userThreadList,
+    bool? isLoading,
+    int? page,
+    List<Thread>? userThreadList,
   }) =>
       UserThreadListState(
         isLoading: isLoading ?? this.isLoading,

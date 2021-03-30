@@ -14,7 +14,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  WebViewController _controller;
+  late WebViewController _controller;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -23,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
             '登入hkGalden',
             style: Theme.of(context)
                 .textTheme
-                .subtitle1
+                .subtitle1!
                 .copyWith(fontWeight: FontWeight.bold),
           ),
           automaticallyImplyLeading: false,
@@ -66,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
               Alert.postMessage(e);
             }
           ''';
-              await _controller?.evaluateJavascript(javascript);
+              await _controller.evaluateJavascript(javascript);
             } catch (_) {}
           },
           javascriptChannels: <JavascriptChannel>{

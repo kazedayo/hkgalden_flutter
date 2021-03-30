@@ -20,8 +20,8 @@ class StartupScreen extends StatefulWidget {
 
 class _StartupScreenState extends State<StartupScreen>
     with TickerProviderStateMixin {
-  AnimationController _controller;
-  String token;
+  late AnimationController _controller;
+  late String token;
 
   @override
   void initState() {
@@ -58,7 +58,7 @@ class _StartupScreenState extends State<StartupScreen>
     return Scaffold(
       body: StoreConnector<AppState, StartupAnimationViewModel>(
         distinct: true,
-        onDidChange: (viewModel) {
+        onDidChange: (_, viewModel) {
           if (viewModel.threadIsLoading == false &&
               viewModel.channelIsLoading == false &&
               viewModel.sessionUserIsLoading == false) {
@@ -71,7 +71,8 @@ class _StartupScreenState extends State<StartupScreen>
           _controller.addStatusListener((status) {
             if (status == AnimationStatus.completed) {
               //Hardcode default to 'bw' channel
-              store.dispatch(RequestThreadListAction(channelId: 'bw', page: 1));
+              store.dispatch(RequestThreadListAction(
+                  channelId: 'bw', page: 1, isRefresh: false));
               store.dispatch(RequestChannelAction());
               if (token != '') {
                 store.dispatch(RequestSessionUserAction());
@@ -94,7 +95,7 @@ class _StartupScreenState extends State<StartupScreen>
 }
 
 class StaggerAnimation extends StatelessWidget {
-  StaggerAnimation({Key key, this.controller})
+  StaggerAnimation({Key? key, required this.controller})
       : opacity = Tween<double>(
           begin: 0.0,
           end: 1.0,
@@ -127,7 +128,7 @@ class StaggerAnimation extends StatelessWidget {
   final Animation<double> opacity;
   final Animation<double> size;
 
-  Widget _buildAnimation(BuildContext context, Widget child) {
+  Widget _buildAnimation(BuildContext context, Widget? child) {
     // ignore: avoid_unnecessary_containers
     return Container(
       child: Column(

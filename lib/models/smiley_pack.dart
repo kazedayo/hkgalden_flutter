@@ -7,9 +7,9 @@ class SmileyPack extends Equatable {
   final List<Smiley> smilies;
 
   const SmileyPack({
-    this.id,
-    this.title,
-    this.smilies,
+    required this.id,
+    required this.title,
+    required this.smilies,
   });
 
   factory SmileyPack.fromJson(Map<String, dynamic> json) => SmileyPack(

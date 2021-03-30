@@ -9,9 +9,9 @@ class SessionUserState extends Equatable {
   final User sessionUser;
 
   const SessionUserState({
-    this.isLoading,
-    this.isLoggedIn,
-    this.sessionUser,
+    required this.isLoading,
+    required this.isLoggedIn,
+    required this.sessionUser,
   });
 
   factory SessionUserState.initial() => const SessionUserState(
@@ -23,13 +23,14 @@ class SessionUserState extends Equatable {
           avatar: '',
           userGroup: [],
           blockedUsers: [],
+          gender: '',
         ),
       );
 
   SessionUserState copyWith({
-    bool isLoading,
-    bool isLoggedIn,
-    User sessionUser,
+    bool? isLoading,
+    bool? isLoggedIn,
+    User? sessionUser,
   }) {
     return SessionUserState(
       isLoading: isLoading ?? this.isLoading,

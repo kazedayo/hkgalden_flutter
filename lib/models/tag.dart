@@ -4,17 +4,17 @@ import 'package:meta/meta.dart';
 
 @immutable
 class Tag extends Equatable {
-  final String id;
+  final String? id;
   final String name;
   final Color color;
 
-  const Tag({this.id, this.name, this.color});
+  const Tag({this.id, required this.name, required this.color});
 
   factory Tag.fromJson(Map<String, dynamic> json) => Tag(
-      id: json['id'] as String,
+      id: json['id'] as String?,
       name: json['name'] as String,
       color: Color(int.parse('FF${json['color']}', radix: 16)));
 
   @override
-  List<Object> get props => [id, name, color];
+  List<Object> get props => [id!, name, color];
 }

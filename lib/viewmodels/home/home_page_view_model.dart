@@ -21,17 +21,17 @@ class HomePageViewModel extends Equatable {
   final User sessionUser;
 
   const HomePageViewModel(
-      {this.isLoggedIn,
-      this.threads,
-      this.title,
-      this.selectedChannelId,
-      this.isThreadLoading,
-      this.isRefresh,
-      this.onRefresh,
-      this.onCreateThread,
-      this.onLogout,
-      this.blockedUserIds,
-      this.sessionUser});
+      {required this.isLoggedIn,
+      required this.threads,
+      required this.title,
+      required this.selectedChannelId,
+      required this.isThreadLoading,
+      required this.isRefresh,
+      required this.onRefresh,
+      required this.onCreateThread,
+      required this.onLogout,
+      required this.blockedUserIds,
+      required this.sessionUser});
 
   factory HomePageViewModel.create(Store<AppState> store) {
     return HomePageViewModel(

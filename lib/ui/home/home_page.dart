@@ -28,9 +28,9 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:package_info/package_info.dart';
 
 class HomePage extends StatefulWidget {
-  final String title;
+  final String? title;
 
-  const HomePage({Key key, this.title}) : super(key: key);
+  const HomePage({Key? key, this.title}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -38,10 +38,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-  ScrollController _scrollController;
-  AnimationController _backgroundBlurAnimationController;
-  bool _fabIsHidden;
-  bool _menuIsShowing;
+  late ScrollController _scrollController;
+  late AnimationController _backgroundBlurAnimationController;
+  late bool _fabIsHidden;
+  late bool _menuIsShowing;
 
   @override
   void initState() {
@@ -181,7 +181,7 @@ class _HomePageState extends State<HomePage>
                                   ),
                                 ],
                             onSelected: (value) async {
-                              switch (value as _MenuItem) {
+                              switch (value! as _MenuItem) {
                                 case _MenuItem.account:
                                   showMaterialModalBottomSheet(
                                       duration:
@@ -362,7 +362,7 @@ class _HomePageState extends State<HomePage>
                 thread.title,
                 style: Theme.of(context)
                     .textTheme
-                    .headline6
+                    .headline6!
                     .copyWith(fontWeight: FontWeight.bold),
               ),
             ),
@@ -385,7 +385,7 @@ class _HomePageState extends State<HomePage>
                     padding: const EdgeInsets.all(16.0),
                     onPressed: () {
                       Navigator.of(context).pop();
-                      navigatorKey.currentState.pushNamed('/Thread',
+                      navigatorKey.currentState!.pushNamed('/Thread',
                           arguments: ThreadPageArguments(
                               threadId: thread.threadId,
                               title: thread.title,

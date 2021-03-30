@@ -17,12 +17,12 @@ class AppState extends Equatable {
   final UserThreadListState userThreadListState;
 
   const AppState({
-    @required this.threadListState,
-    @required this.threadState,
-    @required this.channelState,
-    @required this.sessionUserState,
-    @required this.blockedUsersState,
-    @required this.userThreadListState,
+    required this.threadListState,
+    required this.threadState,
+    required this.channelState,
+    required this.sessionUserState,
+    required this.blockedUsersState,
+    required this.userThreadListState,
   });
 
   factory AppState.initial() {
@@ -37,12 +37,12 @@ class AppState extends Equatable {
   }
 
   AppState copyWith(
-      {ThreadListState threadListState,
-      ThreadState threadState,
-      ChannelState channelState,
-      SessionUserState sessionUserState,
-      BlockedUsersState blockedUsersState,
-      UserThreadListState userThreadListState}) {
+      {ThreadListState? threadListState,
+      ThreadState? threadState,
+      ChannelState? channelState,
+      SessionUserState? sessionUserState,
+      BlockedUsersState? blockedUsersState,
+      UserThreadListState? userThreadListState}) {
     return AppState(
       threadListState: threadListState ?? this.threadListState,
       threadState: threadState ?? this.threadState,

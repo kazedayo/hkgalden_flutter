@@ -11,7 +11,10 @@ class Channel extends Equatable {
   final List<Tag> tags;
 
   const Channel(
-      {this.channelId, this.channelName, this.channelColor, this.tags});
+      {required this.channelId,
+      required this.channelName,
+      required this.channelColor,
+      required this.tags});
 
   factory Channel.fromJson(Map<String, dynamic> json) => Channel(
         channelId: json['id'] as String,

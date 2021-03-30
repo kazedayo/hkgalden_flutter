@@ -29,13 +29,13 @@ class CommentCell extends StatefulWidget {
   final bool threadLocked;
 
   const CommentCell(
-      {Key key,
-      this.threadId,
-      this.reply,
-      this.onLastPage,
-      this.onSent,
-      this.canReply,
-      this.threadLocked})
+      {Key? key,
+      required this.threadId,
+      required this.reply,
+      required this.onLastPage,
+      required this.onSent,
+      required this.canReply,
+      required this.threadLocked})
       : super(key: key);
 
   @override
@@ -44,7 +44,7 @@ class CommentCell extends StatefulWidget {
 
 class _CommentCellState extends State<CommentCell> {
   final FullScreenPhotoView photoView = const FullScreenPhotoView();
-  bool _blockedButtonPressed;
+  late bool _blockedButtonPressed;
 
   @override
   void initState() {
@@ -77,7 +77,7 @@ class _CommentCellState extends State<CommentCell> {
                           child: StyledHtmlView(
                               htmlString: HKGaldenHtmlParser()
                                   .commentWithQuotes(widget.reply,
-                                      StoreProvider.of<AppState>(context)),
+                                      StoreProvider.of<AppState>(context))!,
                               floor: widget.reply.floor)),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -160,7 +160,7 @@ class _CommentCellState extends State<CommentCell> {
                       PopupMenuItem(
                         textStyle: Theme.of(context)
                             .textTheme
-                            .caption
+                            .caption!
                             .copyWith(color: Colors.white),
                         value: _MenuItem.memberinfo,
                         child: const ListTile(
@@ -182,7 +182,7 @@ class _CommentCellState extends State<CommentCell> {
                       ),
                     ],
                     onSelected: (value) {
-                      switch (value as _MenuItem) {
+                      switch (value! as _MenuItem) {
                         case _MenuItem.memberinfo:
                           showMaterialModalBottomSheet(
                               duration: const Duration(milliseconds: 200),
@@ -202,6 +202,7 @@ class _CommentCellState extends State<CommentCell> {
                                       .isLoggedIn ==
                                   false
                               ? showCustomDialog(
+                                  context: context,
                                   builder: (context) => const CustomAlertDialog(
                                       title: "未登入", content: "請先登入"),
                                 )
@@ -212,7 +213,7 @@ class _CommentCellState extends State<CommentCell> {
                                     _blockedButtonPressed =
                                         !_blockedButtonPressed;
                                   });
-                                  if (isSuccess) {
+                                  if (isSuccess!) {
                                     StoreProvider.of<AppState>(context)
                                         .dispatch(AppendUserToBlockListAction(
                                             widget.reply.author.userId));
@@ -239,7 +240,7 @@ class _CommentCellState extends State<CommentCell> {
                               width: 25,
                               height: 25,
                             ),
-                      userGroup: widget.reply.author.userGroup ?? [],
+                      userGroup: widget.reply.author.userGroup,
                     ),
                   ),
                 ),
@@ -254,7 +255,7 @@ class _CommentCellState extends State<CommentCell> {
                     ),
                     Text(
                       widget.reply.authorNickname,
-                      style: Theme.of(context).textTheme.caption.copyWith(
+                      style: Theme.of(context).textTheme.caption!.copyWith(
                             color: widget.reply.author.gender == 'M'
                                 ? Theme.of(context).colorScheme.brotherColor
                                 : Theme.of(context).colorScheme.sisterColor,

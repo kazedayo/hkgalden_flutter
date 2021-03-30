@@ -16,7 +16,8 @@ class StyledHtmlView extends StatefulWidget {
   final String htmlString;
   final int floor;
 
-  const StyledHtmlView({Key key, this.htmlString, this.floor})
+  const StyledHtmlView(
+      {Key? key, required this.htmlString, required this.floor})
       : super(key: key);
 
   @override
@@ -24,8 +25,8 @@ class StyledHtmlView extends StatefulWidget {
 }
 
 class _StyledHtmlViewState extends State<StyledHtmlView> {
-  int _randomHash;
-  bool _imageLoadingHasError;
+  late int _randomHash;
+  late bool _imageLoadingHasError;
 
   @override
   void initState() {
@@ -45,12 +46,13 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
             return ContainerSpan(
               shrinkWrap: true,
               newContext: context,
+              style: Style(),
               child: Hero(
                 tag: '${widget.floor}_${attributes['src']}_$_randomHash',
                 child: Stack(
                   children: [
                     OctoImage(
-                      image: NetworkImage(attributes['src']),
+                      image: NetworkImage(attributes['src']!),
                       placeholderBuilder: (context) => const Padding(
                         padding: EdgeInsets.all(8.0),
                         child: ProgressSpinner(),
@@ -68,7 +70,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                             ? null
                             : _showImageView(
                                 context.buildContext,
-                                attributes['src'],
+                                attributes['src']!,
                                 '${widget.floor}_${attributes['src']}_$_randomHash',
                               ),
                       ),
@@ -82,16 +84,17 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
             return ContainerSpan(
                 shrinkWrap: true,
                 newContext: context,
+                style: Style(),
                 child: Padding(
                   padding: const EdgeInsets.all(3.0),
                   child: OctoImage(
-                    image: NetworkImage(attributes['src']),
+                    image: NetworkImage(attributes['src']!),
                     placeholderBuilder: (context) => const SizedBox(),
                   ),
                 ));
           },
           'span': (context, child, attributes, element) {
-            if (element.className == ('color')) {
+            if (element!.className == ('color')) {
               final Style newStyle = context.style.copyWith(
                 color: Color(int.parse('FF${attributes['hex']}', radix: 16)),
               );
@@ -105,7 +108,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                       parser: context.parser),
                   style: newStyle,
                   children: (child as ContainerSpan).children,
-                  child: (child as ContainerSpan).child,
+                  child: child.child,
                 ),
               );
             }
@@ -150,7 +153,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
           "p.right": Style(textAlign: TextAlign.right),
           "img": Style(display: Display.INLINE)
         },
-        onLinkTap: (url) => _launchURL(url),
+        onLinkTap: (url, _, __, ___) => _launchURL(url!),
       ),
     );
   }

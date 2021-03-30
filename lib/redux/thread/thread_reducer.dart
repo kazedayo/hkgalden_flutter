@@ -31,10 +31,8 @@ ThreadState updateThreadReducer(ThreadState state, UpdateThreadAction action) {
       return state.copyWith(
           threadIsLoading: false,
           previousPages: action.thread.copyWith(
-              replies: state.previousPages.replies == null
-                  ? action.thread.replies
-                  : (action.thread.replies
-                    ..addAll(state.previousPages.replies)),
+              replies: action.thread.replies
+                ..addAll(state.previousPages.replies),
               totalReplies: action.thread.totalReplies),
           isInitialLoad: false,
           currentPage: action.page);

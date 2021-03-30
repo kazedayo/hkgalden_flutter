@@ -14,13 +14,13 @@ class Thread extends Equatable {
   final Color tagColor;
 
   const Thread(
-      {this.threadId,
-      this.title,
-      this.status,
-      this.replies,
-      this.totalReplies,
-      this.tagName,
-      this.tagColor});
+      {required this.threadId,
+      required this.title,
+      required this.status,
+      required this.replies,
+      required this.totalReplies,
+      required this.tagName,
+      required this.tagColor});
 
   factory Thread.fromJson(Map<String, dynamic> json) => Thread(
         threadId: json['id'] as int,
@@ -45,13 +45,13 @@ class Thread extends Equatable {
       );
 
   Thread copyWith({
-    int threadId,
-    String title,
-    String status,
-    List<Reply> replies,
-    int totalReplies,
-    String tagName,
-    Color tagColor,
+    int? threadId,
+    String? title,
+    String? status,
+    List<Reply>? replies,
+    int? totalReplies,
+    String? tagName,
+    Color? tagColor,
   }) {
     return Thread(
       threadId: threadId ?? this.threadId,

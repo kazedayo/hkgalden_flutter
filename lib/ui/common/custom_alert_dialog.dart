@@ -7,7 +7,7 @@ class CustomAlertDialog extends StatelessWidget {
   final String content;
 
   const CustomAlertDialog(
-      {Key key, @required this.title, @required this.content})
+      {Key? key, required this.title, required this.content})
       : super(key: key);
 
   @override
@@ -43,7 +43,8 @@ class CustomAlertDialog extends StatelessWidget {
 }
 
 void showCustomDialog(
-        {BuildContext context, Widget Function(BuildContext) builder}) =>
+        {required BuildContext context,
+        required Widget Function(BuildContext) builder}) =>
     Theme.of(context).platform == TargetPlatform.iOS
         ? showCupertinoDialog(
             context: context,

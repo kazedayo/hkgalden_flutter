@@ -7,9 +7,9 @@ class RequestThreadAction {
   final bool isInitialLoad;
 
   RequestThreadAction({
-    this.threadId,
-    this.page,
-    this.isInitialLoad,
+    required this.threadId,
+    required this.page,
+    required this.isInitialLoad,
   });
 }
 
@@ -19,9 +19,9 @@ class UpdateThreadAction {
   final bool isInitialLoad;
 
   UpdateThreadAction({
-    this.thread,
-    this.page,
-    this.isInitialLoad,
+    required this.thread,
+    required this.page,
+    required this.isInitialLoad,
   });
 }
 
@@ -29,7 +29,7 @@ class AppendReplyToThreadAction {
   final Reply reply;
 
   AppendReplyToThreadAction({
-    this.reply,
+    required this.reply,
   });
 }
 

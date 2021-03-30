@@ -7,8 +7,8 @@ class UserGroup extends Equatable {
   final String groupName;
 
   const UserGroup({
-    this.groupId,
-    this.groupName,
+    required this.groupId,
+    required this.groupName,
   });
 
   factory UserGroup.fromJson(Map<String, dynamic> json) => UserGroup(

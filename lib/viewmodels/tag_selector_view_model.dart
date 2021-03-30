@@ -6,7 +6,7 @@ import 'package:redux/redux.dart';
 class TagSelectorViewModel extends Equatable {
   final List<Channel> channels;
 
-  const TagSelectorViewModel({this.channels});
+  const TagSelectorViewModel({required this.channels});
 
   factory TagSelectorViewModel.create(Store<AppState> store) =>
       TagSelectorViewModel(channels: store.state.channelState.channels);

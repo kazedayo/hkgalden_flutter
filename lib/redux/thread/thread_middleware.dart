@@ -10,7 +10,7 @@ class ThreadMiddleware extends MiddlewareClass<AppState> {
       Store<AppState> store, dynamic action, NextDispatcher next) async {
     next(action);
     if (action is RequestThreadAction) {
-      final Thread thread = await HKGaldenApi()
+      final Thread? thread = await HKGaldenApi()
           .getThreadQuery(action.threadId, action.page, action.isInitialLoad);
       thread == null
           ? next(RequestThreadErrorAction(

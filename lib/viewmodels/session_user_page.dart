@@ -16,11 +16,11 @@ class SessionUserPageViewModel extends Equatable {
   final List<UserGroup> sessionUserGroup;
 
   const SessionUserPageViewModel({
-    this.sessionUser,
-    this.sessionUserName,
-    this.sessionUserAvatar,
-    this.sessionUserGender,
-    this.sessionUserGroup,
+    required this.sessionUser,
+    required this.sessionUserName,
+    required this.sessionUserAvatar,
+    required this.sessionUserGender,
+    required this.sessionUserGroup,
   });
 
   factory SessionUserPageViewModel.create(Store<AppState> store) {
@@ -39,7 +39,7 @@ class SessionUserPageViewModel extends Equatable {
                 size: const Size.square(30),
               ),
             ),
-      sessionUserGender: store.state.sessionUserState.sessionUser.gender,
+      sessionUserGender: store.state.sessionUserState.sessionUser.gender!,
       sessionUserGroup: store.state.sessionUserState.sessionUser.userGroup,
     );
   }

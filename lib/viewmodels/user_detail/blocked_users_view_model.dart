@@ -8,8 +8,8 @@ class BlockedUsersViewModel extends Equatable {
   final List<User> blockedUsers;
 
   const BlockedUsersViewModel({
-    this.isLoading,
-    this.blockedUsers,
+    required this.isLoading,
+    required this.blockedUsers,
   });
 
   factory BlockedUsersViewModel.create(Store<AppState> store) =>

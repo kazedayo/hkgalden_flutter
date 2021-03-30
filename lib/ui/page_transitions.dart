@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class SizeRoute extends PageRouteBuilder {
   final Widget page;
 
-  SizeRoute({this.page})
+  SizeRoute({required this.page})
       : super(
           transitionDuration: const Duration(milliseconds: 650),
           pageBuilder: (
@@ -29,7 +29,7 @@ class SizeRoute extends PageRouteBuilder {
 
 class FadeRoute extends PageRouteBuilder {
   final Widget page;
-  FadeRoute({this.page})
+  FadeRoute({required this.page})
       : super(
           transitionDuration: const Duration(milliseconds: 300),
           pageBuilder: (
@@ -53,7 +53,7 @@ class FadeRoute extends PageRouteBuilder {
 
 class SlideInFromBottomRoute extends PageRouteBuilder {
   final Widget page;
-  SlideInFromBottomRoute({this.page})
+  SlideInFromBottomRoute({required this.page})
       : super(
           pageBuilder: (
             BuildContext context,

@@ -8,7 +8,8 @@ class ChannelCell extends StatelessWidget {
   final HomeDrawerViewModel viewModel;
   final Channel channel;
 
-  const ChannelCell({Key key, this.viewModel, this.channel}) : super(key: key);
+  const ChannelCell({Key? key, required this.viewModel, required this.channel})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) => Container(
@@ -41,7 +42,7 @@ class ChannelCell extends StatelessWidget {
                   const Spacer(),
                   Text(
                     channel.channelName,
-                    style: Theme.of(context).textTheme.subtitle2.copyWith(),
+                    style: Theme.of(context).textTheme.subtitle2!.copyWith(),
                   ),
                   const Spacer(flex: 3),
                   Container(

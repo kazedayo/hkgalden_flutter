@@ -7,7 +7,8 @@ class BlockedUsersState extends Equatable {
   final bool isLoading;
   final List<User> blockedUsers;
 
-  const BlockedUsersState({this.isLoading, this.blockedUsers});
+  const BlockedUsersState(
+      {required this.isLoading, required this.blockedUsers});
 
   factory BlockedUsersState.initial() => const BlockedUsersState(
         isLoading: true,
@@ -15,8 +16,8 @@ class BlockedUsersState extends Equatable {
       );
 
   BlockedUsersState copyWith({
-    bool isLoading,
-    List<User> blockedUsers,
+    bool? isLoading,
+    List<User>? blockedUsers,
   }) =>
       BlockedUsersState(
         isLoading: isLoading ?? this.isLoading,
