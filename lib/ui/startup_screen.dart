@@ -1,14 +1,14 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hkgalden_flutter/bloc/cubit/startup_screen_cubit.dart';
+import 'package:hkgalden_flutter/models/ui_state_models/startup_screen_state.dart';
 import 'package:hkgalden_flutter/nested_navigator.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/redux/channel/channel_action.dart';
 import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
-import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/viewmodels/startup_animation_view_model.dart';
@@ -21,28 +21,12 @@ class StartupScreen extends StatefulWidget {
 class _StartupScreenState extends State<StartupScreen>
     with TickerProviderStateMixin {
   late AnimationController _controller;
-  late String token;
+  late StartupScreenCubit _cubit;
 
   @override
   void initState() {
-    final ParagraphBuilder pb =
-        ParagraphBuilder(ParagraphStyle(locale: window.locale));
-    pb.addText('\ud83d\ude01'); // smiley face emoji
-    pb.build().layout(const ParagraphConstraints(width: 100));
     super.initState();
-    TokenSecureStorage().readToken(onFinish: (value) {
-      if (value == null) {
-        TokenSecureStorage().writeToken('', onFinish: (_) {
-          setState(() {
-            token = '';
-          });
-        });
-      } else {
-        setState(() {
-          token = value as String;
-        });
-      }
-    });
+    _cubit = StartupScreenCubit();
     _controller = AnimationController(
         duration: const Duration(milliseconds: 2000), vsync: this);
   }
@@ -50,43 +34,49 @@ class _StartupScreenState extends State<StartupScreen>
   @override
   void dispose() {
     _controller.dispose();
+    _cubit.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StoreConnector<AppState, StartupAnimationViewModel>(
-        distinct: true,
-        onDidChange: (_, viewModel) {
-          if (viewModel.threadIsLoading == false &&
-              viewModel.channelIsLoading == false &&
-              viewModel.sessionUserIsLoading == false) {
-            final SizeRoute route = SizeRoute(page: NestedNavigator());
-            Navigator.of(context).pushReplacement(route);
-          }
-        },
-        onInit: (store) {
-          _controller.forward();
-          _controller.addStatusListener((status) {
-            if (status == AnimationStatus.completed) {
-              //Hardcode default to 'bw' channel
-              store.dispatch(RequestThreadListAction(
-                  channelId: 'bw', page: 1, isRefresh: false));
-              store.dispatch(RequestChannelAction());
-              if (token != '') {
-                store.dispatch(RequestSessionUserAction());
-              }
+      body: BlocBuilder<StartupScreenCubit, StartupScreenState>(
+        bloc: _cubit,
+        builder: (context, state) =>
+            StoreConnector<AppState, StartupAnimationViewModel>(
+          distinct: true,
+          onDidChange: (_, viewModel) {
+            if (viewModel.threadIsLoading == false &&
+                viewModel.channelIsLoading == false &&
+                viewModel.sessionUserIsLoading == false) {
+              final SizeRoute route = SizeRoute(page: NestedNavigator());
+              Navigator.of(context).pushReplacement(route);
             }
-          });
-        },
-        converter: (store) => StartupAnimationViewModel.create(store),
-        builder: (BuildContext context, StartupAnimationViewModel viewModel) =>
-            Center(
-          child: SizedBox(
-            width: 300,
-            height: 300,
-            child: StaggerAnimation(controller: _controller),
+          },
+          onInit: (store) {
+            _controller.forward();
+            _controller.addStatusListener((status) {
+              if (status == AnimationStatus.completed) {
+                //Hardcode default to 'bw' channel
+                store.dispatch(RequestThreadListAction(
+                    channelId: 'bw', page: 1, isRefresh: false));
+                store.dispatch(RequestChannelAction());
+                if (state.token != '') {
+                  store.dispatch(RequestSessionUserAction());
+                }
+              }
+            });
+          },
+          converter: (store) => StartupAnimationViewModel.create(store),
+          builder:
+              (BuildContext context, StartupAnimationViewModel viewModel) =>
+                  Center(
+            child: SizedBox(
+              width: 300,
+              height: 300,
+              child: StaggerAnimation(controller: _controller),
+            ),
           ),
         ),
       ),

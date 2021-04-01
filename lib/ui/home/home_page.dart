@@ -244,42 +244,38 @@ class _HomePageState extends State<HomePage>
                     .copyWith(highlightColor: const Color(0xff373d3c)),
                 child: Material(
                   color: Theme.of(context).primaryColor,
-                  child: Container(
-                    child: viewModel.isThreadLoading &&
-                            viewModel.isRefresh == false
+                  child: RefreshIndicator(
+                    backgroundColor: Colors.white,
+                    strokeWidth: 2.5,
+                    onRefresh: () => viewModel
+                        .onRefresh(viewModel.selectedChannelId) as Future<void>,
+                    child: viewModel.isThreadLoading
                         ? ListLoadingSkeleton()
-                        : RefreshIndicator(
-                            backgroundColor: Colors.white,
-                            strokeWidth: 2.5,
-                            onRefresh: () =>
-                                viewModel.onRefresh(viewModel.selectedChannelId)
-                                    as Future<void>,
-                            child: ListView.builder(
-                              addAutomaticKeepAlives: false,
-                              addRepaintBoundaries: false,
-                              controller: _scrollController,
-                              itemCount: viewModel.threads.length + 1,
-                              itemBuilder: (context, index) {
-                                if (index == viewModel.threads.length) {
-                                  return ListLoadingSkeletonCell();
-                                } else {
-                                  return Visibility(
-                                    visible: !viewModel.blockedUserIds.contains(
-                                        viewModel.threads[index].replies[0]
-                                            .author.userId),
-                                    child: ThreadCell(
-                                      key: ValueKey(
-                                          viewModel.threads[index].threadId),
-                                      thread: viewModel.threads[index],
-                                      onTap: () =>
-                                          _loadThread(viewModel.threads[index]),
-                                      onLongPress: () =>
-                                          _jumpToPage(viewModel.threads[index]),
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
+                        : ListView.builder(
+                            addAutomaticKeepAlives: false,
+                            addRepaintBoundaries: false,
+                            controller: _scrollController,
+                            itemCount: viewModel.threads.length + 1,
+                            itemBuilder: (context, index) {
+                              if (index == viewModel.threads.length) {
+                                return ListLoadingSkeletonCell();
+                              } else {
+                                return Visibility(
+                                  visible: !viewModel.blockedUserIds.contains(
+                                      viewModel.threads[index].replies[0].author
+                                          .userId),
+                                  child: ThreadCell(
+                                    key: ValueKey(
+                                        viewModel.threads[index].threadId),
+                                    thread: viewModel.threads[index],
+                                    onTap: () =>
+                                        _loadThread(viewModel.threads[index]),
+                                    onLongPress: () =>
+                                        _jumpToPage(viewModel.threads[index]),
+                                  ),
+                                );
+                              }
+                            },
                           ),
                   ),
                 ),

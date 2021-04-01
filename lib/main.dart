@@ -12,7 +12,7 @@ import 'package:hkgalden_flutter/redux/session_user/session_user_middleware.dart
 import 'package:hkgalden_flutter/redux/thread/thread_middleware.dart';
 import 'package:hkgalden_flutter/redux/thread_list/thread_list_middleware.dart';
 import 'package:hkgalden_flutter/redux/user_thread_list/user_thread_list_middleware.dart';
-import 'package:hkgalden_flutter/ui/startup_animation.dart';
+import 'package:hkgalden_flutter/ui/startup_screen.dart';
 import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:redux/redux.dart';
 

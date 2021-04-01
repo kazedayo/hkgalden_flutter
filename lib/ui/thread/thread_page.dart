@@ -33,7 +33,7 @@ class _ThreadPageState extends State<ThreadPage> {
 
   @override
   void initState() {
-    //_scrollController = ScrollController();
+    _scrollController = ScrollController();
     _onLastPage = false;
     _fabIsHidden = false;
     _elevation = 0.0;
@@ -61,7 +61,6 @@ class _ThreadPageState extends State<ThreadPage> {
                 threadId: arguments.threadId,
                 page: arguments.page,
                 isInitialLoad: true));
-            _scrollController = PrimaryScrollController.of(context)!;
             _scrollController.addListener(() {
               if (_scrollController.position.pixels ==
                   _scrollController.position.maxScrollExtent) {

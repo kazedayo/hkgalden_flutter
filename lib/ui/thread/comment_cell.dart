@@ -20,13 +20,15 @@ import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:octo_image/octo_image.dart';
 
-class CommentCell extends StatefulWidget {
+class CommentCell extends StatelessWidget {
   final int threadId;
   final Reply reply;
   final bool onLastPage;
   final Function(Reply) onSent;
   final bool canReply;
   final bool threadLocked;
+  // ignore: avoid_field_initializers_in_const_classes
+  final FullScreenPhotoView photoView = const FullScreenPhotoView();
 
   const CommentCell(
       {Key? key,
@@ -37,20 +39,6 @@ class CommentCell extends StatefulWidget {
       required this.canReply,
       required this.threadLocked})
       : super(key: key);
-
-  @override
-  _CommentCellState createState() => _CommentCellState();
-}
-
-class _CommentCellState extends State<CommentCell> {
-  final FullScreenPhotoView photoView = const FullScreenPhotoView();
-  late bool _blockedButtonPressed;
-
-  @override
-  void initState() {
-    _blockedButtonPressed = false;
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) => Stack(
@@ -76,19 +64,19 @@ class _CommentCellState extends State<CommentCell> {
                           padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
                           child: StyledHtmlView(
                               htmlString: HKGaldenHtmlParser()
-                                  .commentWithQuotes(widget.reply,
+                                  .commentWithQuotes(reply,
                                       StoreProvider.of<AppState>(context))!,
-                              floor: widget.reply.floor)),
+                              floor: reply.floor)),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
                           Transform(
                             transform: Matrix4.translationValues(8, 0, 0),
                             child: Visibility(
-                              visible: !widget.threadLocked,
+                              visible: !threadLocked,
                               child: IconButton(
                                   icon: const Icon(Icons.format_quote),
-                                  onPressed: () => widget.canReply
+                                  onPressed: () => canReply
                                       ? showBarModalBottomSheet(
                                           duration:
                                               const Duration(milliseconds: 300),
@@ -97,10 +85,10 @@ class _CommentCellState extends State<CommentCell> {
                                           builder: (context) => ComposePage(
                                             composeMode:
                                                 ComposeMode.quotedReply,
-                                            threadId: widget.threadId,
-                                            parentReply: widget.reply,
+                                            threadId: threadId,
+                                            parentReply: reply,
                                             onSent: (reply) {
-                                              widget.onSent(reply);
+                                              onSent(reply);
                                             },
                                           ),
                                         )
@@ -141,7 +129,7 @@ class _CommentCellState extends State<CommentCell> {
             right: 24,
             top: 19,
             child: Text(
-                DateTimeFormat.format(widget.reply.date.toLocal(),
+                DateTimeFormat.format(reply.date.toLocal(),
                     format: 'd/m/y H:i'),
                 style: Theme.of(context).textTheme.caption),
           ),
@@ -192,7 +180,7 @@ class _CommentCellState extends State<CommentCell> {
                               context: context,
                               enableDrag: false,
                               builder: (context) => UserPage(
-                                    user: widget.reply.author,
+                                    user: reply.author,
                                   ));
                           break;
                         case _MenuItem.block:
@@ -207,20 +195,16 @@ class _CommentCellState extends State<CommentCell> {
                                       title: "未登入", content: "請先登入"),
                                 )
                               : HKGaldenApi()
-                                  .blockUser(widget.reply.author.userId)
+                                  .blockUser(reply.author.userId)
                                   .then((isSuccess) {
-                                  setState(() {
-                                    _blockedButtonPressed =
-                                        !_blockedButtonPressed;
-                                  });
                                   if (isSuccess!) {
                                     StoreProvider.of<AppState>(context)
                                         .dispatch(AppendUserToBlockListAction(
-                                            widget.reply.author.userId));
+                                            reply.author.userId));
                                     ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                             content: Text(
-                                                '已封鎖會員 ${widget.reply.authorNickname}')));
+                                                '已封鎖會員 ${reply.authorNickname}')));
                                   } else {}
                                 });
                           break;
@@ -228,7 +212,7 @@ class _CommentCellState extends State<CommentCell> {
                       }
                     },
                     child: AvatarWidget(
-                      avatarImage: widget.reply.author.avatar == ''
+                      avatarImage: reply.author.avatar == ''
                           ? SvgPicture.asset('assets/icon-hkgalden.svg',
                               width: 25, height: 25, color: Colors.grey)
                           : OctoImage(
@@ -236,11 +220,11 @@ class _CommentCellState extends State<CommentCell> {
                                   SizedBox.fromSize(
                                 size: const Size.square(30),
                               ),
-                              image: NetworkImage(widget.reply.author.avatar),
+                              image: NetworkImage(reply.author.avatar),
                               width: 25,
                               height: 25,
                             ),
-                      userGroup: widget.reply.author.userGroup,
+                      userGroup: reply.author.userGroup,
                     ),
                   ),
                 ),
@@ -254,9 +238,9 @@ class _CommentCellState extends State<CommentCell> {
                       height: 3,
                     ),
                     Text(
-                      widget.reply.authorNickname,
+                      reply.authorNickname,
                       style: Theme.of(context).textTheme.caption!.copyWith(
-                            color: widget.reply.author.gender == 'M'
+                            color: reply.author.gender == 'M'
                                 ? Theme.of(context).colorScheme.brotherColor
                                 : Theme.of(context).colorScheme.sisterColor,
                           ),
@@ -264,7 +248,7 @@ class _CommentCellState extends State<CommentCell> {
                     const SizedBox(
                       height: 3,
                     ),
-                    Text('#${widget.reply.floor}',
+                    Text('#${reply.floor}',
                         style: Theme.of(context).textTheme.caption),
                   ],
                 )
