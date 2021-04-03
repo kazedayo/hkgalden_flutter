@@ -1,6 +1,5 @@
+import 'package:hkgalden_flutter/bloc/session_user/session_user_state.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
-import 'package:hkgalden_flutter/redux/app/app_state.dart';
-import 'package:redux/redux.dart';
 import 'package:universal_html/parsing.dart';
 import 'package:universal_html/html.dart';
 
@@ -123,7 +122,7 @@ class HKGaldenHtmlParser {
   }
 
   //dumb method, may change to recursive function
-  String? commentWithQuotes(Reply reply, Store<AppState> store) {
+  String? commentWithQuotes(Reply reply, SessionUserState state) {
     final Reply? rootParent = reply.parent;
 
     final htmlDoc = parseHtmlDocument(reply.content!);
@@ -131,13 +130,12 @@ class HKGaldenHtmlParser {
     //print(htmlDoc.body.children);
 
     if (rootParent != null &&
-        !store.state.sessionUserState.sessionUser.blockedUsers
-            .contains(rootParent.author.userId)) {
+        !state.sessionUser.blockedUsers.contains(rootParent.author.userId)) {
       if (rootParent.parent != null &&
-          !store.state.sessionUserState.sessionUser.blockedUsers
+          !state.sessionUser.blockedUsers
               .contains(rootParent.parent!.author.userId)) {
         if (rootParent.parent!.parent != null &&
-            !store.state.sessionUserState.sessionUser.blockedUsers
+            !state.sessionUser.blockedUsers
                 .contains(rootParent.parent!.parent!.author.userId)) {
           htmlDoc.body!.setInnerHtml('''
                 <blockquote style><blockquote><blockquote>
@@ -172,16 +170,15 @@ class HKGaldenHtmlParser {
     return htmlDoc.body!.innerHtml;
   }
 
-  String? replyWithQuotes(Reply reply, Store<AppState> store) {
+  String? replyWithQuotes(Reply reply, SessionUserState state) {
     final htmlDoc = parseHtmlDocument('');
 
-    if (!store.state.sessionUserState.sessionUser.blockedUsers
-        .contains(reply.author.userId)) {
+    if (!state.sessionUser.blockedUsers.contains(reply.author.userId)) {
       if (reply.parent != null &&
-          !store.state.sessionUserState.sessionUser.blockedUsers
+          !state.sessionUser.blockedUsers
               .contains(reply.parent!.author.userId)) {
         if (reply.parent!.parent != null &&
-            !store.state.sessionUserState.sessionUser.blockedUsers
+            !state.sessionUser.blockedUsers
                 .contains(reply.parent!.parent!.author.userId)) {
           htmlDoc.body!.setInnerHtml('''
             <blockquote style><blockquote><blockquote>

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_redux/flutter_redux.dart';
-import 'package:hkgalden_flutter/redux/app/app_state.dart';
-import 'package:hkgalden_flutter/redux/user_thread_list/user_thread_list_action.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hkgalden_flutter/bloc/user_thread_list/user_thread_list_bloc.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
-import 'package:hkgalden_flutter/viewmodels/user_detail/user_thread_list_view_model.dart';
 
 class UserThreadListPage extends StatelessWidget {
   final String userId;
@@ -12,42 +10,42 @@ class UserThreadListPage extends StatelessWidget {
   const UserThreadListPage({required this.userId});
 
   @override
-  Widget build(BuildContext context) => ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: displayHeight(context) / 2),
-        child: StoreConnector<AppState, UserThreadListViewModel>(
-          distinct: true,
-          onInit: (store) => store
-              .dispatch(RequestUserThreadListAction(userId: userId, page: 1)),
-          converter: (store) => UserThreadListViewModel.create(store),
-          builder: (context, viewModel) => viewModel.isLoading
-              ? UserThreadListLoadingSkeleton()
-              : ListView.builder(
-                  padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).padding.bottom),
-                  itemCount: viewModel.userThreads.length,
-                  itemBuilder: (context, index) => Column(
-                        children: <Widget>[
-                          ListTile(
-                              title: Text(
-                                viewModel.userThreads[index].title,
+  Widget build(BuildContext context) {
+    final UserThreadListBloc userThreadListBloc = UserThreadListBloc();
+    userThreadListBloc.add(RequestUserThreadListEvent(userId: userId, page: 1));
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: displayHeight(context) / 2),
+      child: BlocBuilder<UserThreadListBloc, UserThreadListState>(
+        builder: (context, state) => state.isLoading
+            ? UserThreadListLoadingSkeleton()
+            : ListView.builder(
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).padding.bottom),
+                itemCount: state.userThreadList.length,
+                itemBuilder: (context, index) => Column(
+                      children: <Widget>[
+                        ListTile(
+                            title: Text(
+                              state.userThreadList[index].title,
+                            ),
+                            trailing: Chip(
+                              label: Text(
+                                '#${state.userThreadList[index].tagName}',
+                                strutStyle: const StrutStyle(height: 1.25),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .caption!
+                                    .copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700),
                               ),
-                              trailing: Chip(
-                                label: Text(
-                                  '#${viewModel.userThreads[index].tagName}',
-                                  strutStyle: const StrutStyle(height: 1.25),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .caption!
-                                      .copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700),
-                                ),
-                                backgroundColor:
-                                    viewModel.userThreads[index].tagColor,
-                              )),
-                          const Divider(indent: 8, height: 1, thickness: 1),
-                        ],
-                      )),
-        ),
-      );
+                              backgroundColor:
+                                  state.userThreadList[index].tagColor,
+                            )),
+                        const Divider(indent: 8, height: 1, thickness: 1),
+                      ],
+                    )),
+      ),
+    );
+  }
 }

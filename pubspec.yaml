@@ -35,7 +35,6 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_quill: ^1.0.0
-  flutter_redux: ^0.8.0
   flutter_secure_storage: 
   flutter_svg: 
   graphql: ^5.0.0-nullsafety.3
@@ -44,7 +43,6 @@ dependencies:
   modal_bottom_sheet: 
   octo_image: 
   package_info: 
-  redux: 
   shimmer: 2.0.0-nullsafety.0
   universal_html: 
   url_launcher: 

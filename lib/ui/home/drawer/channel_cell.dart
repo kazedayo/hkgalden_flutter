@@ -1,36 +1,46 @@
 import 'package:backdrop/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
+import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
 import 'package:hkgalden_flutter/models/channel.dart';
-import 'package:hkgalden_flutter/viewmodels/home/drawer/home_drawer_view_model.dart';
 
 class ChannelCell extends StatelessWidget {
-  final HomeDrawerViewModel viewModel;
   final Channel channel;
 
-  const ChannelCell({Key? key, required this.viewModel, required this.channel})
-      : super(key: key);
+  const ChannelCell({Key? key, required this.channel}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) {
+    final ChannelBloc channelBloc = BlocProvider.of<ChannelBloc>(context);
+    final ThreadListBloc threadListBloc =
+        BlocProvider.of<ThreadListBloc>(context);
+    return BlocBuilder<ChannelBloc, ChannelState>(
+      builder: (context, state) => Container(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         child: Material(
           clipBehavior: Clip.hardEdge,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          elevation: viewModel.selectedChannelId == channel.channelId ? 6 : 0,
-          color: viewModel.selectedChannelId == channel.channelId
+          elevation: state.selectedChannelId == channel.channelId ? 6 : 0,
+          color: state.selectedChannelId == channel.channelId
               ? Theme.of(context).primaryColor
               : Theme.of(context).scaffoldBackgroundColor,
           child: TextButton(
             style: TextButton.styleFrom(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10))),
-            onPressed: viewModel.selectedChannelId == channel.channelId
+            onPressed: state.selectedChannelId == channel.channelId
                 ? null
                 : () {
                     HapticFeedback.mediumImpact();
-                    viewModel.onTap(channel.channelId);
+                    channelBloc.add(
+                        SetSelectedChannelEvent(channelId: channel.channelId));
+                    threadListBloc.add(RequestThreadListEvent(
+                        channelId: channel.channelId,
+                        page: 1,
+                        isRefresh: false));
                     //Navigator.pop(context);
                     Backdrop.of(context).concealBackLayer();
                   },
@@ -59,5 +69,7 @@ class ChannelCell extends StatelessWidget {
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 }

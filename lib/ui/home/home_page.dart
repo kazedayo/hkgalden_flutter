@@ -4,12 +4,15 @@ import 'package:backdrop/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_redux/flutter_redux.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_state.dart';
+import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
-import 'package:hkgalden_flutter/redux/app/app_state.dart';
-import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
+import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
@@ -23,7 +26,6 @@ import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
-import 'package:hkgalden_flutter/viewmodels/home/home_page_view_model.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:package_info/package_info.dart';
 
@@ -79,251 +81,302 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: StoreConnector<AppState, HomePageViewModel>(
-        converter: (store) => HomePageViewModel.create(store),
-        distinct: true,
-        onInit: (store) {
-          _scrollController.addListener(() {
-            if (_scrollController.position.pixels ==
-                _scrollController.position.maxScrollExtent) {
-              store.dispatch(RequestThreadListAction(
-                  channelId: store.state.threadListState.currentChannelId,
-                  page: store.state.threadListState.currentPage + 1,
-                  isRefresh: true));
-            }
-            if ((_scrollController.position.userScrollDirection ==
-                        ScrollDirection.forward ||
-                    _scrollController.position.pixels == 0.0) &&
-                _fabIsHidden) {
-              setState(() {
-                _fabIsHidden = false;
-              });
-            } else if (_scrollController.position.userScrollDirection ==
-                    ScrollDirection.reverse &&
-                !_fabIsHidden) {
-              setState(() {
-                _fabIsHidden = true;
-              });
-            }
-          });
-        },
-        builder: (BuildContext context, HomePageViewModel viewModel) => Stack(
-          fit: StackFit.expand,
-          children: [
-            BackdropScaffold(
-              resizeToAvoidBottomInset: false,
-              appBar: PreferredSize(
-                preferredSize: const Size.fromHeight(kToolbarHeight),
-                child: AppBar(
-                  leading: _LeadingButton(),
-                  title: Text.rich(
-                    TextSpan(children: [
-                      WidgetSpan(
-                          alignment: PlaceholderAlignment.middle,
-                          child: Hero(
-                              tag: 'logo',
-                              child: SvgPicture.asset(
-                                'assets/icon-hkgalden.svg',
-                                width: 27,
-                                height: 27,
-                              ))),
-                      const WidgetSpan(
-                          child: SizedBox(
-                        width: 5,
-                      )),
-                      TextSpan(
-                          text: viewModel.title,
-                          style: const TextStyle(
-                              fontSize: 19, fontWeight: FontWeight.w700))
-                    ]),
-                  ),
-                  actions: [
-                    if (viewModel.isLoggedIn)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: PopupMenuButton(
-                            itemBuilder: (context) => [
-                                  const PopupMenuItem(
-                                    value: _MenuItem.account,
-                                    child: ListTile(
-                                      dense: true,
-                                      leading: Icon(Icons.account_box_rounded),
-                                      title: Text('個人檔案'),
-                                    ),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: _MenuItem.blocklist,
-                                    child: ListTile(
-                                      dense: true,
-                                      leading: Icon(Icons.block_rounded),
-                                      title: Text('封鎖名單'),
-                                    ),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: _MenuItem.licences,
-                                    child: ListTile(
-                                      dense: true,
-                                      leading: Icon(Icons.copyright_rounded),
-                                      title: Text('版權資訊'),
-                                    ),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: _MenuItem.logout,
-                                    child: ListTile(
-                                      dense: true,
-                                      leading: Icon(
-                                        Icons.logout,
-                                        color: Colors.redAccent,
-                                      ),
-                                      title: Text('登出'),
-                                    ),
-                                  ),
-                                ],
-                            onSelected: (value) async {
-                              switch (value! as _MenuItem) {
-                                case _MenuItem.account:
-                                  showMaterialModalBottomSheet(
-                                      duration:
-                                          const Duration(milliseconds: 200),
-                                      animationCurve: Curves.easeOut,
-                                      enableDrag: false,
-                                      backgroundColor: Colors.transparent,
-                                      barrierColor: Colors.black87,
-                                      context: context,
-                                      builder: (context) => UserPage(
-                                            user: viewModel.sessionUser,
-                                          ));
-                                  break;
-                                case _MenuItem.blocklist:
-                                  showMaterialModalBottomSheet(
-                                      duration:
-                                          const Duration(milliseconds: 200),
-                                      animationCurve: Curves.easeOut,
-                                      enableDrag: false,
-                                      backgroundColor: Colors.transparent,
-                                      barrierColor: Colors.black87,
-                                      context: context,
-                                      builder: (context) => BlockListPage());
-                                  break;
-                                case _MenuItem.licences:
-                                  final PackageInfo info =
-                                      await PackageInfo.fromPlatform();
-                                  showLicensePage(
-                                    context: context,
-                                    applicationName: 'hkGalden',
-                                    applicationIcon: SvgPicture.asset(
+    final SessionUserBloc sessionUserBloc =
+        BlocProvider.of<SessionUserBloc>(context);
+    final ThreadListBloc threadListBloc =
+        BlocProvider.of<ThreadListBloc>(context);
+    final ChannelBloc channelBloc = BlocProvider.of<ChannelBloc>(context);
+    return BlocBuilder<ThreadListBloc, ThreadListState>(
+      builder: (context, state) {
+        _scrollController.addListener(() {
+          if (_scrollController.position.pixels ==
+              _scrollController.position.maxScrollExtent) {
+            BlocProvider.of<ThreadListBloc>(context).add(RequestThreadListEvent(
+                channelId: state.currentChannelId,
+                page: state.currentPage,
+                isRefresh: true));
+          }
+          if ((_scrollController.position.userScrollDirection ==
+                      ScrollDirection.forward ||
+                  _scrollController.position.pixels == 0.0) &&
+              _fabIsHidden) {
+            setState(() {
+              _fabIsHidden = false;
+            });
+          } else if (_scrollController.position.userScrollDirection ==
+                  ScrollDirection.reverse &&
+              !_fabIsHidden) {
+            setState(() {
+              _fabIsHidden = true;
+            });
+          }
+        });
+        return Scaffold(
+          body: Stack(
+            fit: StackFit.expand,
+            children: [
+              BlocBuilder<SessionUserBloc, SessionUserState>(
+                builder: (context, state) => BackdropScaffold(
+                  resizeToAvoidBottomInset: false,
+                  appBar: PreferredSize(
+                    preferredSize: const Size.fromHeight(kToolbarHeight),
+                    child: AppBar(
+                      leading: _LeadingButton(),
+                      title: BlocBuilder<ChannelBloc, ChannelState>(
+                        builder: (context, state) => Text.rich(
+                          TextSpan(children: [
+                            WidgetSpan(
+                                alignment: PlaceholderAlignment.middle,
+                                child: Hero(
+                                    tag: 'logo',
+                                    child: SvgPicture.asset(
                                       'assets/icon-hkgalden.svg',
-                                      width: 50,
-                                      height: 50,
-                                      color: Theme.of(context).accentColor,
-                                    ),
-                                    applicationVersion:
-                                        '${info.version}+${info.buildNumber}',
-                                    applicationLegalese: '© hkGalden & 1080',
-                                  );
-                                  break;
-                                case _MenuItem.logout:
-                                  viewModel.onLogout();
-                                  break;
-                                default:
-                              }
-                            },
-                            icon: const Icon(Icons.apps_rounded)),
-                      )
-                    else
-                      IconButton(
-                          icon: const Icon(Icons.login_rounded),
-                          onPressed: () => Navigator.of(context)
-                              .push(SlideInFromBottomRoute(page: LoginPage())))
-                  ],
-                ),
-              ),
-              frontLayer: Theme(
-                data: Theme.of(context)
-                    .copyWith(highlightColor: const Color(0xff373d3c)),
-                child: Material(
-                  color: Theme.of(context).primaryColor,
-                  child: RefreshIndicator(
-                    backgroundColor: Colors.white,
-                    strokeWidth: 2.5,
-                    onRefresh: () => viewModel
-                        .onRefresh(viewModel.selectedChannelId) as Future<void>,
-                    child: viewModel.isThreadLoading
-                        ? ListLoadingSkeleton()
-                        : ListView.builder(
-                            addAutomaticKeepAlives: false,
-                            addRepaintBoundaries: false,
-                            controller: _scrollController,
-                            itemCount: viewModel.threads.length + 1,
-                            itemBuilder: (context, index) {
-                              if (index == viewModel.threads.length) {
-                                return ListLoadingSkeletonCell();
-                              } else {
-                                return Visibility(
-                                  visible: !viewModel.blockedUserIds.contains(
-                                      viewModel.threads[index].replies[0].author
-                                          .userId),
-                                  child: ThreadCell(
-                                    key: ValueKey(
-                                        viewModel.threads[index].threadId),
-                                    thread: viewModel.threads[index],
-                                    onTap: () =>
-                                        _loadThread(viewModel.threads[index]),
-                                    onLongPress: () =>
-                                        _jumpToPage(viewModel.threads[index]),
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                  ),
-                ),
-              ),
-              frontLayerScrim: Colors.black.withAlpha(177),
-              stickyFrontLayer: true,
-              backLayer: HomeDrawer(),
-              backLayerBackgroundColor:
-                  Theme.of(context).scaffoldBackgroundColor,
-              floatingActionButton: _fabIsHidden
-                  ? null
-                  : FloatingActionButton(
-                      onPressed: () => viewModel.isLoggedIn
-                          ? showBarModalBottomSheet(
-                              duration: const Duration(milliseconds: 300),
-                              animationCurve: Curves.easeOut,
-                              context: context,
-                              builder: (context) => ComposePage(
-                                composeMode: ComposeMode.newPost,
-                                onCreateThread: (channelId) =>
-                                    viewModel.onCreateThread(channelId),
-                              ),
-                            )
-                          : showCustomDialog(
-                              context: context,
-                              builder: (context) => const CustomAlertDialog(
-                                    title: '未登入',
-                                    content: '請先登入',
-                                  )),
-                      child: const Icon(Icons.create_rounded),
+                                      width: 27,
+                                      height: 27,
+                                    ))),
+                            const WidgetSpan(
+                                child: SizedBox(
+                              width: 5,
+                            )),
+                            TextSpan(
+                                text: state.channels
+                                    .where((channel) =>
+                                        channel.channelId ==
+                                        state.selectedChannelId)
+                                    .first
+                                    .channelName,
+                                style: const TextStyle(
+                                    fontSize: 19, fontWeight: FontWeight.w700))
+                          ]),
+                        ),
+                      ),
+                      actions: [
+                        if (state.isLoggedIn)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: PopupMenuButton(
+                                itemBuilder: (context) => [
+                                      const PopupMenuItem(
+                                        value: _MenuItem.account,
+                                        child: ListTile(
+                                          dense: true,
+                                          leading:
+                                              Icon(Icons.account_box_rounded),
+                                          title: Text('個人檔案'),
+                                        ),
+                                      ),
+                                      const PopupMenuItem(
+                                        value: _MenuItem.blocklist,
+                                        child: ListTile(
+                                          dense: true,
+                                          leading: Icon(Icons.block_rounded),
+                                          title: Text('封鎖名單'),
+                                        ),
+                                      ),
+                                      const PopupMenuItem(
+                                        value: _MenuItem.licences,
+                                        child: ListTile(
+                                          dense: true,
+                                          leading:
+                                              Icon(Icons.copyright_rounded),
+                                          title: Text('版權資訊'),
+                                        ),
+                                      ),
+                                      const PopupMenuItem(
+                                        value: _MenuItem.logout,
+                                        child: ListTile(
+                                          dense: true,
+                                          leading: Icon(
+                                            Icons.logout,
+                                            color: Colors.redAccent,
+                                          ),
+                                          title: Text('登出'),
+                                        ),
+                                      ),
+                                    ],
+                                onSelected: (value) async {
+                                  switch (value! as _MenuItem) {
+                                    case _MenuItem.account:
+                                      showMaterialModalBottomSheet(
+                                          duration:
+                                              const Duration(milliseconds: 200),
+                                          animationCurve: Curves.easeOut,
+                                          enableDrag: false,
+                                          backgroundColor: Colors.transparent,
+                                          barrierColor: Colors.black87,
+                                          context: context,
+                                          builder: (context) => UserPage(
+                                                user: state.sessionUser,
+                                              ));
+                                      break;
+                                    case _MenuItem.blocklist:
+                                      showMaterialModalBottomSheet(
+                                          duration:
+                                              const Duration(milliseconds: 200),
+                                          animationCurve: Curves.easeOut,
+                                          enableDrag: false,
+                                          backgroundColor: Colors.transparent,
+                                          barrierColor: Colors.black87,
+                                          context: context,
+                                          builder: (context) =>
+                                              BlockListPage());
+                                      break;
+                                    case _MenuItem.licences:
+                                      final PackageInfo info =
+                                          await PackageInfo.fromPlatform();
+                                      showLicensePage(
+                                        context: context,
+                                        applicationName: 'hkGalden',
+                                        applicationIcon: SvgPicture.asset(
+                                          'assets/icon-hkgalden.svg',
+                                          width: 50,
+                                          height: 50,
+                                          color: Theme.of(context).accentColor,
+                                        ),
+                                        applicationVersion:
+                                            '${info.version}+${info.buildNumber}',
+                                        applicationLegalese:
+                                            '© hkGalden & 1080',
+                                      );
+                                      break;
+                                    case _MenuItem.logout:
+                                      TokenSecureStorage().writeToken('',
+                                          onFinish: (_) {
+                                        sessionUserBloc
+                                            .add(RemoveSessionUserEvent());
+                                        threadListBloc.add(
+                                            RequestThreadListEvent(
+                                                channelId: channelBloc
+                                                    .state.selectedChannelId,
+                                                page: 1,
+                                                isRefresh: false));
+                                      });
+                                      break;
+                                    default:
+                                  }
+                                },
+                                icon: const Icon(Icons.apps_rounded)),
+                          )
+                        else
+                          IconButton(
+                              icon: const Icon(Icons.login_rounded),
+                              onPressed: () => Navigator.of(context).push(
+                                  SlideInFromBottomRoute(page: LoginPage())))
+                      ],
                     ),
-            ),
-            Visibility(
-              visible: _menuIsShowing,
-              child: AnimatedBuilder(
-                animation: _backgroundBlurAnimationController,
-                builder: (context, child) => BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                  child: Container(
-                    color: Colors.black
-                        .withOpacity(_backgroundBlurAnimationController.value),
                   ),
+                  frontLayer: Theme(
+                    data: Theme.of(context)
+                        .copyWith(highlightColor: const Color(0xff373d3c)),
+                    child: Material(
+                      color: Theme.of(context).primaryColor,
+                      child: BlocBuilder<ThreadListBloc, ThreadListState>(
+                        builder: (context, state) => RefreshIndicator(
+                          backgroundColor: Colors.white,
+                          strokeWidth: 2.5,
+                          onRefresh: () async => threadListBloc.add(
+                              RequestThreadListEvent(
+                                  channelId:
+                                      channelBloc.state.selectedChannelId,
+                                  page: 1,
+                                  isRefresh: true)),
+                          child: state.threadListIsLoading
+                              ? ListLoadingSkeleton()
+                              : ListView.builder(
+                                  addAutomaticKeepAlives: false,
+                                  addRepaintBoundaries: false,
+                                  controller: _scrollController,
+                                  itemCount: state.threads.length + 1,
+                                  itemBuilder: (context, index) {
+                                    if (index == state.threads.length) {
+                                      return ListLoadingSkeletonCell();
+                                    } else {
+                                      return BlocBuilder<SessionUserBloc,
+                                          SessionUserState>(
+                                        builder: (context, state) => Visibility(
+                                          visible: !state
+                                              .sessionUser.blockedUsers
+                                              .contains(threadListBloc
+                                                  .state
+                                                  .threads[index]
+                                                  .replies[0]
+                                                  .author
+                                                  .userId),
+                                          child: BlocBuilder<ThreadListBloc,
+                                              ThreadListState>(
+                                            builder: (context, state) =>
+                                                ThreadCell(
+                                              key: ValueKey(state
+                                                  .threads[index].threadId),
+                                              thread: state.threads[index],
+                                              onTap: () => _loadThread(
+                                                  state.threads[index]),
+                                              onLongPress: () => _jumpToPage(
+                                                  state.threads[index]),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  frontLayerScrim: Colors.black.withAlpha(177),
+                  stickyFrontLayer: true,
+                  backLayer: HomeDrawer(),
+                  backLayerBackgroundColor:
+                      Theme.of(context).scaffoldBackgroundColor,
+                  floatingActionButton: _fabIsHidden
+                      ? null
+                      : BlocBuilder<SessionUserBloc, SessionUserState>(
+                          builder: (context, state) => FloatingActionButton(
+                            onPressed: () => state.isLoggedIn
+                                ? showBarModalBottomSheet(
+                                    duration: const Duration(milliseconds: 300),
+                                    animationCurve: Curves.easeOut,
+                                    context: context,
+                                    builder: (context) => ComposePage(
+                                      composeMode: ComposeMode.newPost,
+                                      onCreateThread: (channelId) =>
+                                          threadListBloc.add(
+                                              RequestThreadListEvent(
+                                                  channelId: channelId,
+                                                  page: 1,
+                                                  isRefresh: false)),
+                                    ),
+                                  )
+                                : showCustomDialog(
+                                    context: context,
+                                    builder: (context) =>
+                                        const CustomAlertDialog(
+                                          title: '未登入',
+                                          content: '請先登入',
+                                        )),
+                            child: const Icon(Icons.create_rounded),
+                          ),
+                        ),
                 ),
               ),
-            )
-          ],
-        ),
-      ),
+              Visibility(
+                visible: _menuIsShowing,
+                child: AnimatedBuilder(
+                  animation: _backgroundBlurAnimationController,
+                  builder: (context, child) => BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                    child: Container(
+                      color: Colors.black.withOpacity(
+                          _backgroundBlurAnimationController.value),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        );
+      },
     );
   }
 

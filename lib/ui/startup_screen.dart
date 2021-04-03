@@ -1,17 +1,15 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_redux/flutter_redux.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
+import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
 import 'package:hkgalden_flutter/nested_navigator.dart';
-import 'package:hkgalden_flutter/redux/app/app_state.dart';
-import 'package:hkgalden_flutter/redux/channel/channel_action.dart';
-import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
-import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
-import 'package:hkgalden_flutter/viewmodels/startup_animation_view_model.dart';
 
 class StartupScreen extends StatefulWidget {
   @override
@@ -55,34 +53,32 @@ class _StartupScreenState extends State<StartupScreen>
 
   @override
   Widget build(BuildContext context) {
+    final ThreadListBloc threadListBloc =
+        BlocProvider.of<ThreadListBloc>(context);
+    final ChannelBloc channelBloc = BlocProvider.of<ChannelBloc>(context);
+    final SessionUserBloc sessionUserBloc =
+        BlocProvider.of<SessionUserBloc>(context);
+    _controller.forward();
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        //Hardcode default to 'bw' channel
+        threadListBloc.add(const RequestThreadListEvent(
+            channelId: 'bw', page: 1, isRefresh: false));
+        channelBloc.add(RequestChannelsEvent());
+        if (token != '') {
+          sessionUserBloc.add(RequestSessionUserEvent());
+        }
+      }
+    });
     return Scaffold(
-      body: StoreConnector<AppState, StartupAnimationViewModel>(
-        distinct: true,
-        onDidChange: (_, viewModel) {
-          if (viewModel.threadIsLoading == false &&
-              viewModel.channelIsLoading == false &&
-              viewModel.sessionUserIsLoading == false) {
+      body: BlocListener<ThreadListBloc, ThreadListState>(
+        listener: (context, state) {
+          if (!state.threadListIsLoading) {
             final SizeRoute route = SizeRoute(page: NestedNavigator());
             Navigator.of(context).pushReplacement(route);
           }
         },
-        onInit: (store) {
-          _controller.forward();
-          _controller.addStatusListener((status) {
-            if (status == AnimationStatus.completed) {
-              //Hardcode default to 'bw' channel
-              store.dispatch(RequestThreadListAction(
-                  channelId: 'bw', page: 1, isRefresh: false));
-              store.dispatch(RequestChannelAction());
-              if (token != '') {
-                store.dispatch(RequestSessionUserAction());
-              }
-            }
-          });
-        },
-        converter: (store) => StartupAnimationViewModel.create(store),
-        builder: (BuildContext context, StartupAnimationViewModel viewModel) =>
-            Center(
+        child: Center(
           child: SizedBox(
             width: 300,
             height: 300,

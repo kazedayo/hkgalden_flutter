@@ -3,20 +3,21 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/style.dart';
-import 'package:flutter_redux/flutter_redux.dart';
+import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_state.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/tag.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
-import 'package:hkgalden_flutter/redux/app/app_state.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
-import 'package:hkgalden_flutter/viewmodels/tag_selector_view_model.dart';
 import 'package:flutter_quill/widgets/controller.dart';
 import 'package:flutter_quill/widgets/default_styles.dart';
 import 'package:flutter_quill/widgets/editor.dart';
@@ -98,198 +99,202 @@ class _ComposePageState extends State<ComposePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        centerTitle:
-            Theme.of(context).platform == TargetPlatform.iOS ? true : false,
-        title: Text(
-          widget.composeMode == ComposeMode.newPost
-              ? '發表主題'
-              : widget.composeMode == ComposeMode.reply
-                  ? '回覆主題'
-                  : '引用回覆 (#${widget.parentReply!.floor})',
-          style: Theme.of(context)
-              .textTheme
-              .subtitle1!
-              .copyWith(fontWeight: FontWeight.bold),
-        ),
-        automaticallyImplyLeading: false,
-        actions: <Widget>[
-          ActionBarSpinner(isVisible: _isSending),
-          Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.send_rounded),
-              onPressed: _isSending
-                  ? null
-                  : () async {
-                      setState(() {
-                        _isSending = true;
-                      });
-                      widget.composeMode == ComposeMode.newPost
-                          ? _title == '' ||
-                                  _controller.document.toString() == '/n'
-                              ? showCustomDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    setState(() {
-                                      _isSending = false;
-                                    });
-                                    return const CustomAlertDialog(
-                                        title: '注意!', content: '內文/標題不能為空');
-                                  },
-                                )
-                              : _createThread(context)
-                          : _sendReply(context);
-                      // await DeltaJsonParser()
-                      //     .toGaldenHtml(json.decode(_getZefyrEditorContent()));
-                    },
-            ),
+    return BlocBuilder<SessionUserBloc, SessionUserState>(
+      builder: (context, state) => Scaffold(
+        resizeToAvoidBottomInset: true,
+        appBar: AppBar(
+          centerTitle:
+              Theme.of(context).platform == TargetPlatform.iOS ? true : false,
+          title: Text(
+            widget.composeMode == ComposeMode.newPost
+                ? '發表主題'
+                : widget.composeMode == ComposeMode.reply
+                    ? '回覆主題'
+                    : '引用回覆 (#${widget.parentReply!.floor})',
+            style: Theme.of(context)
+                .textTheme
+                .subtitle1!
+                .copyWith(fontWeight: FontWeight.bold),
           ),
-        ],
-      ),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          if (widget.composeMode == ComposeMode.newPost)
-            Container(
-              height: 29,
-              margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-              child: Row(
-                children: <Widget>[
-                  PopupMenuButton(
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                          child: SizedBox(
-                        height: displayHeight(context) / 3,
-                        child: _TagSelectDialog(
-                          onTagSelect: (tag, channelId) {
-                            Navigator.of(context).pop();
-                            FocusScope.of(context)
-                                .requestFocus(_currentFocusNode);
-                            setState(() {
-                              _tag = tag;
-                              _channelId = channelId;
-                            });
-                          },
-                        ),
-                      ))
-                    ],
-                    child: Chip(
-                      label: Text('#${_tag.name}',
-                          strutStyle: const StrutStyle(height: 1.25),
-                          style: Theme.of(context).textTheme.caption!.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700)),
-                      backgroundColor: _tag.color,
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  Expanded(
-                    child: TextField(
-                      style: const TextStyle(fontSize: 14),
-                      strutStyle: const StrutStyle(height: 1.25),
-                      controller: _titleFieldController,
-                      focusNode: _titleFocusNode,
-                      decoration: InputDecoration(
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6)),
-                          labelText: '標題',
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 6.8)),
-                      onChanged: (value) {
+          automaticallyImplyLeading: false,
+          actions: <Widget>[
+            ActionBarSpinner(isVisible: _isSending),
+            Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.send_rounded),
+                onPressed: _isSending
+                    ? null
+                    : () async {
                         setState(() {
-                          _title = value;
+                          _isSending = true;
                         });
+                        widget.composeMode == ComposeMode.newPost
+                            ? _title == '' ||
+                                    _controller.document.toString() == '/n'
+                                ? showCustomDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      setState(() {
+                                        _isSending = false;
+                                      });
+                                      return const CustomAlertDialog(
+                                          title: '注意!', content: '內文/標題不能為空');
+                                    },
+                                  )
+                                : _createThread(context)
+                            : _sendReply(context);
+                        // await DeltaJsonParser()
+                        //     .toGaldenHtml(json.decode(_getZefyrEditorContent()));
                       },
+              ),
+            ),
+          ],
+        ),
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            if (widget.composeMode == ComposeMode.newPost)
+              Container(
+                height: 29,
+                margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                child: Row(
+                  children: <Widget>[
+                    PopupMenuButton(
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                            child: SizedBox(
+                          height: displayHeight(context) / 3,
+                          child: _TagSelectDialog(
+                            onTagSelect: (tag, channelId) {
+                              Navigator.of(context).pop();
+                              FocusScope.of(context)
+                                  .requestFocus(_currentFocusNode);
+                              setState(() {
+                                _tag = tag;
+                                _channelId = channelId;
+                              });
+                            },
+                          ),
+                        ))
+                      ],
+                      child: Chip(
+                        label: Text('#${_tag.name}',
+                            strutStyle: const StrutStyle(height: 1.25),
+                            style: Theme.of(context)
+                                .textTheme
+                                .caption!
+                                .copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700)),
+                        backgroundColor: _tag.color,
+                      ),
                     ),
-                  )
-                ],
-              ),
-            )
-          else
-            const SizedBox(),
-          if (widget.composeMode == ComposeMode.quotedReply)
-            ConstrainedBox(
-              constraints:
-                  BoxConstraints(maxHeight: displayHeight(context) / 4),
-              child: SingleChildScrollView(
-                reverse: true,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                child: StyledHtmlView(
-                  htmlString: HKGaldenHtmlParser().replyWithQuotes(
-                      widget.parentReply!,
-                      StoreProvider.of<AppState>(context))!,
-                  floor: widget.parentReply!.floor,
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    Expanded(
+                      child: TextField(
+                        style: const TextStyle(fontSize: 14),
+                        strutStyle: const StrutStyle(height: 1.25),
+                        controller: _titleFieldController,
+                        focusNode: _titleFocusNode,
+                        decoration: InputDecoration(
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(6)),
+                            labelText: '標題',
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 7, vertical: 6.8)),
+                        onChanged: (value) {
+                          setState(() {
+                            _title = value;
+                          });
+                        },
+                      ),
+                    )
+                  ],
                 ),
+              )
+            else
+              const SizedBox(),
+            if (widget.composeMode == ComposeMode.quotedReply)
+              ConstrainedBox(
+                constraints:
+                    BoxConstraints(maxHeight: displayHeight(context) / 4),
+                child: SingleChildScrollView(
+                  reverse: true,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  child: StyledHtmlView(
+                    htmlString: HKGaldenHtmlParser()
+                        .replyWithQuotes(widget.parentReply!, state)!,
+                    floor: widget.parentReply!.floor,
+                  ),
+                ),
+              )
+            else
+              const SizedBox(),
+            SizedBox(
+              height: 30,
+              child: QuillToolbar.basic(
+                controller: _controller,
+                showBackgroundColorButton: false,
+                showCodeBlock: false,
+                showListCheck: false,
+                showIndent: false,
+                showQuote: false,
               ),
-            )
-          else
-            const SizedBox(),
-          SizedBox(
-            height: 30,
-            child: QuillToolbar.basic(
-              controller: _controller,
-              showBackgroundColorButton: false,
-              showCodeBlock: false,
-              showListCheck: false,
-              showIndent: false,
-              showQuote: false,
             ),
-          ),
-          Expanded(
-            child: QuillEditor(
-              controller: _controller,
-              focusNode: _focusNode,
-              autoFocus: true,
-              textCapitalization: TextCapitalization.none,
-              expands: true,
-              keyboardAppearance: Brightness.dark,
-              scrollable: true,
-              scrollController: ScrollController(),
-              padding: const EdgeInsets.only(left: 12, right: 12, top: 6),
-              readOnly: false,
-              customStyles: DefaultStyles(
-                  h1: DefaultTextBlockStyle(
-                      Theme.of(context).textTheme.bodyText2!.copyWith(
-                          fontWeight: FontWeight.normal,
-                          fontSize: 33,
-                          height: 1.25),
-                      const Tuple2(0.0, 0.0),
-                      const Tuple2(0.0, 0.0),
-                      null),
-                  h2: DefaultTextBlockStyle(
-                      Theme.of(context).textTheme.bodyText2!.copyWith(
-                          fontWeight: FontWeight.normal,
-                          fontSize: FontSize.xxLarge.size,
-                          height: 1.25),
-                      const Tuple2(0.0, 0.0),
-                      const Tuple2(0.0, 0.0),
-                      null),
-                  h3: DefaultTextBlockStyle(
-                      Theme.of(context).textTheme.bodyText2!.copyWith(
-                          fontWeight: FontWeight.normal,
-                          fontSize: FontSize.xLarge.size,
-                          height: 1.25),
-                      const Tuple2(0.0, 0.0),
-                      const Tuple2(0.0, 0.0),
-                      null),
-                  strikeThrough:
-                      const TextStyle(decoration: TextDecoration.lineThrough),
-                  paragraph: DefaultTextBlockStyle(
-                      Theme.of(context).textTheme.bodyText2!.copyWith(
-                          fontWeight: FontWeight.normal,
-                          fontSize: FontSize.large.size,
-                          height: 1.25),
-                      const Tuple2(0.0, 0.0),
-                      const Tuple2(0.0, 0.0),
-                      null)),
+            Expanded(
+              child: QuillEditor(
+                controller: _controller,
+                focusNode: _focusNode,
+                autoFocus: true,
+                textCapitalization: TextCapitalization.none,
+                expands: true,
+                keyboardAppearance: Brightness.dark,
+                scrollable: true,
+                scrollController: ScrollController(),
+                padding: const EdgeInsets.only(left: 12, right: 12, top: 6),
+                readOnly: false,
+                customStyles: DefaultStyles(
+                    h1: DefaultTextBlockStyle(
+                        Theme.of(context).textTheme.bodyText2!.copyWith(
+                            fontWeight: FontWeight.normal,
+                            fontSize: 33,
+                            height: 1.25),
+                        const Tuple2(0.0, 0.0),
+                        const Tuple2(0.0, 0.0),
+                        null),
+                    h2: DefaultTextBlockStyle(
+                        Theme.of(context).textTheme.bodyText2!.copyWith(
+                            fontWeight: FontWeight.normal,
+                            fontSize: FontSize.xxLarge.size,
+                            height: 1.25),
+                        const Tuple2(0.0, 0.0),
+                        const Tuple2(0.0, 0.0),
+                        null),
+                    h3: DefaultTextBlockStyle(
+                        Theme.of(context).textTheme.bodyText2!.copyWith(
+                            fontWeight: FontWeight.normal,
+                            fontSize: FontSize.xLarge.size,
+                            height: 1.25),
+                        const Tuple2(0.0, 0.0),
+                        const Tuple2(0.0, 0.0),
+                        null),
+                    strikeThrough:
+                        const TextStyle(decoration: TextDecoration.lineThrough),
+                    paragraph: DefaultTextBlockStyle(
+                        Theme.of(context).textTheme.bodyText2!.copyWith(
+                            fontWeight: FontWeight.normal,
+                            fontSize: FontSize.large.size,
+                            height: 1.25),
+                        const Tuple2(0.0, 0.0),
+                        const Tuple2(0.0, 0.0),
+                        null)),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -351,15 +356,12 @@ class _TagSelectDialog extends StatelessWidget {
   const _TagSelectDialog({required this.onTagSelect});
 
   @override
-  Widget build(BuildContext context) =>
-      StoreConnector<AppState, TagSelectorViewModel>(
-        distinct: true,
-        converter: (store) => TagSelectorViewModel.create(store),
-        builder: (context, viewModel) => SingleChildScrollView(
+  Widget build(BuildContext context) => BlocBuilder<ChannelBloc, ChannelState>(
+        builder: (context, state) => SingleChildScrollView(
           //padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: viewModel.channels
+            children: state.channels
                 .map((channel) => Container(
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Column(

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_redux/flutter_redux.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
+import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
-import 'package:hkgalden_flutter/redux/app/app_state.dart';
-import 'package:hkgalden_flutter/redux/session_user/session_user_action.dart';
-import 'package:hkgalden_flutter/redux/thread_list/thread_list_action.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
@@ -17,7 +17,13 @@ class _LoginPageState extends State<LoginPage> {
   late WebViewController _controller;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) {
+    final SessionUserBloc sessionUserBloc =
+        BlocProvider.of<SessionUserBloc>(context);
+    final ThreadListBloc threadListBloc =
+        BlocProvider.of<ThreadListBloc>(context);
+    return BlocBuilder<ChannelBloc, ChannelState>(
+      builder: (context, state) => Scaffold(
         appBar: AppBar(
           title: Text(
             '登入hkGalden',
@@ -43,16 +49,11 @@ class _LoginPageState extends State<LoginPage> {
             if (request.url.startsWith('http://localhost/callback')) {
               TokenSecureStorage().writeToken(request.url.substring(32),
                   onFinish: (_) {
-                StoreProvider.of<AppState>(context)
-                    .dispatch(RequestSessionUserAction());
-                StoreProvider.of<AppState>(context).dispatch(
-                    RequestThreadListAction(
-                        channelId: StoreProvider.of<AppState>(context)
-                            .state
-                            .channelState
-                            .selectedChannelId,
-                        page: 1,
-                        isRefresh: false));
+                sessionUserBloc.add(RequestSessionUserEvent());
+                threadListBloc.add(RequestThreadListEvent(
+                    channelId: state.selectedChannelId,
+                    page: 1,
+                    isRefresh: false));
                 Navigator.pop(context);
               });
               return NavigationDecision.prevent;
@@ -62,10 +63,10 @@ class _LoginPageState extends State<LoginPage> {
           onPageFinished: (url) async {
             try {
               const javascript = '''
-            window.alert = function (e){
-              Alert.postMessage(e);
-            }
-          ''';
+              window.alert = function (e){
+                Alert.postMessage(e);
+              }
+            ''';
               await _controller.evaluateJavascript(javascript);
             } catch (_) {}
           },
@@ -73,7 +74,9 @@ class _LoginPageState extends State<LoginPage> {
             _alertJavascriptChannel(context)
           },
         ),
-      );
+      ),
+    );
+  }
 
   JavascriptChannel _alertJavascriptChannel(BuildContext context) {
     return JavascriptChannel(
