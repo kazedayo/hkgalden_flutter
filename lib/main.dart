@@ -15,6 +15,7 @@ import 'package:hkgalden_flutter/ui/startup_screen.dart';
 
 // ignore: avoid_void_async
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   await Hive.openBox('token');
   runApp(MyApp());
