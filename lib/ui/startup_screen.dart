@@ -7,7 +7,7 @@ import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
 import 'package:hkgalden_flutter/nested_navigator.dart';
-import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
+import 'package:hkgalden_flutter/utils/token_store.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 
@@ -22,25 +22,23 @@ class _StartupScreenState extends State<StartupScreen>
   late String token;
 
   @override
-  void initState() {
+  Future<void> initState() async {
     final ParagraphBuilder pb =
         ParagraphBuilder(ParagraphStyle(locale: window.locale));
     pb.addText('\ud83d\ude01'); // smiley face emoji
     pb.build().layout(const ParagraphConstraints(width: 100));
     super.initState();
-    TokenSecureStorage().readToken(onFinish: (value) {
-      if (value == null) {
-        TokenSecureStorage().writeToken('', onFinish: (_) {
-          setState(() {
-            token = '';
-          });
-        });
-      } else {
-        setState(() {
-          token = value as String;
-        });
-      }
-    });
+    final String _token = await TokenStore().readToken();
+    if (_token.isEmpty) {
+      await TokenStore().writeToken('');
+      setState(() {
+        token = '';
+      });
+    } else {
+      setState(() {
+        token = _token;
+      });
+    }
     _controller = AnimationController(
         duration: const Duration(milliseconds: 2000), vsync: this);
   }

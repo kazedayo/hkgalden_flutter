@@ -35,9 +35,10 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_quill: ^1.0.0
-  flutter_secure_storage: 
   flutter_svg: 
   graphql: ^5.0.0-nullsafety.3
+  hive:
+  hive_flutter:
   image_downloader:
   image_picker: 
   modal_bottom_sheet: 

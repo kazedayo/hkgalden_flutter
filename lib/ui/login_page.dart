@@ -6,7 +6,7 @@ import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
+import 'package:hkgalden_flutter/utils/token_store.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -45,17 +45,15 @@ class _LoginPageState extends State<LoginPage> {
               'https://hkgalden.org/oauth/v1/authorize?client_id=${HKGaldenApi.clientId}',
           javascriptMode: JavascriptMode.unrestricted,
           onWebViewCreated: (controller) => _controller = controller,
-          navigationDelegate: (NavigationRequest request) {
+          navigationDelegate: (NavigationRequest request) async {
             if (request.url.startsWith('http://localhost/callback')) {
-              TokenSecureStorage().writeToken(request.url.substring(32),
-                  onFinish: (_) {
-                sessionUserBloc.add(RequestSessionUserEvent());
-                threadListBloc.add(RequestThreadListEvent(
-                    channelId: state.selectedChannelId,
-                    page: 1,
-                    isRefresh: false));
-                Navigator.pop(context);
-              });
+              await TokenStore().writeToken(request.url.substring(32));
+              sessionUserBloc.add(RequestSessionUserEvent());
+              threadListBloc.add(RequestThreadListEvent(
+                  channelId: state.selectedChannelId,
+                  page: 1,
+                  isRefresh: false));
+              Navigator.pop(context);
               return NavigationDecision.prevent;
             }
             return NavigationDecision.navigate;

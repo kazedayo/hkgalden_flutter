@@ -3,7 +3,7 @@ import 'package:hkgalden_flutter/models/channel.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';
-import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
+import 'package:hkgalden_flutter/utils/token_store.dart';
 
 class HKGaldenApi {
   static const String clientId = '15897154848030720.apis.hkgalden.org';
@@ -11,7 +11,7 @@ class HKGaldenApi {
 
   static final AuthLink _bearerToken = AuthLink(getToken: () async {
     final String? tokenString =
-        await TokenSecureStorage().storage.read(key: 'token');
+        await TokenStore().tokenBox.get('token') as String?;
     //print(tokenString);
     return 'Bearer $tokenString';
   });

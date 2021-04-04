@@ -12,7 +12,7 @@ import 'package:hkgalden_flutter/bloc/session_user/session_user_state.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
-import 'package:hkgalden_flutter/secure_storage/token_secure_storage.dart';
+import 'package:hkgalden_flutter/utils/token_store.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
@@ -240,17 +240,14 @@ class _HomePageState extends State<HomePage>
                                       );
                                       break;
                                     case _MenuItem.logout:
-                                      TokenSecureStorage().writeToken('',
-                                          onFinish: (_) {
-                                        sessionUserBloc
-                                            .add(RemoveSessionUserEvent());
-                                        threadListBloc.add(
-                                            RequestThreadListEvent(
-                                                channelId: channelBloc
-                                                    .state.selectedChannelId,
-                                                page: 1,
-                                                isRefresh: false));
-                                      });
+                                      await TokenStore().writeToken('');
+                                      sessionUserBloc
+                                          .add(RemoveSessionUserEvent());
+                                      threadListBloc.add(RequestThreadListEvent(
+                                          channelId: channelBloc
+                                              .state.selectedChannelId,
+                                          page: 1,
+                                          isRefresh: false));
                                       break;
                                     default:
                                   }
