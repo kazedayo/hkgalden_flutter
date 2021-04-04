@@ -13,6 +13,7 @@ import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
 import 'package:hkgalden_flutter/ui/startup_screen.dart';
 
+// ignore: avoid_void_async
 void main() async {
   await Hive.initFlutter();
   await Hive.openBox('token');

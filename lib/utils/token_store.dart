@@ -8,8 +8,8 @@ class TokenStore {
     return;
   }
 
-  Future<String> readToken() async {
-    final String token = await tokenBox.get('token') as String;
+  Future<String?> readToken() async {
+    final String? token = await tokenBox.get('token') as String?;
     return token;
   }
 }

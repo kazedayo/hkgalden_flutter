@@ -13,32 +13,19 @@ class ThreadListBloc extends Bloc<ThreadListEvent, ThreadListState> {
   @override
   Stream<ThreadListState> mapEventToState(ThreadListEvent event) async* {
     if (event is RequestThreadListEvent) {
-      if (!event.isRefresh || event.channelId != state.currentChannelId) {
-        yield state.copyWith(
-            threadListIsLoading: true,
-            isRefresh: event.isRefresh,
-            threads: [],
-            currentPage: event.page,
-            currentChannelId: event.channelId);
-      } else {
-        yield state.copyWith(
-            threadListIsLoading: true,
-            isRefresh: event.isRefresh,
-            currentPage: event.page,
-            currentChannelId: event.channelId);
-      }
+      yield state.copyWith(
+          threadListIsLoading: true,
+          currentPage: event.page,
+          currentChannelId: event.channelId);
       final List<Thread>? threads = await HKGaldenApi()
           .getThreadListQuery(event.channelId, event.page, event.isRefresh);
-      if (event.page == 1 && event.isRefresh) {
-        yield state.copyWith(
-            threadListIsLoading: false, isRefresh: false, threads: threads);
+      if (event.page == 1) {
+        yield state.copyWith(threadListIsLoading: false, threads: threads);
       } else {
         yield state.copyWith(
             threadListIsLoading: false,
-            isRefresh: false,
             threads: state.threads..addAll(threads!));
       }
-      yield state.copyWith(threads: threads);
     }
   }
 }

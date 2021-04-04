@@ -22,14 +22,20 @@ class _StartupScreenState extends State<StartupScreen>
   late String token;
 
   @override
-  Future<void> initState() async {
+  void initState() {
     final ParagraphBuilder pb =
         ParagraphBuilder(ParagraphStyle(locale: window.locale));
     pb.addText('\ud83d\ude01'); // smiley face emoji
     pb.build().layout(const ParagraphConstraints(width: 100));
+    initToken();
     super.initState();
-    final String _token = await TokenStore().readToken();
-    if (_token.isEmpty) {
+    _controller = AnimationController(
+        duration: const Duration(milliseconds: 2000), vsync: this);
+  }
+
+  Future<void> initToken() async {
+    final String? _token = await TokenStore().readToken();
+    if (_token == null) {
       await TokenStore().writeToken('');
       setState(() {
         token = '';
@@ -39,8 +45,6 @@ class _StartupScreenState extends State<StartupScreen>
         token = _token;
       });
     }
-    _controller = AnimationController(
-        duration: const Duration(milliseconds: 2000), vsync: this);
   }
 
   @override

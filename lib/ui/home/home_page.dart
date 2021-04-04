@@ -86,31 +86,32 @@ class _HomePageState extends State<HomePage>
     final ThreadListBloc threadListBloc =
         BlocProvider.of<ThreadListBloc>(context);
     final ChannelBloc channelBloc = BlocProvider.of<ChannelBloc>(context);
-    return BlocBuilder<ThreadListBloc, ThreadListState>(
-      builder: (context, state) {
-        _scrollController.addListener(() {
-          if (_scrollController.position.pixels ==
-              _scrollController.position.maxScrollExtent) {
-            BlocProvider.of<ThreadListBloc>(context).add(RequestThreadListEvent(
-                channelId: state.currentChannelId,
-                page: state.currentPage,
-                isRefresh: true));
-          }
-          if ((_scrollController.position.userScrollDirection ==
-                      ScrollDirection.forward ||
-                  _scrollController.position.pixels == 0.0) &&
-              _fabIsHidden) {
-            setState(() {
-              _fabIsHidden = false;
-            });
-          } else if (_scrollController.position.userScrollDirection ==
-                  ScrollDirection.reverse &&
-              !_fabIsHidden) {
-            setState(() {
-              _fabIsHidden = true;
-            });
-          }
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        BlocProvider.of<ThreadListBloc>(context).add(RequestThreadListEvent(
+            channelId: threadListBloc.state.currentChannelId,
+            page: threadListBloc.state.currentPage + 1,
+            isRefresh: false));
+      }
+      if ((_scrollController.position.userScrollDirection ==
+                  ScrollDirection.forward ||
+              _scrollController.position.pixels == 0.0) &&
+          _fabIsHidden) {
+        setState(() {
+          _fabIsHidden = false;
         });
+      } else if (_scrollController.position.userScrollDirection ==
+              ScrollDirection.reverse &&
+          !_fabIsHidden) {
+        setState(() {
+          _fabIsHidden = true;
+        });
+      }
+    });
+    return BlocBuilder<ThreadListBloc, ThreadListState>(
+      bloc: threadListBloc,
+      builder: (context, state) {
         return Scaffold(
           body: Stack(
             fit: StackFit.expand,
@@ -123,6 +124,7 @@ class _HomePageState extends State<HomePage>
                     child: AppBar(
                       leading: _LeadingButton(),
                       title: BlocBuilder<ChannelBloc, ChannelState>(
+                        bloc: channelBloc,
                         builder: (context, state) => Text.rich(
                           TextSpan(children: [
                             WidgetSpan(
@@ -277,7 +279,8 @@ class _HomePageState extends State<HomePage>
                                       channelBloc.state.selectedChannelId,
                                   page: 1,
                                   isRefresh: true)),
-                          child: state.threadListIsLoading
+                          child: state.threadListIsLoading &&
+                                  state.currentPage == 1
                               ? ListLoadingSkeleton()
                               : ListView.builder(
                                   addAutomaticKeepAlives: false,
