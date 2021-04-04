@@ -108,125 +108,116 @@ class _ThreadPageState extends State<ThreadPage> {
         return threadBloc;
       },
       child: Scaffold(
-        body: Builder(
-          builder: (context) => BlocBuilder<ThreadBloc, ThreadState>(
-            buildWhen: (prev, state) {
-              if ((state.thread.totalReplies.toDouble() / 50.0).ceil() >
-                  state.endPage) {
-                setState(() {
-                  _onLastPage = false;
-                });
-              } else {
-                setState(() {
-                  _onLastPage = true;
-                });
-              }
-              return true;
-            },
-            builder: (context, state) => Scaffold(
-              resizeToAvoidBottomInset: false,
-              key: scaffoldKey,
-              appBar: PreferredSize(
-                preferredSize: const Size.fromHeight(kToolbarHeight),
-                child: AppBar(
-                  elevation: _elevation,
-                  automaticallyImplyLeading: false,
-                  leading: IconButton(
-                      icon: Icon(
-                          Theme.of(context).platform == TargetPlatform.iOS
-                              ? Icons.arrow_back_ios_rounded
-                              : Icons.arrow_back_rounded),
-                      onPressed: () => Navigator.of(context).pop()),
-                  title: SizedBox(
-                    height: kToolbarHeight * 0.85,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Flexible(
-                          child: AutoSizeText(
-                            arguments.title,
-                            style: const TextStyle(fontWeight: FontWeight.w700),
-                            maxLines: 2,
-                            minFontSize: 14,
-                            maxFontSize: 19,
-                            //overflow: TextOverflow.ellipsis
-                          ),
-                        )
-                      ],
-                    ),
+        body: BlocConsumer<ThreadBloc, ThreadState>(
+          listener: (context, state) {
+            if ((state.thread.totalReplies.toDouble() / 50.0).ceil() >
+                state.endPage) {
+              setState(() {
+                _onLastPage = false;
+              });
+            } else {
+              setState(() {
+                _onLastPage = true;
+              });
+            }
+          },
+          builder: (context, state) => Scaffold(
+            resizeToAvoidBottomInset: false,
+            key: scaffoldKey,
+            appBar: PreferredSize(
+              preferredSize: const Size.fromHeight(kToolbarHeight),
+              child: AppBar(
+                elevation: _elevation,
+                automaticallyImplyLeading: false,
+                leading: IconButton(
+                    icon: Icon(Theme.of(context).platform == TargetPlatform.iOS
+                        ? Icons.arrow_back_ios_rounded
+                        : Icons.arrow_back_rounded),
+                    onPressed: () => Navigator.of(context).pop()),
+                title: SizedBox(
+                  height: kToolbarHeight * 0.85,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Flexible(
+                        child: AutoSizeText(
+                          arguments.title,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                          maxLines: 2,
+                          minFontSize: 14,
+                          maxFontSize: 19,
+                          //overflow: TextOverflow.ellipsis
+                        ),
+                      )
+                    ],
                   ),
-                  actions: [
-                    Visibility(
-                      visible: arguments.locked,
-                      child: const Padding(
-                        padding: EdgeInsets.only(right: 16.0),
-                        child: Icon(Icons.lock_rounded),
-                      ),
-                    )
-                  ],
                 ),
+                actions: [
+                  Visibility(
+                    visible: arguments.locked,
+                    child: const Padding(
+                      padding: EdgeInsets.only(right: 16.0),
+                      child: Icon(Icons.lock_rounded),
+                    ),
+                  )
+                ],
               ),
-              body: state.threadIsLoading && state.isInitialLoad
-                  ? ThreadPageLoadingSkeleton()
-                  : CustomScrollView(
-                      center: centerKey,
-                      controller: _scrollController,
-                      slivers: <Widget>[
-                        SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                            return _generatePreviousPageSliver(
-                                state, index, arguments.page);
-                          },
-                              childCount: state.previousPages.replies.isEmpty
-                                  ? 1
-                                  : state.previousPages.replies.length,
-                              addAutomaticKeepAlives: false,
-                              addRepaintBoundaries: false),
-                        ),
-                        SliverList(
-                          key: centerKey,
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              return _generatePageSliver(state, index);
-                            },
-                            childCount: state.thread.replies.length,
-                            addAutomaticKeepAlives: false,
-                            addRepaintBoundaries: false,
-                          ),
-                        ),
-                      ],
-                    ),
-              floatingActionButton: _fabIsHidden ||
-                      state.thread.status == 'locked' ||
-                      (state.threadIsLoading && state.isInitialLoad)
-                  ? null
-                  : FloatingActionButton(
-                      onPressed: () => !_canReply
-                          ? showCustomDialog(
-                              context: context,
-                              builder: (context) => const CustomAlertDialog(
-                                    title: '未登入',
-                                    content: '請先登入',
-                                  ))
-                          : showBarModalBottomSheet(
-                              duration: const Duration(milliseconds: 300),
-                              animationCurve: Curves.easeOut,
-                              context: context,
-                              builder: (context) => ComposePage(
-                                composeMode: ComposeMode.reply,
-                                threadId: state.thread.threadId,
-                                onSent: (reply) {
-                                  _onReplySuccess(
-                                      BlocProvider.of<ThreadBloc>(context),
-                                      reply);
-                                },
-                              ),
-                            ),
-                      child: const Icon(Icons.reply_rounded),
-                    ),
             ),
+            body: state.threadIsLoading && state.isInitialLoad
+                ? ThreadPageLoadingSkeleton()
+                : CustomScrollView(
+                    center: centerKey,
+                    controller: _scrollController,
+                    slivers: <Widget>[
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          return _generatePreviousPageSliver(
+                              state, index, arguments.page);
+                        },
+                            childCount: state.previousPages.replies.isEmpty
+                                ? 1
+                                : state.previousPages.replies.length),
+                      ),
+                      SliverList(
+                        key: centerKey,
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return _generatePageSliver(state, index);
+                          },
+                          childCount: state.thread.replies.length,
+                        ),
+                      ),
+                    ],
+                  ),
+            floatingActionButton: _fabIsHidden ||
+                    state.thread.status == 'locked' ||
+                    (state.threadIsLoading && state.isInitialLoad)
+                ? null
+                : FloatingActionButton(
+                    onPressed: () => !_canReply
+                        ? showCustomDialog(
+                            context: context,
+                            builder: (context) => const CustomAlertDialog(
+                                  title: '未登入',
+                                  content: '請先登入',
+                                ))
+                        : showBarModalBottomSheet(
+                            duration: const Duration(milliseconds: 300),
+                            animationCurve: Curves.easeOut,
+                            context: context,
+                            builder: (context) => ComposePage(
+                              composeMode: ComposeMode.reply,
+                              threadId: state.thread.threadId,
+                              onSent: (reply) {
+                                _onReplySuccess(
+                                    BlocProvider.of<ThreadBloc>(context),
+                                    reply);
+                              },
+                            ),
+                          ),
+                    child: const Icon(Icons.reply_rounded),
+                  ),
           ),
         ),
       ),
@@ -336,11 +327,6 @@ class _ThreadPageState extends State<ThreadPage> {
           _PageFooter(
             onLastPage: _onLastPage,
             isLoading: state.threadIsLoading,
-            onTap: () => BlocProvider.of<ThreadBloc>(context).add(
-                RequestThreadEvent(
-                    threadId: state.thread.threadId,
-                    page: state.endPage,
-                    isInitialLoad: false)),
           )
         ],
       );
@@ -379,11 +365,6 @@ class _ThreadPageState extends State<ThreadPage> {
           _PageFooter(
             onLastPage: _onLastPage,
             isLoading: state.threadIsLoading,
-            onTap: () => BlocProvider.of<ThreadBloc>(context).add(
-                RequestThreadEvent(
-                    threadId: state.thread.threadId,
-                    page: state.endPage,
-                    isInitialLoad: false)),
           ),
         ],
       );
@@ -420,44 +401,53 @@ class _PageHeader extends StatelessWidget {
 class _PageFooter extends StatelessWidget {
   final bool onLastPage;
   final bool isLoading;
-  final Function onTap;
 
-  const _PageFooter(
-      {Key? key,
-      required this.onLastPage,
-      required this.isLoading,
-      required this.onTap})
-      : super(key: key);
+  const _PageFooter({
+    Key? key,
+    required this.onLastPage,
+    required this.isLoading,
+  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => SafeArea(
-        top: false,
-        child: !onLastPage
-            ? ThreadPageLoadingSkeletonHeader()
-            : Column(
-                children: [
-                  SizedBox(
-                    height: 85,
-                    child: Center(
-                      child: TextButton.icon(
-                          clipBehavior: Clip.hardEdge,
-                          onPressed: () => onTap(),
-                          icon: isLoading
-                              ? const ProgressSpinner()
-                              : const Icon(
-                                  Icons.refresh,
-                                  size: 25,
-                                  color: Colors.grey,
-                                ),
-                          label: Text(
-                            isLoading ? '撈緊...' : '重新整理',
-                            style: Theme.of(context).textTheme.caption,
-                            strutStyle: const StrutStyle(
-                                height: 1.1, forceStrutHeight: true),
-                          )),
+  Widget build(BuildContext context) => BlocBuilder<ThreadBloc, ThreadState>(
+        builder: (context, state) => SafeArea(
+          top: false,
+          child: !onLastPage
+              ? ThreadPageLoadingSkeletonHeader()
+              : Column(
+                  children: [
+                    SizedBox(
+                      height: 85,
+                      child: Center(
+                        child: TextButton.icon(
+                            style: TextButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 14),
+                                visualDensity: VisualDensity.comfortable),
+                            clipBehavior: Clip.hardEdge,
+                            onPressed: () =>
+                                BlocProvider.of<ThreadBloc>(context).add(
+                                    RequestThreadEvent(
+                                        threadId: state.thread.threadId,
+                                        page: state.endPage,
+                                        isInitialLoad: false)),
+                            icon: isLoading
+                                ? const ProgressSpinner()
+                                : const Icon(
+                                    Icons.refresh,
+                                    size: 25,
+                                    color: Colors.grey,
+                                  ),
+                            label: Text(
+                              isLoading ? '撈緊...' : '重新整理',
+                              style: Theme.of(context).textTheme.caption,
+                              strutStyle: const StrutStyle(
+                                  height: 1.1, forceStrutHeight: true),
+                            )),
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+        ),
       );
 }
