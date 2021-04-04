@@ -1,4 +1,4 @@
-package com.example.hkgalden_flutter
+package org.hkgalden.hkgalden_flutter
 
 import io.flutter.embedding.android.FlutterActivity
 

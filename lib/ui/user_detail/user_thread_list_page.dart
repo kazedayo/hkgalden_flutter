@@ -16,6 +16,7 @@ class UserThreadListPage extends StatelessWidget {
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: displayHeight(context) / 2),
       child: BlocBuilder<UserThreadListBloc, UserThreadListState>(
+        bloc: userThreadListBloc,
         builder: (context, state) => state.isLoading
             ? UserThreadListLoadingSkeleton()
             : ListView.builder(
