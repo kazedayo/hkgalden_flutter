@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -16,6 +17,7 @@ import 'package:hkgalden_flutter/ui/startup_screen.dart';
 // ignore: avoid_void_async
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  GestureBinding.instance!.resamplingEnabled = true;
   await Hive.initFlutter();
   await Hive.openBox('token');
   runApp(MyApp());
