@@ -237,7 +237,9 @@ class _ComposePageState extends State<ComposePage> {
               height: 30,
               child: QuillToolbar.basic(
                 controller: _controller,
+                showHistory: false,
                 showBackgroundColorButton: false,
+                showColorButton: false,
                 showCodeBlock: false,
                 showListCheck: false,
                 showIndent: false,
