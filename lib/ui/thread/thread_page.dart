@@ -226,10 +226,7 @@ class _ThreadPageState extends State<ThreadPage> {
                                       composeMode: ComposeMode.reply,
                                       threadId: state.thread.threadId,
                                       onSent: (reply) {
-                                        _onReplySuccess(
-                                            BlocProvider.of<ThreadBloc>(
-                                                context),
-                                            reply);
+                                        _onReplySuccess(reply);
                                       },
                                     ),
                                   ),
@@ -245,11 +242,12 @@ class _ThreadPageState extends State<ThreadPage> {
     );
   }
 
-  void _onReplySuccess(ThreadBloc threadBloc, Reply reply) {
+  void _onReplySuccess(Reply reply) {
     ScaffoldMessenger.of(context)
         .showSnackBar(const SnackBar(content: Text('回覆發送成功!')));
     if (_onLastPage) {
-      threadBloc.add(AppendReplyToThreadEvent(reply: reply));
+      BlocProvider.of<ThreadBloc>(context)
+          .add(AppendReplyToThreadEvent(reply: reply));
       SchedulerBinding.instance!.addPostFrameCallback((_) {
         _scrollController.animateTo(_scrollController.position.maxScrollExtent,
             duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
@@ -303,7 +301,7 @@ class _ThreadPageState extends State<ThreadPage> {
                   .replies[state.previousPages.replies.length - index - 1],
               onLastPage: _onLastPage,
               onSent: (reply) {
-                _onReplySuccess(BlocProvider.of<ThreadBloc>(context), reply);
+                _onReplySuccess(reply);
               },
               canReply: _canReply,
               threadLocked: state.thread.status == 'locked',
@@ -319,7 +317,7 @@ class _ThreadPageState extends State<ThreadPage> {
               .replies[state.previousPages.replies.length - index - 1],
           onLastPage: _onLastPage,
           onSent: (reply) {
-            _onReplySuccess(BlocProvider.of<ThreadBloc>(context), reply);
+            _onReplySuccess(reply);
           },
           canReply: _canReply,
           threadLocked: state.thread.status == 'locked',
@@ -340,7 +338,7 @@ class _ThreadPageState extends State<ThreadPage> {
             reply: state.thread.replies[index],
             onLastPage: _onLastPage,
             onSent: (reply) {
-              _onReplySuccess(BlocProvider.of<ThreadBloc>(context), reply);
+              _onReplySuccess(reply);
             },
             canReply: _canReply,
             threadLocked: state.thread.status == 'locked',
@@ -361,7 +359,7 @@ class _ThreadPageState extends State<ThreadPage> {
             reply: state.thread.replies[index],
             onLastPage: _onLastPage,
             onSent: (reply) {
-              _onReplySuccess(BlocProvider.of<ThreadBloc>(context), reply);
+              _onReplySuccess(reply);
             },
             canReply: _canReply,
             threadLocked: state.thread.status == 'locked',
@@ -377,7 +375,7 @@ class _ThreadPageState extends State<ThreadPage> {
             reply: state.thread.replies[index],
             onLastPage: _onLastPage,
             onSent: (reply) {
-              _onReplySuccess(BlocProvider.of<ThreadBloc>(context), reply);
+              _onReplySuccess(reply);
             },
             canReply: _canReply,
             threadLocked: state.thread.status == 'locked',
@@ -394,7 +392,7 @@ class _ThreadPageState extends State<ThreadPage> {
         reply: state.thread.replies[index],
         onLastPage: _onLastPage,
         onSent: (reply) {
-          _onReplySuccess(BlocProvider.of<ThreadBloc>(context), reply);
+          _onReplySuccess(reply);
         },
         canReply: _canReply,
         threadLocked: state.thread.status == 'locked',
