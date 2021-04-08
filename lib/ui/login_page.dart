@@ -22,56 +22,56 @@ class _LoginPageState extends State<LoginPage> {
         BlocProvider.of<SessionUserBloc>(context);
     final ThreadListBloc threadListBloc =
         BlocProvider.of<ThreadListBloc>(context);
-    return BlocBuilder<ChannelBloc, ChannelState>(
-      builder: (context, state) => Scaffold(
-        appBar: AppBar(
-          title: Text(
-            '登入hkGalden',
-            style: Theme.of(context)
-                .textTheme
-                .subtitle1!
-                .copyWith(fontWeight: FontWeight.bold),
-          ),
-          automaticallyImplyLeading: false,
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.close_rounded),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
+    final ChannelBloc channelBloc = BlocProvider.of<ChannelBloc>(context);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          '登入hkGalden',
+          style: Theme.of(context)
+              .textTheme
+              .subtitle1!
+              .copyWith(fontWeight: FontWeight.bold),
         ),
-        body: WebView(
-          initialUrl:
-              'https://hkgalden.org/oauth/v1/authorize?client_id=${HKGaldenApi.clientId}',
-          javascriptMode: JavascriptMode.unrestricted,
-          onWebViewCreated: (controller) => _controller = controller,
-          navigationDelegate: (NavigationRequest request) async {
-            if (request.url.startsWith('http://localhost/callback')) {
-              await TokenStore().writeToken(request.url.substring(32));
-              sessionUserBloc.add(RequestSessionUserEvent());
-              threadListBloc.add(RequestThreadListEvent(
-                  channelId: state.selectedChannelId,
-                  page: 1,
-                  isRefresh: false));
-              Navigator.pop(context);
-              return NavigationDecision.prevent;
-            }
-            return NavigationDecision.navigate;
-          },
-          onPageFinished: (url) async {
-            try {
-              const javascript = '''
+        automaticallyImplyLeading: false,
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.close_rounded),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+      body: WebView(
+        initialUrl:
+            'https://hkgalden.org/oauth/v1/authorize?client_id=${HKGaldenApi.clientId}',
+        javascriptMode: JavascriptMode.unrestricted,
+        onWebViewCreated: (controller) => _controller = controller,
+        navigationDelegate: (NavigationRequest request) async {
+          if (request.url.startsWith('http://localhost/callback')) {
+            await TokenStore().writeToken(request.url.substring(32));
+            sessionUserBloc.add(RequestSessionUserEvent());
+            threadListBloc.add(RequestThreadListEvent(
+                channelId:
+                    (channelBloc.state as ChannelLoaded).selectedChannelId,
+                page: 1,
+                isRefresh: false));
+            Navigator.pop(context);
+            return NavigationDecision.prevent;
+          }
+          return NavigationDecision.navigate;
+        },
+        onPageFinished: (url) async {
+          try {
+            const javascript = '''
               window.alert = function (e){
                 Alert.postMessage(e);
               }
             ''';
-              await _controller.evaluateJavascript(javascript);
-            } catch (_) {}
-          },
-          javascriptChannels: <JavascriptChannel>{
-            _alertJavascriptChannel(context)
-          },
-        ),
+            await _controller.evaluateJavascript(javascript);
+          } catch (_) {}
+        },
+        javascriptChannels: <JavascriptChannel>{
+          _alertJavascriptChannel(context)
+        },
       ),
     );
   }

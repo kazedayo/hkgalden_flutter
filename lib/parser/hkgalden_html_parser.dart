@@ -130,13 +130,20 @@ class HKGaldenHtmlParser {
     //print(htmlDoc.body.children);
 
     if (rootParent != null &&
-        !state.sessionUser.blockedUsers.contains(rootParent.author.userId)) {
+        ((state is SessionUserLoaded &&
+                !state.sessionUser.blockedUsers
+                    .contains(rootParent.author.userId)) ||
+            state is SessionUserUndefined)) {
       if (rootParent.parent != null &&
-          !state.sessionUser.blockedUsers
-              .contains(rootParent.parent!.author.userId)) {
+          ((state is SessionUserLoaded &&
+                  !state.sessionUser.blockedUsers
+                      .contains(rootParent.parent!.author.userId)) ||
+              state is SessionUserUndefined)) {
         if (rootParent.parent!.parent != null &&
-            !state.sessionUser.blockedUsers
-                .contains(rootParent.parent!.parent!.author.userId)) {
+            ((state is SessionUserLoaded &&
+                    !state.sessionUser.blockedUsers
+                        .contains(rootParent.parent!.parent!.author.userId)) ||
+                state is SessionUserUndefined)) {
           htmlDoc.body!.setInnerHtml('''
                 <blockquote style><blockquote><blockquote>
                 <div class="quoteName">${rootParent.parent!.parent!.authorNickname} 說:</div>
@@ -170,7 +177,7 @@ class HKGaldenHtmlParser {
     return htmlDoc.body!.innerHtml;
   }
 
-  String? replyWithQuotes(Reply reply, SessionUserState state) {
+  String? replyWithQuotes(Reply reply, SessionUserLoaded state) {
     final htmlDoc = parseHtmlDocument('');
 
     if (!state.sessionUser.blockedUsers.contains(reply.author.userId)) {

@@ -7,22 +7,28 @@ import 'package:hkgalden_flutter/bloc/session_user/session_user_state.dart';
 part 'session_user_event.dart';
 
 class SessionUserBloc extends Bloc<SessionUserEvent, SessionUserState> {
-  SessionUserBloc() : super(SessionUserState.initial());
+  SessionUserBloc() : super(SessionUserUndefined());
 
   @override
   Stream<SessionUserState> mapEventToState(SessionUserEvent event) async* {
     if (event is RequestSessionUserEvent) {
-      yield state.copyWith(isLoading: true);
+      yield SessionUserLoading();
       final User? sessionUser = await HKGaldenApi().getSessionUserQuery();
-      yield state.copyWith(
-          isLoading: false, isLoggedIn: true, sessionUser: sessionUser);
+      if (sessionUser != null) {
+        yield SessionUserLoaded(sessionUser: sessionUser);
+      }
     } else if (event is AppendUserToBlockListEvent) {
-      final List<String> blockedUsers = state.sessionUser.blockedUsers.toList();
-      blockedUsers.add(event.userId);
-      yield state.copyWith(
-          sessionUser: state.sessionUser.copyWith(blockedUsers: blockedUsers));
+      if (state is SessionUserLoaded) {
+        final List<String> blockedUsers =
+            (state as SessionUserLoaded).sessionUser.blockedUsers.toList();
+        blockedUsers.add(event.userId);
+        final User updatedSessionUser = (state as SessionUserLoaded)
+            .sessionUser
+            .copyWith(blockedUsers: blockedUsers);
+        yield SessionUserLoaded(sessionUser: updatedSessionUser);
+      }
     } else if (event is RemoveSessionUserEvent) {
-      yield SessionUserState.initial();
+      yield SessionUserUndefined();
     }
   }
 }

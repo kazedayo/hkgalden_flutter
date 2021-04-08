@@ -17,12 +17,13 @@ class UserThreadListPage extends StatelessWidget {
       constraints: BoxConstraints(maxHeight: displayHeight(context) / 2),
       child: BlocBuilder<UserThreadListBloc, UserThreadListState>(
         bloc: userThreadListBloc,
-        builder: (context, state) => state.isLoading
+        builder: (context, state) => state is UserThreadListLoading
             ? UserThreadListLoadingSkeleton()
             : ListView.builder(
                 padding: EdgeInsets.only(
                     bottom: MediaQuery.of(context).padding.bottom),
-                itemCount: state.userThreadList.length,
+                itemCount:
+                    (state as UserThreadListLoaded).userThreadList.length,
                 itemBuilder: (context, index) => Column(
                       children: <Widget>[
                         ListTile(

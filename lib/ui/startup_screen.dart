@@ -75,7 +75,7 @@ class _StartupScreenState extends State<StartupScreen>
     return Scaffold(
       body: BlocListener<ThreadListBloc, ThreadListState>(
         listener: (context, state) {
-          if (!state.threadListIsLoading) {
+          if (state is ThreadListLoaded) {
             final SizeRoute route = SizeRoute(page: NestedNavigator());
             Navigator.of(context).pushReplacement(route);
           }
