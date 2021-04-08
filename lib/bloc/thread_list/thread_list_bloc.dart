@@ -12,7 +12,7 @@ class ThreadListBloc extends Bloc<ThreadListEvent, ThreadListState> {
   @override
   Stream<ThreadListState> mapEventToState(ThreadListEvent event) async* {
     if (event is RequestThreadListEvent) {
-      if (event.page == 1) {
+      if (event.page == 1 || event.isRefresh) {
         yield ThreadListLoading();
         final List<Thread>? threads = await HKGaldenApi()
             .getThreadListQuery(event.channelId, event.page, event.isRefresh);
