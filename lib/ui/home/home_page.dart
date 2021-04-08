@@ -48,6 +48,34 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     _scrollController = ScrollController();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        BlocProvider.of<ThreadListBloc>(context).add(RequestThreadListEvent(
+            channelId: (BlocProvider.of<ThreadListBloc>(context).state
+                    as ThreadListLoaded)
+                .currentChannelId,
+            page: (BlocProvider.of<ThreadListBloc>(context).state
+                        as ThreadListLoaded)
+                    .currentPage +
+                1,
+            isRefresh: false));
+      }
+      if ((_scrollController.position.userScrollDirection ==
+                  ScrollDirection.forward ||
+              _scrollController.position.pixels == 0.0) &&
+          _fabIsHidden) {
+        setState(() {
+          _fabIsHidden = false;
+        });
+      } else if (_scrollController.position.userScrollDirection ==
+              ScrollDirection.reverse &&
+          !_fabIsHidden) {
+        setState(() {
+          _fabIsHidden = true;
+        });
+      }
+    });
     _backgroundBlurAnimationController = AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 150),
@@ -86,30 +114,6 @@ class _HomePageState extends State<HomePage>
     final SessionUserBloc sessionUserBloc =
         BlocProvider.of<SessionUserBloc>(context);
     final ChannelBloc channelBloc = BlocProvider.of<ChannelBloc>(context);
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
-        BlocProvider.of<ThreadListBloc>(context).add(RequestThreadListEvent(
-            channelId:
-                (threadListBloc.state as ThreadListLoaded).currentChannelId,
-            page: (threadListBloc.state as ThreadListLoaded).currentPage + 1,
-            isRefresh: false));
-      }
-      if ((_scrollController.position.userScrollDirection ==
-                  ScrollDirection.forward ||
-              _scrollController.position.pixels == 0.0) &&
-          _fabIsHidden) {
-        setState(() {
-          _fabIsHidden = false;
-        });
-      } else if (_scrollController.position.userScrollDirection ==
-              ScrollDirection.reverse &&
-          !_fabIsHidden) {
-        setState(() {
-          _fabIsHidden = true;
-        });
-      }
-    });
     return BlocBuilder<ThreadListBloc, ThreadListState>(
       bloc: threadListBloc,
       buildWhen: (_, state) => state is! ThreadListAppending,
