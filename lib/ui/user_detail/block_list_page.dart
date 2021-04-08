@@ -22,12 +22,15 @@ class BlockListPage extends StatelessWidget {
         elevation: 6,
         child: SizedBox(
           height: displayHeight(context) / 2,
-          child: state.isLoading
+          child: state is BlockedUsersLoading
               ? BlockedUsersLoadingSkeleton()
               : ListView.builder(
                   padding: EdgeInsets.only(
+                      top: 6,
+                      left: 12,
+                      right: 12,
                       bottom: MediaQuery.of(context).padding.bottom),
-                  itemCount: state.blockedUsers.length,
+                  itemCount: (state as BlockedUsersLoaded).blockedUsers.length,
                   itemBuilder: (context, index) {
                     return BlockedUserCell(user: state.blockedUsers[index]);
                   }),

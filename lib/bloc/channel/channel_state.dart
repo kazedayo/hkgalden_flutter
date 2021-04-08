@@ -1,35 +1,21 @@
 part of 'channel_bloc.dart';
 
-@immutable
-class ChannelState extends Equatable {
-  final bool isLoading;
+abstract class ChannelState extends Equatable {
+  const ChannelState();
+
+  @override
+  List<Object> get props => [];
+}
+
+class ChannelLoading extends ChannelState {}
+
+class ChannelLoaded extends ChannelState {
   final List<Channel> channels;
   final String selectedChannelId;
 
-  const ChannelState({
-    required this.isLoading,
-    required this.channels,
-    required this.selectedChannelId,
-  });
-
-  factory ChannelState.initial() => const ChannelState(
-        isLoading: false,
-        channels: [],
-        selectedChannelId: 'bw',
-      );
-
-  ChannelState copyWith({
-    bool? isLoading,
-    List<Channel>? channels,
-    String? selectedChannelId,
-  }) {
-    return ChannelState(
-      isLoading: isLoading ?? this.isLoading,
-      channels: channels ?? this.channels,
-      selectedChannelId: selectedChannelId ?? this.selectedChannelId,
-    );
-  }
+  const ChannelLoaded(
+      {required this.channels, required this.selectedChannelId});
 
   @override
-  List<Object> get props => [isLoading, channels, selectedChannelId];
+  List<Object> get props => [channels, selectedChannelId];
 }

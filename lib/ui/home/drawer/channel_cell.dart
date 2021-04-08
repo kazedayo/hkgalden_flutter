@@ -13,7 +13,6 @@ class ChannelCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ChannelBloc channelBloc = BlocProvider.of<ChannelBloc>(context);
     final ThreadListBloc threadListBloc =
         BlocProvider.of<ThreadListBloc>(context);
     return BlocBuilder<ChannelBloc, ChannelState>(
@@ -23,7 +22,10 @@ class ChannelCell extends StatelessWidget {
           clipBehavior: Clip.hardEdge,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          elevation: state.selectedChannelId == channel.channelId ? 6 : 0,
+          elevation:
+              (state as ChannelLoaded).selectedChannelId == channel.channelId
+                  ? 6
+                  : 0,
           color: state.selectedChannelId == channel.channelId
               ? Theme.of(context).primaryColor
               : Theme.of(context).scaffoldBackgroundColor,
@@ -35,7 +37,7 @@ class ChannelCell extends StatelessWidget {
                 ? null
                 : () {
                     HapticFeedback.mediumImpact();
-                    channelBloc.add(
+                    BlocProvider.of<ChannelBloc>(context).add(
                         SetSelectedChannelEvent(channelId: channel.channelId));
                     threadListBloc.add(RequestThreadListEvent(
                         channelId: channel.channelId,
