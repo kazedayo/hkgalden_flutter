@@ -3,7 +3,6 @@ import 'package:equatable/equatable.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
-import 'package:meta/meta.dart';
 
 part 'thread_event.dart';
 part 'thread_state.dart';

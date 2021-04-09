@@ -8,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
-import 'package:hkgalden_flutter/bloc/session_user/session_user_state.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
@@ -122,12 +121,12 @@ class _HomePageState extends State<HomePage>
           body: Stack(
             fit: StackFit.expand,
             children: [
-              BlocBuilder<SessionUserBloc, SessionUserState>(
-                builder: (context, state) => BackdropScaffold(
-                  resizeToAvoidBottomInset: false,
-                  appBar: PreferredSize(
-                    preferredSize: const Size.fromHeight(kToolbarHeight),
-                    child: AppBar(
+              BackdropScaffold(
+                resizeToAvoidBottomInset: false,
+                appBar: PreferredSize(
+                  preferredSize: const Size.fromHeight(kToolbarHeight),
+                  child: BlocBuilder<SessionUserBloc, SessionUserState>(
+                    builder: (context, state) => AppBar(
                       leading: _LeadingButton(),
                       title: BlocBuilder<ChannelBloc, ChannelState>(
                         bloc: channelBloc,
@@ -173,109 +172,107 @@ class _HomePageState extends State<HomePage>
                       ],
                     ),
                   ),
-                  frontLayer: Theme(
-                    data: Theme.of(context)
-                        .copyWith(highlightColor: const Color(0xff373d3c)),
-                    child: Material(
-                      color: Theme.of(context).primaryColor,
-                      child: BlocBuilder<ThreadListBloc, ThreadListState>(
-                        buildWhen: (_, state) => state is! ThreadListAppending,
-                        builder: (context, state) => RefreshIndicator(
-                            backgroundColor: Colors.white,
-                            strokeWidth: 2.5,
-                            onRefresh: () {
-                              threadListBloc.add(RequestThreadListEvent(
-                                  channelId:
-                                      (channelBloc.state as ChannelLoaded)
-                                          .selectedChannelId,
-                                  page: 1,
-                                  isRefresh: true));
-                              return threadListBloc.stream.firstWhere(
-                                  (element) => element is! ThreadListLoading);
-                            },
-                            child: state is ThreadListLoading
-                                ? ListLoadingSkeleton()
-                                : () {
-                                    if (state is ThreadListLoaded) {
-                                      return ListView.builder(
-                                        addAutomaticKeepAlives: false,
-                                        addRepaintBoundaries: false,
-                                        controller: _scrollController,
-                                        itemCount: state.threads.length + 1,
-                                        itemBuilder: (context, index) {
-                                          if (index == state.threads.length) {
-                                            return ListLoadingSkeletonCell();
-                                          } else {
-                                            return Visibility(
-                                              visible: () {
-                                                if (sessionUserBloc.state
-                                                    is SessionUserLoaded) {
-                                                  return !(sessionUserBloc.state
-                                                          as SessionUserLoaded)
-                                                      .sessionUser
-                                                      .blockedUsers
-                                                      .contains(state
-                                                          .threads[index]
-                                                          .replies[0]
-                                                          .author
-                                                          .userId);
-                                                } else {
-                                                  return true;
-                                                }
-                                              }(),
-                                              child: ThreadCell(
-                                                key: ValueKey(state
-                                                    .threads[index].threadId),
-                                                thread: state.threads[index],
-                                                onTap: () => _loadThread(
-                                                    state.threads[index]),
-                                                onLongPress: () => _jumpToPage(
-                                                    state.threads[index]),
-                                              ),
-                                            );
-                                          }
-                                        },
-                                      );
-                                    }
-                                    return const SizedBox();
-                                  }()),
-                      ),
+                ),
+                frontLayer: Theme(
+                  data: Theme.of(context)
+                      .copyWith(highlightColor: const Color(0xff373d3c)),
+                  child: Material(
+                    color: Theme.of(context).primaryColor,
+                    child: BlocBuilder<ThreadListBloc, ThreadListState>(
+                      buildWhen: (_, state) => state is! ThreadListAppending,
+                      builder: (context, state) => RefreshIndicator(
+                          backgroundColor: Colors.white,
+                          strokeWidth: 2.5,
+                          onRefresh: () {
+                            threadListBloc.add(RequestThreadListEvent(
+                                channelId: (channelBloc.state as ChannelLoaded)
+                                    .selectedChannelId,
+                                page: 1,
+                                isRefresh: true));
+                            return threadListBloc.stream.firstWhere(
+                                (element) => element is! ThreadListLoading);
+                          },
+                          child: state is ThreadListLoading
+                              ? ListLoadingSkeleton()
+                              : () {
+                                  if (state is ThreadListLoaded) {
+                                    return ListView.builder(
+                                      addAutomaticKeepAlives: false,
+                                      addRepaintBoundaries: false,
+                                      controller: _scrollController,
+                                      itemCount: state.threads.length + 1,
+                                      itemBuilder: (context, index) {
+                                        if (index == state.threads.length) {
+                                          return ListLoadingSkeletonCell();
+                                        } else {
+                                          return Visibility(
+                                            visible: () {
+                                              if (sessionUserBloc.state
+                                                  is SessionUserLoaded) {
+                                                return !(sessionUserBloc.state
+                                                        as SessionUserLoaded)
+                                                    .sessionUser
+                                                    .blockedUsers
+                                                    .contains(state
+                                                        .threads[index]
+                                                        .replies[0]
+                                                        .author
+                                                        .userId);
+                                              } else {
+                                                return true;
+                                              }
+                                            }(),
+                                            child: ThreadCell(
+                                              key: ValueKey(state
+                                                  .threads[index].threadId),
+                                              thread: state.threads[index],
+                                              onTap: () => _loadThread(
+                                                  state.threads[index]),
+                                              onLongPress: () => _jumpToPage(
+                                                  state.threads[index]),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    );
+                                  }
+                                  return const SizedBox();
+                                }()),
                     ),
                   ),
-                  frontLayerScrim: Colors.black.withAlpha(177),
-                  stickyFrontLayer: true,
-                  backLayer: HomeDrawer(),
-                  backLayerBackgroundColor:
-                      Theme.of(context).scaffoldBackgroundColor,
-                  floatingActionButton: _fabIsHidden
-                      ? null
-                      : FloatingActionButton(
-                          onPressed: () => BlocProvider.of<SessionUserBloc>(
-                                      context)
-                                  .state is SessionUserLoaded
-                              ? showBarModalBottomSheet(
-                                  duration: const Duration(milliseconds: 300),
-                                  animationCurve: Curves.easeOut,
-                                  context: context,
-                                  builder: (context) => ComposePage(
-                                    composeMode: ComposeMode.newPost,
-                                    onCreateThread: (channelId) =>
-                                        threadListBloc.add(
-                                            RequestThreadListEvent(
-                                                channelId: channelId,
-                                                page: 1,
-                                                isRefresh: false)),
-                                  ),
-                                )
-                              : showCustomDialog(
-                                  context: context,
-                                  builder: (context) => const CustomAlertDialog(
-                                        title: '未登入',
-                                        content: '請先登入',
-                                      )),
-                          child: const Icon(Icons.create_rounded),
-                        ),
                 ),
+                frontLayerScrim: Colors.black.withAlpha(177),
+                stickyFrontLayer: true,
+                backLayer: HomeDrawer(),
+                backLayerBackgroundColor:
+                    Theme.of(context).scaffoldBackgroundColor,
+                floatingActionButton: _fabIsHidden
+                    ? null
+                    : FloatingActionButton(
+                        onPressed: () => BlocProvider.of<SessionUserBloc>(
+                                    context)
+                                .state is SessionUserLoaded
+                            ? showBarModalBottomSheet(
+                                duration: const Duration(milliseconds: 300),
+                                animationCurve: Curves.easeOut,
+                                context: context,
+                                builder: (context) => ComposePage(
+                                  composeMode: ComposeMode.newPost,
+                                  onCreateThread: (channelId) =>
+                                      threadListBloc.add(RequestThreadListEvent(
+                                          channelId: channelId,
+                                          page: 1,
+                                          isRefresh: false)),
+                                ),
+                              )
+                            : showCustomDialog(
+                                context: context,
+                                builder: (context) => const CustomAlertDialog(
+                                      title: '未登入',
+                                      content: '請先登入',
+                                    )),
+                        child: const Icon(Icons.create_rounded),
+                      ),
               ),
               Visibility(
                 visible: _menuIsShowing,

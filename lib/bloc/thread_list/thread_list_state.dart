@@ -1,6 +1,6 @@
 part of 'thread_list_bloc.dart';
 
-class ThreadListState extends Equatable {
+abstract class ThreadListState extends Equatable {
   const ThreadListState();
 
   @override

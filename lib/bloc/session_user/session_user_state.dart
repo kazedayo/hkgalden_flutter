@@ -1,7 +1,6 @@
-import 'package:equatable/equatable.dart';
-import 'package:hkgalden_flutter/models/user.dart';
+part of 'session_user_bloc.dart';
 
-class SessionUserState extends Equatable {
+abstract class SessionUserState extends Equatable {
   const SessionUserState();
 
   @override
@@ -18,5 +17,5 @@ class SessionUserLoaded extends SessionUserState {
   const SessionUserLoaded({required this.sessionUser});
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [sessionUser];
 }

@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -57,8 +56,6 @@ class MyApp extends StatelessWidget {
   ThemeData _generateTheme(BuildContext context) {
     final baseTheme = ThemeData(
       visualDensity: VisualDensity.compact,
-      //materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      splashFactory: InkRipple.splashFactory,
       chipTheme: Theme.of(context).chipTheme.copyWith(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(6))),
@@ -94,10 +91,6 @@ class MyApp extends StatelessWidget {
       ),
       cupertinoOverrideTheme:
           const CupertinoThemeData(primaryColor: Color(0xff45c17c)),
-      pageTransitionsTheme: const PageTransitionsTheme(builders: {
-        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-        TargetPlatform.android: ZoomPageTransitionsBuilder(),
-      }),
     );
     return baseTheme;
   }

@@ -2,9 +2,9 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
-import 'package:hkgalden_flutter/bloc/session_user/session_user_state.dart';
 
 part 'session_user_event.dart';
+part 'session_user_state.dart';
 
 class SessionUserBloc extends Bloc<SessionUserEvent, SessionUserState> {
   SessionUserBloc() : super(SessionUserUndefined());

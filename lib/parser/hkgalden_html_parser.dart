@@ -1,4 +1,4 @@
-import 'package:hkgalden_flutter/bloc/session_user/session_user_state.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:universal_html/parsing.dart';
 import 'package:universal_html/html.dart';
