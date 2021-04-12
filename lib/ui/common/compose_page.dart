@@ -158,31 +158,40 @@ class _ComposePageState extends State<ComposePage> {
               margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
               child: Row(
                 children: <Widget>[
-                  PopupMenuButton(
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                          child: SizedBox(
-                        height: displayHeight(context) / 3,
-                        child: _TagSelectDialog(
-                          onTagSelect: (tag, channelId) {
-                            Navigator.of(context).pop();
-                            FocusScope.of(context)
-                                .requestFocus(_currentFocusNode);
-                            setState(() {
-                              _tag = tag;
-                              _channelId = channelId;
-                            });
-                          },
-                        ),
-                      ))
-                    ],
-                    child: Chip(
-                      label: Text('#${_tag.name}',
-                          strutStyle: const StrutStyle(height: 1.25),
-                          style: Theme.of(context).textTheme.caption!.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700)),
-                      backgroundColor: _tag.color,
+                  Theme(
+                    data: Theme.of(context).copyWith(
+                        highlightColor: Colors.transparent,
+                        splashColor: Colors.transparent),
+                    child: PopupMenuButton(
+                      offset: const Offset(0, -48),
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                            child: SizedBox(
+                          height: displayHeight(context) / 3,
+                          child: _TagSelectDialog(
+                            onTagSelect: (tag, channelId) {
+                              Navigator.of(context).pop();
+                              FocusScope.of(context)
+                                  .requestFocus(_currentFocusNode);
+                              setState(() {
+                                _tag = tag;
+                                _channelId = channelId;
+                              });
+                            },
+                          ),
+                        ))
+                      ],
+                      child: Chip(
+                        label: Text('#${_tag.name}',
+                            strutStyle: const StrutStyle(height: 1.25),
+                            style: Theme.of(context)
+                                .textTheme
+                                .caption!
+                                .copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700)),
+                        backgroundColor: _tag.color,
+                      ),
                     ),
                   ),
                   const SizedBox(

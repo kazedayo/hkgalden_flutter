@@ -157,6 +157,7 @@ class CommentCell extends StatelessWidget {
                   shape: const CircleBorder(),
                   clipBehavior: Clip.hardEdge,
                   child: PopupMenuButton(
+                    offset: const Offset(55, -46),
                     itemBuilder: (context) => [
                       PopupMenuItem(
                         textStyle: Theme.of(context)
