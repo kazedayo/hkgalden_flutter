@@ -20,6 +20,8 @@ class HKGaldenApi {
 
   final GraphQLClient _client = GraphQLClient(
     cache: GraphQLCache(),
+    defaultPolicies:
+        DefaultPolicies(query: Policies(fetch: FetchPolicy.cacheAndNetwork)),
     link: _link,
   );
 
@@ -165,8 +167,7 @@ class HKGaldenApi {
     }
   }
 
-  Future<List<Thread>?> getThreadListQuery(
-      String channelId, int page) async {
+  Future<List<Thread>?> getThreadListQuery(String channelId, int page) async {
     const String query = r'''
       query GetThreadListQuery($channelId: String!, $page: Int!) {
         threadsByChannel(channelId: $channelId, page: $page) {
