@@ -1,19 +1,23 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hkgalden_flutter/models/user.dart';
-import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
+import 'package:hkgalden_flutter/repository/session_user_repository.dart';
 
 part 'session_user_event.dart';
 part 'session_user_state.dart';
 
 class SessionUserBloc extends Bloc<SessionUserEvent, SessionUserState> {
-  SessionUserBloc() : super(SessionUserUndefined());
+  SessionUserBloc({required SessionUserRepository repository})
+      : _repository = repository,
+        super(SessionUserUndefined());
+
+  final SessionUserRepository _repository;
 
   @override
   Stream<SessionUserState> mapEventToState(SessionUserEvent event) async* {
     if (event is RequestSessionUserEvent) {
       yield SessionUserLoading();
-      final User? sessionUser = await HKGaldenApi().getSessionUserQuery();
+      final User? sessionUser = await _repository.getSessionUser();
       if (sessionUser != null) {
         yield SessionUserLoaded(sessionUser: sessionUser);
       }

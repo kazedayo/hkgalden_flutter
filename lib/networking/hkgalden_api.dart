@@ -91,8 +91,7 @@ class HKGaldenApi {
     }
   }
 
-  Future<Thread?> getThreadQuery(
-      int threadId, int page, bool isInitialLoad) async {
+  Future<Thread?> getThreadQuery(int threadId, int page) async {
     const String query = r'''
       query GetThreadContent($id: Int!, $page: Int!) {
         thread(id: $id,sorting: date_asc,page: $page) {
@@ -167,7 +166,7 @@ class HKGaldenApi {
   }
 
   Future<List<Thread>?> getThreadListQuery(
-      String channelId, int page, bool isRefresh) async {
+      String channelId, int page) async {
     const String query = r'''
       query GetThreadListQuery($channelId: String!, $page: Int!) {
         threadsByChannel(channelId: $channelId, page: $page) {

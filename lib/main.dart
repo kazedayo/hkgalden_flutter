@@ -9,8 +9,10 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
-import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
+import 'package:hkgalden_flutter/repository/channel_repository.dart';
+import 'package:hkgalden_flutter/repository/session_user_repository.dart';
+import 'package:hkgalden_flutter/repository/thread_list_repository.dart';
 import 'package:hkgalden_flutter/ui/startup_screen.dart';
 
 // ignore: avoid_void_async
@@ -25,30 +27,45 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return MultiRepositoryProvider(
       providers: [
-        BlocProvider(create: (context) => ChannelBloc()),
-        BlocProvider(create: (context) => SessionUserBloc()),
-        BlocProvider(create: (context) => ThreadBloc()),
-        BlocProvider(create: (context) => ThreadListBloc())
+        RepositoryProvider(create: (context) => ChannelRepository()),
+        RepositoryProvider(create: (context) => SessionUserRepository()),
+        RepositoryProvider(create: (context) => ThreadListRepository())
       ],
-      child: MaterialApp(
-        home: StartupScreen(),
-        theme: _generateTheme(context),
-        locale: const Locale.fromSubtags(
-            languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+              create: (context) => ChannelBloc(
+                  repository:
+                      RepositoryProvider.of<ChannelRepository>(context))),
+          BlocProvider(
+              create: (context) => SessionUserBloc(
+                  repository:
+                      RepositoryProvider.of<SessionUserRepository>(context))),
+          BlocProvider(
+              create: (context) => ThreadListBloc(
+                  repository:
+                      RepositoryProvider.of<ThreadListRepository>(context)))
         ],
-        supportedLocales: const [
-          Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
-          Locale.fromSubtags(
+        child: MaterialApp(
+          home: StartupScreen(),
+          theme: _generateTheme(context),
+          locale: const Locale.fromSubtags(
               languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
-          Locale.fromSubtags(
-              languageCode: 'zh', scriptCode: 'Hant', countryCode: 'TW'),
-        ],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+            Locale.fromSubtags(
+                languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
+            Locale.fromSubtags(
+                languageCode: 'zh', scriptCode: 'Hant', countryCode: 'TW'),
+          ],
+        ),
       ),
     );
   }

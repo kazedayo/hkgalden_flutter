@@ -2,20 +2,24 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
-import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
+import 'package:hkgalden_flutter/repository/thread_repository.dart';
 
 part 'thread_event.dart';
 part 'thread_state.dart';
 
 class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
-  ThreadBloc() : super(ThreadLoading());
+  ThreadBloc({required ThreadRepository repository})
+      : _repository = repository,
+        super(ThreadLoading());
+
+  final ThreadRepository _repository;
 
   @override
   Stream<ThreadState> mapEventToState(ThreadEvent event) async* {
     if (event is RequestThreadEvent) {
       if (event.isInitialLoad) {
-        final Thread? thread = await HKGaldenApi()
-            .getThreadQuery(event.threadId, event.page, event.isInitialLoad);
+        final Thread? thread =
+            await _repository.getThread(event.threadId, event.page);
         if (thread != null) {
           yield ThreadLoaded(
               thread: thread,
@@ -26,8 +30,8 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
       } else {
         final ThreadLoaded previousState = state as ThreadLoaded;
         yield ThreadAppending();
-        final Thread? thread = await HKGaldenApi()
-            .getThreadQuery(event.threadId, event.page, event.isInitialLoad);
+        final Thread? thread =
+            await _repository.getThread(event.threadId, event.page);
         if (thread != null) {
           if (event.page < previousState.endPage) {
             yield ThreadLoaded(

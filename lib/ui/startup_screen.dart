@@ -60,16 +60,12 @@ class _StartupScreenState extends State<StartupScreen>
     final ChannelBloc channelBloc = BlocProvider.of<ChannelBloc>(context);
     final SessionUserBloc sessionUserBloc =
         BlocProvider.of<SessionUserBloc>(context);
-    _controller.forward();
-    _controller.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        //Hardcode default to 'bw' channel
-        threadListBloc.add(const RequestThreadListEvent(
-            channelId: 'bw', page: 1, isRefresh: false));
-        channelBloc.add(RequestChannelsEvent());
-        if (token != '') {
-          sessionUserBloc.add(RequestSessionUserEvent());
-        }
+    _controller.forward().whenComplete(() {
+      threadListBloc.add(const RequestThreadListEvent(
+          channelId: 'bw', page: 1, isRefresh: false));
+      channelBloc.add(RequestChannelsEvent());
+      if (token != '') {
+        sessionUserBloc.add(RequestSessionUserEvent());
       }
     });
     return Scaffold(

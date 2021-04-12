@@ -7,6 +7,7 @@ import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
+import 'package:hkgalden_flutter/repository/thread_repository.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
@@ -14,7 +15,6 @@ import 'package:hkgalden_flutter/ui/thread/comment_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton_header.dart';
-import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
@@ -53,189 +53,197 @@ class _ThreadPageState extends State<ThreadPage> {
     final ThreadPageArguments arguments =
         ModalRoute.of(context)!.settings.arguments! as ThreadPageArguments;
     _canReply = sessionUserBloc.state is SessionUserLoaded;
-    return BlocProvider(
-      create: (context) {
-        final ThreadBloc threadBloc = ThreadBloc();
-        threadBloc.add(RequestThreadEvent(
-            threadId: arguments.threadId,
-            page: arguments.page,
-            isInitialLoad: true));
-        _scrollController.addListener(() {
-          if (_scrollController.position.pixels ==
-              _scrollController.position.maxScrollExtent) {
-            if (!_onLastPage) {
-              threadBloc.add(RequestThreadEvent(
-                  threadId: (threadBloc.state as ThreadLoaded).thread.threadId,
-                  page: (threadBloc.state as ThreadLoaded).currentPage + 1,
-                  isInitialLoad: false));
-            }
-          } else if (_scrollController.position.pixels ==
-              _scrollController.position.minScrollExtent) {
-            if ((threadBloc.state as ThreadLoaded).currentPage != 1 &&
-                (threadBloc.state as ThreadLoaded).endPage <= arguments.page) {
-              threadBloc.add(RequestThreadEvent(
-                  threadId: (threadBloc.state as ThreadLoaded).thread.threadId,
-                  page: (threadBloc.state as ThreadLoaded).currentPage - 1,
-                  isInitialLoad: false));
-            }
-          }
-          if (_scrollController.position.userScrollDirection ==
-                  ScrollDirection.reverse &&
-              !_fabIsHidden) {
-            setState(() {
-              _fabIsHidden = true;
-            });
-          } else if ((_scrollController.position.userScrollDirection ==
-                      ScrollDirection.forward ||
-                  _scrollController.position.pixels ==
-                      _scrollController.position.maxScrollExtent ||
-                  _scrollController.position.pixels == 0.0) &&
-              _fabIsHidden) {
-            setState(() {
-              _fabIsHidden = false;
-            });
-          }
-          final double newElevation = _scrollController.position.pixels >
-                  _scrollController.position.minScrollExtent
-              ? 4.0
-              : 0.0;
-          if (newElevation != _elevation) {
-            setState(() {
-              _elevation = newElevation;
-            });
-          }
-        });
-        return threadBloc;
-      },
-      child: Scaffold(
-        body: BlocConsumer<ThreadBloc, ThreadState>(
-          listener: (context, state) {
-            if (state is ThreadLoaded) {
-              if ((state.thread.totalReplies.toDouble() / 50.0).ceil() >
-                  state.endPage) {
-                setState(() {
-                  _onLastPage = false;
-                });
-              } else {
-                setState(() {
-                  _onLastPage = true;
-                });
+    return RepositoryProvider(
+      create: (context) => ThreadRepository(),
+      child: BlocProvider(
+        create: (context) {
+          final ThreadBloc threadBloc = ThreadBloc(
+              repository: RepositoryProvider.of<ThreadRepository>(context));
+          threadBloc.add(RequestThreadEvent(
+              threadId: arguments.threadId,
+              page: arguments.page,
+              isInitialLoad: true));
+          _scrollController.addListener(() {
+            if (_scrollController.position.pixels ==
+                _scrollController.position.maxScrollExtent) {
+              if (!_onLastPage) {
+                threadBloc.add(RequestThreadEvent(
+                    threadId:
+                        (threadBloc.state as ThreadLoaded).thread.threadId,
+                    page: (threadBloc.state as ThreadLoaded).currentPage + 1,
+                    isInitialLoad: false));
+              }
+            } else if (_scrollController.position.pixels ==
+                _scrollController.position.minScrollExtent) {
+              if ((threadBloc.state as ThreadLoaded).currentPage != 1 &&
+                  (threadBloc.state as ThreadLoaded).endPage <=
+                      arguments.page) {
+                threadBloc.add(RequestThreadEvent(
+                    threadId:
+                        (threadBloc.state as ThreadLoaded).thread.threadId,
+                    page: (threadBloc.state as ThreadLoaded).currentPage - 1,
+                    isInitialLoad: false));
               }
             }
-          },
-          buildWhen: (_, state) => state is! ThreadAppending,
-          builder: (context, state) {
-            return Scaffold(
-              resizeToAvoidBottomInset: false,
-              key: scaffoldKey,
-              appBar: PreferredSize(
-                preferredSize: const Size.fromHeight(kToolbarHeight),
-                child: AppBar(
-                  elevation: _elevation,
-                  automaticallyImplyLeading: false,
-                  leading: IconButton(
-                      icon: Icon(
-                          Theme.of(context).platform == TargetPlatform.iOS
-                              ? Icons.arrow_back_ios_rounded
-                              : Icons.arrow_back_rounded),
-                      onPressed: () => Navigator.of(context).pop()),
-                  title: SizedBox(
-                    height: kToolbarHeight * 0.85,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Flexible(
-                          child: AutoSizeText(
-                            arguments.title,
-                            style: const TextStyle(fontWeight: FontWeight.w700),
-                            maxLines: 2,
-                            minFontSize: 14,
-                            maxFontSize: 19,
-                            //overflow: TextOverflow.ellipsis
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    Visibility(
-                      visible: arguments.locked,
-                      child: const Padding(
-                        padding: EdgeInsets.only(right: 16.0),
-                        child: Icon(Icons.lock_rounded),
+            if (_scrollController.position.userScrollDirection ==
+                    ScrollDirection.reverse &&
+                !_fabIsHidden) {
+              setState(() {
+                _fabIsHidden = true;
+              });
+            } else if ((_scrollController.position.userScrollDirection ==
+                        ScrollDirection.forward ||
+                    _scrollController.position.pixels ==
+                        _scrollController.position.maxScrollExtent ||
+                    _scrollController.position.pixels == 0.0) &&
+                _fabIsHidden) {
+              setState(() {
+                _fabIsHidden = false;
+              });
+            }
+            final double newElevation = _scrollController.position.pixels >
+                    _scrollController.position.minScrollExtent
+                ? 4.0
+                : 0.0;
+            if (newElevation != _elevation) {
+              setState(() {
+                _elevation = newElevation;
+              });
+            }
+          });
+          return threadBloc;
+        },
+        child: Scaffold(
+          body: BlocConsumer<ThreadBloc, ThreadState>(
+            listener: (context, state) {
+              if (state is ThreadLoaded) {
+                if ((state.thread.totalReplies.toDouble() / 50.0).ceil() >
+                    state.endPage) {
+                  setState(() {
+                    _onLastPage = false;
+                  });
+                } else {
+                  setState(() {
+                    _onLastPage = true;
+                  });
+                }
+              }
+            },
+            buildWhen: (_, state) => state is! ThreadAppending,
+            builder: (context, state) {
+              return Scaffold(
+                resizeToAvoidBottomInset: false,
+                appBar: PreferredSize(
+                  preferredSize: const Size.fromHeight(kToolbarHeight),
+                  child: AppBar(
+                    elevation: _elevation,
+                    automaticallyImplyLeading: false,
+                    leading: IconButton(
+                        icon: Icon(
+                            Theme.of(context).platform == TargetPlatform.iOS
+                                ? Icons.arrow_back_ios_rounded
+                                : Icons.arrow_back_rounded),
+                        onPressed: () => Navigator.of(context).pop()),
+                    title: SizedBox(
+                      height: kToolbarHeight * 0.85,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Flexible(
+                            child: AutoSizeText(
+                              arguments.title,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w700),
+                              maxLines: 2,
+                              minFontSize: 14,
+                              maxFontSize: 19,
+                              //overflow: TextOverflow.ellipsis
+                            ),
+                          )
+                        ],
                       ),
-                    )
-                  ],
+                    ),
+                    actions: [
+                      Visibility(
+                        visible: arguments.locked,
+                        child: const Padding(
+                          padding: EdgeInsets.only(right: 16.0),
+                          child: Icon(Icons.lock_rounded),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
-              ),
-              body: state is ThreadLoading
-                  ? ThreadPageLoadingSkeleton()
-                  : () {
-                      if (state is ThreadLoaded) {
-                        return CustomScrollView(
-                          center: centerKey,
-                          controller: _scrollController,
-                          slivers: <Widget>[
-                            SliverList(
-                              delegate: SliverChildBuilderDelegate(
-                                  (context, index) {
-                                return _generatePreviousPageSliver(
-                                    state, index, arguments.page);
-                              },
-                                  childCount:
-                                      state.previousPages.replies.isEmpty
-                                          ? 1
-                                          : state.previousPages.replies.length),
-                            ),
-                            SliverList(
-                              key: centerKey,
-                              delegate: SliverChildBuilderDelegate(
-                                (context, index) {
-                                  return _generatePageSliver(state, index);
+                body: state is ThreadLoading
+                    ? ThreadPageLoadingSkeleton()
+                    : () {
+                        if (state is ThreadLoaded) {
+                          return CustomScrollView(
+                            center: centerKey,
+                            controller: _scrollController,
+                            slivers: <Widget>[
+                              SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                    (context, index) {
+                                  return _generatePreviousPageSliver(
+                                      state, index, arguments.page);
                                 },
-                                childCount: state.thread.replies.length,
+                                    childCount: state
+                                            .previousPages.replies.isEmpty
+                                        ? 1
+                                        : state.previousPages.replies.length),
                               ),
-                            ),
-                          ],
-                        );
-                      }
-                    }(),
-              floatingActionButton: _fabIsHidden || state is ThreadLoading
-                  ? null
-                  : () {
-                      if (state is ThreadLoaded) {
-                        if (state.thread.status == 'locked') {
-                          return null;
-                        } else {
-                          return FloatingActionButton(
-                            onPressed: () => !_canReply
-                                ? showCustomDialog(
-                                    context: context,
-                                    builder: (context) =>
-                                        const CustomAlertDialog(
-                                          title: '未登入',
-                                          content: '請先登入',
-                                        ))
-                                : showBarModalBottomSheet(
-                                    duration: const Duration(milliseconds: 300),
-                                    animationCurve: Curves.easeOut,
-                                    context: context,
-                                    builder: (context) => ComposePage(
-                                      composeMode: ComposeMode.reply,
-                                      threadId: state.thread.threadId,
-                                      onSent: (reply) {
-                                        _onReplySuccess(reply);
-                                      },
-                                    ),
-                                  ),
-                            child: const Icon(Icons.reply_rounded),
+                              SliverList(
+                                key: centerKey,
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                    return _generatePageSliver(state, index);
+                                  },
+                                  childCount: state.thread.replies.length,
+                                ),
+                              ),
+                            ],
                           );
                         }
-                      }
-                    }(),
-            );
-          },
+                      }(),
+                floatingActionButton: _fabIsHidden || state is ThreadLoading
+                    ? null
+                    : () {
+                        if (state is ThreadLoaded) {
+                          if (state.thread.status == 'locked') {
+                            return null;
+                          } else {
+                            return FloatingActionButton(
+                              onPressed: () => !_canReply
+                                  ? showCustomDialog(
+                                      context: context,
+                                      builder: (context) =>
+                                          const CustomAlertDialog(
+                                            title: '未登入',
+                                            content: '請先登入',
+                                          ))
+                                  : showBarModalBottomSheet(
+                                      duration:
+                                          const Duration(milliseconds: 300),
+                                      animationCurve: Curves.easeOut,
+                                      context: context,
+                                      builder: (context) => ComposePage(
+                                        composeMode: ComposeMode.reply,
+                                        threadId: state.thread.threadId,
+                                        onSent: (reply) {
+                                          _onReplySuccess(reply);
+                                        },
+                                      ),
+                                    ),
+                              child: const Icon(Icons.reply_rounded),
+                            );
+                          }
+                        }
+                      }(),
+              );
+            },
+          ),
         ),
       ),
     );
