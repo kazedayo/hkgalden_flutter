@@ -28,6 +28,12 @@ import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:package_info/package_info.dart';
 
+part 'widgets/home_page_app_bar.dart';
+part 'widgets/home_page_popup_menu_button.dart';
+part 'widgets/home_page_leading_button.dart';
+part 'widgets/home_page_fab.dart';
+part 'widgets/home_page_front_layer.dart';
+
 class HomePage extends StatefulWidget {
   final String? title;
 
@@ -114,7 +120,6 @@ class _HomePageState extends State<HomePage>
         BlocProvider.of<SessionUserBloc>(context);
     final ChannelBloc channelBloc = BlocProvider.of<ChannelBloc>(context);
     return BlocBuilder<ThreadListBloc, ThreadListState>(
-      bloc: threadListBloc,
       buildWhen: (_, state) => state is! ThreadListAppending,
       builder: (context, state) {
         return Scaffold(
@@ -123,156 +128,23 @@ class _HomePageState extends State<HomePage>
             children: [
               BackdropScaffold(
                 resizeToAvoidBottomInset: false,
-                appBar: PreferredSize(
-                  preferredSize: const Size.fromHeight(kToolbarHeight),
-                  child: BlocBuilder<SessionUserBloc, SessionUserState>(
-                    builder: (context, state) => AppBar(
-                      leading: _LeadingButton(),
-                      title: BlocBuilder<ChannelBloc, ChannelState>(
-                        bloc: channelBloc,
-                        builder: (context, state) => Text.rich(
-                          TextSpan(children: [
-                            WidgetSpan(
-                                alignment: PlaceholderAlignment.middle,
-                                child: Hero(
-                                    tag: 'logo',
-                                    child: SvgPicture.asset(
-                                      'assets/icon-hkgalden.svg',
-                                      width: 27,
-                                      height: 27,
-                                    ))),
-                            const WidgetSpan(
-                                child: SizedBox(
-                              width: 5,
-                            )),
-                            TextSpan(
-                                text: (state as ChannelLoaded)
-                                    .channels
-                                    .where((channel) =>
-                                        channel.channelId ==
-                                        state.selectedChannelId)
-                                    .first
-                                    .channelName,
-                                style: const TextStyle(
-                                    fontSize: 19, fontWeight: FontWeight.w700))
-                          ]),
-                        ),
-                      ),
-                      actions: [
-                        if (state is SessionUserLoaded)
-                          Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 4),
-                              child: _PopupMenuButton())
-                        else
-                          IconButton(
-                              icon: const Icon(Icons.login_rounded),
-                              onPressed: () => Navigator.of(context).push(
-                                  SlideInFromBottomRoute(page: LoginPage())))
-                      ],
-                    ),
-                  ),
-                ),
-                frontLayer: Theme(
-                  data: Theme.of(context)
-                      .copyWith(highlightColor: const Color(0xff373d3c)),
-                  child: Material(
-                    color: Theme.of(context).primaryColor,
-                    child: BlocBuilder<ThreadListBloc, ThreadListState>(
-                      buildWhen: (_, state) => state is! ThreadListAppending,
-                      builder: (context, state) => RefreshIndicator(
-                          backgroundColor: Colors.white,
-                          strokeWidth: 2.5,
-                          onRefresh: () {
-                            threadListBloc.add(RequestThreadListEvent(
-                                channelId: (channelBloc.state as ChannelLoaded)
-                                    .selectedChannelId,
-                                page: 1,
-                                isRefresh: true));
-                            return threadListBloc.stream.firstWhere(
-                                (element) => element is! ThreadListLoading);
-                          },
-                          child: state is ThreadListLoading
-                              ? ListLoadingSkeleton()
-                              : () {
-                                  if (state is ThreadListLoaded) {
-                                    return ListView.builder(
-                                      addAutomaticKeepAlives: false,
-                                      addRepaintBoundaries: false,
-                                      controller: _scrollController,
-                                      itemCount: state.threads.length + 1,
-                                      itemBuilder: (context, index) {
-                                        if (index == state.threads.length) {
-                                          return ListLoadingSkeletonCell();
-                                        } else {
-                                          return Visibility(
-                                            visible: () {
-                                              if (sessionUserBloc.state
-                                                  is SessionUserLoaded) {
-                                                return !(sessionUserBloc.state
-                                                        as SessionUserLoaded)
-                                                    .sessionUser
-                                                    .blockedUsers
-                                                    .contains(state
-                                                        .threads[index]
-                                                        .replies[0]
-                                                        .author
-                                                        .userId);
-                                              } else {
-                                                return true;
-                                              }
-                                            }(),
-                                            child: ThreadCell(
-                                              key: ValueKey(state
-                                                  .threads[index].threadId),
-                                              thread: state.threads[index],
-                                              onTap: () => _loadThread(
-                                                  state.threads[index]),
-                                              onLongPress: () => _jumpToPage(
-                                                  state.threads[index]),
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    );
-                                  }
-                                  return const SizedBox();
-                                }()),
-                    ),
-                  ),
-                ),
+                appBar: _buildAppBar(),
+                frontLayer: _buildFrontLayer(
+                    context,
+                    threadListBloc,
+                    channelBloc,
+                    state,
+                    sessionUserBloc,
+                    _scrollController,
+                    _loadThread,
+                    _jumpToPage),
                 frontLayerScrim: Colors.black.withAlpha(177),
                 stickyFrontLayer: true,
                 backLayer: HomeDrawer(),
                 backLayerBackgroundColor:
                     Theme.of(context).scaffoldBackgroundColor,
-                floatingActionButton: _fabIsHidden
-                    ? null
-                    : FloatingActionButton(
-                        onPressed: () => BlocProvider.of<SessionUserBloc>(
-                                    context)
-                                .state is SessionUserLoaded
-                            ? showBarModalBottomSheet(
-                                duration: const Duration(milliseconds: 300),
-                                animationCurve: Curves.easeOut,
-                                context: context,
-                                builder: (context) => ComposePage(
-                                  composeMode: ComposeMode.newPost,
-                                  onCreateThread: (channelId) =>
-                                      threadListBloc.add(RequestThreadListEvent(
-                                          channelId: channelId,
-                                          page: 1,
-                                          isRefresh: false)),
-                                ),
-                              )
-                            : showCustomDialog(
-                                context: context,
-                                builder: (context) => const CustomAlertDialog(
-                                      title: '未登入',
-                                      content: '請先登入',
-                                    )),
-                        child: const Icon(Icons.create_rounded),
-                      ),
+                floatingActionButton:
+                    _fabIsHidden ? null : _buildFab(context, threadListBloc),
               ),
               Visibility(
                 visible: _menuIsShowing,
@@ -369,120 +241,3 @@ class _HomePageState extends State<HomePage>
     );
   }
 }
-
-class _LeadingButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) => IconButton(
-        icon: AnimatedIcon(
-          icon: AnimatedIcons.close_menu,
-          progress: Backdrop.of(context).animationController.view,
-        ),
-        onPressed: () => Backdrop.of(context).fling(),
-      );
-}
-
-class _PopupMenuButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final double deviceWidth = MediaQuery.of(context).size.width;
-    final double deviceHeight = MediaQuery.of(context).size.height;
-    return PopupMenuButton(
-        offset: Offset(deviceWidth, -deviceHeight),
-        itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: _MenuItem.account,
-                child: ListTile(
-                  dense: true,
-                  leading: Icon(Icons.account_box_rounded),
-                  title: Text('個人檔案'),
-                ),
-              ),
-              const PopupMenuItem(
-                value: _MenuItem.blocklist,
-                child: ListTile(
-                  dense: true,
-                  leading: Icon(Icons.block_rounded),
-                  title: Text('封鎖名單'),
-                ),
-              ),
-              const PopupMenuItem(
-                value: _MenuItem.licences,
-                child: ListTile(
-                  dense: true,
-                  leading: Icon(Icons.copyright_rounded),
-                  title: Text('版權資訊'),
-                ),
-              ),
-              const PopupMenuItem(
-                value: _MenuItem.logout,
-                child: ListTile(
-                  dense: true,
-                  leading: Icon(
-                    Icons.logout,
-                    color: Colors.redAccent,
-                  ),
-                  title: Text('登出'),
-                ),
-              ),
-            ],
-        onSelected: (value) async {
-          switch (value! as _MenuItem) {
-            case _MenuItem.account:
-              showMaterialModalBottomSheet(
-                  duration: const Duration(milliseconds: 200),
-                  animationCurve: Curves.easeOut,
-                  enableDrag: false,
-                  backgroundColor: Colors.transparent,
-                  barrierColor: Colors.black87,
-                  context: context,
-                  builder: (context) => UserPage(
-                        user: (BlocProvider.of<SessionUserBloc>(context).state
-                                as SessionUserLoaded)
-                            .sessionUser,
-                      ));
-              break;
-            case _MenuItem.blocklist:
-              showMaterialModalBottomSheet(
-                  duration: const Duration(milliseconds: 200),
-                  animationCurve: Curves.easeOut,
-                  enableDrag: false,
-                  backgroundColor: Colors.transparent,
-                  barrierColor: Colors.black87,
-                  context: context,
-                  builder: (context) => BlockListPage());
-              break;
-            case _MenuItem.licences:
-              final PackageInfo info = await PackageInfo.fromPlatform();
-              showLicensePage(
-                context: context,
-                applicationName: 'hkGalden',
-                applicationIcon: SvgPicture.asset(
-                  'assets/icon-hkgalden.svg',
-                  width: 50,
-                  height: 50,
-                  color: Theme.of(context).accentColor,
-                ),
-                applicationVersion: '${info.version}+${info.buildNumber}',
-                applicationLegalese: '© hkGalden & 1080',
-              );
-              break;
-            case _MenuItem.logout:
-              await TokenStore().writeToken('');
-              BlocProvider.of<SessionUserBloc>(context)
-                  .add(RemoveSessionUserEvent());
-              BlocProvider.of<ThreadListBloc>(context).add(
-                  RequestThreadListEvent(
-                      channelId: (BlocProvider.of<ChannelBloc>(context).state
-                              as ChannelLoaded)
-                          .selectedChannelId,
-                      page: 1,
-                      isRefresh: false));
-              break;
-            default:
-          }
-        },
-        icon: const Icon(Icons.apps_rounded));
-  }
-}
-
-enum _MenuItem { account, blocklist, licences, logout }

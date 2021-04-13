@@ -18,6 +18,13 @@ import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleto
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
+part 'widgets/thread_page_app_bar.dart';
+part 'widgets/thread_page_fab.dart';
+part 'widgets/thread_page_previous_sliver.dart';
+part 'widgets/thread_page_sliver.dart';
+part 'widgets/thread_page_header.dart';
+part 'widgets/thread_page_footer.dart';
+
 class ThreadPage extends StatefulWidget {
   @override
   _ThreadPageState createState() => _ThreadPageState();
@@ -135,45 +142,7 @@ class _ThreadPageState extends State<ThreadPage> {
                 resizeToAvoidBottomInset: false,
                 appBar: PreferredSize(
                   preferredSize: const Size.fromHeight(kToolbarHeight),
-                  child: AppBar(
-                    elevation: _elevation,
-                    automaticallyImplyLeading: false,
-                    leading: IconButton(
-                        icon: Icon(
-                            Theme.of(context).platform == TargetPlatform.iOS
-                                ? Icons.arrow_back_ios_rounded
-                                : Icons.arrow_back_rounded),
-                        onPressed: () => Navigator.of(context).pop()),
-                    title: SizedBox(
-                      height: kToolbarHeight * 0.85,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Flexible(
-                            child: AutoSizeText(
-                              arguments.title,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w700),
-                              maxLines: 2,
-                              minFontSize: 14,
-                              maxFontSize: 19,
-                              //overflow: TextOverflow.ellipsis
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    actions: [
-                      Visibility(
-                        visible: arguments.locked,
-                        child: const Padding(
-                          padding: EdgeInsets.only(right: 16.0),
-                          child: Icon(Icons.lock_rounded),
-                        ),
-                      )
-                    ],
-                  ),
+                  child: _buildAppBar(context, arguments, _elevation),
                 ),
                 body: state is ThreadLoading
                     ? ThreadPageLoadingSkeleton()
@@ -187,7 +156,12 @@ class _ThreadPageState extends State<ThreadPage> {
                                 delegate: SliverChildBuilderDelegate(
                                     (context, index) {
                                   return _generatePreviousPageSliver(
-                                      state, index, arguments.page);
+                                      state,
+                                      index,
+                                      arguments.page,
+                                      _onLastPage,
+                                      _canReply,
+                                      _onReplySuccess);
                                 },
                                     childCount: state
                                             .previousPages.replies.isEmpty
@@ -198,7 +172,12 @@ class _ThreadPageState extends State<ThreadPage> {
                                 key: centerKey,
                                 delegate: SliverChildBuilderDelegate(
                                   (context, index) {
-                                    return _generatePageSliver(state, index);
+                                    return _generatePageSliver(
+                                        state,
+                                        index,
+                                        _onLastPage,
+                                        _canReply,
+                                        _onReplySuccess);
                                   },
                                   childCount: state.thread.replies.length,
                                 ),
@@ -214,30 +193,8 @@ class _ThreadPageState extends State<ThreadPage> {
                           if (state.thread.status == 'locked') {
                             return null;
                           } else {
-                            return FloatingActionButton(
-                              onPressed: () => !_canReply
-                                  ? showCustomDialog(
-                                      context: context,
-                                      builder: (context) =>
-                                          const CustomAlertDialog(
-                                            title: '未登入',
-                                            content: '請先登入',
-                                          ))
-                                  : showBarModalBottomSheet(
-                                      duration:
-                                          const Duration(milliseconds: 300),
-                                      animationCurve: Curves.easeOut,
-                                      context: context,
-                                      builder: (context) => ComposePage(
-                                        composeMode: ComposeMode.reply,
-                                        threadId: state.thread.threadId,
-                                        onSent: (reply) {
-                                          _onReplySuccess(reply);
-                                        },
-                                      ),
-                                    ),
-                              child: const Icon(Icons.reply_rounded),
-                            );
+                            return _buildFab(
+                                context, state, _canReply, _onReplySuccess);
                           }
                         }
                       }(),
@@ -261,226 +218,4 @@ class _ThreadPageState extends State<ThreadPage> {
       });
     }
   }
-
-  Widget _generatePreviousPageSliver(ThreadLoaded state, int index, int page) {
-    if (state.previousPages.replies.isEmpty) {
-      return Visibility(
-        visible: page != 1,
-        child: ThreadPageLoadingSkeletonCell(),
-      );
-    } else {
-      if (state
-                  .previousPages
-                  .replies[state.previousPages.replies.length - index - 1]
-                  .floor %
-              50 ==
-          1) {
-        return Column(
-          children: <Widget>[
-            if (state
-                        .previousPages
-                        .replies[state.previousPages.replies.length - index - 1]
-                        .floor !=
-                    1 &&
-                (state
-                                .previousPages
-                                .replies[state.previousPages.replies.length -
-                                    index -
-                                    1]
-                                .floor /
-                            50.0)
-                        .ceil() ==
-                    state.currentPage)
-              ThreadPageLoadingSkeletonCell(),
-            _PageHeader(
-              floor: state
-                  .previousPages
-                  .replies[state.previousPages.replies.length - index - 1]
-                  .floor,
-            ),
-            CommentCell(
-              key: ValueKey(state
-                  .previousPages
-                  .replies[state.previousPages.replies.length - index - 1]
-                  .replyId),
-              threadId: state.thread.threadId,
-              reply: state.previousPages
-                  .replies[state.previousPages.replies.length - index - 1],
-              onLastPage: _onLastPage,
-              onSent: (reply) {
-                _onReplySuccess(reply);
-              },
-              canReply: _canReply,
-              threadLocked: state.thread.status == 'locked',
-            ),
-          ],
-        );
-      } else {
-        return CommentCell(
-          key: ValueKey(state.previousPages
-              .replies[state.previousPages.replies.length - index - 1].replyId),
-          threadId: state.thread.threadId,
-          reply: state.previousPages
-              .replies[state.previousPages.replies.length - index - 1],
-          onLastPage: _onLastPage,
-          onSent: (reply) {
-            _onReplySuccess(reply);
-          },
-          canReply: _canReply,
-          threadLocked: state.thread.status == 'locked',
-        );
-      }
-    }
-  }
-
-  Widget _generatePageSliver(ThreadLoaded state, int index) {
-    if (state.thread.replies[index].floor % 50 == 1 &&
-        state.thread.replies[index] == state.thread.replies.last) {
-      return Column(
-        children: <Widget>[
-          _PageHeader(floor: state.thread.replies[index].floor),
-          CommentCell(
-            key: ValueKey(state.thread.replies[index].replyId),
-            threadId: state.thread.threadId,
-            reply: state.thread.replies[index],
-            onLastPage: _onLastPage,
-            onSent: (reply) {
-              _onReplySuccess(reply);
-            },
-            canReply: _canReply,
-            threadLocked: state.thread.status == 'locked',
-          ),
-          _PageFooter(
-            onLastPage: _onLastPage,
-          )
-        ],
-      );
-    } else if (state.thread.replies[index].floor % 50 == 1 &&
-        state.thread.replies.length != 1) {
-      return Column(
-        children: <Widget>[
-          _PageHeader(floor: state.thread.replies[index].floor),
-          CommentCell(
-            key: ValueKey(state.thread.replies[index].replyId),
-            threadId: state.thread.threadId,
-            reply: state.thread.replies[index],
-            onLastPage: _onLastPage,
-            onSent: (reply) {
-              _onReplySuccess(reply);
-            },
-            canReply: _canReply,
-            threadLocked: state.thread.status == 'locked',
-          ),
-        ],
-      );
-    } else if (index == state.thread.replies.length - 1) {
-      return Column(
-        children: <Widget>[
-          CommentCell(
-            key: ValueKey(state.thread.replies[index].replyId),
-            threadId: state.thread.threadId,
-            reply: state.thread.replies[index],
-            onLastPage: _onLastPage,
-            onSent: (reply) {
-              _onReplySuccess(reply);
-            },
-            canReply: _canReply,
-            threadLocked: state.thread.status == 'locked',
-          ),
-          _PageFooter(
-            onLastPage: _onLastPage,
-          ),
-        ],
-      );
-    } else {
-      return CommentCell(
-        key: ValueKey(state.thread.replies[index].replyId),
-        threadId: state.thread.threadId,
-        reply: state.thread.replies[index],
-        onLastPage: _onLastPage,
-        onSent: (reply) {
-          _onReplySuccess(reply);
-        },
-        canReply: _canReply,
-        threadLocked: state.thread.status == 'locked',
-      );
-    }
-  }
-}
-
-class _PageHeader extends StatelessWidget {
-  final int floor;
-
-  const _PageHeader({Key? key, required this.floor}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-        height: 50,
-        child: Center(
-          child: Text(floor == 1 ? '第 1 頁' : '第 ${(floor + 49) ~/ 50} 頁'),
-        ),
-      );
-}
-
-class _PageFooter extends StatelessWidget {
-  final bool onLastPage;
-
-  const _PageFooter({
-    Key? key,
-    required this.onLastPage,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) => BlocBuilder<ThreadBloc, ThreadState>(
-        buildWhen: (prev, state) {
-          if ((prev is ThreadLoaded && state is ThreadAppending) ||
-              (prev is ThreadAppending && state is ThreadLoaded)) {
-            return true;
-          } else {
-            return false;
-          }
-        },
-        builder: (context, state) => SafeArea(
-          top: false,
-          child: !onLastPage
-              ? ThreadPageLoadingSkeletonHeader()
-              : Column(
-                  children: [
-                    SizedBox(
-                      height: 85,
-                      child: Center(
-                        child: TextButton.icon(
-                            style: TextButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 14),
-                                visualDensity: VisualDensity.comfortable),
-                            clipBehavior: Clip.hardEdge,
-                            onPressed: () {
-                              if (state is ThreadLoaded) {
-                                BlocProvider.of<ThreadBloc>(context).add(
-                                    RequestThreadEvent(
-                                        threadId: state.thread.threadId,
-                                        page: state.endPage,
-                                        isInitialLoad: false));
-                              }
-                            },
-                            icon: state is ThreadAppending
-                                ? const ProgressSpinner()
-                                : const Icon(
-                                    Icons.refresh,
-                                    size: 25,
-                                    color: Colors.grey,
-                                  ),
-                            label: Text(
-                              state is ThreadAppending ? '撈緊...' : '重新整理',
-                              style: Theme.of(context).textTheme.caption,
-                              strutStyle: const StrutStyle(
-                                  height: 1.1, forceStrutHeight: true),
-                            )),
-                      ),
-                    ),
-                  ],
-                ),
-        ),
-      );
 }
