@@ -1,7 +1,4 @@
-import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
-import 'package:hkgalden_flutter/models/channel.dart';
-import 'package:hkgalden_flutter/models/tag.dart';
 import 'package:hkgalden_flutter/repository/channel_repository.dart';
 import 'package:mockito/annotations.dart';
 import 'package:test/test.dart';
@@ -17,6 +14,7 @@ void main() {
 
     setUp(() {
       repository = MockChannelRepository();
+      when(repository.getChannels()).thenAnswer((_) async => []);
       channelBloc = ChannelBloc(repository: repository);
     });
 
@@ -25,25 +23,26 @@ void main() {
     });
 
     blocTest('emits ChannelLoaded state when RequestChannelEvent added',
-        build: () {
-          when(repository.getChannels()).thenAnswer((_) async => [
-                const Channel(
-                    channelId: "channelId",
-                    channelName: "channelName",
-                    channelColor: Colors.black,
-                    tags: [Tag(name: "name", color: Colors.black)])
-              ]);
-          return channelBloc;
-        },
+        build: () => channelBloc,
         act: (ChannelBloc bloc) => bloc.add(RequestChannelsEvent()),
         expect: () => [isA<ChannelLoaded>()],
         verify: (_) => verify(repository.getChannels()).called(1));
 
     blocTest(
-        'state should remain unchanged when SetSelectedChannelEvent call on state ChannelLoading',
+        'state should remain unchanged when SetSelectedChannelEvent add on state ChannelLoading',
         build: () => channelBloc,
         act: (ChannelBloc bloc) =>
             bloc.add(const SetSelectedChannelEvent(channelId: 'bw')),
         expect: () => []);
+
+    blocTest('emits new state when SetSelectedChannelEvent added',
+        build: () => channelBloc,
+        act: (ChannelBloc bloc) => bloc
+          ..add(RequestChannelsEvent())
+          ..add(const SetSelectedChannelEvent(channelId: 'et')),
+        expect: () => [
+              const ChannelLoaded(channels: [], selectedChannelId: 'bw'),
+              const ChannelLoaded(channels: [], selectedChannelId: 'et')
+            ]);
   });
 }

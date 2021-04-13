@@ -33,7 +33,7 @@ class ThreadListBloc extends Bloc<ThreadListEvent, ThreadListState> {
             await _repository.getThreadList(event.channelId, event.page);
         if (threads != null) {
           yield ThreadListLoaded(
-              threads: previousState.threads..addAll(threads),
+              threads: previousState.threads.toList()..addAll(threads),
               currentChannelId: event.channelId,
               currentPage: event.page);
         }

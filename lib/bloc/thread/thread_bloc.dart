@@ -37,7 +37,7 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
             yield ThreadLoaded(
                 thread: previousState.thread,
                 previousPages: thread.copyWith(
-                    replies: thread.replies
+                    replies: thread.replies.toList()
                       ..addAll(previousState.previousPages.replies),
                     totalReplies: thread.totalReplies),
                 currentPage: event.page,
@@ -47,7 +47,7 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
                 thread: previousState.thread.copyWith(
                     replies: event.page == previousState.endPage
                         ? thread.replies
-                        : (previousState.thread.replies
+                        : (previousState.thread.replies.toList()
                           ..addAll(thread.replies))),
                 previousPages: previousState.previousPages,
                 currentPage: event.page,

@@ -1,7 +1,6 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
-import 'package:meta/meta.dart';
-import 'package:equatable/equatable.dart';
 
 @immutable
 class Thread extends Equatable {

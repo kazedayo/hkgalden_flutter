@@ -30,8 +30,6 @@ Theme _buildFrontLayer(
               : () {
                   if (state is ThreadListLoaded) {
                     return ListView.builder(
-                      addAutomaticKeepAlives: false,
-                      addRepaintBoundaries: false,
                       controller: scrollController,
                       itemCount: state.threads.length + 1,
                       itemBuilder: (context, index) {
