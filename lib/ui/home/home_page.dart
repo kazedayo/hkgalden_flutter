@@ -179,7 +179,7 @@ class _HomePageState extends State<HomePage>
                   child: Material(
                     color: Theme.of(context).primaryColor,
                     child: BlocBuilder<ThreadListBloc, ThreadListState>(
-                      //buildWhen: (_, state) => state is! ThreadListAppending,
+                      buildWhen: (_, state) => state is! ThreadListAppending,
                       builder: (context, state) => RefreshIndicator(
                           backgroundColor: Colors.white,
                           strokeWidth: 2.5,
