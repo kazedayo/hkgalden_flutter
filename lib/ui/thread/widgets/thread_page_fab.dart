@@ -4,11 +4,9 @@ FloatingActionButton _buildFab(
     BuildContext context,
     ScrollController scrollController,
     ThreadLoaded state,
-    bool canReply,
-    bool onLastPage,
     Function(BuildContext, ScrollController, Reply, bool) onReplySuccess) {
   return FloatingActionButton(
-    onPressed: () => !canReply
+    onPressed: () => !BlocProvider.of<ThreadPageCubit>(context).state.canReply
         ? showCustomDialog(
             context: context,
             builder: (context) => const CustomAlertDialog(
@@ -23,7 +21,8 @@ FloatingActionButton _buildFab(
               composeMode: ComposeMode.reply,
               threadId: state.thread.threadId,
               onSent: (reply) {
-                onReplySuccess(context, scrollController, reply, onLastPage);
+                onReplySuccess(context, scrollController, reply,
+                    BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
               },
             ),
           ),

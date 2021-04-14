@@ -56,5 +56,6 @@ class User extends Equatable {
           blockedUsers: blockedUsers ?? this.blockedUsers);
 
   @override
-  List<Object> get props => [userId, nickName, avatar, userGroup, blockedUsers];
+  List<Object?> get props =>
+      [userId, nickName, avatar, userGroup, gender, blockedUsers];
 }

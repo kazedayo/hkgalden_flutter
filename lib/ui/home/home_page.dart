@@ -49,43 +49,17 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   late ScrollController _scrollController;
-  late AnimationController _backgroundBlurAnimationController;
-  late bool _fabIsHidden;
-  late bool _menuIsShowing;
 
   @override
   void initState() {
-    _fabIsHidden = false;
     _scrollController = ScrollController();
-    _initListener(context, _scrollController, (fabIsHidden) {
-      if (_fabIsHidden != fabIsHidden) {
-        setState(() {
-          _fabIsHidden = fabIsHidden;
-        });
-      }
-    });
-    _backgroundBlurAnimationController = AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 150),
-        reverseDuration: const Duration(milliseconds: 200),
-        value: 0.0,
-        upperBound: 0.5)
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.dismissed) {
-          setState(() {
-            _menuIsShowing = false;
-          });
-        }
-      });
-    _fabIsHidden = false;
-    _menuIsShowing = false;
+    _initListener(context, _scrollController);
     super.initState();
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
-    _backgroundBlurAnimationController.dispose();
     super.dispose();
   }
 
@@ -97,7 +71,8 @@ class _HomePageState extends State<HomePage>
         BlocProvider.of<SessionUserBloc>(context);
     final ChannelBloc channelBloc = BlocProvider.of<ChannelBloc>(context);
     return BlocBuilder<ThreadListBloc, ThreadListState>(
-      buildWhen: (_, state) => state is! ThreadListAppending,
+      buildWhen: (prev, state) =>
+          state is! ThreadListAppending && prev != state,
       builder: (context, state) {
         return Scaffold(
           body: Stack(
@@ -120,22 +95,8 @@ class _HomePageState extends State<HomePage>
                 backLayer: HomeDrawer(),
                 backLayerBackgroundColor:
                     Theme.of(context).scaffoldBackgroundColor,
-                floatingActionButton:
-                    _fabIsHidden ? null : _buildFab(context, threadListBloc),
+                floatingActionButton: _buildFab(context, threadListBloc),
               ),
-              Visibility(
-                visible: _menuIsShowing,
-                child: AnimatedBuilder(
-                  animation: _backgroundBlurAnimationController,
-                  builder: (context, child) => BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                    child: Container(
-                      color: Colors.black.withOpacity(
-                          _backgroundBlurAnimationController.value),
-                    ),
-                  ),
-                ),
-              )
             ],
           ),
         );

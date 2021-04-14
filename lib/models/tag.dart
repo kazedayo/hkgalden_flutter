@@ -16,5 +16,5 @@ class Tag extends Equatable {
       color: Color(int.parse('FF${json['color']}', radix: 16)));
 
   @override
-  List<Object> get props => [name, color];
+  List<Object?> get props => [id, name, color];
 }

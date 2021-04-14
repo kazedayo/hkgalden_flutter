@@ -44,6 +44,7 @@ dependencies:
   modal_bottom_sheet: 
   octo_image: 
   package_info: 
+  popover: 
   shimmer: 2.0.0-nullsafety.0
   universal_html: 
   url_launcher: 

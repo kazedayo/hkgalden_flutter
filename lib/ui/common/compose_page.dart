@@ -239,19 +239,6 @@ class _ComposePageState extends State<ComposePage> {
             )
           else
             const SizedBox(),
-          SizedBox(
-            height: 30,
-            child: QuillToolbar.basic(
-              controller: _controller,
-              showHistory: false,
-              showBackgroundColorButton: false,
-              showColorButton: false,
-              showCodeBlock: false,
-              showListCheck: false,
-              showIndent: false,
-              showQuote: false,
-            ),
-          ),
           Expanded(
             child: QuillEditor(
               controller: _controller,
@@ -300,6 +287,16 @@ class _ComposePageState extends State<ComposePage> {
                       const Tuple2(0.0, 0.0),
                       null)),
             ),
+          ),
+          QuillToolbar.basic(
+            controller: _controller,
+            showHistory: false,
+            showBackgroundColorButton: false,
+            showColorButton: false,
+            showCodeBlock: false,
+            showListCheck: false,
+            showIndent: false,
+            showQuote: false,
           ),
         ],
       ),

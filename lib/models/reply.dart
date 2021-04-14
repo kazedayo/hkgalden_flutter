@@ -35,5 +35,6 @@ class Reply extends Equatable {
       );
 
   @override
-  List<Object> get props => [floor, author, authorNickname, date];
+  List<Object?> get props =>
+      [replyId, floor, content, author, authorNickname, date, parent];
 }

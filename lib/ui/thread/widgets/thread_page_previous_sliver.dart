@@ -6,8 +6,6 @@ Widget _generatePreviousPageSliver(
     ThreadLoaded state,
     int index,
     int page,
-    bool onLastPage,
-    bool canReply,
     Function(BuildContext, ScrollController, Reply, bool) onReplySuccess) {
   if (state.previousPages.replies.isEmpty) {
     return Visibility(
@@ -48,11 +46,13 @@ Widget _generatePreviousPageSliver(
             threadId: state.thread.threadId,
             reply: state.previousPages
                 .replies[state.previousPages.replies.length - index - 1],
-            onLastPage: onLastPage,
+            onLastPage:
+                BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
             onSent: (reply) {
-              onReplySuccess(context, scrollController, reply, onLastPage);
+              onReplySuccess(context, scrollController, reply,
+                  BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
             },
-            canReply: canReply,
+            canReply: BlocProvider.of<ThreadPageCubit>(context).state.canReply,
             threadLocked: state.thread.status == 'locked',
           ),
         ],
@@ -64,11 +64,12 @@ Widget _generatePreviousPageSliver(
         threadId: state.thread.threadId,
         reply: state.previousPages
             .replies[state.previousPages.replies.length - index - 1],
-        onLastPage: onLastPage,
+        onLastPage: BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
         onSent: (reply) {
-          onReplySuccess(context, scrollController, reply, onLastPage);
+          onReplySuccess(context, scrollController, reply,
+              BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
         },
-        canReply: canReply,
+        canReply: BlocProvider.of<ThreadPageCubit>(context).state.canReply,
         threadLocked: state.thread.status == 'locked',
       );
     }

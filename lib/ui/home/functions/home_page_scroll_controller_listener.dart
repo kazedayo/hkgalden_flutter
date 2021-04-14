@@ -1,7 +1,6 @@
 part of '../home_page.dart';
 
-void _initListener(BuildContext context, ScrollController scrollController,
-    Function(bool) callback) {
+void _initListener(BuildContext context, ScrollController scrollController) {
   scrollController.addListener(() {
     if (scrollController.position.pixels ==
         scrollController.position.maxScrollExtent) {
@@ -14,14 +13,6 @@ void _initListener(BuildContext context, ScrollController scrollController,
                   .currentPage +
               1,
           isRefresh: false));
-    }
-    if (scrollController.position.userScrollDirection ==
-            ScrollDirection.forward ||
-        scrollController.position.pixels == 0.0) {
-      callback(false);
-    } else if (scrollController.position.userScrollDirection ==
-        ScrollDirection.reverse) {
-      callback(true);
     }
   });
 }

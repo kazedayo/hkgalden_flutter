@@ -5,8 +5,6 @@ Widget _generatePageSliver(
     ScrollController scrollController,
     ThreadLoaded state,
     int index,
-    bool onLastPage,
-    bool canReply,
     Function(BuildContext, ScrollController, Reply, bool) onReplySuccess) {
   if (state.thread.replies[index].floor % 50 == 1 &&
       state.thread.replies[index] == state.thread.replies.last) {
@@ -17,15 +15,15 @@ Widget _generatePageSliver(
           key: ValueKey(state.thread.replies[index].replyId),
           threadId: state.thread.threadId,
           reply: state.thread.replies[index],
-          onLastPage: onLastPage,
+          onLastPage: BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
           onSent: (reply) {
-            onReplySuccess(context, scrollController, reply, onLastPage);
+            onReplySuccess(context, scrollController, reply, BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
           },
-          canReply: canReply,
+          canReply: BlocProvider.of<ThreadPageCubit>(context).state.canReply,
           threadLocked: state.thread.status == 'locked',
         ),
         _PageFooter(
-          onLastPage: onLastPage,
+          onLastPage: BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
         )
       ],
     );
@@ -38,11 +36,11 @@ Widget _generatePageSliver(
           key: ValueKey(state.thread.replies[index].replyId),
           threadId: state.thread.threadId,
           reply: state.thread.replies[index],
-          onLastPage: onLastPage,
+          onLastPage: BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
           onSent: (reply) {
-            onReplySuccess(context, scrollController, reply, onLastPage);
+            onReplySuccess(context, scrollController, reply, BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
           },
-          canReply: canReply,
+          canReply: BlocProvider.of<ThreadPageCubit>(context).state.canReply,
           threadLocked: state.thread.status == 'locked',
         ),
       ],
@@ -54,15 +52,15 @@ Widget _generatePageSliver(
           key: ValueKey(state.thread.replies[index].replyId),
           threadId: state.thread.threadId,
           reply: state.thread.replies[index],
-          onLastPage: onLastPage,
+          onLastPage: BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
           onSent: (reply) {
-            onReplySuccess(context, scrollController, reply, onLastPage);
+            onReplySuccess(context, scrollController, reply, BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
           },
-          canReply: canReply,
+          canReply: BlocProvider.of<ThreadPageCubit>(context).state.canReply,
           threadLocked: state.thread.status == 'locked',
         ),
         _PageFooter(
-          onLastPage: onLastPage,
+          onLastPage: BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
         ),
       ],
     );
@@ -71,11 +69,11 @@ Widget _generatePageSliver(
       key: ValueKey(state.thread.replies[index].replyId),
       threadId: state.thread.threadId,
       reply: state.thread.replies[index],
-      onLastPage: onLastPage,
+      onLastPage: BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
       onSent: (reply) {
-        onReplySuccess(context, scrollController, reply, onLastPage);
+        onReplySuccess(context, scrollController, reply, BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
       },
-      canReply: canReply,
+      canReply: BlocProvider.of<ThreadPageCubit>(context).state.canReply,
       threadLocked: state.thread.status == 'locked',
     );
   }
