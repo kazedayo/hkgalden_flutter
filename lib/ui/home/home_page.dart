@@ -11,7 +11,6 @@ import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
-import 'package:hkgalden_flutter/utils/token_store.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
@@ -25,14 +24,18 @@ import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
+import 'package:hkgalden_flutter/utils/token_store.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:package_info/package_info.dart';
 
+part 'functions/home_page_jump_to_page.dart';
+part 'functions/home_page_load_thread.dart';
+part 'functions/home_page_scroll_controller_listener.dart';
 part 'widgets/home_page_app_bar.dart';
-part 'widgets/home_page_popup_menu_button.dart';
-part 'widgets/home_page_leading_button.dart';
 part 'widgets/home_page_fab.dart';
 part 'widgets/home_page_front_layer.dart';
+part 'widgets/home_page_leading_button.dart';
+part 'widgets/home_page_popup_menu_button.dart';
 
 class HomePage extends StatefulWidget {
   final String? title;
@@ -52,32 +55,12 @@ class _HomePageState extends State<HomePage>
 
   @override
   void initState() {
+    _fabIsHidden = false;
     _scrollController = ScrollController();
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
-        BlocProvider.of<ThreadListBloc>(context).add(RequestThreadListEvent(
-            channelId: (BlocProvider.of<ThreadListBloc>(context).state
-                    as ThreadListLoaded)
-                .currentChannelId,
-            page: (BlocProvider.of<ThreadListBloc>(context).state
-                        as ThreadListLoaded)
-                    .currentPage +
-                1,
-            isRefresh: false));
-      }
-      if ((_scrollController.position.userScrollDirection ==
-                  ScrollDirection.forward ||
-              _scrollController.position.pixels == 0.0) &&
-          _fabIsHidden) {
+    _initListener(context, _scrollController, (fabIsHidden) {
+      if (_fabIsHidden != fabIsHidden) {
         setState(() {
-          _fabIsHidden = false;
-        });
-      } else if (_scrollController.position.userScrollDirection ==
-              ScrollDirection.reverse &&
-          !_fabIsHidden) {
-        setState(() {
-          _fabIsHidden = true;
+          _fabIsHidden = fabIsHidden;
         });
       }
     });
@@ -105,12 +88,6 @@ class _HomePageState extends State<HomePage>
     _backgroundBlurAnimationController.dispose();
     super.dispose();
   }
-
-  // @override
-  // void didChangeDependencies() {
-  //   context.dependOnInheritedWidgetOfExactType();
-  //   super.didChangeDependencies();
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -163,81 +140,6 @@ class _HomePageState extends State<HomePage>
           ),
         );
       },
-    );
-  }
-
-  void _loadThread(Thread thread) {
-    Navigator.of(context).pushNamed('/Thread',
-        arguments: ThreadPageArguments(
-            threadId: thread.threadId,
-            title: thread.title,
-            page: 1,
-            locked: thread.status == 'locked'));
-  }
-
-  void _jumpToPage(Thread thread) {
-    HapticFeedback.mediumImpact();
-    showMaterialModalBottomSheet(
-      useRootNavigator: true,
-      duration: const Duration(milliseconds: 200),
-      animationCurve: Curves.easeOut,
-      enableDrag: false,
-      barrierColor: Colors.black.withOpacity(0.5),
-      context: context,
-      builder: (context) => Theme(
-        data: Theme.of(context).copyWith(highlightColor: Colors.grey[800]),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-              child: Text(
-                thread.title,
-                style: Theme.of(context)
-                    .textTheme
-                    .headline6!
-                    .copyWith(fontWeight: FontWeight.bold),
-              ),
-            ),
-            ConstrainedBox(
-              constraints:
-                  BoxConstraints(maxHeight: displayHeight(context) / 2),
-              child: ListView.builder(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).padding.bottom),
-                shrinkWrap: true,
-                itemCount: (thread.replies.last.floor.toDouble() / 50.0).ceil(),
-                itemBuilder: (context, index) => Card(
-                  color: Colors.transparent,
-                  elevation: 0,
-                  clipBehavior: Clip.hardEdge,
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  child: SimpleDialogOption(
-                    padding: const EdgeInsets.all(16.0),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      navigatorKey.currentState!.pushNamed('/Thread',
-                          arguments: ThreadPageArguments(
-                              threadId: thread.threadId,
-                              title: thread.title,
-                              page: index + 1,
-                              locked: thread.status == 'locked'));
-                    },
-                    child: Text(
-                      '第 ${index + 1} 頁',
-                      style: Theme.of(context).textTheme.subtitle1,
-                    ),
-                  ),
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
     );
   }
 }

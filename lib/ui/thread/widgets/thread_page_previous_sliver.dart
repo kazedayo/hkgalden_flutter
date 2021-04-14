@@ -1,7 +1,14 @@
 part of '../thread_page.dart';
 
-Widget _generatePreviousPageSliver(ThreadLoaded state, int index, int page,
-    bool onLastPage, bool canReply, Function(Reply) onReplySuccess) {
+Widget _generatePreviousPageSliver(
+    BuildContext context,
+    ScrollController scrollController,
+    ThreadLoaded state,
+    int index,
+    int page,
+    bool onLastPage,
+    bool canReply,
+    Function(BuildContext, ScrollController, Reply, bool) onReplySuccess) {
   if (state.previousPages.replies.isEmpty) {
     return Visibility(
       visible: page != 1,
@@ -43,7 +50,7 @@ Widget _generatePreviousPageSliver(ThreadLoaded state, int index, int page,
                 .replies[state.previousPages.replies.length - index - 1],
             onLastPage: onLastPage,
             onSent: (reply) {
-              onReplySuccess(reply);
+              onReplySuccess(context, scrollController, reply, onLastPage);
             },
             canReply: canReply,
             threadLocked: state.thread.status == 'locked',
@@ -59,7 +66,7 @@ Widget _generatePreviousPageSliver(ThreadLoaded state, int index, int page,
             .replies[state.previousPages.replies.length - index - 1],
         onLastPage: onLastPage,
         onSent: (reply) {
-          onReplySuccess(reply);
+          onReplySuccess(context, scrollController, reply, onLastPage);
         },
         canReply: canReply,
         threadLocked: state.thread.status == 'locked',

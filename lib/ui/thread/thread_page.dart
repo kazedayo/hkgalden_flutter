@@ -18,12 +18,14 @@ import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleto
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
+part 'functions/thread_page_on_reply_success.dart';
+part 'functions/thread_page_scroll_controller_listener.dart';
 part 'widgets/thread_page_app_bar.dart';
 part 'widgets/thread_page_fab.dart';
+part 'widgets/thread_page_footer.dart';
+part 'widgets/thread_page_header.dart';
 part 'widgets/thread_page_previous_sliver.dart';
 part 'widgets/thread_page_sliver.dart';
-part 'widgets/thread_page_header.dart';
-part 'widgets/thread_page_footer.dart';
 
 class ThreadPage extends StatefulWidget {
   @override
@@ -70,51 +72,23 @@ class _ThreadPageState extends State<ThreadPage> {
               threadId: arguments.threadId,
               page: arguments.page,
               isInitialLoad: true));
-          _scrollController.addListener(() {
-            if (_scrollController.position.pixels ==
-                _scrollController.position.maxScrollExtent) {
-              if (!_onLastPage) {
-                threadBloc.add(RequestThreadEvent(
-                    threadId:
-                        (threadBloc.state as ThreadLoaded).thread.threadId,
-                    page: (threadBloc.state as ThreadLoaded).currentPage + 1,
-                    isInitialLoad: false));
-              }
-            } else if (_scrollController.position.pixels ==
-                _scrollController.position.minScrollExtent) {
-              if ((threadBloc.state as ThreadLoaded).currentPage != 1 &&
-                  (threadBloc.state as ThreadLoaded).endPage <=
-                      arguments.page) {
-                threadBloc.add(RequestThreadEvent(
-                    threadId:
-                        (threadBloc.state as ThreadLoaded).thread.threadId,
-                    page: (threadBloc.state as ThreadLoaded).currentPage - 1,
-                    isInitialLoad: false));
-              }
+          _initListener(arguments, threadBloc, _scrollController, () {
+            if (!_onLastPage) {
+              threadBloc.add(RequestThreadEvent(
+                  threadId: (threadBloc.state as ThreadLoaded).thread.threadId,
+                  page: (threadBloc.state as ThreadLoaded).currentPage + 1,
+                  isInitialLoad: false));
             }
-            if (_scrollController.position.userScrollDirection ==
-                    ScrollDirection.reverse &&
-                !_fabIsHidden) {
+          }, (fabHidden) {
+            if (_fabIsHidden != fabHidden) {
               setState(() {
-                _fabIsHidden = true;
-              });
-            } else if ((_scrollController.position.userScrollDirection ==
-                        ScrollDirection.forward ||
-                    _scrollController.position.pixels ==
-                        _scrollController.position.maxScrollExtent ||
-                    _scrollController.position.pixels == 0.0) &&
-                _fabIsHidden) {
-              setState(() {
-                _fabIsHidden = false;
+                _fabIsHidden = fabHidden;
               });
             }
-            final double newElevation = _scrollController.position.pixels >
-                    _scrollController.position.minScrollExtent
-                ? 4.0
-                : 0.0;
-            if (newElevation != _elevation) {
+          }, (elevation) {
+            if (elevation != _elevation) {
               setState(() {
-                _elevation = newElevation;
+                _elevation = elevation;
               });
             }
           });
@@ -156,6 +130,8 @@ class _ThreadPageState extends State<ThreadPage> {
                                 delegate: SliverChildBuilderDelegate(
                                     (context, index) {
                                   return _generatePreviousPageSliver(
+                                      context,
+                                      _scrollController,
                                       state,
                                       index,
                                       arguments.page,
@@ -173,6 +149,8 @@ class _ThreadPageState extends State<ThreadPage> {
                                 delegate: SliverChildBuilderDelegate(
                                   (context, index) {
                                     return _generatePageSliver(
+                                        context,
+                                        _scrollController,
                                         state,
                                         index,
                                         _onLastPage,
@@ -193,8 +171,8 @@ class _ThreadPageState extends State<ThreadPage> {
                           if (state.thread.status == 'locked') {
                             return null;
                           } else {
-                            return _buildFab(
-                                context, state, _canReply, _onReplySuccess);
+                            return _buildFab(context, _scrollController, state,
+                                _canReply, _onLastPage, _onReplySuccess);
                           }
                         }
                       }(),
@@ -204,18 +182,5 @@ class _ThreadPageState extends State<ThreadPage> {
         ),
       ),
     );
-  }
-
-  void _onReplySuccess(Reply reply) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('回覆發送成功!')));
-    if (_onLastPage) {
-      BlocProvider.of<ThreadBloc>(context)
-          .add(AppendReplyToThreadEvent(reply: reply));
-      SchedulerBinding.instance!.addPostFrameCallback((_) {
-        _scrollController.animateTo(_scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
-      });
-    }
   }
 }

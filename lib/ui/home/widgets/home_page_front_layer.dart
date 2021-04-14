@@ -7,8 +7,8 @@ Theme _buildFrontLayer(
     ThreadListState state,
     SessionUserBloc sessionUserBloc,
     ScrollController scrollController,
-    Function(Thread) loadThread,
-    Function(Thread) jumpToPage) {
+    Function(BuildContext, Thread) loadThread,
+    Function(BuildContext, Thread) jumpToPage) {
   return Theme(
     data: Theme.of(context).copyWith(highlightColor: const Color(0xff373d3c)),
     child: Material(
@@ -52,9 +52,10 @@ Theme _buildFrontLayer(
                             child: ThreadCell(
                               key: ValueKey(state.threads[index].threadId),
                               thread: state.threads[index],
-                              onTap: () => loadThread(state.threads[index]),
+                              onTap: () =>
+                                  loadThread(context, state.threads[index]),
                               onLongPress: () =>
-                                  jumpToPage(state.threads[index]),
+                                  jumpToPage(context, state.threads[index]),
                             ),
                           );
                         }

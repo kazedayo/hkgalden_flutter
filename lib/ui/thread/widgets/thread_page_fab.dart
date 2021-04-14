@@ -1,7 +1,12 @@
 part of '../thread_page.dart';
 
-FloatingActionButton _buildFab(BuildContext context, ThreadLoaded state,
-    bool canReply, Function(Reply) onReplySuccess) {
+FloatingActionButton _buildFab(
+    BuildContext context,
+    ScrollController scrollController,
+    ThreadLoaded state,
+    bool canReply,
+    bool onLastPage,
+    Function(BuildContext, ScrollController, Reply, bool) onReplySuccess) {
   return FloatingActionButton(
     onPressed: () => !canReply
         ? showCustomDialog(
@@ -18,7 +23,7 @@ FloatingActionButton _buildFab(BuildContext context, ThreadLoaded state,
               composeMode: ComposeMode.reply,
               threadId: state.thread.threadId,
               onSent: (reply) {
-                onReplySuccess(reply);
+                onReplySuccess(context, scrollController, reply, onLastPage);
               },
             ),
           ),

@@ -1,7 +1,13 @@
 part of '../thread_page.dart';
 
-Widget _generatePageSliver(ThreadLoaded state, int index, bool onLastPage,
-    bool canReply, Function(Reply) onReplySuccess) {
+Widget _generatePageSliver(
+    BuildContext context,
+    ScrollController scrollController,
+    ThreadLoaded state,
+    int index,
+    bool onLastPage,
+    bool canReply,
+    Function(BuildContext, ScrollController, Reply, bool) onReplySuccess) {
   if (state.thread.replies[index].floor % 50 == 1 &&
       state.thread.replies[index] == state.thread.replies.last) {
     return Column(
@@ -13,7 +19,7 @@ Widget _generatePageSliver(ThreadLoaded state, int index, bool onLastPage,
           reply: state.thread.replies[index],
           onLastPage: onLastPage,
           onSent: (reply) {
-            onReplySuccess(reply);
+            onReplySuccess(context, scrollController, reply, onLastPage);
           },
           canReply: canReply,
           threadLocked: state.thread.status == 'locked',
@@ -34,7 +40,7 @@ Widget _generatePageSliver(ThreadLoaded state, int index, bool onLastPage,
           reply: state.thread.replies[index],
           onLastPage: onLastPage,
           onSent: (reply) {
-            onReplySuccess(reply);
+            onReplySuccess(context, scrollController, reply, onLastPage);
           },
           canReply: canReply,
           threadLocked: state.thread.status == 'locked',
@@ -50,7 +56,7 @@ Widget _generatePageSliver(ThreadLoaded state, int index, bool onLastPage,
           reply: state.thread.replies[index],
           onLastPage: onLastPage,
           onSent: (reply) {
-            onReplySuccess(reply);
+            onReplySuccess(context, scrollController, reply, onLastPage);
           },
           canReply: canReply,
           threadLocked: state.thread.status == 'locked',
@@ -67,7 +73,7 @@ Widget _generatePageSliver(ThreadLoaded state, int index, bool onLastPage,
       reply: state.thread.replies[index],
       onLastPage: onLastPage,
       onSent: (reply) {
-        onReplySuccess(reply);
+        onReplySuccess(context, scrollController, reply, onLastPage);
       },
       canReply: canReply,
       threadLocked: state.thread.status == 'locked',
