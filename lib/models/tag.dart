@@ -2,6 +2,11 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
+List<Tag> tagListFromJson(List<dynamic> json) =>
+    json.map((tag) => Tag.fromJson(tag as Map<String, dynamic>)).toList();
+
+Tag tagFromJson(Map<String, dynamic> json) => Tag.fromJson(json);
+
 @immutable
 class Tag extends Equatable {
   final String? id;

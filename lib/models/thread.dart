@@ -2,6 +2,12 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 
+List<Thread> threadListFromJson(List<dynamic> json) => json
+    .map((thread) => Thread.fromJson(thread as Map<String, dynamic>))
+    .toList();
+
+Thread threadFromJson(Map<String, dynamic> json) => Thread.fromJson(json);
+
 @immutable
 class Thread extends Equatable {
   final int threadId;

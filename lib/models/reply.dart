@@ -3,6 +3,8 @@ import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
 
+Reply replyFromJson(dynamic json) => Reply.fromJson(json);
+
 @immutable
 class Reply extends Equatable {
   final String? replyId;

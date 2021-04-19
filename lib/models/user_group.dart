@@ -1,6 +1,9 @@
 import 'package:meta/meta.dart';
 import 'package:equatable/equatable.dart';
 
+UserGroup userGroupFromJson(Map<String, dynamic> json) =>
+    UserGroup.fromJson(json);
+
 @immutable
 class UserGroup extends Equatable {
   final String groupId;

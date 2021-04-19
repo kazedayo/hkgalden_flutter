@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:graphql/client.dart';
 import 'package:hkgalden_flutter/models/channel.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
@@ -6,6 +7,7 @@ import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/utils/token_store.dart';
 
 class HKGaldenApi {
+  //client creation
   static const String clientId = '15897154848030720.apis.hkgalden.org';
   static final HttpLink _api = HttpLink('https://hkgalden.org/_');
 
@@ -51,9 +53,7 @@ class HKGaldenApi {
       final List<dynamic> result =
           queryResult.data!['channels'] as List<dynamic>;
 
-      final List<Channel> threads = result
-          .map((thread) => Channel.fromJson(thread as Map<String, dynamic>))
-          .toList();
+      final List<Channel> threads = await compute(channelFromJson, result);
 
       return threads;
     }
@@ -87,7 +87,8 @@ class HKGaldenApi {
     } else {
       final dynamic result = queryResult.data!['sessionUser'] as dynamic;
 
-      final User sessionUser = User.fromJson(result as Map<String, dynamic>);
+      final User sessionUser =
+          await compute(userFromJson, result as Map<String, dynamic>);
 
       return sessionUser;
     }
@@ -161,7 +162,8 @@ class HKGaldenApi {
     } else {
       final dynamic result = queryResult.data!['thread'] as dynamic;
 
-      final Thread thread = Thread.fromJson(result as Map<String, dynamic>);
+      final Thread thread =
+          await compute(threadFromJson, result as Map<String, dynamic>);
 
       return thread;
     }
@@ -214,9 +216,7 @@ class HKGaldenApi {
       final List<dynamic> result =
           queryResult.data!['threadsByChannel'] as List<dynamic>;
 
-      final List<Thread> threads = result
-          .map((thread) => Thread.fromJson(thread as Map<String, dynamic>))
-          .toList();
+      final List<Thread> threads = await compute(threadListFromJson, result);
 
       return threads;
     }
@@ -248,9 +248,7 @@ class HKGaldenApi {
       final List<dynamic> result =
           queryResult.data!['blockedUsers'] as List<dynamic>;
 
-      final List<User> blockedUsers = result
-          .map((user) => User.fromJson(user as Map<String, dynamic>))
-          .toList();
+      final List<User> blockedUsers = await compute(userListFromJson, result);
 
       return blockedUsers;
     }
@@ -300,9 +298,8 @@ class HKGaldenApi {
       final List<dynamic> result =
           queryResult.data!['threadsByUser'] as List<dynamic>;
 
-      final List<Thread> userThreads = result
-          .map((e) => Thread.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final List<Thread> userThreads =
+          await compute(threadListFromJson, result);
 
       return userThreads;
     }
@@ -365,7 +362,7 @@ class HKGaldenApi {
       return null;
     } else {
       final dynamic resultJson = result.data!['replyThread'] as dynamic;
-      final Reply sentReply = Reply.fromJson(resultJson);
+      final Reply sentReply = await compute(replyFromJson, resultJson);
       return sentReply;
     }
   }

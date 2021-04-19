@@ -3,6 +3,10 @@ import 'package:meta/meta.dart';
 import 'package:flutter/material.dart';
 import 'package:equatable/equatable.dart';
 
+List<Channel> channelFromJson(List<dynamic> json) => json
+    .map((thread) => Channel.fromJson(thread as Map<String, dynamic>))
+    .toList();
+
 @immutable
 class Channel extends Equatable {
   final String channelId;

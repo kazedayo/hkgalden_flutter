@@ -106,6 +106,10 @@ class MyApp extends StatelessWidget {
         highlightElevation: 1,
         foregroundColor: Colors.white,
       ),
+      pageTransitionsTheme: const PageTransitionsTheme(builders: {
+        TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder()
+      }),
       cupertinoOverrideTheme:
           const CupertinoThemeData(primaryColor: Color(0xff45c17c)),
     );
