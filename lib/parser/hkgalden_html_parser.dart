@@ -3,6 +3,10 @@ import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:universal_html/parsing.dart';
 import 'package:universal_html/html.dart';
 
+String? parseReplyWithQuotes(Map<String, dynamic> args) =>
+    HKGaldenHtmlParser().commentWithQuotes(
+        args['reply'] as Reply, args['state'] as SessionUserState);
+
 class HKGaldenHtmlParser {
   static final NodeValidator validator = NodeValidatorBuilder.common()
     ..allowInlineStyles()

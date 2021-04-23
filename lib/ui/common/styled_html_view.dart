@@ -31,10 +31,10 @@ class StyledHtmlView extends StatelessWidget {
           builder: (context, state) => Html(
             data: htmlString,
             customRender: {
-              'img': (context, _, attributes, __) {
+              'img': (renderContext, _, attributes, __) {
                 return ContainerSpan(
                   shrinkWrap: true,
-                  newContext: context,
+                  newContext: renderContext,
                   style: Style(),
                   child: Hero(
                     tag: '${floor}_${attributes['src']}_$state.randomHash',
@@ -59,7 +59,7 @@ class StyledHtmlView extends StatelessWidget {
                             onTap: () => state.imageLoadingHasError
                                 ? null
                                 : _showImageView(
-                                    context.buildContext,
+                                    context,
                                     attributes['src']!,
                                     '${floor}_${attributes['src']}_$state.randomHash',
                                   ),
