@@ -25,7 +25,7 @@ class ImageLoadingError extends StatelessWidget {
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
-        )
+        ),
       ],
     );
   }

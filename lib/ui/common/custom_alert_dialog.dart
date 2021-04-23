@@ -20,7 +20,7 @@ class CustomAlertDialog extends StatelessWidget {
                 CupertinoDialogAction(
                   onPressed: () => Navigator.of(context).pop(),
                   child: const Text('OK'),
-                )
+                ),
               ],
             )
           : AlertDialog(

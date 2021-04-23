@@ -10,9 +10,12 @@ class ListLoadingSkeleton extends StatelessWidget {
           baseColor: Theme.of(context).primaryColor,
           highlightColor: Theme.of(context).scaffoldBackgroundColor,
           child: ListView(
-              physics: const NeverScrollableScrollPhysics(),
-              children:
-                  List.generate(10, (index) => ListLoadingSkeletonCell())),
+            physics: const NeverScrollableScrollPhysics(),
+            children: List.generate(
+              10,
+              (index) => ListLoadingSkeletonCell(),
+            ),
+          ),
         ),
       );
 }

@@ -25,9 +25,11 @@ class BlockListPage extends StatelessWidget {
             clipBehavior: Clip.hardEdge,
             color: Theme.of(context).primaryColor,
             shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10))),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(10),
+                topRight: Radius.circular(10),
+              ),
+            ),
             elevation: 6,
             child: SizedBox(
               height: displayHeight(context) / 2,
@@ -43,7 +45,8 @@ class BlockListPage extends StatelessWidget {
                           (state as BlockedUsersLoaded).blockedUsers.length,
                       itemBuilder: (context, index) {
                         return BlockedUserCell(user: state.blockedUsers[index]);
-                      }),
+                      },
+                    ),
             ),
           ),
         ),

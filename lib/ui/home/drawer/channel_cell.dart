@@ -31,18 +31,22 @@ class ChannelCell extends StatelessWidget {
               : Theme.of(context).scaffoldBackgroundColor,
           child: TextButton(
             style: TextButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10))),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
             onPressed: state.selectedChannelId == channel.channelId
                 ? null
                 : () {
                     HapticFeedback.mediumImpact();
                     BlocProvider.of<ChannelBloc>(context).add(
                         SetSelectedChannelEvent(channelId: channel.channelId));
-                    threadListBloc.add(RequestThreadListEvent(
-                        channelId: channel.channelId,
-                        page: 1,
-                        isRefresh: false));
+                    threadListBloc.add(
+                      RequestThreadListEvent(
+                          channelId: channel.channelId,
+                          page: 1,
+                          isRefresh: false),
+                    );
                     //Navigator.pop(context);
                     Backdrop.of(context).concealBackLayer();
                   },
@@ -65,7 +69,7 @@ class ChannelCell extends StatelessWidget {
                       shape: BoxShape.circle,
                     ),
                   ),
-                  const Spacer()
+                  const Spacer(),
                 ],
               ),
             ),

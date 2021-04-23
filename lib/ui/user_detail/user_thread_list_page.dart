@@ -34,28 +34,30 @@ class UserThreadListPage extends StatelessWidget {
                     itemCount:
                         (state as UserThreadListLoaded).userThreadList.length,
                     itemBuilder: (context, index) => Column(
-                          children: <Widget>[
-                            ListTile(
-                                title: Text(
-                                  state.userThreadList[index].title,
-                                ),
-                                trailing: Chip(
-                                  label: Text(
-                                    '#${state.userThreadList[index].tagName}',
-                                    strutStyle: const StrutStyle(height: 1.25),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .caption!
-                                        .copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w700),
-                                  ),
-                                  backgroundColor:
-                                      state.userThreadList[index].tagColor,
-                                )),
-                            const Divider(indent: 8, height: 1, thickness: 1),
-                          ],
-                        )),
+                      children: <Widget>[
+                        ListTile(
+                          title: Text(
+                            state.userThreadList[index].title,
+                          ),
+                          trailing: Chip(
+                            label: Text(
+                              '#${state.userThreadList[index].tagName}',
+                              strutStyle: const StrutStyle(height: 1.25),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .caption!
+                                  .copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700),
+                            ),
+                            backgroundColor:
+                                state.userThreadList[index].tagColor,
+                          ),
+                        ),
+                        const Divider(indent: 8, height: 1, thickness: 1),
+                      ],
+                    ),
+                  ),
           ),
         ),
       ),

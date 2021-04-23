@@ -54,73 +54,83 @@ class ThreadCell extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: <Widget>[
                           Text.rich(
-                            TextSpan(children: [
-                              const WidgetSpan(
-                                  child: Icon(Icons.face_rounded, size: 13),
-                                  alignment: PlaceholderAlignment.middle),
-                              const WidgetSpan(
-                                  child: SizedBox(
-                                width: 5,
-                              )),
-                              WidgetSpan(
-                                child: Text(
-                                  thread.replies[0].authorNickname,
-                                  style: Theme.of(context).textTheme.caption,
+                            TextSpan(
+                              children: [
+                                const WidgetSpan(
+                                    child: Icon(Icons.face_rounded, size: 13),
+                                    alignment: PlaceholderAlignment.middle),
+                                const WidgetSpan(
+                                    child: SizedBox(
+                                  width: 5,
+                                )),
+                                WidgetSpan(
+                                  child: Text(
+                                    thread.replies[0].authorNickname,
+                                    style: Theme.of(context).textTheme.caption,
+                                  ),
                                 ),
-                              )
-                            ]),
+                              ],
+                            ),
                           ),
                           const SizedBox(width: 10),
                           Text.rich(
-                            TextSpan(children: [
-                              const WidgetSpan(
-                                  child: Icon(Icons.reply_rounded, size: 13),
-                                  alignment: PlaceholderAlignment.middle),
-                              const WidgetSpan(
-                                  child: SizedBox(
-                                width: 5,
-                              )),
-                              WidgetSpan(
-                                child: Text(thread.totalReplies.toString(),
-                                    style: Theme.of(context).textTheme.caption),
-                              )
-                            ]),
+                            TextSpan(
+                              children: [
+                                const WidgetSpan(
+                                    child: Icon(Icons.reply_rounded, size: 13),
+                                    alignment: PlaceholderAlignment.middle),
+                                const WidgetSpan(
+                                    child: SizedBox(
+                                  width: 5,
+                                )),
+                                WidgetSpan(
+                                  child: Text(thread.totalReplies.toString(),
+                                      style:
+                                          Theme.of(context).textTheme.caption),
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(width: 10),
                           Text.rich(
-                            TextSpan(children: [
-                              const WidgetSpan(
-                                  child:
-                                      Icon(Icons.access_time_rounded, size: 13),
-                                  alignment: PlaceholderAlignment.middle),
-                              const WidgetSpan(
-                                  child: SizedBox(
-                                width: 5,
-                              )),
-                              WidgetSpan(
-                                child: LastReplyTimer(
+                            TextSpan(
+                              children: [
+                                const WidgetSpan(
+                                    child: Icon(Icons.access_time_rounded,
+                                        size: 13),
+                                    alignment: PlaceholderAlignment.middle),
+                                const WidgetSpan(
+                                    child: SizedBox(
+                                  width: 5,
+                                )),
+                                WidgetSpan(
+                                  child: LastReplyTimer(
                                     key: ValueKey(thread.threadId),
                                     time: thread.replies.length == 2
                                         ? thread.replies[1].date.toLocal()
-                                        : thread.replies[0].date.toLocal()),
-                              )
-                            ]),
+                                        : thread.replies[0].date.toLocal(),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           const Spacer(),
                           Chip(
                             padding: EdgeInsets.zero,
                             materialTapTargetSize:
                                 MaterialTapTargetSize.shrinkWrap,
-                            label: Text('#${thread.tagName}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .overline!
-                                    .copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600)),
+                            label: Text(
+                              '#${thread.tagName}',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .overline!
+                                  .copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600),
+                            ),
                             //labelPadding: EdgeInsets.zero,
                             backgroundColor: thread.tagColor,
-                          )
+                          ),
                         ],
                       ),
                     ),

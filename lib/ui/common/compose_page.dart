@@ -368,39 +368,42 @@ class _TagSelectDialog extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: state.channels
-            .map((channel) => Container(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(channel.channelName,
-                          style: Theme.of(context)
-                              .textTheme
-                              .caption!
-                              .copyWith(color: Colors.white60)),
-                      Wrap(
-                        spacing: 8,
-                        children: channel.tags
-                            .map((tag) => InputChip(
-                                  label: Text('#${tag.name}',
-                                      strutStyle:
-                                          const StrutStyle(height: 1.25),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .caption!
-                                          .copyWith(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w700)),
-                                  backgroundColor: tag.color,
-                                  onPressed: () {
-                                    onTagSelect(tag, channel.channelId);
-                                  },
-                                ))
-                            .toList(),
-                      )
-                    ],
-                  ),
-                ))
+            .map(
+              (channel) => Container(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(channel.channelName,
+                        style: Theme.of(context)
+                            .textTheme
+                            .caption!
+                            .copyWith(color: Colors.white60)),
+                    Wrap(
+                      spacing: 8,
+                      children: channel.tags
+                          .map(
+                            (tag) => InputChip(
+                              label: Text('#${tag.name}',
+                                  strutStyle: const StrutStyle(height: 1.25),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .caption!
+                                      .copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700)),
+                              backgroundColor: tag.color,
+                              onPressed: () {
+                                onTagSelect(tag, channel.channelId);
+                              },
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
+                ),
+              ),
+            )
             .toList(),
       ),
     );

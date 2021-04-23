@@ -39,17 +39,20 @@ void _jumpToPage(BuildContext context, Thread thread) {
                 clipBehavior: Clip.hardEdge,
                 margin: const EdgeInsets.symmetric(horizontal: 8),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
                 child: SimpleDialogOption(
                   padding: const EdgeInsets.all(16.0),
                   onPressed: () {
                     Navigator.of(context).pop();
-                    navigatorKey.currentState!.pushNamed('/Thread',
-                        arguments: ThreadPageArguments(
-                            threadId: thread.threadId,
-                            title: thread.title,
-                            page: index + 1,
-                            locked: thread.status == 'locked'));
+                    navigatorKey.currentState!.pushNamed(
+                      '/Thread',
+                      arguments: ThreadPageArguments(
+                          threadId: thread.threadId,
+                          title: thread.title,
+                          page: index + 1,
+                          locked: thread.status == 'locked'),
+                    );
                   },
                   child: Text(
                     '第 ${index + 1} 頁',

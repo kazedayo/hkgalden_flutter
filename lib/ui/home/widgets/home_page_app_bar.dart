@@ -8,21 +8,25 @@ PreferredSize _buildAppBar() {
         leading: _LeadingButton(),
         title: BlocBuilder<ChannelBloc, ChannelState>(
           builder: (context, state) => Text.rich(
-            TextSpan(children: [
-              WidgetSpan(
+            TextSpan(
+              children: [
+                WidgetSpan(
                   alignment: PlaceholderAlignment.middle,
                   child: Hero(
-                      tag: 'logo',
-                      child: SvgPicture.asset(
-                        'assets/icon-hkgalden.svg',
-                        width: 27,
-                        height: 27,
-                      ))),
-              const WidgetSpan(
+                    tag: 'logo',
+                    child: SvgPicture.asset(
+                      'assets/icon-hkgalden.svg',
+                      width: 27,
+                      height: 27,
+                    ),
+                  ),
+                ),
+                const WidgetSpan(
                   child: SizedBox(
-                width: 5,
-              )),
-              TextSpan(
+                    width: 5,
+                  ),
+                ),
+                TextSpan(
                   text: (state as ChannelLoaded)
                       .channels
                       .where((channel) =>
@@ -30,20 +34,27 @@ PreferredSize _buildAppBar() {
                       .first
                       .channelName,
                   style: const TextStyle(
-                      fontSize: 19, fontWeight: FontWeight.w700))
-            ]),
+                      fontSize: 19, fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
           ),
         ),
         actions: [
           if (state is SessionUserLoaded)
             Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: _PopupMenuButton())
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: _PopupMenuButton(),
+            )
           else
             IconButton(
-                icon: const Icon(Icons.login_rounded),
-                onPressed: () => Navigator.of(context)
-                    .push(SlideInFromBottomRoute(page: LoginPage())))
+              icon: const Icon(Icons.login_rounded),
+              onPressed: () => Navigator.of(context).push(
+                SlideInFromBottomRoute(
+                  page: LoginPage(),
+                ),
+              ),
+            ),
         ],
       ),
     ),

@@ -14,56 +14,56 @@ Theme _buildFrontLayer(
     child: Material(
       color: Theme.of(context).primaryColor,
       child: RefreshIndicator(
-          backgroundColor: Colors.white,
-          strokeWidth: 2.5,
-          onRefresh: () {
-            threadListBloc.add(RequestThreadListEvent(
-                channelId:
-                    (channelBloc.state as ChannelLoaded).selectedChannelId,
-                page: 1,
-                isRefresh: true));
-            return threadListBloc.stream
-                .firstWhere((element) => element is! ThreadListLoading);
-          },
-          child: state is ThreadListLoading
-              ? ListLoadingSkeleton()
-              : () {
-                  if (state is ThreadListLoaded) {
-                    return ListView.builder(
-                      controller: scrollController,
-                      itemCount: state.threads.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == state.threads.length) {
-                          return ListLoadingSkeletonCell();
-                        } else {
-                          return Visibility(
-                            visible: () {
-                              if (sessionUserBloc.state is SessionUserLoaded) {
-                                return !(sessionUserBloc.state
-                                        as SessionUserLoaded)
-                                    .sessionUser
-                                    .blockedUsers
-                                    .contains(state.threads[index].replies[0]
-                                        .author.userId);
-                              } else {
-                                return true;
-                              }
-                            }(),
-                            child: ThreadCell(
-                              key: ValueKey(state.threads[index].threadId),
-                              thread: state.threads[index],
-                              onTap: () =>
-                                  loadThread(context, state.threads[index]),
-                              onLongPress: () =>
-                                  jumpToPage(context, state.threads[index]),
-                            ),
-                          );
-                        }
-                      },
-                    );
-                  }
-                  return const SizedBox();
-                }()),
+        backgroundColor: Colors.white,
+        strokeWidth: 2.5,
+        onRefresh: () {
+          threadListBloc.add(RequestThreadListEvent(
+              channelId: (channelBloc.state as ChannelLoaded).selectedChannelId,
+              page: 1,
+              isRefresh: true));
+          return threadListBloc.stream
+              .firstWhere((element) => element is! ThreadListLoading);
+        },
+        child: state is ThreadListLoading
+            ? ListLoadingSkeleton()
+            : () {
+                if (state is ThreadListLoaded) {
+                  return ListView.builder(
+                    controller: scrollController,
+                    itemCount: state.threads.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == state.threads.length) {
+                        return ListLoadingSkeletonCell();
+                      } else {
+                        return Visibility(
+                          visible: () {
+                            if (sessionUserBloc.state is SessionUserLoaded) {
+                              return !(sessionUserBloc.state
+                                      as SessionUserLoaded)
+                                  .sessionUser
+                                  .blockedUsers
+                                  .contains(state
+                                      .threads[index].replies[0].author.userId);
+                            } else {
+                              return true;
+                            }
+                          }(),
+                          child: ThreadCell(
+                            key: ValueKey(state.threads[index].threadId),
+                            thread: state.threads[index],
+                            onTap: () =>
+                                loadThread(context, state.threads[index]),
+                            onLongPress: () =>
+                                jumpToPage(context, state.threads[index]),
+                          ),
+                        );
+                      }
+                    },
+                  );
+                }
+                return const SizedBox();
+              }(),
+      ),
     ),
   );
 }

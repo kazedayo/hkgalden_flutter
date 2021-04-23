@@ -78,16 +78,16 @@ class _LoginPageState extends State<LoginPage> {
 
   JavascriptChannel _alertJavascriptChannel(BuildContext context) {
     return JavascriptChannel(
-        name: 'Alert',
-        onMessageReceived: (JavascriptMessage message) {
-          showCustomDialog(
-            context: context,
-            builder: (BuildContext context) {
-              // return object of type Dialog
-              return CustomAlertDialog(
-                  title: '登入失敗!', content: message.message);
-            },
-          );
-        });
+      name: 'Alert',
+      onMessageReceived: (JavascriptMessage message) {
+        showCustomDialog(
+          context: context,
+          builder: (BuildContext context) {
+            // return object of type Dialog
+            return CustomAlertDialog(title: '登入失敗!', content: message.message);
+          },
+        );
+      },
+    );
   }
 }

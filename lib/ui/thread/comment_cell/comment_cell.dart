@@ -91,30 +91,31 @@ class CommentCell extends StatelessWidget {
                             child: Visibility(
                               visible: !threadLocked,
                               child: IconButton(
-                                  icon: const Icon(Icons.format_quote),
-                                  onPressed: () => canReply
-                                      ? showBarModalBottomSheet(
-                                          duration:
-                                              const Duration(milliseconds: 300),
-                                          animationCurve: Curves.easeOut,
-                                          context: context,
-                                          builder: (context) => ComposePage(
-                                            composeMode:
-                                                ComposeMode.quotedReply,
-                                            threadId: threadId,
-                                            parentReply: reply,
-                                            onSent: (reply) {
-                                              onSent(reply);
-                                            },
-                                          ),
-                                        )
-                                      : showCustomDialog(
-                                          context: context,
-                                          builder: (context) =>
-                                              const CustomAlertDialog(
-                                                title: '未登入',
-                                                content: '請先登入',
-                                              ))),
+                                icon: const Icon(Icons.format_quote),
+                                onPressed: () => canReply
+                                    ? showBarModalBottomSheet(
+                                        duration:
+                                            const Duration(milliseconds: 300),
+                                        animationCurve: Curves.easeOut,
+                                        context: context,
+                                        builder: (context) => ComposePage(
+                                          composeMode: ComposeMode.quotedReply,
+                                          threadId: threadId,
+                                          parentReply: reply,
+                                          onSent: (reply) {
+                                            onSent(reply);
+                                          },
+                                        ),
+                                      )
+                                    : showCustomDialog(
+                                        context: context,
+                                        builder: (context) =>
+                                            const CustomAlertDialog(
+                                          title: '未登入',
+                                          content: '請先登入',
+                                        ),
+                                      ),
+                              ),
                             ),
                           ),
                         ],

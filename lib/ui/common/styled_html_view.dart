@@ -53,18 +53,19 @@ class StyledHtmlView extends StatelessWidget {
                           },
                         ),
                         Positioned.fill(
-                            child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () => state.imageLoadingHasError
-                                ? null
-                                : _showImageView(
-                                    context,
-                                    attributes['src']!,
-                                    '${floor}_${attributes['src']}_$state.randomHash',
-                                  ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () => state.imageLoadingHasError
+                                  ? null
+                                  : _showImageView(
+                                      context,
+                                      attributes['src']!,
+                                      '${floor}_${attributes['src']}_$state.randomHash',
+                                    ),
+                            ),
                           ),
-                        ))
+                        ),
                       ],
                     ),
                   ),
@@ -163,10 +164,13 @@ class StyledHtmlView extends StatelessWidget {
   }
 
   void _showImageView(BuildContext context, String url, String heroTag) {
-    Navigator.of(context).push(FadeRoute(
+    Navigator.of(context).push(
+      FadeRoute(
         page: FullScreenPhotoView(
-      heroTag: heroTag,
-      url: url,
-    )));
+          heroTag: heroTag,
+          url: url,
+        ),
+      ),
+    );
   }
 }
