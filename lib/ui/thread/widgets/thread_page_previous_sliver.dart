@@ -39,7 +39,7 @@ Widget _generatePreviousPageSliver(
                 .replies[state.previousPages.replies.length - index - 1].floor,
           ),
           CommentCell(
-            key: ValueKey(state
+            key: PageStorageKey(state
                 .previousPages
                 .replies[state.previousPages.replies.length - index - 1]
                 .replyId),
@@ -59,7 +59,7 @@ Widget _generatePreviousPageSliver(
       );
     } else {
       return CommentCell(
-        key: ValueKey(state.previousPages
+        key: PageStorageKey(state.previousPages
             .replies[state.previousPages.replies.length - index - 1].replyId),
         threadId: state.thread.threadId,
         reply: state.previousPages

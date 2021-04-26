@@ -12,18 +12,21 @@ Widget _generatePageSliver(
       children: <Widget>[
         _PageHeader(floor: state.thread.replies[index].floor),
         CommentCell(
-          key: ValueKey(state.thread.replies[index].replyId),
+          key: PageStorageKey(state.thread.replies[index].replyId),
           threadId: state.thread.threadId,
           reply: state.thread.replies[index],
-          onLastPage: BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
+          onLastPage:
+              BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
           onSent: (reply) {
-            onReplySuccess(context, scrollController, reply, BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
+            onReplySuccess(context, scrollController, reply,
+                BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
           },
           canReply: BlocProvider.of<ThreadPageCubit>(context).state.canReply,
           threadLocked: state.thread.status == 'locked',
         ),
         _PageFooter(
-          onLastPage: BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
+          onLastPage:
+              BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
         )
       ],
     );
@@ -33,12 +36,14 @@ Widget _generatePageSliver(
       children: <Widget>[
         _PageHeader(floor: state.thread.replies[index].floor),
         CommentCell(
-          key: ValueKey(state.thread.replies[index].replyId),
+          key: PageStorageKey(state.thread.replies[index].replyId),
           threadId: state.thread.threadId,
           reply: state.thread.replies[index],
-          onLastPage: BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
+          onLastPage:
+              BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
           onSent: (reply) {
-            onReplySuccess(context, scrollController, reply, BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
+            onReplySuccess(context, scrollController, reply,
+                BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
           },
           canReply: BlocProvider.of<ThreadPageCubit>(context).state.canReply,
           threadLocked: state.thread.status == 'locked',
@@ -49,29 +54,33 @@ Widget _generatePageSliver(
     return Column(
       children: <Widget>[
         CommentCell(
-          key: ValueKey(state.thread.replies[index].replyId),
+          key: PageStorageKey(state.thread.replies[index].replyId),
           threadId: state.thread.threadId,
           reply: state.thread.replies[index],
-          onLastPage: BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
+          onLastPage:
+              BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
           onSent: (reply) {
-            onReplySuccess(context, scrollController, reply, BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
+            onReplySuccess(context, scrollController, reply,
+                BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
           },
           canReply: BlocProvider.of<ThreadPageCubit>(context).state.canReply,
           threadLocked: state.thread.status == 'locked',
         ),
         _PageFooter(
-          onLastPage: BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
+          onLastPage:
+              BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
         ),
       ],
     );
   } else {
     return CommentCell(
-      key: ValueKey(state.thread.replies[index].replyId),
+      key: PageStorageKey(state.thread.replies[index].replyId),
       threadId: state.thread.threadId,
       reply: state.thread.replies[index],
       onLastPage: BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
       onSent: (reply) {
-        onReplySuccess(context, scrollController, reply, BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
+        onReplySuccess(context, scrollController, reply,
+            BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
       },
       canReply: BlocProvider.of<ThreadPageCubit>(context).state.canReply,
       threadLocked: state.thread.status == 'locked',

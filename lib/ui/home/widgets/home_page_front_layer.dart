@@ -49,7 +49,7 @@ Theme _buildFrontLayer(
                             }
                           }(),
                           child: ThreadCell(
-                            key: ValueKey(state.threads[index].threadId),
+                            key: PageStorageKey(state.threads[index].threadId),
                             thread: state.threads[index],
                             onTap: () =>
                                 loadThread(context, state.threads[index]),
