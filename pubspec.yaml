@@ -36,6 +36,7 @@ dependencies:
     sdk: flutter
   flutter_quill: ^1.0.0
   flutter_svg: 
+  flutter_web_auth: 
   graphql: ^5.0.0-nullsafety.3
   hive:
   hive_flutter:
@@ -48,7 +49,6 @@ dependencies:
   shimmer: 2.0.0-nullsafety.0
   universal_html: 
   url_launcher: 
-  webview_flutter: 
 
 dev_dependencies:
   bloc_test:

@@ -49,11 +49,25 @@ PreferredSize _buildAppBar() {
           else
             IconButton(
               icon: const Icon(Icons.login_rounded),
-              onPressed: () => Navigator.of(context).push(
-                SlideInFromBottomRoute(
-                  page: LoginPage(),
-                ),
-              ),
+              onPressed: () async {
+                final result = await FlutterWebAuth.authenticate(
+                    url:
+                        "https://hkgalden.org/oauth/v1/authorize?client_id=${HKGaldenApi.clientId}",
+                    callbackUrlScheme: "http.hkgalden.app");
+
+                final token = Uri.parse(result).queryParameters['token'];
+                await TokenStore().writeToken(token!);
+                BlocProvider.of<SessionUserBloc>(context)
+                    .add(RequestSessionUserEvent());
+                BlocProvider.of<ThreadListBloc>(context).add(
+                  RequestThreadListEvent(
+                      channelId: (BlocProvider.of<ChannelBloc>(context).state
+                              as ChannelLoaded)
+                          .selectedChannelId,
+                      page: 1,
+                      isRefresh: false),
+                );
+              },
             ),
         ],
       ),

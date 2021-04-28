@@ -6,6 +6,14 @@
         android:label="hkGalden"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
+        <activity android:name="com.linusu.flutter_web_auth.CallbackActivity" >
+          <intent-filter android:label="flutter_web_auth">
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="http.hkgalden.app" />
+          </intent-filter>
+        </activity>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
