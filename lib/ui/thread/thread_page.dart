@@ -10,7 +10,7 @@ import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/ui_state_models/thread_page_state.dart';
 import 'package:hkgalden_flutter/repository/thread_repository.dart';
-import 'package:hkgalden_flutter/ui/common/compose_page.dart';
+import 'package:hkgalden_flutter/ui/common/compose_page/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/thread/comment_cell/comment_cell.dart';

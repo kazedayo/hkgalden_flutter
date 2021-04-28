@@ -23,6 +23,8 @@ import 'package:flutter_quill/widgets/editor.dart';
 import 'package:flutter_quill/widgets/toolbar.dart';
 import 'package:tuple/tuple.dart';
 
+part 'widgets/compose_page_tag_select_dialog.dart';
+
 class ComposePage extends StatefulWidget {
   final ComposeMode composeMode;
   final int? threadId;
@@ -319,8 +321,8 @@ class _ComposePageState extends State<ComposePage> {
       setState(() {
         _isSending = false;
         if (threadId != null) {
-          Navigator.pop(context);
           widget.onCreateThread!(_channelId);
+          Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text('主題發表失敗!')));
@@ -343,69 +345,13 @@ class _ComposePageState extends State<ComposePage> {
       setState(() {
         _isSending = false;
         if (sentReply != null) {
-          Navigator.pop(context);
           widget.onSent!(sentReply);
+          Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text('回覆發送失敗!')));
         }
       });
     });
-  }
-}
-
-class _TagSelectDialog extends StatelessWidget {
-  final Function(Tag, String) onTagSelect;
-
-  const _TagSelectDialog({required this.onTagSelect});
-
-  @override
-  Widget build(BuildContext context) {
-    final ChannelLoaded state =
-        BlocProvider.of<ChannelBloc>(context).state as ChannelLoaded;
-    return SingleChildScrollView(
-      //padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: state.channels
-            .map(
-              (channel) => Container(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(channel.channelName,
-                        style: Theme.of(context)
-                            .textTheme
-                            .caption!
-                            .copyWith(color: Colors.white60)),
-                    Wrap(
-                      spacing: 8,
-                      children: channel.tags
-                          .map(
-                            (tag) => InputChip(
-                              label: Text('#${tag.name}',
-                                  strutStyle: const StrutStyle(height: 1.25),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .caption!
-                                      .copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700)),
-                              backgroundColor: tag.color,
-                              onPressed: () {
-                                onTagSelect(tag, channel.channelId);
-                              },
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ],
-                ),
-              ),
-            )
-            .toList(),
-      ),
-    );
   }
 }

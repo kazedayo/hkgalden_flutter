@@ -57,14 +57,15 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
       }
     } else if (event is AppendReplyToThreadEvent) {
       if (state is ThreadLoaded) {
-        final List<Reply> replies =
-            (state as ThreadLoaded).thread.replies.toList();
+        final ThreadLoaded previousState = state as ThreadLoaded;
+        yield ThreadAppending();
+        final List<Reply> replies = previousState.thread.replies.toList();
         replies.add(event.reply);
         yield ThreadLoaded(
-            thread: (state as ThreadLoaded).thread.copyWith(replies: replies),
-            previousPages: (state as ThreadLoaded).previousPages,
-            currentPage: (state as ThreadLoaded).currentPage,
-            endPage: (state as ThreadLoaded).endPage);
+            thread: previousState.thread.copyWith(replies: replies),
+            previousPages: previousState.previousPages,
+            currentPage: previousState.currentPage,
+            endPage: previousState.endPage);
       }
     } else if (event is ClearThreadStateEvent) {
       yield ThreadLoading();
