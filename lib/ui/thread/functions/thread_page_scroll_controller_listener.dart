@@ -17,8 +17,7 @@ void _initListener(
       }
     } else if (scrollController.position.pixels ==
         scrollController.position.minScrollExtent) {
-      if ((threadBloc.state as ThreadLoaded).currentPage != 1 &&
-          (threadBloc.state as ThreadLoaded).endPage <= arguments.page) {
+      if ((threadBloc.state as ThreadLoaded).currentPage != 1) {
         threadBloc.add(RequestThreadEvent(
             threadId: (threadBloc.state as ThreadLoaded).thread.threadId,
             page: (threadBloc.state as ThreadLoaded).currentPage - 1,
