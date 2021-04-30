@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -11,10 +12,12 @@ import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/tag.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
+import 'package:hkgalden_flutter/networking/image_upload_api.dart';
 import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
+import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:flutter_quill/widgets/controller.dart';
@@ -24,6 +27,7 @@ import 'package:flutter_quill/widgets/toolbar.dart';
 import 'package:tuple/tuple.dart';
 
 part 'widgets/compose_page_tag_select_dialog.dart';
+part 'widgets/quill_editor.dart';
 
 class ComposePage extends StatefulWidget {
   final ComposeMode composeMode;
@@ -173,8 +177,6 @@ class _ComposePageState extends State<ComposePage> {
                           child: _TagSelectDialog(
                             onTagSelect: (tag, channelId) {
                               Navigator.of(context).pop();
-                              FocusScope.of(context)
-                                  .requestFocus(_currentFocusNode);
                               setState(() {
                                 _tag = tag;
                                 _channelId = channelId;
@@ -241,65 +243,8 @@ class _ComposePageState extends State<ComposePage> {
             )
           else
             const SizedBox(),
-          Expanded(
-            child: QuillEditor(
-              controller: _controller,
-              focusNode: _focusNode,
-              autoFocus: true,
-              textCapitalization: TextCapitalization.none,
-              expands: true,
-              keyboardAppearance: Brightness.dark,
-              scrollable: true,
-              scrollController: ScrollController(),
-              padding: const EdgeInsets.only(left: 12, right: 12, top: 6),
-              readOnly: false,
-              customStyles: DefaultStyles(
-                  h1: DefaultTextBlockStyle(
-                      Theme.of(context).textTheme.bodyText2!.copyWith(
-                          fontWeight: FontWeight.normal,
-                          fontSize: 33,
-                          height: 1.25),
-                      const Tuple2(0.0, 0.0),
-                      const Tuple2(0.0, 0.0),
-                      null),
-                  h2: DefaultTextBlockStyle(
-                      Theme.of(context).textTheme.bodyText2!.copyWith(
-                          fontWeight: FontWeight.normal,
-                          fontSize: FontSize.xxLarge.size,
-                          height: 1.25),
-                      const Tuple2(0.0, 0.0),
-                      const Tuple2(0.0, 0.0),
-                      null),
-                  h3: DefaultTextBlockStyle(
-                      Theme.of(context).textTheme.bodyText2!.copyWith(
-                          fontWeight: FontWeight.normal,
-                          fontSize: FontSize.xLarge.size,
-                          height: 1.25),
-                      const Tuple2(0.0, 0.0),
-                      const Tuple2(0.0, 0.0),
-                      null),
-                  strikeThrough:
-                      const TextStyle(decoration: TextDecoration.lineThrough),
-                  paragraph: DefaultTextBlockStyle(
-                      Theme.of(context).textTheme.bodyText2!.copyWith(
-                          fontWeight: FontWeight.normal,
-                          fontSize: FontSize.large.size,
-                          height: 1.25),
-                      const Tuple2(0.0, 0.0),
-                      const Tuple2(0.0, 0.0),
-                      null)),
-            ),
-          ),
-          QuillToolbar.basic(
-            controller: _controller,
-            showHistory: false,
-            showBackgroundColorButton: false,
-            showColorButton: false,
-            showCodeBlock: false,
-            showListCheck: false,
-            showIndent: false,
-            showQuote: false,
-          ),
+          ..._buildQuillEditor(
+              context, _controller, _focusNode, onImagePickCallback)
         ],
       ),
     );
@@ -328,6 +273,27 @@ class _ComposePageState extends State<ComposePage> {
               .showSnackBar(const SnackBar(content: Text('主題發表失敗!')));
         }
       });
+    });
+  }
+
+  Future<String> onImagePickCallback(File file) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(days: 1),
+        content: Row(
+          children: const [
+            ProgressSpinner(),
+            SizedBox(
+              width: 8,
+            ),
+            Text('圖片上載中...')
+          ],
+        ),
+      ),
+    );
+    return ImageUploadApi().uploadImage(file.path).then((value) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      return value;
     });
   }
 
