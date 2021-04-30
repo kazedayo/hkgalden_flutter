@@ -24,45 +24,55 @@ Theme _buildFrontLayer(
           return threadListBloc.stream
               .firstWhere((element) => element is! ThreadListLoading);
         },
-        child: state is ThreadListLoading
-            ? ListLoadingSkeleton()
-            : () {
-                if (state is ThreadListLoaded) {
-                  return ListView.builder(
-                    controller: scrollController,
-                    itemCount: state.threads.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == state.threads.length) {
-                        return ListLoadingSkeletonCell();
+        child: () {
+          if (state is ThreadListLoading) {
+            return ListLoadingSkeleton();
+          } else if (state is ThreadListLoaded) {
+            return ListView.builder(
+              controller: scrollController,
+              itemCount: state.threads.length + 1,
+              itemBuilder: (context, index) {
+                if (index == state.threads.length) {
+                  return ListLoadingSkeletonCell();
+                } else {
+                  return Visibility(
+                    visible: () {
+                      if (sessionUserBloc.state is SessionUserLoaded) {
+                        return !(sessionUserBloc.state as SessionUserLoaded)
+                            .sessionUser
+                            .blockedUsers
+                            .contains(
+                                state.threads[index].replies[0].author.userId);
                       } else {
-                        return Visibility(
-                          visible: () {
-                            if (sessionUserBloc.state is SessionUserLoaded) {
-                              return !(sessionUserBloc.state
-                                      as SessionUserLoaded)
-                                  .sessionUser
-                                  .blockedUsers
-                                  .contains(state
-                                      .threads[index].replies[0].author.userId);
-                            } else {
-                              return true;
-                            }
-                          }(),
-                          child: ThreadCell(
-                            key: PageStorageKey(state.threads[index].threadId),
-                            thread: state.threads[index],
-                            onTap: () =>
-                                loadThread(context, state.threads[index]),
-                            onLongPress: () =>
-                                jumpToPage(context, state.threads[index]),
-                          ),
-                        );
+                        return true;
                       }
-                    },
+                    }(),
+                    child: ThreadCell(
+                      key: PageStorageKey(state.threads[index].threadId),
+                      thread: state.threads[index],
+                      onTap: () => loadThread(context, state.threads[index]),
+                      onLongPress: () =>
+                          jumpToPage(context, state.threads[index]),
+                    ),
                   );
                 }
-                return const SizedBox();
-              }(),
+              },
+            );
+          } else if (state is ThreadListError) {
+            return ErrorPage(
+              message: '無法載入主題列表',
+              onRetry: () => BlocProvider.of<ThreadListBloc>(context).add(
+                RequestThreadListEvent(
+                  channelId:
+                      (channelBloc.state as ChannelLoaded).selectedChannelId,
+                  page: 1,
+                  isRefresh: false,
+                ),
+              ),
+            );
+          }
+          return const SizedBox();
+        }(),
       ),
     ),
   );

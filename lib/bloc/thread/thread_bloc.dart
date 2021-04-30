@@ -10,7 +10,7 @@ part 'thread_state.dart';
 class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
   ThreadBloc({required ThreadRepository repository})
       : _repository = repository,
-        super(ThreadLoading());
+        super(ThreadInit());
 
   final ThreadRepository _repository;
 
@@ -18,6 +18,7 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
   Stream<ThreadState> mapEventToState(ThreadEvent event) async* {
     if (event is RequestThreadEvent) {
       if (event.isInitialLoad) {
+        yield ThreadLoading();
         final Thread? thread =
             await _repository.getThread(event.threadId, event.page);
         if (thread != null) {
@@ -26,6 +27,8 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
               previousPages: Thread.initial(),
               currentPage: event.page,
               endPage: event.page);
+        } else {
+          yield ThreadError();
         }
       } else {
         final ThreadLoaded previousState = state as ThreadLoaded;
@@ -53,6 +56,8 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
                 currentPage: event.page,
                 endPage: event.page);
           }
+        } else {
+          yield ThreadError();
         }
       }
     } else if (event is AppendReplyToThreadEvent) {
@@ -68,7 +73,7 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
             endPage: previousState.endPage);
       }
     } else if (event is ClearThreadStateEvent) {
-      yield ThreadLoading();
+      yield ThreadInit();
     }
   }
 }

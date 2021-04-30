@@ -7,7 +7,11 @@ abstract class ThreadListState extends Equatable {
   List<Object> get props => [];
 }
 
+class ThreadListInit extends ThreadListState {}
+
 class ThreadListLoading extends ThreadListState {}
+
+class ThreadListError extends ThreadListState {}
 
 class ThreadListAppending extends ThreadListState {}
 

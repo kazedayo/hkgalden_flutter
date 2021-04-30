@@ -9,7 +9,7 @@ part 'thread_list_state.dart';
 class ThreadListBloc extends Bloc<ThreadListEvent, ThreadListState> {
   ThreadListBloc({required ThreadListRepository repository})
       : _repository = repository,
-        super(ThreadListLoading());
+        super(ThreadListInit());
 
   final ThreadListRepository _repository;
 
@@ -25,6 +25,8 @@ class ThreadListBloc extends Bloc<ThreadListEvent, ThreadListState> {
               threads: threads,
               currentChannelId: event.channelId,
               currentPage: event.page);
+        } else {
+          yield ThreadListError();
         }
       } else {
         final ThreadListLoaded previousState = state as ThreadListLoaded;
@@ -36,6 +38,8 @@ class ThreadListBloc extends Bloc<ThreadListEvent, ThreadListState> {
               threads: previousState.threads.toList()..addAll(threads),
               currentChannelId: event.channelId,
               currentPage: event.page);
+        } else {
+          add(event);
         }
       }
     }

@@ -12,6 +12,7 @@ import 'package:hkgalden_flutter/models/ui_state_models/thread_page_state.dart';
 import 'package:hkgalden_flutter/repository/thread_repository.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
+import 'package:hkgalden_flutter/ui/common/error_page.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/thread/comment_cell/comment_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton.dart';
@@ -96,48 +97,56 @@ class _ThreadPageState extends State<ThreadPage> {
                 preferredSize: const Size.fromHeight(kToolbarHeight),
                 child: _buildAppBar(context, arguments),
               ),
-              body: state is ThreadLoading
-                  ? ThreadPageLoadingSkeleton()
-                  : () {
-                      if (state is ThreadLoaded) {
-                        return CustomScrollView(
-                          center: centerKey,
-                          controller: _scrollController,
-                          slivers: <Widget>[
-                            SliverList(
-                              delegate: SliverChildBuilderDelegate(
-                                  (context, index) {
-                                return _generatePreviousPageSliver(
-                                    context,
-                                    _scrollController,
-                                    state,
-                                    index,
-                                    arguments.page,
-                                    _onReplySuccess);
-                              },
-                                  childCount:
-                                      state.previousPages.replies.isEmpty
-                                          ? 1
-                                          : state.previousPages.replies.length),
-                            ),
-                            SliverList(
-                              key: centerKey,
-                              delegate: SliverChildBuilderDelegate(
-                                (context, index) {
-                                  return _generatePageSliver(
-                                      context,
-                                      _scrollController,
-                                      state,
-                                      index,
-                                      _onReplySuccess);
-                                },
-                                childCount: state.thread.replies.length,
-                              ),
-                            ),
-                          ],
-                        );
-                      }
-                    }(),
+              body: () {
+                if (state is ThreadLoading) {
+                  return ThreadPageLoadingSkeleton();
+                } else if (state is ThreadLoaded) {
+                  return CustomScrollView(
+                    center: centerKey,
+                    controller: _scrollController,
+                    slivers: <Widget>[
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          return _generatePreviousPageSliver(
+                              context,
+                              _scrollController,
+                              state,
+                              index,
+                              arguments.page,
+                              _onReplySuccess);
+                        },
+                            childCount: state.previousPages.replies.isEmpty
+                                ? 1
+                                : state.previousPages.replies.length),
+                      ),
+                      SliverList(
+                        key: centerKey,
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return _generatePageSliver(
+                                context,
+                                _scrollController,
+                                state,
+                                index,
+                                _onReplySuccess);
+                          },
+                          childCount: state.thread.replies.length,
+                        ),
+                      ),
+                    ],
+                  );
+                } else if (state is ThreadError) {
+                  return ErrorPage(
+                    message: '無法載入主題',
+                    onRetry: () => BlocProvider.of<ThreadBloc>(context).add(
+                      RequestThreadEvent(
+                          threadId: arguments.threadId,
+                          page: arguments.page,
+                          isInitialLoad: true),
+                    ),
+                  );
+                }
+              }(),
               floatingActionButton: () {
                 if (state is ThreadLoaded) {
                   if (state.thread.status == 'locked') {
