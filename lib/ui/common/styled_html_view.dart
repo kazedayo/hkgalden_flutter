@@ -31,17 +31,19 @@ class StyledHtmlView extends StatelessWidget {
           builder: (context, state) => Html(
             data: htmlString,
             customRender: {
-              'img': (renderContext, _, attributes, __) {
+              'img': (renderContext, child) {
                 return ContainerSpan(
                   shrinkWrap: true,
                   newContext: renderContext,
                   style: Style(),
                   child: Hero(
-                    tag: '${floor}_${attributes['src']}_$state.randomHash',
+                    tag:
+                        '${floor}_${renderContext.tree.element!.attributes['src']}_$state.randomHash',
                     child: Stack(
                       children: [
                         OctoImage(
-                          image: NetworkImage(attributes['src']!),
+                          image: NetworkImage(
+                              renderContext.tree.element!.attributes['src']!),
                           placeholderBuilder: (context) => const Padding(
                             padding: EdgeInsets.all(8.0),
                             child: ProgressSpinner(),
@@ -60,8 +62,9 @@ class StyledHtmlView extends StatelessWidget {
                                   ? null
                                   : _showImageView(
                                       context,
-                                      attributes['src']!,
-                                      '${floor}_${attributes['src']}_$state.randomHash',
+                                      renderContext
+                                          .tree.element!.attributes['src']!,
+                                      '${floor}_${renderContext.tree.element!.attributes['src']}_$state.randomHash',
                                     ),
                             ),
                           ),
@@ -71,7 +74,7 @@ class StyledHtmlView extends StatelessWidget {
                   ),
                 );
               },
-              'icon': (context, __, attributes, ____) {
+              'icon': (context, child) {
                 return ContainerSpan(
                     shrinkWrap: true,
                     newContext: context,
@@ -79,16 +82,18 @@ class StyledHtmlView extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(3.0),
                       child: OctoImage(
-                        image: NetworkImage(attributes['src']!),
+                        image: NetworkImage(
+                            context.tree.element!.attributes['src']!),
                         placeholderBuilder: (context) => const SizedBox(),
                       ),
                     ));
               },
-              'span': (context, child, attributes, element) {
-                if (element!.className == ('color')) {
+              'span': (context, child) {
+                if (context.tree.element!.className == ('color')) {
                   final Style newStyle = context.style.copyWith(
-                    color:
-                        Color(int.parse('FF${attributes['hex']}', radix: 16)),
+                    color: Color(int.parse(
+                        'FF${context.tree.element!.attributes['hex']}',
+                        radix: 16)),
                   );
                   return Transform.translate(
                     offset: const Offset(0, 1),
@@ -96,6 +101,7 @@ class StyledHtmlView extends StatelessWidget {
                       shrinkWrap: true,
                       newContext: RenderContext(
                           buildContext: context.buildContext,
+                          tree: context.tree,
                           style: newStyle,
                           parser: context.parser),
                       style: newStyle,
