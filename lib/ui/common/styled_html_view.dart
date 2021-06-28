@@ -30,6 +30,7 @@ class StyledHtmlView extends StatelessWidget {
         child: BlocBuilder<StyledHtmlViewCubit, StyledHtmlViewState>(
           builder: (context, state) => Html(
             data: htmlString,
+            tagsList: Html.tags..add('icon'),
             customRender: {
               'img': (renderContext, child) {
                 return ContainerSpan(

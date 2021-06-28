@@ -38,7 +38,7 @@ class FullScreenPhotoView extends StatelessWidget {
                       child: Text.rich(
                         TextSpan(children: [
                           TextSpan(
-                              text: String.fromCharCode(0xe9a2),
+                              text: String.fromCharCode(0xF0125),
                               style: const TextStyle(
                                   fontSize: 25,
                                   shadows: [Shadow(blurRadius: 5)],
