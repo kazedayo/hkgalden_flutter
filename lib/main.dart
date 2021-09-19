@@ -98,7 +98,6 @@ class MyApp extends StatelessWidget {
       canvasColor: const Color(0xff1b1f1e),
       scaffoldBackgroundColor: const Color(0xff1b1f1e),
       appBarTheme: const AppBarTheme(color: Color(0xff1b1f1e), elevation: 0),
-      accentColor: const Color(0xff45c17c),
       textSelectionTheme: const TextSelectionThemeData(
           cursorColor: Color(0xff45c17c), selectionColor: Color(0xff2d8052)),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
@@ -108,6 +107,8 @@ class MyApp extends StatelessWidget {
       ),
       cupertinoOverrideTheme:
           const CupertinoThemeData(primaryColor: Color(0xff45c17c)),
+      colorScheme:
+          ColorScheme.fromSwatch().copyWith(secondary: const Color(0xff45c17c)),
     );
     return baseTheme;
   }

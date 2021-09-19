@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
+import 'package:test/test.dart';
 
 void main() {
   group("hkGalden parser", () {

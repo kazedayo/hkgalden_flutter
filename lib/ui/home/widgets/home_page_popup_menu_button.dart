@@ -77,12 +77,10 @@ class _PopupMenuButton extends StatelessWidget {
             showLicensePage(
               context: context,
               applicationName: 'hkGalden',
-              applicationIcon: SvgPicture.asset(
-                'assets/icon-hkgalden.svg',
-                width: 50,
-                height: 50,
-                color: Theme.of(context).accentColor,
-              ),
+              applicationIcon: SvgPicture.asset('assets/icon-hkgalden.svg',
+                  width: 50,
+                  height: 50,
+                  color: Theme.of(context).colorScheme.secondary),
               applicationVersion: '${info.version}+${info.buildNumber}',
               applicationLegalese: '© hkGalden & 1080',
             );

@@ -1,5 +1,5 @@
-import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
+import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 
 class UserThreadListRepository {
   final _api = HKGaldenApi();

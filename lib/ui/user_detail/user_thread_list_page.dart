@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/user_thread_list/user_thread_list_bloc.dart';
+import 'package:hkgalden_flutter/repository/user_thread_list_repository.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
-import 'package:hkgalden_flutter/repository/user_thread_list_repository.dart';
 
 class UserThreadListPage extends StatelessWidget {
   final String userId;

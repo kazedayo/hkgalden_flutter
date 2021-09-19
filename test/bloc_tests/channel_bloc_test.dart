@@ -1,9 +1,10 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
 import 'package:hkgalden_flutter/repository/channel_repository.dart';
 import 'package:mockito/annotations.dart';
-import 'package:test/test.dart';
-import 'package:bloc_test/bloc_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:test/test.dart';
+
 import 'channel_bloc_test.mocks.dart';
 
 @GenerateMocks([ChannelRepository])
