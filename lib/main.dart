@@ -107,8 +107,8 @@ class MyApp extends StatelessWidget {
       ),
       cupertinoOverrideTheme:
           const CupertinoThemeData(primaryColor: Color(0xff45c17c)),
-      colorScheme:
-          ColorScheme.fromSwatch().copyWith(secondary: const Color(0xff45c17c)),
+      colorScheme: ColorScheme.fromSwatch().copyWith(
+          secondary: const Color(0xff45c17c), brightness: Brightness.dark),
     );
     return baseTheme;
   }

@@ -148,7 +148,7 @@ class StyledHtmlView extends StatelessWidget {
                 fontWeight: FontWeight.normal,
                 margin: EdgeInsets.zero,
               ),
-              "p": Style(margin: const EdgeInsets.symmetric()),
+              "p": Style(margin: EdgeInsets.zero),
               "p.center": Style(textAlign: TextAlign.center),
               "p.right": Style(textAlign: TextAlign.right),
               "img": Style(display: Display.INLINE)

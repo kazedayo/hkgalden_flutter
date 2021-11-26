@@ -10,3 +10,4 @@ linter:
     unsafe_html: false
     avoid_bool_literals_in_conditional_expressions: false
     implementation_imports: false
+    require_trailing_commas: false
