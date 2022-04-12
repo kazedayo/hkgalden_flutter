@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
@@ -12,12 +13,12 @@ import 'package:hkgalden_flutter/repository/session_user_repository.dart';
 import 'package:hkgalden_flutter/repository/thread_list_repository.dart';
 import 'package:hkgalden_flutter/ui/startup_screen.dart';
 
-// ignore: avoid_void_async
-void main() async {
+Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GestureBinding.instance!.resamplingEnabled = true;
   await Hive.initFlutter();
   await Hive.openBox('token');
+  await dotenv.load();
   runApp(MyApp());
 }
 

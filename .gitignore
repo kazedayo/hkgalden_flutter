@@ -45,3 +45,5 @@ ios/Flutter/.last_build_id
 ios/fastlane/report.xml
 /.fvm/
 /.vscode/settings.json
+
+*.env

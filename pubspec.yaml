@@ -48,6 +48,7 @@ dependencies:
   shimmer: 
   universal_html: 
   url_launcher: 
+  flutter_dotenv:
 
 dev_dependencies:
   bloc_test:
@@ -106,6 +107,7 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
   assets:
     - assets/
+    - .env
   fonts:
     - family: CustomIcons
       fonts:
