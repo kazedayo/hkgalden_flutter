@@ -57,7 +57,6 @@ List<Widget> _buildQuillEditor(
       ),
       QuillToolbar.basic(
         controller: _controller,
-        showHistory: false,
         showBackgroundColorButton: false,
         showColorButton: false,
         showCodeBlock: false,
