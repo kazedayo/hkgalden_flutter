@@ -1,5 +1,6 @@
 part of '../home_page.dart';
 
+// ignore: unused_element
 class _PopupMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -32,27 +33,27 @@ class _PopupMenuButton extends StatelessWidget {
             title: Text('版權資訊'),
           ),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: _MenuItem.logout,
           child: ListTile(
             dense: true,
             leading: Icon(
               Icons.logout,
-              color: Colors.redAccent,
+              color: Theme.of(context).colorScheme.error,
             ),
             title: Text('登出'),
           ),
         ),
       ],
       onSelected: (value) async {
-        switch (value! as _MenuItem) {
+        switch (value) {
           case _MenuItem.account:
             showMaterialModalBottomSheet(
               duration: const Duration(milliseconds: 200),
               animationCurve: Curves.easeOut,
               enableDrag: false,
               backgroundColor: Colors.transparent,
-              barrierColor: Colors.black87,
+              barrierColor: AppTheme.barrierColor,
               context: context,
               builder: (context) => UserPage(
                 user: (BlocProvider.of<SessionUserBloc>(context).state
@@ -67,26 +68,30 @@ class _PopupMenuButton extends StatelessWidget {
               animationCurve: Curves.easeOut,
               enableDrag: false,
               backgroundColor: Colors.transparent,
-              barrierColor: Colors.black87,
+              barrierColor: AppTheme.barrierColor,
               context: context,
               builder: (context) => BlockListPage(),
             );
             break;
           case _MenuItem.licences:
             final PackageInfo info = await PackageInfo.fromPlatform();
+            if (!context.mounted) return;
             showLicensePage(
               context: context,
               applicationName: 'hkGalden',
               applicationIcon: SvgPicture.asset('assets/icon-hkgalden.svg',
                   width: 50,
                   height: 50,
-                  color: Theme.of(context).colorScheme.secondary),
+                  colorFilter: ColorFilter.mode(
+                      Theme.of(context).colorScheme.secondary,
+                      BlendMode.srcIn)),
               applicationVersion: '${info.version}+${info.buildNumber}',
               applicationLegalese: '© hkGalden & 1080',
             );
             break;
           case _MenuItem.logout:
             await TokenStore().writeToken('');
+            if (!context.mounted) return;
             BlocProvider.of<SessionUserBloc>(context)
                 .add(RemoveSessionUserEvent());
             BlocProvider.of<ThreadListBloc>(context).add(
@@ -97,8 +102,6 @@ class _PopupMenuButton extends StatelessWidget {
                   page: 1,
                   isRefresh: false),
             );
-            break;
-          default:
         }
       },
       icon: const Icon(Icons.apps_rounded),

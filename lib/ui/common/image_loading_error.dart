@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class ImageLoadingError extends StatelessWidget {
   final String error;
 
-  const ImageLoadingError(this.error);
+  const ImageLoadingError(this.error, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class ImageLoadingError extends StatelessWidget {
         Expanded(
           child: AutoSizeText(
             '圖片載入錯誤: $error',
-            style: Theme.of(context).textTheme.caption,
+            style: Theme.of(context).textTheme.bodySmall,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),

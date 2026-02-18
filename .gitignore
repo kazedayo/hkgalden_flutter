@@ -47,3 +47,6 @@ ios/fastlane/report.xml
 /.vscode/settings.json
 
 *.env
+
+# FVM Version Cache
+.fvm/

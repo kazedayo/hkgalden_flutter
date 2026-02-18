@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/material.dart';
 
 UserGroup userGroupFromJson(Map<String, dynamic> json) =>
     UserGroup.fromJson(json);

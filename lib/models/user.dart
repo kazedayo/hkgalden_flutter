@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/models/user_group.dart';
-import 'package:meta/meta.dart';
 
 List<User> userListFromJson(List<dynamic> json) =>
     json.map((user) => User.fromJson(user as Map<String, dynamic>)).toList();

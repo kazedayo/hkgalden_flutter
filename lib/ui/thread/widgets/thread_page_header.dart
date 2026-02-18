@@ -3,7 +3,7 @@ part of '../thread_page.dart';
 class _PageHeader extends StatelessWidget {
   final int floor;
 
-  const _PageHeader({Key? key, required this.floor}) : super(key: key);
+  const _PageHeader({required this.floor});
 
   @override
   Widget build(BuildContext context) => SizedBox(

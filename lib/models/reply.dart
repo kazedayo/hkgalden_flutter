@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
-import 'package:meta/meta.dart';
 
 Reply replyFromJson(dynamic json) => Reply.fromJson(json);
 
@@ -24,7 +24,7 @@ class Reply extends Equatable {
       required this.date,
       this.parent});
 
-  factory Reply.fromJson(json) => Reply(
+  factory Reply.fromJson(dynamic json) => Reply(
         replyId: json['id'] as String?,
         floor: json['floor'] as int,
         content: json['content'] == null

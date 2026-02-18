@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ListLoadingSkeletonCell extends StatelessWidget {
+  const ListLoadingSkeletonCell({super.key});
+
   @override
   Widget build(BuildContext context) => SafeArea(
         child: Shimmer.fromColors(

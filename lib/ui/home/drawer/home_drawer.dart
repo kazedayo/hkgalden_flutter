@@ -4,6 +4,8 @@ import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/channel_cell.dart';
 
 class HomeDrawer extends StatelessWidget {
+  const HomeDrawer({super.key});
+
   @override
   Widget build(BuildContext context) {
     final ChannelLoaded state =

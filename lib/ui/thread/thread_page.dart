@@ -1,6 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/cubit/thread_page_cubit.dart';
@@ -31,7 +30,10 @@ part 'widgets/thread_page_previous_sliver.dart';
 part 'widgets/thread_page_sliver.dart';
 
 class ThreadPage extends StatefulWidget {
+  const ThreadPage({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _ThreadPageState createState() => _ThreadPageState();
 }
 

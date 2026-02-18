@@ -3,6 +3,8 @@ import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton_cell.da
 import 'package:shimmer/shimmer.dart';
 
 class ListLoadingSkeleton extends StatelessWidget {
+  const ListLoadingSkeleton({super.key});
+
   @override
   Widget build(BuildContext context) => Container(
         margin: const EdgeInsets.only(top: 10),

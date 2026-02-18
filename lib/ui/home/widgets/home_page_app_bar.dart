@@ -50,13 +50,14 @@ PreferredSize _buildAppBar() {
             IconButton(
               icon: const Icon(Icons.login_rounded),
               onPressed: () async {
-                final result = await FlutterWebAuth.authenticate(
+                final result = await FlutterWebAuth2.authenticate(
                     url:
                         "https://hkgalden.org/oauth/v1/authorize?client_id=${HKGaldenApi.clientId}",
                     callbackUrlScheme: "http.hkgalden.app");
 
                 final token = Uri.parse(result).queryParameters['token'];
                 await TokenStore().writeToken(token!);
+                if (!context.mounted) return;
                 BlocProvider.of<SessionUserBloc>(context)
                     .add(RequestSessionUserEvent());
                 BlocProvider.of<ThreadListBloc>(context).add(

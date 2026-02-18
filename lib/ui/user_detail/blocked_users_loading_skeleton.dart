@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class BlockedUsersLoadingSkeleton extends StatelessWidget {
+  const BlockedUsersLoadingSkeleton({super.key});
+
   @override
   Widget build(BuildContext context) => Shimmer.fromColors(
         baseColor: Theme.of(context).scaffoldBackgroundColor,

@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_html/style.dart';
-import 'package:flutter_quill/flutter_quill.dart' hide Text;
+
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
@@ -19,7 +19,6 @@ import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
-import 'package:tuple/tuple.dart';
 
 part 'widgets/compose_page_tag_select_dialog.dart';
 part 'widgets/quill_editor.dart';
@@ -32,19 +31,18 @@ class ComposePage extends StatefulWidget {
   final Function(String)? onCreateThread;
 
   const ComposePage(
-      {Key? key,
+      {super.key,
       required this.composeMode,
       this.threadId,
       this.parentReply,
       this.onSent,
-      this.onCreateThread})
-      : super(key: key);
+      this.onCreateThread});
 
   @override
-  _ComposePageState createState() => _ComposePageState();
+  ComposePageState createState() => ComposePageState();
 }
 
-class _ComposePageState extends State<ComposePage> {
+class ComposePageState extends State<ComposePage> {
   late Tag _tag;
   late String _channelId;
   late String _title;
@@ -113,7 +111,7 @@ class _ComposePageState extends State<ComposePage> {
                   : '引用回覆 (#${widget.parentReply!.floor})',
           style: Theme.of(context)
               .textTheme
-              .subtitle1!
+              .titleMedium!
               .copyWith(fontWeight: FontWeight.bold),
         ),
         automaticallyImplyLeading: false,
@@ -185,7 +183,7 @@ class _ComposePageState extends State<ComposePage> {
                             strutStyle: const StrutStyle(height: 1.25),
                             style: Theme.of(context)
                                 .textTheme
-                                .caption!
+                                .bodySmall!
                                 .copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w700)),
@@ -198,7 +196,7 @@ class _ComposePageState extends State<ComposePage> {
                   ),
                   Expanded(
                     child: TextField(
-                      style: const TextStyle(fontSize: 14),
+                      style: Theme.of(context).textTheme.bodyMedium,
                       strutStyle: const StrutStyle(height: 1.25),
                       controller: _titleFieldController,
                       focusNode: _titleFocusNode,
@@ -287,7 +285,9 @@ class _ComposePageState extends State<ComposePage> {
       ),
     );
     return ImageUploadApi().uploadImage(file.path).then((value) {
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      }
       return value;
     });
   }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class UserThreadListLoadingSkeleton extends StatelessWidget {
+  const UserThreadListLoadingSkeleton({super.key});
+
   @override
   Widget build(BuildContext context) => Shimmer.fromColors(
         baseColor: Theme.of(context).scaffoldBackgroundColor,

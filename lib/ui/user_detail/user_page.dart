@@ -9,7 +9,7 @@ import 'package:octo_image/octo_image.dart';
 class UserPage extends StatelessWidget {
   final User user;
 
-  const UserPage({Key? key, required this.user}) : super(key: key);
+  const UserPage({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) => Stack(
@@ -39,7 +39,10 @@ class UserPage extends StatelessWidget {
                 AvatarWidget(
                   avatarImage: user.avatar == ''
                       ? SvgPicture.asset('assets/icon-hkgalden.svg',
-                          width: 25, height: 25, color: Colors.grey)
+                          width: 25,
+                          height: 25,
+                          colorFilter: const ColorFilter.mode(
+                              Colors.grey, BlendMode.srcIn))
                       : OctoImage(
                           width: 25,
                           height: 25,
@@ -61,7 +64,7 @@ class UserPage extends StatelessWidget {
                     ),
                     Text(
                       user.nickName,
-                      style: Theme.of(context).textTheme.bodyText1!.copyWith(
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                           color: user.gender == 'M'
                               ? Theme.of(context).colorScheme.brotherColor
                               : Theme.of(context).colorScheme.sisterColor),
@@ -70,7 +73,7 @@ class UserPage extends StatelessWidget {
                       height: 5,
                     ),
                     Text(user.userId,
-                        style: Theme.of(context).textTheme.caption),
+                        style: Theme.of(context).textTheme.bodySmall),
                   ],
                 ),
               ],

@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,14 +31,13 @@ class CommentCell extends StatelessWidget {
   final FullScreenPhotoView photoView = const FullScreenPhotoView();
 
   const CommentCell(
-      {Key? key,
+      {super.key,
       required this.threadId,
       required this.reply,
       required this.onLastPage,
       required this.onSent,
       required this.canReply,
-      required this.threadLocked})
-      : super(key: key);
+      required this.threadLocked});
 
   @override
   Widget build(BuildContext context) {
@@ -67,9 +64,7 @@ class CommentCell extends StatelessWidget {
               Card(
                 elevation: 3,
                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                color: Theme.of(context).primaryColor,
+                // shape and color defined in AppTheme cardTheme
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: Column(
@@ -132,7 +127,7 @@ class CommentCell extends StatelessWidget {
             child: Text(
                 DateTimeFormat.format(reply.date.toLocal(),
                     format: 'd/m/y H:i'),
-                style: Theme.of(context).textTheme.caption),
+                style: Theme.of(context).textTheme.bodySmall),
           ),
           CommentUserInfoCluster(reply: reply, sessionUserBloc: sessionUserBloc)
         ],

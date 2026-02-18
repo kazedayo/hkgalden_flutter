@@ -6,10 +6,10 @@ class AvatarWidget extends StatelessWidget {
   final List<UserGroup> userGroup;
 
   const AvatarWidget({
-    Key? key,
+    super.key,
     required this.avatarImage,
     required this.userGroup,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => Material(
@@ -22,7 +22,7 @@ class AvatarWidget extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.grey[700],
+            color: Theme.of(context).colorScheme.surfaceContainerHigh,
             gradient: userGroup.isEmpty
                 ? null
                 : LinearGradient(

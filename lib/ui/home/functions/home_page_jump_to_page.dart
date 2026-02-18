@@ -7,7 +7,7 @@ void _jumpToPage(BuildContext context, Thread thread) {
     duration: const Duration(milliseconds: 200),
     animationCurve: Curves.easeOut,
     enableDrag: false,
-    barrierColor: Colors.black.withOpacity(0.5),
+    barrierColor: Colors.black.withValues(alpha: 0.5),
     context: context,
     builder: (context) => Theme(
       data: Theme.of(context).copyWith(highlightColor: Colors.grey[800]),
@@ -22,7 +22,7 @@ void _jumpToPage(BuildContext context, Thread thread) {
               thread.title,
               style: Theme.of(context)
                   .textTheme
-                  .headline6!
+                  .titleLarge!
                   .copyWith(fontWeight: FontWeight.bold),
             ),
           ),
@@ -56,7 +56,7 @@ void _jumpToPage(BuildContext context, Thread thread) {
                   },
                   child: Text(
                     '第 ${index + 1} 頁',
-                    style: Theme.of(context).textTheme.subtitle1,
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
               ),

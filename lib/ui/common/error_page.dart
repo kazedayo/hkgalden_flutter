@@ -4,7 +4,7 @@ class ErrorPage extends StatelessWidget {
   final String message;
   final Function onRetry;
 
-  const ErrorPage({required this.message, required this.onRetry});
+  const ErrorPage({super.key, required this.message, required this.onRetry});
 
   @override
   Widget build(BuildContext context) => Center(

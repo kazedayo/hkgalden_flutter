@@ -4,9 +4,8 @@ class _PageFooter extends StatelessWidget {
   final bool onLastPage;
 
   const _PageFooter({
-    Key? key,
     required this.onLastPage,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) => BlocBuilder<ThreadBloc, ThreadState>(
@@ -51,7 +50,7 @@ class _PageFooter extends StatelessWidget {
                                   ),
                             label: Text(
                               state is ThreadAppending ? '撈緊...' : '重新整理',
-                              style: Theme.of(context).textTheme.caption,
+                              style: Theme.of(context).textTheme.bodySmall,
                               strutStyle: const StrutStyle(
                                   height: 1.1, forceStrutHeight: true),
                             )),

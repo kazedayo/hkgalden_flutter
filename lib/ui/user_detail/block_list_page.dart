@@ -7,6 +7,8 @@ import 'package:hkgalden_flutter/ui/user_detail/blocked_users_loading_skeleton.d
 import 'package:hkgalden_flutter/utils/device_properties.dart';
 
 class BlockListPage extends StatelessWidget {
+  const BlockListPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return RepositoryProvider<BlockedUsersRepository>(

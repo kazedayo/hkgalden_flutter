@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class ProgressSpinner extends StatelessWidget {
   final double? value;
 
-  const ProgressSpinner({Key? key, this.value}) : super(key: key);
+  const ProgressSpinner({super.key, this.value});
 
   @override
   Widget build(BuildContext context) {

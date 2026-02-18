@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ThreadPageLoadingSkeletonHeader extends StatelessWidget {
+  const ThreadPageLoadingSkeletonHeader({super.key});
+
   @override
   Widget build(BuildContext context) => Shimmer.fromColors(
         baseColor: Theme.of(context).scaffoldBackgroundColor,

@@ -3,6 +3,8 @@ import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleto
 import 'package:shimmer/shimmer.dart';
 
 class ThreadPageLoadingSkeleton extends StatelessWidget {
+  const ThreadPageLoadingSkeleton({super.key});
+
   @override
   Widget build(BuildContext context) => Shimmer.fromColors(
         baseColor: Theme.of(context).scaffoldBackgroundColor,

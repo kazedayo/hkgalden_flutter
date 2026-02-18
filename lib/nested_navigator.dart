@@ -5,14 +5,17 @@ import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 
 class NestedNavigator extends StatelessWidget {
+  const NestedNavigator({super.key});
+
   @override
-  Widget build(BuildContext context) => WillPopScope(
-      onWillPop: () async {
-        navigatorKey.currentState!.canPop()
-            ? navigatorKey.currentState!.pop()
-            : SystemNavigator.pop();
-        //navigatorKey.currentState.pop();
-        return false;
+  Widget build(BuildContext context) => PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          navigatorKey.currentState!.canPop()
+              ? navigatorKey.currentState!.pop()
+              : SystemNavigator.pop();
+        }
       },
       child: Navigator(
         key: navigatorKey,

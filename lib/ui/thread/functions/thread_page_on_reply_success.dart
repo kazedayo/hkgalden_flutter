@@ -7,7 +7,7 @@ void _onReplySuccess(BuildContext context, ScrollController scrollController,
   if (onLastPage) {
     BlocProvider.of<ThreadBloc>(context)
         .add(AppendReplyToThreadEvent(reply: reply));
-    SchedulerBinding.instance!.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
       scrollController.animateTo(scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
     });

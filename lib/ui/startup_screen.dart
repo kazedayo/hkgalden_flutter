@@ -12,19 +12,21 @@ import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/utils/token_store.dart';
 
 class StartupScreen extends StatefulWidget {
+  const StartupScreen({super.key});
+
   @override
-  _StartupScreenState createState() => _StartupScreenState();
+  StartupScreenState createState() => StartupScreenState();
 }
 
-class _StartupScreenState extends State<StartupScreen>
+class StartupScreenState extends State<StartupScreen>
     with TickerProviderStateMixin {
   late AnimationController _controller;
   late String token;
 
   @override
   void initState() {
-    final ParagraphBuilder pb =
-        ParagraphBuilder(ParagraphStyle(locale: window.locale));
+    final ParagraphBuilder pb = ParagraphBuilder(
+        ParagraphStyle(locale: PlatformDispatcher.instance.locale));
     pb.addText('\ud83d\ude01'); // smiley face emoji
     pb.build().layout(const ParagraphConstraints(width: 100));
     initToken();
@@ -34,15 +36,15 @@ class _StartupScreenState extends State<StartupScreen>
   }
 
   Future<void> initToken() async {
-    final String? _token = await TokenStore().readToken();
-    if (_token == null) {
+    final String? readToken = await TokenStore().readToken();
+    if (readToken == null) {
       await TokenStore().writeToken('');
       setState(() {
         token = '';
       });
     } else {
       setState(() {
-        token = _token;
+        token = readToken;
       });
     }
   }
@@ -89,7 +91,7 @@ class _StartupScreenState extends State<StartupScreen>
 }
 
 class StaggerAnimation extends StatelessWidget {
-  StaggerAnimation({Key? key, required this.controller})
+  StaggerAnimation({super.key, required this.controller})
       : opacity = Tween<double>(
           begin: 0.0,
           end: 1.0,
@@ -115,8 +117,7 @@ class StaggerAnimation extends StatelessWidget {
               curve: Curves.bounceOut,
             ),
           ),
-        ),
-        super(key: key);
+        );
 
   final Animation<double> controller;
   final Animation<double> opacity;

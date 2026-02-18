@@ -4,7 +4,7 @@ import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 class ActionBarSpinner extends StatelessWidget {
   final bool isVisible;
 
-  const ActionBarSpinner({Key? key, required this.isVisible}) : super(key: key);
+  const ActionBarSpinner({super.key, required this.isVisible});
 
   @override
   Widget build(BuildContext context) => Container(

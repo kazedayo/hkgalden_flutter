@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:hkgalden_flutter/utils/app_theme.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ThreadPageLoadingSkeletonCell extends StatelessWidget {
+  const ThreadPageLoadingSkeletonCell({super.key});
+
   @override
   Widget build(BuildContext context) => Shimmer.fromColors(
       baseColor: Theme.of(context).scaffoldBackgroundColor,
@@ -74,7 +77,7 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
                   height: 25,
                   width: displayWidth(context) / 2,
                   decoration: BoxDecoration(
-                    color: Colors.grey,
+                    color: AppTheme.skeletonColor,
                     borderRadius: BorderRadius.circular(100),
                   ),
                 ),

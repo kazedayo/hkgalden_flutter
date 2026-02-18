@@ -10,7 +10,7 @@ import 'package:octo_image/octo_image.dart';
 class BlockedUserCell extends StatelessWidget {
   final User user;
 
-  const BlockedUserCell({required this.user});
+  const BlockedUserCell({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) => BlocProvider(
@@ -26,7 +26,10 @@ class BlockedUserCell extends StatelessWidget {
               leading: AvatarWidget(
                 avatarImage: user.avatar == ''
                     ? SvgPicture.asset('assets/icon-hkgalden.svg',
-                        width: 30, height: 30, color: Colors.grey)
+                        width: 30,
+                        height: 30,
+                        colorFilter: const ColorFilter.mode(
+                            Colors.grey, BlendMode.srcIn))
                     : OctoImage(
                         width: 30,
                         height: 30,
@@ -38,7 +41,7 @@ class BlockedUserCell extends StatelessWidget {
                 userGroup: user.userGroup,
               ),
               title: Text(user.nickName,
-                  style: Theme.of(context).textTheme.bodyText1!.copyWith(
+                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                       decoration: state
                           ? TextDecoration.lineThrough
                           : TextDecoration.none,
@@ -49,7 +52,7 @@ class BlockedUserCell extends StatelessWidget {
                           : Theme.of(context).colorScheme.sisterColor)),
               trailing: Text(
                 user.userId,
-                style: Theme.of(context).textTheme.caption,
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
           ),

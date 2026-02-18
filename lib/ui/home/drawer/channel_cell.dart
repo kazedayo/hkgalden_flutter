@@ -9,7 +9,7 @@ import 'package:hkgalden_flutter/models/channel.dart';
 class ChannelCell extends StatelessWidget {
   final Channel channel;
 
-  const ChannelCell({Key? key, required this.channel}) : super(key: key);
+  const ChannelCell({super.key, required this.channel});
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class ChannelCell extends StatelessWidget {
                   const Spacer(),
                   Text(
                     channel.channelName,
-                    style: Theme.of(context).textTheme.subtitle2!.copyWith(),
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(),
                   ),
                   const Spacer(flex: 3),
                   Container(

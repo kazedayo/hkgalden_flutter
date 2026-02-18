@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
+import 'package:hkgalden_flutter/ui/common/thread_tag_chip.dart';
 import 'package:hkgalden_flutter/ui/home/last_reply_timer.dart';
+import 'package:hkgalden_flutter/utils/app_theme.dart';
 
 class ThreadCell extends StatelessWidget {
   final Thread thread;
@@ -8,11 +10,10 @@ class ThreadCell extends StatelessWidget {
   final Function onLongPress;
 
   const ThreadCell(
-      {Key? key,
+      {super.key,
       required this.onTap,
       required this.onLongPress,
-      required this.thread})
-      : super(key: key);
+      required this.thread});
 
   @override
   Widget build(BuildContext context) => Material(
@@ -37,15 +38,18 @@ class ThreadCell extends StatelessWidget {
                                   ? const Icon(
                                       Icons.lock,
                                       size: 15,
-                                      color: Colors.grey,
+                                      color: AppTheme.lockedColor,
                                     )
                                   : const SizedBox())
                         ]),
-                        style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: thread.status == 'locked'
-                                ? Colors.grey
-                                : Colors.white)),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium!
+                            .copyWith(
+                                fontWeight: FontWeight.w500,
+                                color: thread.status == 'locked'
+                                    ? AppTheme.lockedColor
+                                    : AppTheme.activeColor)),
                     const SizedBox(height: 10),
                     // ignore: avoid_unnecessary_containers
                     Container(
@@ -66,7 +70,8 @@ class ThreadCell extends StatelessWidget {
                                 WidgetSpan(
                                   child: Text(
                                     thread.replies[0].authorNickname,
-                                    style: Theme.of(context).textTheme.caption,
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall,
                                   ),
                                 ),
                               ],
@@ -85,8 +90,9 @@ class ThreadCell extends StatelessWidget {
                                 )),
                                 WidgetSpan(
                                   child: Text(thread.totalReplies.toString(),
-                                      style:
-                                          Theme.of(context).textTheme.caption),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall),
                                 ),
                               ],
                             ),
@@ -115,20 +121,8 @@ class ThreadCell extends StatelessWidget {
                             ),
                           ),
                           const Spacer(),
-                          Chip(
-                            padding: EdgeInsets.zero,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                            label: Text(
-                              '#${thread.tagName}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .overline!
-                                  .copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600),
-                            ),
-                            //labelPadding: EdgeInsets.zero,
+                          ThreadTagChip(
+                            label: thread.tagName,
                             backgroundColor: thread.tagColor,
                           ),
                         ],
@@ -138,7 +132,8 @@ class ThreadCell extends StatelessWidget {
                 ),
               ),
             ),
-            const Divider(height: 1, thickness: 1),
+            Divider(
+                height: 1, thickness: 1, color: Theme.of(context).dividerColor),
           ],
         ),
       );

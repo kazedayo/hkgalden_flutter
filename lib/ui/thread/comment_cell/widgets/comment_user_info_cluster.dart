@@ -2,10 +2,10 @@ part of '../comment_cell.dart';
 
 class CommentUserInfoCluster extends StatelessWidget {
   const CommentUserInfoCluster({
-    Key? key,
+    super.key,
     required this.reply,
     required this.sessionUserBloc,
-  }) : super(key: key);
+  });
 
   final Reply reply;
   final SessionUserBloc sessionUserBloc;
@@ -32,7 +32,10 @@ class CommentUserInfoCluster extends StatelessWidget {
             child: AvatarWidget(
               avatarImage: reply.author.avatar == ''
                   ? SvgPicture.asset('assets/icon-hkgalden.svg',
-                      width: 25, height: 25, color: Colors.grey)
+                      width: 25,
+                      height: 25,
+                      colorFilter:
+                          const ColorFilter.mode(Colors.grey, BlendMode.srcIn))
                   : OctoImage(
                       placeholderBuilder: (context) => SizedBox.fromSize(
                         size: const Size.square(30),
@@ -55,7 +58,7 @@ class CommentUserInfoCluster extends StatelessWidget {
               ),
               Text(
                 reply.authorNickname,
-                style: Theme.of(context).textTheme.caption!.copyWith(
+                style: Theme.of(context).textTheme.bodySmall!.copyWith(
                       color: reply.author.gender == 'M'
                           ? Theme.of(context).colorScheme.brotherColor
                           : Theme.of(context).colorScheme.sisterColor,
@@ -65,7 +68,7 @@ class CommentUserInfoCluster extends StatelessWidget {
                 height: 3,
               ),
               Text('#${reply.floor}',
-                  style: Theme.of(context).textTheme.caption),
+                  style: Theme.of(context).textTheme.bodySmall),
             ],
           )
         ],
@@ -89,8 +92,9 @@ class _CommentUserPopover extends StatelessWidget {
           children: [
             ListTile(
               dense: true,
-              leading: const Icon(Icons.account_box_rounded),
-              title: const Text('會員檔案'),
+              leading:
+                  const Icon(Icons.account_box_rounded, color: Colors.white),
+              title: const Text('會員檔案', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.of(context).pop();
                 showMaterialModalBottomSheet(
@@ -111,7 +115,7 @@ class _CommentUserPopover extends StatelessWidget {
                 Icons.block_outlined,
                 color: Colors.redAccent,
               ),
-              title: const Text('封鎖會員'),
+              title: const Text('封鎖會員', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.of(context).pop();
                 sessionUserBloc.state is! SessionUserLoaded
@@ -126,8 +130,11 @@ class _CommentUserPopover extends StatelessWidget {
                         if (isSuccess!) {
                           sessionUserBloc.add(AppendUserToBlockListEvent(
                               userId: reply.author.userId));
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text('已封鎖會員 ${reply.authorNickname}')));
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content:
+                                    Text('已封鎖會員 ${reply.authorNickname}')));
+                          }
                         } else {}
                       });
               },

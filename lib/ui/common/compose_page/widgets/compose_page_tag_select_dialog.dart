@@ -23,7 +23,7 @@ class _TagSelectDialog extends StatelessWidget {
                     Text(channel.channelName,
                         style: Theme.of(context)
                             .textTheme
-                            .caption!
+                            .bodySmall!
                             .copyWith(color: Colors.white60)),
                     Wrap(
                       spacing: 8,
@@ -34,7 +34,7 @@ class _TagSelectDialog extends StatelessWidget {
                                   strutStyle: const StrutStyle(height: 1.25),
                                   style: Theme.of(context)
                                       .textTheme
-                                      .caption!
+                                      .bodySmall!
                                       .copyWith(
                                           color: Colors.white,
                                           fontWeight: FontWeight.w700)),

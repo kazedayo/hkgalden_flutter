@@ -1,9 +1,10 @@
 import 'package:backdrop/backdrop.dart';
 import 'package:flutter/material.dart';
+import 'package:hkgalden_flutter/utils/app_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:flutter_web_auth/flutter_web_auth.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
@@ -24,7 +25,7 @@ import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/utils/token_store.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:package_info/package_info.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 part 'functions/home_page_jump_to_page.dart';
 part 'functions/home_page_load_thread.dart';
@@ -38,13 +39,13 @@ part 'widgets/home_page_popup_menu_button.dart';
 class HomePage extends StatefulWidget {
   final String? title;
 
-  const HomePage({Key? key, this.title}) : super(key: key);
+  const HomePage({super.key, this.title});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  HomePageState createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
+class HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   late ScrollController _scrollController;
 

@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/models/tag.dart';
-import 'package:meta/meta.dart';
 
 List<Channel> channelFromJson(List<dynamic> json) => json
     .map((thread) => Channel.fromJson(thread as Map<String, dynamic>))

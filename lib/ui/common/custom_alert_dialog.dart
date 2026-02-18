@@ -7,8 +7,7 @@ class CustomAlertDialog extends StatelessWidget {
   final String content;
 
   const CustomAlertDialog(
-      {Key? key, required this.title, required this.content})
-      : super(key: key);
+      {super.key, required this.title, required this.content});
 
   @override
   Widget build(BuildContext context) =>
