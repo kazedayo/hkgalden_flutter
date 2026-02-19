@@ -32,6 +32,8 @@ class _RichTextEditor extends StatelessWidget {
               scrollable: true,
               padding: const EdgeInsets.only(left: 12, right: 12, top: 6),
               customStyles: _buildEditorStyles(context),
+              customStyleBuilder: (attribute) =>
+                  _getCustomStyle(context, attribute),
             ),
           ),
         ),
@@ -46,27 +48,6 @@ class _RichTextEditor extends StatelessWidget {
     const noSpacing = VerticalSpacing(0.0, 0.0);
 
     return DefaultStyles(
-      h1: DefaultTextBlockStyle(
-        textTheme.headlineMedium!,
-        HorizontalSpacing.zero,
-        noSpacing,
-        noSpacing,
-        null,
-      ),
-      h2: DefaultTextBlockStyle(
-        textTheme.titleLarge!,
-        HorizontalSpacing.zero,
-        noSpacing,
-        noSpacing,
-        null,
-      ),
-      h3: DefaultTextBlockStyle(
-        textTheme.titleMedium!,
-        HorizontalSpacing.zero,
-        noSpacing,
-        noSpacing,
-        null,
-      ),
       strikeThrough: const TextStyle(decoration: TextDecoration.lineThrough),
       paragraph: DefaultTextBlockStyle(
         textTheme.bodyMedium!.copyWith(fontSize: 16),
@@ -76,5 +57,20 @@ class _RichTextEditor extends StatelessWidget {
         null,
       ),
     );
+  }
+
+  TextStyle _getCustomStyle(BuildContext context, Attribute attribute) {
+    final textTheme = Theme.of(context).textTheme;
+    if (attribute.key == Attribute.font.key) {
+      switch (attribute.value) {
+        case 'h1':
+          return textTheme.headlineMedium!;
+        case 'h2':
+          return textTheme.titleLarge!;
+        case 'h3':
+          return textTheme.titleMedium!;
+      }
+    }
+    return const TextStyle();
   }
 }

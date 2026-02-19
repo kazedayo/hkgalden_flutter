@@ -55,7 +55,6 @@ class ComposePageState extends State<ComposePage> {
   late TextEditingController _titleFieldController;
   late FocusNode _focusNode;
   late FocusNode _titleFocusNode;
-  late FocusNode _currentFocusNode;
   late bool _isSending;
 
   @override
@@ -69,26 +68,7 @@ class ComposePageState extends State<ComposePage> {
     _focusNode = FocusNode();
     _titleFocusNode = FocusNode();
     _isSending = false;
-    _focusNode.addListener(() {
-      _focusListener(_focusNode);
-    });
-    _titleFocusNode.addListener(() {
-      _focusListener(_titleFocusNode);
-    });
     super.initState();
-  }
-
-  void _focusListener(FocusNode node) {
-    if (node.hasFocus) {
-      _currentFocusNode = node;
-    }
-    if (!_focusNode.hasFocus && !_titleFocusNode.hasFocus) {
-      _retainFocus();
-    }
-  }
-
-  void _retainFocus() {
-    FocusScope.of(context).requestFocus(_currentFocusNode);
   }
 
   @override

@@ -168,7 +168,7 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
 
   @override
   void dispose() {
-    _dismissColorPicker();
+    _dismissColorPicker(updateUi: false);
     widget.controller.removeListener(_onSelectionChanged);
     super.dispose();
   }
@@ -177,7 +177,6 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
     final style = widget.controller.getSelectionStyle();
     final attrs = style.attributes;
 
-    final heading = attrs[Attribute.header.key];
     final align = attrs[Attribute.align.key];
     final colorValue = attrs[Attribute.color.key]?.value as String?;
 
@@ -197,9 +196,9 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
       _isStrikethrough = attrs.containsKey(Attribute.strikeThrough.key);
       _isCenterAlign = align?.value == 'center';
       _isRightAlign = align?.value == 'right';
-      _isH1 = heading?.value == 1;
-      _isH2 = heading?.value == 2;
-      _isH3 = heading?.value == 3;
+      _isH1 = attrs[Attribute.font.key]?.value == 'h1';
+      _isH2 = attrs[Attribute.font.key]?.value == 'h2';
+      _isH3 = attrs[Attribute.font.key]?.value == 'h3';
       _activeColor = parsedColor;
     });
   }
@@ -218,9 +217,11 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
     );
   }
 
-  void _toggleHeading(Attribute attribute, bool isActive) {
+  void _toggleSize(String sizeValue, bool isActive) {
     widget.controller.formatSelection(
-      isActive ? Attribute.clone(Attribute.header, null) : attribute,
+      isActive
+          ? Attribute.clone(Attribute.font, null)
+          : Attribute.clone(Attribute.font, sizeValue),
     );
   }
 
@@ -257,7 +258,6 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
 
     final overlay = Overlay.of(context);
     final btnPosition = renderBox.localToGlobal(Offset.zero);
-    final btnSize = renderBox.size;
 
     // Calculate where the popup should appear (above the button if near bottom).
     const popupWidth = 5 * 28.0 + 4 * 4.0 + 20; // swatches + gaps + padding
@@ -299,10 +299,10 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
     setState(() {});
   }
 
-  void _dismissColorPicker() {
+  void _dismissColorPicker({bool updateUi = true}) {
     _colorOverlay?.remove();
     _colorOverlay = null;
-    if (mounted) setState(() {});
+    if (updateUi && mounted) setState(() {});
   }
 
   void _applyColor(Color color) {
@@ -393,19 +393,19 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
               _ToolbarButton(
                 label: 'H1',
                 isActive: _isH1,
-                onPressed: () => _toggleHeading(Attribute.h1, _isH1),
+                onPressed: () => _toggleSize('h1', _isH1),
               ),
               const SizedBox(width: 3),
               _ToolbarButton(
                 label: 'H2',
                 isActive: _isH2,
-                onPressed: () => _toggleHeading(Attribute.h2, _isH2),
+                onPressed: () => _toggleSize('h2', _isH2),
               ),
               const SizedBox(width: 3),
               _ToolbarButton(
                 label: 'H3',
                 isActive: _isH3,
-                onPressed: () => _toggleHeading(Attribute.h3, _isH3),
+                onPressed: () => _toggleSize('h3', _isH3),
               ),
 
               _buildDivider(dividerColor),
@@ -451,40 +451,27 @@ class _ColorButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final inactiveColor =
         Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45);
-    final stripeColor = activeColor ?? inactiveColor;
+    final iconColor =
+        isPickerOpen ? Colors.white : activeColor ?? inactiveColor;
 
     return Material(
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
+        canRequestFocus: false,
         onTap: onPressed,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: isPickerOpen ? AppTheme.accentColor : Colors.transparent,
+            color: isPickerOpen ? AppTheme.primaryColor : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.format_color_text_rounded,
-                size: 20,
-                color: isPickerOpen ? Colors.white : inactiveColor,
-              ),
-              const SizedBox(height: 2),
-              // Coloured underline stripe indicating the active colour.
-              Container(
-                width: 18,
-                height: 3,
-                decoration: BoxDecoration(
-                  color: isPickerOpen ? Colors.white : stripeColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ],
+          child: Icon(
+            Icons.format_paint_rounded,
+            size: 20,
+            color: iconColor,
           ),
         ),
       ),

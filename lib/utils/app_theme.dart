@@ -6,7 +6,7 @@ class AppTheme {
   static const Color primaryColor = Color(0xff2e3533);
   static const Color backgroundColor = Color(0xff1b1f1e);
   static const Color accentColor = Color(0xff45c17c);
-  static const Color selectionColor = Color(0xff2d8052);
+  static const Color selectionColor = Color(0x6645c17c);
   static const Color dividerColor = Colors.white10;
 
   // Semantic mappings for hardcoded colors found in analysis
@@ -127,6 +127,7 @@ class AppTheme {
       textSelectionTheme: const TextSelectionThemeData(
         cursorColor: accentColor,
         selectionColor: selectionColor,
+        selectionHandleColor: accentColor,
       ),
 
       textTheme: _buildTextTheme(const TextTheme()),

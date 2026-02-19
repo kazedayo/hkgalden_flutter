@@ -5,84 +5,86 @@ import 'package:flutter/material.dart';
 
 class DeltaJsonParser {
   Future<String> toGaldenHtml(List<dynamic> json) async {
-    String result = '';
-    String row = '';
-    String styledInsert = '';
-    await Future.forEach(json, (element) async {
-      //print(element);
-      final dynamic el = element;
-      if (el['insert'].contains('\n') == false || el['insert'] == '\n') {
-        styledInsert =
-            el['insert'] == '\n' ? styledInsert : el['insert'] as String;
-        if (el['attributes'] != null) {
-          //print(element['insert']);
-          await Future.forEach(
-              (el['attributes'] as Map<String, dynamic>).entries,
-              (entry) async {
-            final dynamic en = entry;
-            switch (en.key as String) {
-              case 'a':
-                styledInsert =
-                    '<span data-nodetype="a" data-href="${en.value}">$styledInsert</span>';
-                break;
-              case 'b':
-                styledInsert = '<span data-nodetype="b">$styledInsert</span>';
-                break;
-              case 'i':
-                styledInsert = '<span data-nodetype="i">$styledInsert</span>';
-                break;
-              case 'u':
-                styledInsert = '<span data-nodetype="u">$styledInsert</span>';
-                break;
-              case 's':
-                styledInsert = '<span data-nodetype="s">$styledInsert</span>';
-                break;
-              case 'heading':
-                //heading自成一行
-                row = '';
-                styledInsert =
-                    '<span data-nodetype="h${en.value}">$styledInsert</span>';
-                break;
-              case 'embed':
-                if (en.value['type'] == 'image') {
-                  await _getImageDimension(en.value['source'] as String).then(
-                      (image) => styledInsert =
-                          '<span data-nodetype="img" data-src="${en.value['source']}" data-sx="${image.width}" data-sy="${image.height}"></span>');
-                }
-                break;
-              default:
-            }
-          });
-          row += styledInsert;
-          if (el['insert'] == '\n') {
-            //heading自成一行
-            result += '<p>$row</p>';
-            row = '';
+    final StringBuffer result = StringBuffer();
+    StringBuffer currentRow = StringBuffer();
+
+    for (final element in json) {
+      final insert = element['insert'];
+      final Map<String, dynamic> attributes =
+          element['attributes'] as Map<String, dynamic>? ?? {};
+
+      if (insert is String) {
+        // Split by newline to handle interruptions in style
+        final parts = insert.split('\n');
+        for (int i = 0; i < parts.length; i++) {
+          final part = parts[i];
+          if (part.isNotEmpty) {
+            final styled = await _applyAttributes(part, attributes);
+            currentRow.write(styled);
           }
-        } else {
-          //for 混排
-          row += el['insert'] as String;
+
+          // If not the last part, we hit a newline
+          if (i < parts.length - 1) {
+            result.write('<p>$currentRow</p>');
+            currentRow.clear();
+          }
         }
       } else {
-        final List<String> texts = el['insert'].split('\n') as List<String>;
-        //print(texts.length);
-        if (texts.length == 2) {
-          row += texts.first;
-          //save old row and start new row
-          result += '<p>$row</p>';
-          row = '';
-        } else {
-          texts.forEach((el) {
-            //save old row and start new row
-            result += '<p>$row</p>';
-            row = '';
-            //print(el);
-            result += '<p>$el</p>';
-          });
+        if (attributes.isNotEmpty) {
+          // Pass empty string as placeholder for attribute-based embeds (like images)
+          final styled = await _applyAttributes('', attributes);
+          currentRow.write(styled);
         }
       }
-    });
-    return '<div id="pmc">${result.replaceAll('<p></p>', '')}</div>';
+    }
+
+    // Flush any remaining content in the current row
+    if (currentRow.isNotEmpty) {
+      result.write('<p>$currentRow</p>');
+    }
+
+    return '<div id="pmc">${result.toString().replaceAll('<p></p>', '')}</div>';
+  }
+
+  Future<String> _applyAttributes(
+      String text, Map<String, dynamic> attributes) async {
+    String styled = text;
+    for (final entry in attributes.entries) {
+      switch (entry.key) {
+        case 'a':
+          styled =
+              '<span data-nodetype="a" data-href="${entry.value}">$styled</span>';
+          break;
+        case 'b':
+          styled = '<span data-nodetype="b">$styled</span>';
+          break;
+        case 'i':
+          styled = '<span data-nodetype="i">$styled</span>';
+          break;
+        case 'u':
+          styled = '<span data-nodetype="u">$styled</span>';
+          break;
+        case 's':
+          styled = '<span data-nodetype="s">$styled</span>';
+          break;
+        case 'color':
+          styled =
+              '<span data-nodetype="color" data-value="${entry.value}">$styled</span>';
+          break;
+        case 'font':
+          // Using font attribute for size (h1, h2, h3)
+          styled = '<span data-nodetype="${entry.value}">$styled</span>';
+          break;
+        case 'embed':
+          if (entry.value is Map && entry.value['type'] == 'image') {
+            final image = await _getImageDimension(entry.value['source']);
+            styled =
+                '<span data-nodetype="img" data-src="${entry.value['source']}" data-sx="${image.width}" data-sy="${image.height}"></span>';
+          }
+          break;
+      }
+    }
+    return styled;
   }
 
   Future<ui.Image> _getImageDimension(String url) {
