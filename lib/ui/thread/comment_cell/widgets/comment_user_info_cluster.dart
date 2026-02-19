@@ -25,7 +25,7 @@ class CommentUserInfoCluster extends StatelessWidget {
                       reply: reply,
                       sessionUserBloc: sessionUserBloc,
                     ),
-                backgroundColor: Colors.black87,
+                backgroundColor: AppTheme.backgroundColor,
                 barrierColor: Colors.transparent,
                 width: 150,
                 height: 100),

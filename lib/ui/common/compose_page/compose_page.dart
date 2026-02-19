@@ -18,10 +18,15 @@ import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
+import 'package:hkgalden_flutter/utils/app_theme.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
 
 part 'widgets/compose_page_tag_select_dialog.dart';
 part 'widgets/quill_editor.dart';
+part 'widgets/toolbar_button.dart';
+part 'widgets/link_dialog.dart';
+part 'widgets/rich_text_toolbar.dart';
+part 'widgets/rich_text_editor.dart';
 
 class ComposePage extends StatefulWidget {
   final ComposeMode composeMode;
@@ -149,7 +154,6 @@ class ComposePageState extends State<ComposePage> {
         ],
       ),
       body: Column(
-        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           if (widget.composeMode == ComposeMode.newPost)
             Container(
@@ -237,8 +241,10 @@ class ComposePageState extends State<ComposePage> {
             )
           else
             const SizedBox(),
-          ..._buildQuillEditor(
-              context, _controller, _focusNode, onImagePickCallback)
+          Expanded(
+            child: _buildQuillEditor(
+                context, _controller, _focusNode, onImagePickCallback),
+          )
         ],
       ),
     );

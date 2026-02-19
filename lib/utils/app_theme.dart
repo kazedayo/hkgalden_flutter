@@ -111,6 +111,7 @@ class AppTheme {
       }),
 
       popupMenuTheme: PopupMenuThemeData(
+        color: backgroundColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       ),
 
