@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
+import 'package:hkgalden_flutter/ui/common/icon_text_item.dart';
+import 'package:hkgalden_flutter/ui/common/list_divider.dart';
 import 'package:hkgalden_flutter/ui/common/thread_tag_chip.dart';
 import 'package:hkgalden_flutter/ui/home/last_reply_timer.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
@@ -51,89 +53,46 @@ class ThreadCell extends StatelessWidget {
                                     ? AppTheme.lockedColor
                                     : AppTheme.activeColor)),
                     const SizedBox(height: 10),
-                    // ignore: avoid_unnecessary_containers
-                    Container(
-                      //constraints: BoxConstraints.expand(height: 20),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: <Widget>[
-                          Text.rich(
-                            TextSpan(
-                              children: [
-                                const WidgetSpan(
-                                    child: Icon(Icons.face_rounded, size: 13),
-                                    alignment: PlaceholderAlignment.middle),
-                                const WidgetSpan(
-                                    child: SizedBox(
-                                  width: 5,
-                                )),
-                                WidgetSpan(
-                                  child: Text(
-                                    thread.replies[0].authorNickname,
-                                    style:
-                                        Theme.of(context).textTheme.bodySmall,
-                                  ),
-                                ),
-                              ],
-                            ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        IconTextItem(
+                          icon: Icons.face_rounded,
+                          child: Text(
+                            thread.replies[0].authorNickname,
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
-                          const SizedBox(width: 10),
-                          Text.rich(
-                            TextSpan(
-                              children: [
-                                const WidgetSpan(
-                                    child: Icon(Icons.reply_rounded, size: 13),
-                                    alignment: PlaceholderAlignment.middle),
-                                const WidgetSpan(
-                                    child: SizedBox(
-                                  width: 5,
-                                )),
-                                WidgetSpan(
-                                  child: Text(thread.totalReplies.toString(),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall),
-                                ),
-                              ],
-                            ),
+                        ),
+                        const SizedBox(width: 10),
+                        IconTextItem(
+                          icon: Icons.reply_rounded,
+                          child: Text(
+                            thread.totalReplies.toString(),
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
-                          const SizedBox(width: 10),
-                          Text.rich(
-                            TextSpan(
-                              children: [
-                                const WidgetSpan(
-                                    child: Icon(Icons.access_time_rounded,
-                                        size: 13),
-                                    alignment: PlaceholderAlignment.middle),
-                                const WidgetSpan(
-                                    child: SizedBox(
-                                  width: 5,
-                                )),
-                                WidgetSpan(
-                                  child: LastReplyTimer(
-                                    key: ValueKey(thread.threadId),
-                                    time: thread.replies.length == 2
-                                        ? thread.replies[1].date.toLocal()
-                                        : thread.replies[0].date.toLocal(),
-                                  ),
-                                ),
-                              ],
-                            ),
+                        ),
+                        const SizedBox(width: 10),
+                        IconTextItem(
+                          icon: Icons.access_time_rounded,
+                          child: LastReplyTimer(
+                            key: ValueKey(thread.threadId),
+                            time: thread.replies.length == 2
+                                ? thread.replies[1].date.toLocal()
+                                : thread.replies[0].date.toLocal(),
                           ),
-                          const Spacer(),
-                          ThreadTagChip(
-                            label: thread.tagName,
-                            backgroundColor: thread.tagColor,
-                          ),
-                        ],
-                      ),
+                        ),
+                        const Spacer(),
+                        ThreadTagChip(
+                          label: thread.tagName,
+                          backgroundColor: thread.tagColor,
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
             ),
-            Divider(
-                height: 1, thickness: 1, color: Theme.of(context).dividerColor),
+            const ListDivider(),
           ],
         ),
       );

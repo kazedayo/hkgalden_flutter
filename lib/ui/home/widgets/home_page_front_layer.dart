@@ -14,7 +14,7 @@ Theme _buildFrontLayer(
     child: Material(
       color: Theme.of(context).primaryColor,
       child: RefreshIndicator(
-        backgroundColor: Colors.white,
+        color: AppTheme.activeColor,
         strokeWidth: 2.5,
         onRefresh: () {
           threadListBloc.add(RequestThreadListEvent(

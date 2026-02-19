@@ -39,6 +39,7 @@ class _TagSelectDialog extends StatelessWidget {
                                           color: Colors.white,
                                           fontWeight: FontWeight.w700)),
                               backgroundColor: tag.color,
+                              side: BorderSide.none,
                               onPressed: () {
                                 onTagSelect(tag, channel.channelId);
                               },

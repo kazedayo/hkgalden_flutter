@@ -1,13 +1,13 @@
 import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hkgalden_flutter/ui/common/user_avatar_image.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
-import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
+
 import 'package:hkgalden_flutter/ui/common/compose_page/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
@@ -15,7 +15,7 @@ import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:octo_image/octo_image.dart';
+
 import 'package:popover/popover.dart';
 
 part 'widgets/comment_user_info_cluster.dart';

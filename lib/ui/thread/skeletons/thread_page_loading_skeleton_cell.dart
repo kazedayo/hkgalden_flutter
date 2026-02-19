@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:hkgalden_flutter/utils/app_theme.dart';
+import 'package:hkgalden_flutter/ui/common/app_shimmer.dart';
+import 'package:hkgalden_flutter/ui/common/skeleton_block.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
-import 'package:shimmer/shimmer.dart';
 
 class ThreadPageLoadingSkeletonCell extends StatelessWidget {
   const ThreadPageLoadingSkeletonCell({super.key});
 
   @override
-  Widget build(BuildContext context) => Shimmer.fromColors(
-      baseColor: Theme.of(context).scaffoldBackgroundColor,
-      highlightColor: Theme.of(context).primaryColor,
-      child: Container(
+  Widget build(BuildContext context) => AppShimmer(
+          child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         height: 200,
         child: Column(
@@ -18,68 +16,30 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Container(
-                  width: 45,
-                  height: 45,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey,
-                  ),
-                ),
+                const SkeletonBlock(width: 45, height: 45, borderRadius: 100),
                 const SizedBox(width: 15),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Container(
-                      width: 100,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.grey,
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                    ),
+                    const SkeletonBlock(width: 100, height: 20),
                     const SizedBox(height: 5),
-                    Container(
-                      width: 50,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.grey,
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                    ),
+                    const SkeletonBlock(width: 50, height: 20),
                   ],
                 ),
                 const Spacer(),
-                Container(
-                  width: 100,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                ),
+                const SkeletonBlock(width: 100, height: 20),
               ],
             ),
             const Spacer(),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Container(
-                  height: 25,
-                  width: displayWidth(context),
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                ),
+                SkeletonBlock(height: 25, width: displayWidth(context)),
                 const SizedBox(height: 10),
-                Container(
+                SkeletonBlock(
                   height: 25,
                   width: displayWidth(context) / 2,
-                  decoration: BoxDecoration(
-                    color: AppTheme.skeletonColor,
-                    borderRadius: BorderRadius.circular(100),
-                  ),
+                  borderRadius: 100,
                 ),
               ],
             ),

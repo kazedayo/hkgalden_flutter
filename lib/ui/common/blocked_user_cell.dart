@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/bloc/cubit/blocked_user_cell_cubit.dart';
 import 'package:hkgalden_flutter/models/user.dart';
-import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
+import 'package:hkgalden_flutter/ui/common/user_avatar_image.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
-import 'package:octo_image/octo_image.dart';
 
 class BlockedUserCell extends StatelessWidget {
   final User user;
@@ -23,22 +21,10 @@ class BlockedUserCell extends StatelessWidget {
             },
             child: ListTile(
               contentPadding: const EdgeInsets.symmetric(vertical: 8),
-              leading: AvatarWidget(
-                avatarImage: user.avatar == ''
-                    ? SvgPicture.asset('assets/icon-hkgalden.svg',
-                        width: 30,
-                        height: 30,
-                        colorFilter: const ColorFilter.mode(
-                            Colors.grey, BlendMode.srcIn))
-                    : OctoImage(
-                        width: 30,
-                        height: 30,
-                        image: NetworkImage(user.avatar),
-                        placeholderBuilder: (context) => SizedBox.fromSize(
-                          size: const Size.square(30),
-                        ),
-                      ),
+              leading: UserAvatarImage(
+                avatarUrl: user.avatar,
                 userGroup: user.userGroup,
+                size: 30,
               ),
               title: Text(user.nickName,
                   style: Theme.of(context).textTheme.bodyLarge!.copyWith(

@@ -29,33 +29,17 @@ class CommentUserInfoCluster extends StatelessWidget {
                 barrierColor: Colors.transparent,
                 width: 150,
                 height: 100),
-            child: AvatarWidget(
-              avatarImage: reply.author.avatar == ''
-                  ? SvgPicture.asset('assets/icon-hkgalden.svg',
-                      width: 25,
-                      height: 25,
-                      colorFilter:
-                          const ColorFilter.mode(Colors.grey, BlendMode.srcIn))
-                  : OctoImage(
-                      placeholderBuilder: (context) => SizedBox.fromSize(
-                        size: const Size.square(30),
-                      ),
-                      image: NetworkImage(reply.author.avatar),
-                      width: 25,
-                      height: 25,
-                    ),
+            child: UserAvatarImage(
+              avatarUrl: reply.author.avatar,
               userGroup: reply.author.userGroup,
+              size: 25,
             ),
           ),
-          const SizedBox(
-            width: 5,
-          ),
+          const SizedBox(width: 5),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(
-                height: 3,
-              ),
+              const SizedBox(height: 3),
               Text(
                 reply.authorNickname,
                 style: Theme.of(context).textTheme.bodySmall!.copyWith(
@@ -64,9 +48,7 @@ class CommentUserInfoCluster extends StatelessWidget {
                           : Theme.of(context).colorScheme.sisterColor,
                     ),
               ),
-              const SizedBox(
-                height: 3,
-              ),
+              const SizedBox(height: 3),
               Text('#${reply.floor}',
                   style: Theme.of(context).textTheme.bodySmall),
             ],
@@ -122,7 +104,7 @@ class _CommentUserPopover extends StatelessWidget {
                     ? showCustomDialog(
                         context: context,
                         builder: (context) => const CustomAlertDialog(
-                            title: "未登入", content: "請先登入"),
+                            title: '未登入', content: '請先登入'),
                       )
                     : HKGaldenApi()
                         .blockUser(reply.author.userId)

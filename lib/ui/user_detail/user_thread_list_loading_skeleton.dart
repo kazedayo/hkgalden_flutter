@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:hkgalden_flutter/ui/common/app_shimmer.dart';
+import 'package:hkgalden_flutter/ui/common/skeleton_block.dart';
 
 class UserThreadListLoadingSkeleton extends StatelessWidget {
   const UserThreadListLoadingSkeleton({super.key});
 
   @override
-  Widget build(BuildContext context) => Shimmer.fromColors(
-        baseColor: Theme.of(context).scaffoldBackgroundColor,
-        highlightColor: Theme.of(context).primaryColor,
+  Widget build(BuildContext context) => AppShimmer(
         child: ListView.builder(
           physics: const NeverScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 12),
           itemCount: 10,
-          itemBuilder: (context, index) => ListTile(
-            title: Container(
-              height: 30,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(100), color: Colors.grey),
-            ),
-            trailing: const Chip(label: Text('haha')),
+          itemBuilder: (context, index) => const ListTile(
+            title: SkeletonBlock(width: double.infinity, height: 30),
+            trailing: Chip(label: Text('haha')),
           ),
         ),
       );

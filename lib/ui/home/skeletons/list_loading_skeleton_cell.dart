@@ -1,39 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:hkgalden_flutter/ui/common/app_shimmer.dart';
+import 'package:hkgalden_flutter/ui/common/skeleton_block.dart';
 
 class ListLoadingSkeletonCell extends StatelessWidget {
   const ListLoadingSkeletonCell({super.key});
 
   @override
   Widget build(BuildContext context) => SafeArea(
-        child: Shimmer.fromColors(
-          baseColor: Theme.of(context).primaryColor,
-          highlightColor: Theme.of(context).scaffoldBackgroundColor,
+        child: AppShimmer(
+          invert: true,
           child: Column(
             children: <Widget>[
-              Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(100),
-                    color: Colors.grey,
-                  ),
-                  margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                  height: 30),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                child: SkeletonBlock(width: double.infinity, height: 30),
+              ),
               Row(
                 children: <Widget>[
                   Flexible(
                     flex: 2,
-                    child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(100),
-                          color: Colors.grey,
-                        ),
-                        margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                        height: 25),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                      child: SkeletonBlock(width: double.infinity, height: 25),
+                    ),
                   ),
                   const Spacer(),
                   const Chip(
                     label: Text('#哈哈'),
-                    //labelPadding: EdgeInsets.zero,
                     backgroundColor: Colors.grey,
                   ),
                   const SizedBox(width: 10),

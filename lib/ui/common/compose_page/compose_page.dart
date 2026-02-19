@@ -188,6 +188,7 @@ class ComposePageState extends State<ComposePage> {
                                     color: Colors.white,
                                     fontWeight: FontWeight.w700)),
                         backgroundColor: _tag.color,
+                        side: BorderSide.none,
                       ),
                     ),
                   ),
