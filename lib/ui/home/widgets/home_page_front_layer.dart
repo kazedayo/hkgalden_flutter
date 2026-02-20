@@ -33,7 +33,7 @@ Theme _buildFrontLayer(
               itemCount: state.threads.length + 1,
               itemBuilder: (context, index) {
                 if (index == state.threads.length) {
-                  return ListLoadingSkeletonCell();
+                  return const ListLoadingSkeletonCell(enabled: false);
                 } else {
                   return Visibility(
                     visible: () {

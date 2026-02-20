@@ -12,10 +12,18 @@ class AppShimmer extends StatelessWidget {
   /// When false (default), base = scaffoldBackgroundColor and highlight = primaryColor.
   final bool invert;
 
-  const AppShimmer({super.key, required this.child, this.invert = false});
+  /// Whether the shimmer animation is active.
+  final bool enabled;
+
+  const AppShimmer(
+      {super.key,
+      required this.child,
+      this.invert = false,
+      this.enabled = true});
 
   @override
   Widget build(BuildContext context) => Shimmer.fromColors(
+        enabled: enabled,
         baseColor: invert
             ? Theme.of(context).primaryColor
             : Theme.of(context).scaffoldBackgroundColor,

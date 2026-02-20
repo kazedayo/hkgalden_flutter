@@ -246,29 +246,22 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
   }
 
   Future<void> _insertImage(BuildContext context) async {
-    if (widget.imagePickCallback == null) return;
-
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 85,
-      maxWidth: 1920,
+    final imageUrl = await showDialog<String>(
+      context: context,
+      builder: (_) => _ImageInsertDialog(
+        imagePickCallback: widget.imagePickCallback,
+      ),
     );
-    if (pickedFile == null) return;
-
-    final file = File(pickedFile.path);
-    final imageUrl = await widget.imagePickCallback!(file);
+    if (imageUrl == null || imageUrl.isEmpty) return;
 
     if (!mounted) return;
 
-    if (imageUrl.isNotEmpty) {
-      final index = widget.controller.selection.baseOffset;
-      final length = widget.controller.selection.extentOffset - index;
-      widget.controller
-          .replaceText(index, length, BlockEmbed.image(imageUrl), null);
-      widget.controller.updateSelection(
-          TextSelection.collapsed(offset: index + 1), ChangeSource.local);
-    }
+    final index = widget.controller.selection.baseOffset;
+    final length = widget.controller.selection.extentOffset - index;
+    widget.controller
+        .replaceText(index, length, BlockEmbed.image(imageUrl), null);
+    widget.controller.updateSelection(
+        TextSelection.collapsed(offset: index + 1), ChangeSource.local);
   }
 
   // ── Color picker ──────────────────────────────────────────────────────────
@@ -447,14 +440,11 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
                 onPressed: () => _insertLink(context),
               ),
 
-              if (widget.imagePickCallback != null) ...[
-                _buildDivider(dividerColor),
-                _ToolbarButton(
-                  icon: Icons.image_rounded,
-                  isActive: false,
-                  onPressed: () => _insertImage(context),
-                ),
-              ],
+              _ToolbarButton(
+                icon: Icons.image_rounded,
+                isActive: false,
+                onPressed: () => _insertImage(context),
+              ),
             ],
           ),
         ),

@@ -18,7 +18,8 @@ class _LinkDialogState extends State<_LinkDialog> {
     super.dispose();
   }
 
-  void _submit() {
+  void _submit(BuildContext context, UrlValidationState state) {
+    if (!state.isValidUrl) return;
     final url = _urlController.text.trim();
     if (url.isEmpty) return;
     Navigator.of(context).pop(url);
@@ -26,29 +27,45 @@ class _LinkDialogState extends State<_LinkDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('插入連結'),
-      content: TextField(
-        controller: _urlController,
-        autofocus: true,
-        keyboardType: TextInputType.url,
-        textInputAction: TextInputAction.done,
-        onSubmitted: (_) => _submit(),
-        decoration: const InputDecoration(
-          hintText: 'https://',
-          labelText: 'URL',
-        ),
+    return BlocProvider(
+      create: (_) => UrlValidationCubit(),
+      child: BlocBuilder<UrlValidationCubit, UrlValidationState>(
+        builder: (context, state) {
+          return AlertDialog(
+            title: const Text('插入連結'),
+            content: SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: TextField(
+                controller: _urlController,
+                autofocus: true,
+                keyboardType: TextInputType.url,
+                textInputAction: TextInputAction.done,
+                onChanged: (text) =>
+                    context.read<UrlValidationCubit>().validateUrl(text),
+                onSubmitted: (_) => _submit(context, state),
+                decoration: InputDecoration(
+                  hintText: 'https://',
+                  labelText: 'URL',
+                  errorText: (!state.isValidUrl && state.isUrlDirty)
+                      ? '請輸入有效的連結 (例如: https://...)'
+                      : null,
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(null),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed:
+                    state.isValidUrl ? () => _submit(context, state) : null,
+                child: const Text('確定'),
+              ),
+            ],
+          );
+        },
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(null),
-          child: const Text('取消'),
-        ),
-        TextButton(
-          onPressed: _submit,
-          child: const Text('確定'),
-        ),
-      ],
     );
   }
 }

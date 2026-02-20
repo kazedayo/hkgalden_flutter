@@ -12,9 +12,19 @@ import 'package:hkgalden_flutter/repository/session_user_repository.dart';
 import 'package:hkgalden_flutter/repository/thread_list_repository.dart';
 import 'package:hkgalden_flutter/ui/startup_screen.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
+import 'dart:io';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isAndroid) {
+    try {
+      await FlutterDisplayMode.setHighRefreshRate();
+    } catch (_) {
+      // Ignore if setting high refresh rate fails.
+    }
+  }
 
   await Hive.initFlutter();
   await Hive.openBox('token');

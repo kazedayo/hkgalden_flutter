@@ -3,12 +3,14 @@ import 'package:hkgalden_flutter/ui/common/app_shimmer.dart';
 import 'package:hkgalden_flutter/ui/common/skeleton_block.dart';
 
 class ListLoadingSkeletonCell extends StatelessWidget {
-  const ListLoadingSkeletonCell({super.key});
+  final bool enabled;
+  const ListLoadingSkeletonCell({super.key, this.enabled = true});
 
   @override
   Widget build(BuildContext context) => SafeArea(
         child: AppShimmer(
           invert: true,
+          enabled: enabled,
           child: Column(
             children: <Widget>[
               Padding(

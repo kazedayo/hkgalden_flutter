@@ -53,6 +53,7 @@ dependencies:
   url_launcher: 
   flutter_dotenv:
   image_picker: ^1.2.1
+  flutter_displaymode: ^0.7.0
 
 dev_dependencies:
   bloc_test:

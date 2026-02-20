@@ -105,11 +105,6 @@ class AppTheme {
       iconTheme: const IconThemeData(color: Colors.white),
       primaryIconTheme: const IconThemeData(color: Colors.white),
 
-      pageTransitionsTheme: const PageTransitionsTheme(builders: {
-        TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-      }),
-
       popupMenuTheme: PopupMenuThemeData(
         color: backgroundColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),

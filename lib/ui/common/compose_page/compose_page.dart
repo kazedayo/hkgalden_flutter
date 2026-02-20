@@ -22,11 +22,13 @@ import 'package:hkgalden_flutter/utils/device_properties.dart';
 
 import 'package:hkgalden_flutter/bloc/cubit/compose_cubit.dart';
 import 'package:hkgalden_flutter/bloc/cubit/compose_state.dart';
+import 'package:hkgalden_flutter/bloc/cubit/url_validation_cubit.dart';
 
 part 'widgets/compose_page_tag_select_dialog.dart';
 part 'widgets/quill_editor.dart';
 part 'widgets/toolbar_button.dart';
 part 'widgets/link_dialog.dart';
+part 'widgets/image_insert_dialog.dart';
 part 'widgets/rich_text_toolbar.dart';
 part 'widgets/rich_text_editor.dart';
 

@@ -69,10 +69,29 @@ class _ThreadPageState extends State<ThreadPage> {
           BlocProvider(create: (context) {
             final ThreadBloc threadBloc = ThreadBloc(
                 repository: RepositoryProvider.of<ThreadRepository>(context));
-            threadBloc.add(RequestThreadEvent(
-                threadId: arguments.threadId,
-                page: arguments.page,
-                isInitialLoad: true));
+
+            final route = ModalRoute.of(context);
+            if (route != null &&
+                route.animation != null &&
+                route.animation!.status != AnimationStatus.completed) {
+              void handler(AnimationStatus status) {
+                if (status == AnimationStatus.completed) {
+                  route.animation!.removeStatusListener(handler);
+                  threadBloc.add(RequestThreadEvent(
+                      threadId: arguments.threadId,
+                      page: arguments.page,
+                      isInitialLoad: true));
+                }
+              }
+
+              route.animation!.addStatusListener(handler);
+            } else {
+              threadBloc.add(RequestThreadEvent(
+                  threadId: arguments.threadId,
+                  page: arguments.page,
+                  isInitialLoad: true));
+            }
+
             _initListener(
                 arguments, threadBloc, _scrollController, _threadPageCubit);
             return threadBloc;
