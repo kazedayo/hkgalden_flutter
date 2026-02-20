@@ -21,6 +21,10 @@ class StyledHtmlView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final int cacheWidth = (MediaQuery.sizeOf(context).width *
+            MediaQuery.devicePixelRatioOf(context))
+        .toInt();
+
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
         textScaler: TextScaler.linear(1.0),
@@ -40,7 +44,10 @@ class StyledHtmlView extends StatelessWidget {
                     child: Stack(
                       children: [
                         OctoImage(
-                          image: NetworkImage(src),
+                          image: ResizeImage(
+                            NetworkImage(src),
+                            width: cacheWidth,
+                          ),
                           placeholderBuilder: (context) => const Padding(
                             padding: EdgeInsets.all(8.0),
                             child: ProgressSpinner(),

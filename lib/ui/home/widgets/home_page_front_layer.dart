@@ -29,31 +29,32 @@ Theme _buildFrontLayer(
             return ListLoadingSkeleton();
           } else if (state is ThreadListLoaded) {
             return ListView.builder(
+              padding: const EdgeInsets.only(bottom: 80),
               controller: scrollController,
               itemCount: state.threads.length + 1,
               itemBuilder: (context, index) {
                 if (index == state.threads.length) {
-                  return const ListLoadingSkeletonCell(enabled: false);
+                  return const ListLoadingSkeletonCell(enabled: true);
                 } else {
-                  return Visibility(
-                    visible: () {
-                      if (sessionUserBloc.state is SessionUserLoaded) {
-                        return !(sessionUserBloc.state as SessionUserLoaded)
+                  if (sessionUserBloc.state is SessionUserLoaded) {
+                    final isBlocked =
+                        (sessionUserBloc.state as SessionUserLoaded)
                             .sessionUser
                             .blockedUsers
                             .contains(
                                 state.threads[index].replies[0].author.userId);
-                      } else {
-                        return true;
-                      }
-                    }(),
-                    child: ThreadCell(
-                      key: PageStorageKey(state.threads[index].threadId),
-                      thread: state.threads[index],
-                      onTap: () => loadThread(context, state.threads[index]),
-                      onLongPress: () =>
-                          jumpToPage(context, state.threads[index]),
-                    ),
+
+                    if (isBlocked) {
+                      return const SizedBox.shrink();
+                    }
+                  }
+
+                  return ThreadCell(
+                    key: PageStorageKey(state.threads[index].threadId),
+                    thread: state.threads[index],
+                    onTap: () => loadThread(context, state.threads[index]),
+                    onLongPress: () =>
+                        jumpToPage(context, state.threads[index]),
                   );
                 }
               },

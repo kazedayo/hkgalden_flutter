@@ -13,7 +13,12 @@ class ThreadListLoading extends ThreadListState {}
 
 class ThreadListError extends ThreadListState {}
 
-class ThreadListAppending extends ThreadListState {}
+class ThreadListAppending extends ThreadListLoaded {
+  const ThreadListAppending(
+      {required super.threads,
+      required super.currentChannelId,
+      required super.currentPage});
+}
 
 class ThreadListLoaded extends ThreadListState {
   final List<Thread> threads;

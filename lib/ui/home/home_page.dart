@@ -70,8 +70,7 @@ class HomePageState extends State<HomePage>
         BlocProvider.of<SessionUserBloc>(context);
     final ChannelBloc channelBloc = BlocProvider.of<ChannelBloc>(context);
     return BlocBuilder<ThreadListBloc, ThreadListState>(
-      buildWhen: (prev, state) =>
-          state is! ThreadListAppending && prev != state,
+      buildWhen: (prev, state) => prev != state,
       builder: (context, state) {
         return Scaffold(
           body: Stack(

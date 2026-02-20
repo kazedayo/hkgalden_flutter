@@ -62,6 +62,8 @@ class _ThreadPageState extends State<ThreadPage> {
     final ThreadPageArguments arguments =
         ModalRoute.of(context)!.settings.arguments! as ThreadPageArguments;
     _threadPageCubit.setCanReply(sessionUserBloc.state is SessionUserLoaded);
+    final route = ModalRoute.of(context);
+
     return RepositoryProvider(
       create: (context) => ThreadRepository(),
       child: MultiBlocProvider(
@@ -70,7 +72,6 @@ class _ThreadPageState extends State<ThreadPage> {
             final ThreadBloc threadBloc = ThreadBloc(
                 repository: RepositoryProvider.of<ThreadRepository>(context));
 
-            final route = ModalRoute.of(context);
             if (route != null &&
                 route.animation != null &&
                 route.animation!.status != AnimationStatus.completed) {

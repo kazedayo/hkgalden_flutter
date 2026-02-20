@@ -21,22 +21,30 @@ class UserAvatarImage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => AvatarWidget(
-        userGroup: userGroup,
-        avatarImage: avatarUrl.isEmpty
-            ? SvgPicture.asset(
-                'assets/icon-hkgalden.svg',
-                width: size,
-                height: size,
-                colorFilter:
-                    const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
-              )
-            : OctoImage(
-                width: size,
-                height: size,
-                image: NetworkImage(avatarUrl),
-                placeholderBuilder: (context) =>
-                    SizedBox.fromSize(size: Size.square(size)),
+  Widget build(BuildContext context) {
+    final int cacheSize =
+        (size * MediaQuery.devicePixelRatioOf(context)).toInt();
+
+    return AvatarWidget(
+      userGroup: userGroup,
+      avatarImage: avatarUrl.isEmpty
+          ? SvgPicture.asset(
+              'assets/icon-hkgalden.svg',
+              width: size,
+              height: size,
+              colorFilter: const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
+            )
+          : OctoImage(
+              width: size,
+              height: size,
+              image: ResizeImage(
+                NetworkImage(avatarUrl),
+                width: cacheSize,
+                height: cacheSize,
               ),
-      );
+              placeholderBuilder: (context) =>
+                  SizedBox.fromSize(size: Size.square(size)),
+            ),
+    );
+  }
 }
