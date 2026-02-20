@@ -11,10 +11,12 @@ part of '../compose_page.dart';
 class _RichTextEditor extends StatelessWidget {
   final QuillController controller;
   final FocusNode focusNode;
+  final Future<String> Function(File)? imagePickCallback;
 
   const _RichTextEditor({
     required this.controller,
     required this.focusNode,
+    this.imagePickCallback,
   });
 
   @override
@@ -34,10 +36,16 @@ class _RichTextEditor extends StatelessWidget {
               customStyles: _buildEditorStyles(context),
               customStyleBuilder: (attribute) =>
                   _getCustomStyle(context, attribute),
+              embedBuilders: [
+                _ImageEmbedBuilder(),
+              ],
             ),
           ),
         ),
-        _RichTextToolbar(controller: controller),
+        _RichTextToolbar(
+          controller: controller,
+          imagePickCallback: imagePickCallback,
+        ),
       ],
     );
   }
@@ -72,5 +80,26 @@ class _RichTextEditor extends StatelessWidget {
       }
     }
     return const TextStyle();
+  }
+}
+
+class _ImageEmbedBuilder extends EmbedBuilder {
+  @override
+  String get key => BlockEmbed.imageType;
+
+  @override
+  Widget build(
+    BuildContext context,
+    EmbedContext embedContext,
+  ) {
+    final imageUrl = embedContext.node.value.data;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Image.network(
+        imageUrl as String,
+        fit: BoxFit.contain,
+      ),
+    );
   }
 }

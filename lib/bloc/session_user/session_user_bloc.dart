@@ -31,13 +31,16 @@ class SessionUserBloc extends Bloc<SessionUserEvent, SessionUserState> {
   FutureOr<void> _onAppendUserToBlockListEvent(
       AppendUserToBlockListEvent event, Emitter<SessionUserState> emit) async {
     if (state is SessionUserLoaded) {
-      final List<String> blockedUsers =
-          (state as SessionUserLoaded).sessionUser.blockedUsers.toList();
-      blockedUsers.add(event.userId);
-      final User updatedSessionUser = (state as SessionUserLoaded)
-          .sessionUser
-          .copyWith(blockedUsers: blockedUsers);
-      emit(SessionUserLoaded(sessionUser: updatedSessionUser));
+      final isSuccess = await _repository.blockUser(event.userId);
+      if (isSuccess == true) {
+        final List<String> blockedUsers =
+            (state as SessionUserLoaded).sessionUser.blockedUsers.toList();
+        blockedUsers.add(event.userId);
+        final User updatedSessionUser = (state as SessionUserLoaded)
+            .sessionUser
+            .copyWith(blockedUsers: blockedUsers);
+        emit(SessionUserLoaded(sessionUser: updatedSessionUser));
+      }
     }
   }
 }

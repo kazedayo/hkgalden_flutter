@@ -5,4 +5,6 @@ class SessionUserRepository {
   final _api = HKGaldenApi();
 
   Future<User?> getSessionUser() => _api.getSessionUserQuery();
+
+  Future<bool?> blockUser(String userId) => _api.blockUser(userId);
 }

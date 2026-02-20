@@ -1,13 +1,9 @@
-import 'dart:io';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gal/gal.dart';
 import 'package:hkgalden_flutter/bloc/cubit/full_screen_photo_view_cubit.dart';
 import 'package:hkgalden_flutter/models/ui_state_models/full_screen_photo_view_state.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
-import 'package:path_provider/path_provider.dart';
 
 class FullScreenPhotoView extends StatelessWidget {
   final String? url;
@@ -48,8 +44,17 @@ class FullScreenPhotoView extends StatelessWidget {
                   left: 0,
                   right: 0,
                   child: SafeArea(
-                    child: BlocBuilder<FullScreenPhotoViewCubit,
+                    child: BlocConsumer<FullScreenPhotoViewCubit,
                         FullScreenPhotoViewState>(
+                      listenWhen: (previous, current) =>
+                          previous.downloadSuccess != current.downloadSuccess &&
+                          current.downloadSuccess != null,
+                      listener: (context, state) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(state.downloadSuccess == true
+                                ? '圖片下載成功!'
+                                : '圖片下載失敗!')));
+                      },
                       builder: (context, state) => Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -59,7 +64,9 @@ class FullScreenPhotoView extends StatelessWidget {
                               clipBehavior: Clip.hardEdge,
                               onPressed: state.isDownloadingImage
                                   ? null
-                                  : () => _saveImage(context, url!),
+                                  : () => context
+                                      .read<FullScreenPhotoViewCubit>()
+                                      .saveImage(url!),
                               child: Padding(
                                 padding: const EdgeInsets.all(16.0),
                                 child: Text.rich(
@@ -83,34 +90,4 @@ class FullScreenPhotoView extends StatelessWidget {
               ],
             )),
       );
-
-  Future<void> _saveImage(BuildContext context, String url) async {
-    BlocProvider.of<FullScreenPhotoViewCubit>(context)
-        .setIsDownloadingImage(true);
-    try {
-      final tempDir = await getTemporaryDirectory();
-      final fileName = url.split('/').last;
-      final filePath = '${tempDir.path}/$fileName';
-      await Dio().download(url, filePath);
-      await Gal.putImage(filePath);
-      // Clean up temp file
-      try {
-        await File(filePath).delete();
-      } catch (_) {}
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('圖片下載成功!')));
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('圖片下載失敗!')));
-      }
-    } finally {
-      if (context.mounted) {
-        BlocProvider.of<FullScreenPhotoViewCubit>(context)
-            .setIsDownloadingImage(false);
-      }
-    }
-  }
 }

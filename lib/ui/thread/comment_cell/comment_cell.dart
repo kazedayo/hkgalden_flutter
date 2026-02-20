@@ -5,7 +5,6 @@ import 'package:hkgalden_flutter/ui/common/user_avatar_image.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
-import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 
 import 'package:hkgalden_flutter/ui/common/compose_page/compose_page.dart';

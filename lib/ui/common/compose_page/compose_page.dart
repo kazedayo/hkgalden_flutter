@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:flutter_quill/flutter_quill.dart';
@@ -10,16 +11,17 @@ import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/tag.dart';
-import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
-import 'package:hkgalden_flutter/networking/image_upload_api.dart';
-import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
+import 'package:hkgalden_flutter/ui/common/thread_tag_chip.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
+
+import 'package:hkgalden_flutter/bloc/cubit/compose_cubit.dart';
+import 'package:hkgalden_flutter/bloc/cubit/compose_state.dart';
 
 part 'widgets/compose_page_tag_select_dialog.dart';
 part 'widgets/quill_editor.dart';
@@ -55,7 +57,6 @@ class ComposePageState extends State<ComposePage> {
   late TextEditingController _titleFieldController;
   late FocusNode _focusNode;
   late FocusNode _titleFocusNode;
-  late bool _isSending;
 
   @override
   void initState() {
@@ -67,7 +68,6 @@ class ComposePageState extends State<ComposePage> {
     _titleFieldController = TextEditingController();
     _focusNode = FocusNode();
     _titleFocusNode = FocusNode();
-    _isSending = false;
     super.initState();
   }
 
@@ -83,149 +83,174 @@ class ComposePageState extends State<ComposePage> {
   @override
   Widget build(BuildContext context) {
     final sessionUserBloc = BlocProvider.of<SessionUserBloc>(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        centerTitle:
-            Theme.of(context).platform == TargetPlatform.iOS ? true : false,
-        title: Text(
-          widget.composeMode == ComposeMode.newPost
-              ? '發表主題'
-              : widget.composeMode == ComposeMode.reply
-                  ? '回覆主題'
-                  : '引用回覆 (#${widget.parentReply!.floor})',
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium!
-              .copyWith(fontWeight: FontWeight.bold),
-        ),
-        automaticallyImplyLeading: false,
-        actions: <Widget>[
-          ActionBarSpinner(isVisible: _isSending),
-          Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.send_rounded),
-              onPressed: _isSending
-                  ? null
-                  : () async {
-                      setState(() {
-                        _isSending = true;
-                      });
-                      widget.composeMode == ComposeMode.newPost
-                          ? _title == '' ||
-                                  _controller.document.toString() == '/n'
-                              ? showCustomDialog(
+    return BlocProvider(
+      create: (context) => ComposeCubit(),
+      child: BlocConsumer<ComposeCubit, ComposeState>(
+        listener: (context, state) {
+          if (state is ComposeSuccess) {
+            if (widget.composeMode == ComposeMode.newPost) {
+              widget.onCreateThread!(_channelId);
+            } else {
+              widget.onSent!(state.result);
+            }
+            Navigator.pop(context);
+          } else if (state is ComposeFailure) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(state.message)));
+          }
+        },
+        builder: (context, state) {
+          final isSending = state is ComposeSending;
+          return Scaffold(
+            resizeToAvoidBottomInset: true,
+            appBar: AppBar(
+              centerTitle: Theme.of(context).platform == TargetPlatform.iOS
+                  ? true
+                  : false,
+              title: Text(
+                widget.composeMode == ComposeMode.newPost
+                    ? '發表主題'
+                    : widget.composeMode == ComposeMode.reply
+                        ? '回覆主題'
+                        : '引用回覆 (#${widget.parentReply!.floor})',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium!
+                    .copyWith(fontWeight: FontWeight.bold),
+              ),
+              automaticallyImplyLeading: false,
+              actions: <Widget>[
+                ActionBarSpinner(isVisible: isSending),
+                Builder(
+                  builder: (context) => IconButton(
+                    icon: const Icon(Icons.send_rounded),
+                    onPressed: isSending
+                        ? null
+                        : () {
+                            if (widget.composeMode == ComposeMode.newPost) {
+                              if (_title == '' ||
+                                  _controller.document.toString() == '/n') {
+                                showCustomDialog(
                                   context: context,
-                                  builder: (context) {
-                                    setState(() {
-                                      _isSending = false;
-                                    });
-                                    return const CustomAlertDialog(
-                                        title: '注意!', content: '內文/標題不能為空');
-                                  },
-                                )
-                              : _createThread(context)
-                          : _sendReply(context);
-                      // await DeltaJsonParser()
-                      //     .toGaldenHtml(json.decode(_getZefyrEditorContent()));
-                    },
+                                  builder: (context) => const CustomAlertDialog(
+                                      title: '注意!', content: '內文/標題不能為空'),
+                                );
+                                return;
+                              }
+                              context.read<ComposeCubit>().createThread(
+                                  _title, _tag.id!, _getZefyrEditorContent());
+                            } else {
+                              context.read<ComposeCubit>().sendReply(
+                                  widget.threadId!, _getZefyrEditorContent(),
+                                  parentId: widget.composeMode ==
+                                          ComposeMode.quotedReply
+                                      ? widget.parentReply!.replyId
+                                      : null);
+                            }
+                          },
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: <Widget>[
-          if (widget.composeMode == ComposeMode.newPost)
-            Container(
-              height: 29,
-              margin: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-              child: Row(
-                children: <Widget>[
-                  Theme(
-                    data: Theme.of(context).copyWith(
-                        highlightColor: Colors.transparent,
-                        splashColor: Colors.transparent),
-                    child: PopupMenuButton(
-                      offset: const Offset(0, -48),
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                            child: SizedBox(
-                          height: displayHeight(context) / 3,
-                          child: _TagSelectDialog(
-                            onTagSelect: (tag, channelId) {
-                              Navigator.of(context).pop();
+            body: Column(
+              children: <Widget>[
+                if (widget.composeMode == ComposeMode.newPost)
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Theme(
+                          data: Theme.of(context).copyWith(
+                              highlightColor: Colors.transparent,
+                              splashColor: Colors.transparent),
+                          child: PopupMenuButton(
+                            offset: const Offset(-14, -8),
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                  child: SizedBox(
+                                height: displayHeight(context) / 3,
+                                child: _TagSelectDialog(
+                                  onTagSelect: (tag, channelId) {
+                                    Navigator.of(context).pop();
+                                    setState(() {
+                                      _tag = tag;
+                                      _channelId = channelId;
+                                    });
+                                  },
+                                ),
+                              ))
+                            ],
+                            child: ThreadTagChip(
+                              label: _tag.name,
+                              backgroundColor: _tag.color,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                          child: TextField(
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            controller: _titleFieldController,
+                            focusNode: _titleFocusNode,
+                            decoration: InputDecoration(
+                                isDense: true,
+                                filled: true,
+                                fillColor: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest
+                                    .withOpacity(0.5),
+                                border: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                    borderRadius: BorderRadius.circular(8)),
+                                hintText: '標題',
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 4, vertical: 10)),
+                            onChanged: (value) {
                               setState(() {
-                                _tag = tag;
-                                _channelId = channelId;
+                                _title = value;
                               });
                             },
                           ),
-                        ))
+                        )
                       ],
-                      child: Chip(
-                        label: Text('#${_tag.name}',
-                            strutStyle: const StrutStyle(height: 1.25),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall!
-                                .copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700)),
-                        backgroundColor: _tag.color,
-                        side: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  Expanded(
-                    child: TextField(
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      strutStyle: const StrutStyle(height: 1.25),
-                      controller: _titleFieldController,
-                      focusNode: _titleFocusNode,
-                      decoration: InputDecoration(
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(6)),
-                          labelText: '標題',
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 6.8)),
-                      onChanged: (value) {
-                        setState(() {
-                          _title = value;
-                        });
-                      },
                     ),
                   )
-                ],
-              ),
-            )
-          else
-            const SizedBox(),
-          if (widget.composeMode == ComposeMode.quotedReply)
-            ConstrainedBox(
-              constraints:
-                  BoxConstraints(maxHeight: displayHeight(context) / 4),
-              child: SingleChildScrollView(
-                reverse: true,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                child: StyledHtmlView(
-                  htmlString: HKGaldenHtmlParser().replyWithQuotes(
-                      widget.parentReply!,
-                      sessionUserBloc.state as SessionUserLoaded)!,
-                  floor: widget.parentReply!.floor,
-                ),
-              ),
-            )
-          else
-            const SizedBox(),
-          Expanded(
-            child: _buildQuillEditor(
-                context, _controller, _focusNode, onImagePickCallback),
-          )
-        ],
+                else
+                  const SizedBox(),
+                if (widget.composeMode == ComposeMode.quotedReply)
+                  ConstrainedBox(
+                    constraints:
+                        BoxConstraints(maxHeight: displayHeight(context) / 4),
+                    child: SingleChildScrollView(
+                      reverse: true,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      child: StyledHtmlView(
+                        htmlString: HKGaldenHtmlParser().replyWithQuotes(
+                            widget.parentReply!,
+                            sessionUserBloc.state as SessionUserLoaded)!,
+                        floor: widget.parentReply!.floor,
+                      ),
+                    ),
+                  )
+                else
+                  const SizedBox(),
+                Expanded(
+                  child: Builder(builder: (builderContext) {
+                    return _buildQuillEditor(
+                        builderContext,
+                        _controller,
+                        _focusNode,
+                        (file) => _onImagePickCallback(builderContext, file));
+                  }),
+                )
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -235,29 +260,9 @@ class ComposePageState extends State<ComposePage> {
     return json.encode(content);
   }
 
-  Future<void> _createThread(BuildContext context) async {
-    HKGaldenApi()
-        .createThread(
-            _title,
-            [_tag.id!],
-            await DeltaJsonParser().toGaldenHtml(
-                json.decode(_getZefyrEditorContent()) as List<dynamic>))
-        .then((threadId) {
-      setState(() {
-        _isSending = false;
-        if (threadId != null) {
-          widget.onCreateThread!(_channelId);
-          Navigator.pop(context);
-        } else {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text('主題發表失敗!')));
-        }
-      });
-    });
-  }
-
-  Future<String> onImagePickCallback(File file) async {
-    ScaffoldMessenger.of(context).showSnackBar(
+  Future<String> _onImagePickCallback(BuildContext context, File file) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    scaffoldMessenger.showSnackBar(
       SnackBar(
         duration: const Duration(days: 1),
         content: Row(
@@ -271,35 +276,20 @@ class ComposePageState extends State<ComposePage> {
         ),
       ),
     );
-    return ImageUploadApi().uploadImage(file.path).then((value) {
+    // Use the cubit to trigger upload
+    return context.read<ComposeCubit>().uploadImage(file.path).then((value) {
       if (mounted) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        scaffoldMessenger.hideCurrentSnackBar();
       }
       return value;
-    });
-  }
-
-  Future<void> _sendReply(BuildContext context) async {
-    HKGaldenApi()
-        .sendReply(
-      widget.threadId!,
-      await DeltaJsonParser()
-          .toGaldenHtml(json.decode(_getZefyrEditorContent()) as List<dynamic>),
-      parentId: widget.composeMode == ComposeMode.quotedReply
-          ? widget.parentReply!.replyId
-          : '',
-    )
-        .then((sentReply) {
-      setState(() {
-        _isSending = false;
-        if (sentReply != null) {
-          widget.onSent!(sentReply);
-          Navigator.pop(context);
-        } else {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text('回覆發送失敗!')));
-        }
-      });
+    }).catchError((error) {
+      if (mounted) {
+        scaffoldMessenger.hideCurrentSnackBar();
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(content: Text('圖片上載失敗')),
+        );
+      }
+      return '';
     });
   }
 }

@@ -10,4 +10,5 @@ Widget _buildQuillEditor(
     _RichTextEditor(
       controller: controller,
       focusNode: focusNode,
+      imagePickCallback: imageCallback,
     );

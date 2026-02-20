@@ -100,25 +100,18 @@ class _CommentUserPopover extends StatelessWidget {
               title: const Text('封鎖會員', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.of(context).pop();
-                sessionUserBloc.state is! SessionUserLoaded
-                    ? showCustomDialog(
-                        context: context,
-                        builder: (context) => const CustomAlertDialog(
-                            title: '未登入', content: '請先登入'),
-                      )
-                    : HKGaldenApi()
-                        .blockUser(reply.author.userId)
-                        .then((isSuccess) {
-                        if (isSuccess!) {
-                          sessionUserBloc.add(AppendUserToBlockListEvent(
-                              userId: reply.author.userId));
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content:
-                                    Text('已封鎖會員 ${reply.authorNickname}')));
-                          }
-                        } else {}
-                      });
+                if (sessionUserBloc.state is! SessionUserLoaded) {
+                  showCustomDialog(
+                    context: context,
+                    builder: (context) =>
+                        const CustomAlertDialog(title: '未登入', content: '請先登入'),
+                  );
+                } else {
+                  sessionUserBloc.add(
+                      AppendUserToBlockListEvent(userId: reply.author.userId));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('已封鎖會員 ${reply.authorNickname}')));
+                }
               },
             ),
           ],

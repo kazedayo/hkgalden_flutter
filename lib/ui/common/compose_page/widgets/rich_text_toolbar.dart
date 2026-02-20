@@ -132,8 +132,12 @@ class _ColorPickerPopup extends StatelessWidget {
 /// Center/Right align, H1/H2/H3, and link insertion.
 class _RichTextToolbar extends StatefulWidget {
   final QuillController controller;
+  final Future<String> Function(File)? imagePickCallback;
 
-  const _RichTextToolbar({required this.controller});
+  const _RichTextToolbar({
+    required this.controller,
+    this.imagePickCallback,
+  });
 
   @override
   State<_RichTextToolbar> createState() => _RichTextToolbarState();
@@ -238,6 +242,32 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
           .formatText(selection.baseOffset, url.length, LinkAttribute(url));
     } else {
       widget.controller.formatSelection(LinkAttribute(url));
+    }
+  }
+
+  Future<void> _insertImage(BuildContext context) async {
+    if (widget.imagePickCallback == null) return;
+
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 1920,
+    );
+    if (pickedFile == null) return;
+
+    final file = File(pickedFile.path);
+    final imageUrl = await widget.imagePickCallback!(file);
+
+    if (!mounted) return;
+
+    if (imageUrl.isNotEmpty) {
+      final index = widget.controller.selection.baseOffset;
+      final length = widget.controller.selection.extentOffset - index;
+      widget.controller
+          .replaceText(index, length, BlockEmbed.image(imageUrl), null);
+      widget.controller.updateSelection(
+          TextSelection.collapsed(offset: index + 1), ChangeSource.local);
     }
   }
 
@@ -416,6 +446,15 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
                 isActive: false,
                 onPressed: () => _insertLink(context),
               ),
+
+              if (widget.imagePickCallback != null) ...[
+                _buildDivider(dividerColor),
+                _ToolbarButton(
+                  icon: Icons.image_rounded,
+                  isActive: false,
+                  onPressed: () => _insertImage(context),
+                ),
+              ],
             ],
           ),
         ),

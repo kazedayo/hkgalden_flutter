@@ -52,6 +52,7 @@ dependencies:
   universal_html: 
   url_launcher: 
   flutter_dotenv:
+  image_picker: ^1.2.1
 
 dev_dependencies:
   bloc_test:
