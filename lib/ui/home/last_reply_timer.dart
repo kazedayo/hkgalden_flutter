@@ -1,44 +1,34 @@
-import 'dart:async';
-
-import 'package:date_time_format/date_time_format.dart';
 import 'package:flutter/material.dart';
 
-class LastReplyTimer extends StatefulWidget {
+class LastReplyTimer extends StatelessWidget {
   final DateTime time;
 
   const LastReplyTimer({super.key, required this.time});
 
-  @override
-  LastReplyTimerState createState() => LastReplyTimerState();
-}
+  static String formatRelativeTime(DateTime timeObj) {
+    final now = DateTime.now();
+    final difference = now.difference(timeObj);
 
-class LastReplyTimerState extends State<LastReplyTimer> {
-  late Timer _timer;
-  late String _time;
-
-  @override
-  void initState() {
-    _time = DateTimeFormat.relative(widget.time, abbr: true);
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      final newTime = DateTimeFormat.relative(widget.time, abbr: true);
-      if (newTime != _time) {
-        setState(() {
-          _time = newTime;
-        });
-      }
-    });
-    super.initState();
+    if (difference.inDays >= 365) {
+      return '${(difference.inDays / 365).floor()}y';
+    } else if (difference.inDays >= 30) {
+      return '${(difference.inDays / 30).floor()}mo';
+    } else if (difference.inDays > 0) {
+      return '${difference.inDays}d';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m';
+    } else {
+      return '${difference.inSeconds > 0 ? difference.inSeconds : 0}s';
+    }
   }
 
   @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
+  Widget build(BuildContext context) {
+    return Text(
+      formatRelativeTime(time),
+      style: Theme.of(context).textTheme.bodySmall,
+    );
   }
-
-  @override
-  Widget build(BuildContext context) => Text(
-        _time,
-        style: Theme.of(context).textTheme.bodySmall,
-      );
 }

@@ -9,6 +9,7 @@ Widget _generatePageSliver(
   if (state.thread.replies[index].floor % 50 == 1 &&
       state.thread.replies[index] == state.thread.replies.last) {
     return Column(
+      key: ValueKey(state.thread.replies[index].replyId),
       children: <Widget>[
         _PageHeader(floor: state.thread.replies[index].floor),
         CommentCell(
@@ -33,6 +34,7 @@ Widget _generatePageSliver(
   } else if (state.thread.replies[index].floor % 50 == 1 &&
       state.thread.replies.length != 1) {
     return Column(
+      key: ValueKey(state.thread.replies[index].replyId),
       children: <Widget>[
         _PageHeader(floor: state.thread.replies[index].floor),
         CommentCell(
@@ -52,6 +54,7 @@ Widget _generatePageSliver(
     );
   } else if (index == state.thread.replies.length - 1) {
     return Column(
+      key: ValueKey(state.thread.replies[index].replyId),
       children: <Widget>[
         CommentCell(
           key: PageStorageKey(state.thread.replies[index].replyId),
@@ -73,17 +76,20 @@ Widget _generatePageSliver(
       ],
     );
   } else {
-    return CommentCell(
-      key: PageStorageKey(state.thread.replies[index].replyId),
-      threadId: state.thread.threadId,
-      reply: state.thread.replies[index],
-      onLastPage: BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
-      onSent: (reply) {
-        onReplySuccess(context, scrollController, reply,
-            BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
-      },
-      canReply: BlocProvider.of<ThreadPageCubit>(context).state.canReply,
-      threadLocked: state.thread.status == 'locked',
+    return KeyedSubtree(
+      key: ValueKey(state.thread.replies[index].replyId),
+      child: CommentCell(
+        key: PageStorageKey(state.thread.replies[index].replyId),
+        threadId: state.thread.threadId,
+        reply: state.thread.replies[index],
+        onLastPage: BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
+        onSent: (reply) {
+          onReplySuccess(context, scrollController, reply,
+              BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
+        },
+        canReply: BlocProvider.of<ThreadPageCubit>(context).state.canReply,
+        threadLocked: state.thread.status == 'locked',
+      ),
     );
   }
 }

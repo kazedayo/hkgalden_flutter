@@ -45,8 +45,17 @@ class BlockListPage extends StatelessWidget {
                           bottom: MediaQuery.of(context).padding.bottom),
                       itemCount:
                           (state as BlockedUsersLoaded).blockedUsers.length,
+                      findChildIndexCallback: (Key key) {
+                        if (key is ValueKey<String>) {
+                          return state.blockedUsers
+                              .indexWhere((user) => user.userId == key.value);
+                        }
+                        return null;
+                      },
                       itemBuilder: (context, index) {
-                        return BlockedUserCell(user: state.blockedUsers[index]);
+                        return BlockedUserCell(
+                            key: ValueKey(state.blockedUsers[index].userId),
+                            user: state.blockedUsers[index]);
                       },
                     ),
             ),

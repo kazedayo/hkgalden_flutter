@@ -99,7 +99,6 @@ class AppTheme {
         highlightElevation: 1,
         foregroundColor: Colors.white,
         backgroundColor: accentColor,
-        shape: CircleBorder(),
       ),
 
       iconTheme: const IconThemeData(color: Colors.white),

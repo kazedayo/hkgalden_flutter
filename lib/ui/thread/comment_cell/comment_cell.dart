@@ -9,7 +9,6 @@ import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 
 import 'package:hkgalden_flutter/ui/common/compose_page/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
-import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
@@ -21,15 +20,13 @@ import 'package:popover/popover.dart';
 
 part 'widgets/comment_user_info_cluster.dart';
 
-class CommentCell extends StatelessWidget {
+class CommentCell extends StatefulWidget {
   final int threadId;
   final Reply reply;
   final bool onLastPage;
   final Function(Reply) onSent;
   final bool canReply;
   final bool threadLocked;
-  // ignore: avoid_field_initializers_in_const_classes
-  final FullScreenPhotoView photoView = const FullScreenPhotoView();
 
   const CommentCell(
       {super.key,
@@ -41,16 +38,43 @@ class CommentCell extends StatelessWidget {
       required this.threadLocked});
 
   @override
+  State<CommentCell> createState() => _CommentCellState();
+}
+
+class _CommentCellState extends State<CommentCell> {
+  late String _parsedHtml;
+  late SessionUserBloc _sessionUserBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _sessionUserBloc = BlocProvider.of<SessionUserBloc>(context);
+    _parseHtml();
+  }
+
+  @override
+  void didUpdateWidget(covariant CommentCell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.reply != oldWidget.reply) {
+      _parseHtml();
+    }
+  }
+
+  void _parseHtml() {
+    _parsedHtml = HKGaldenHtmlParser()
+            .commentWithQuotes(widget.reply, _sessionUserBloc.state) ??
+        '';
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final SessionUserBloc sessionUserBloc =
-        BlocProvider.of<SessionUserBloc>(context);
     return Visibility(
       visible: () {
-        if (sessionUserBloc.state is SessionUserLoaded) {
-          return !(sessionUserBloc.state as SessionUserLoaded)
+        if (_sessionUserBloc.state is SessionUserLoaded) {
+          return !(_sessionUserBloc.state as SessionUserLoaded)
               .sessionUser
               .blockedUsers
-              .contains(reply.author.userId);
+              .contains(widget.reply.author.userId);
         } else {
           return true;
         }
@@ -62,10 +86,20 @@ class CommentCell extends StatelessWidget {
               const SizedBox(
                 height: 33,
               ),
-              Card(
-                elevation: 3,
+              Container(
                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                // shape and color defined in AppTheme cardTheme
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardTheme.color ??
+                      Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(4),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 3,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
+                ),
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: Column(
@@ -75,20 +109,18 @@ class CommentCell extends StatelessWidget {
                       Padding(
                           padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
                           child: StyledHtmlView(
-                              htmlString: HKGaldenHtmlParser()
-                                  .commentWithQuotes(
-                                      reply, sessionUserBloc.state)!,
-                              floor: reply.floor)),
+                              htmlString: _parsedHtml,
+                              floor: widget.reply.floor)),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
                           Transform(
                             transform: Matrix4.translationValues(8, 0, 0),
                             child: Visibility(
-                              visible: !threadLocked,
+                              visible: !widget.threadLocked,
                               child: IconButton(
                                 icon: const Icon(Icons.format_quote),
-                                onPressed: () => canReply
+                                onPressed: () => widget.canReply
                                     ? showBarModalBottomSheet(
                                         duration:
                                             const Duration(milliseconds: 300),
@@ -96,10 +128,10 @@ class CommentCell extends StatelessWidget {
                                         context: context,
                                         builder: (context) => ComposePage(
                                           composeMode: ComposeMode.quotedReply,
-                                          threadId: threadId,
-                                          parentReply: reply,
+                                          threadId: widget.threadId,
+                                          parentReply: widget.reply,
                                           onSent: (reply) {
-                                            onSent(reply);
+                                            widget.onSent(reply);
                                           },
                                         ),
                                       )
@@ -126,11 +158,12 @@ class CommentCell extends StatelessWidget {
             right: 24,
             top: 19,
             child: Text(
-                DateTimeFormat.format(reply.date.toLocal(),
+                DateTimeFormat.format(widget.reply.date.toLocal(),
                     format: 'd/m/y H:i'),
                 style: Theme.of(context).textTheme.bodySmall),
           ),
-          CommentUserInfoCluster(reply: reply, sessionUserBloc: sessionUserBloc)
+          CommentUserInfoCluster(
+              reply: widget.reply, sessionUserBloc: _sessionUserBloc)
         ],
       ),
     );

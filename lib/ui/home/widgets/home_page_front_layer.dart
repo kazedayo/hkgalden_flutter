@@ -28,33 +28,45 @@ Theme _buildFrontLayer(
           if (state is ThreadListLoading) {
             return ListLoadingSkeleton();
           } else if (state is ThreadListLoaded) {
+            final blockedUserIds = sessionUserBloc.state is SessionUserLoaded
+                ? (sessionUserBloc.state as SessionUserLoaded)
+                    .sessionUser
+                    .blockedUsers
+                    .toSet()
+                : const <String>{};
+
+            final threadIdToIndex = {
+              for (var i = 0; i < state.threads.length; i++)
+                state.threads[i].threadId: i
+            };
+
             return ListView.builder(
               padding: const EdgeInsets.only(bottom: 80),
               controller: scrollController,
+              cacheExtent: 500,
               itemCount: state.threads.length + 1,
+              findChildIndexCallback: (Key key) {
+                if (key is ValueKey<int>) {
+                  return threadIdToIndex[key.value];
+                }
+                return null;
+              },
               itemBuilder: (context, index) {
                 if (index == state.threads.length) {
                   return const ListLoadingSkeletonCell(enabled: true);
                 } else {
-                  if (sessionUserBloc.state is SessionUserLoaded) {
-                    final isBlocked =
-                        (sessionUserBloc.state as SessionUserLoaded)
-                            .sessionUser
-                            .blockedUsers
-                            .contains(
-                                state.threads[index].replies[0].author.userId);
+                  final thread = state.threads[index];
 
-                    if (isBlocked) {
-                      return const SizedBox.shrink();
-                    }
+                  if (blockedUserIds
+                      .contains(thread.replies[0].author.userId)) {
+                    return const SizedBox.shrink();
                   }
 
                   return ThreadCell(
-                    key: PageStorageKey(state.threads[index].threadId),
-                    thread: state.threads[index],
-                    onTap: () => loadThread(context, state.threads[index]),
-                    onLongPress: () =>
-                        jumpToPage(context, state.threads[index]),
+                    key: ValueKey(thread.threadId),
+                    thread: thread,
+                    onTap: () => loadThread(context, thread),
+                    onLongPress: () => jumpToPage(context, thread),
                   );
                 }
               },

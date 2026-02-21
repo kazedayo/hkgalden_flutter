@@ -136,6 +136,12 @@ class _ThreadPageState extends State<ThreadPage> {
                               index,
                               arguments.page,
                               _onReplySuccess);
+                        }, findChildIndexCallback: (Key key) {
+                          if (key is ValueKey<String?>) {
+                            return state.previousPages.replies.indexWhere(
+                                (reply) => reply.replyId == key.value);
+                          }
+                          return null;
                         },
                             childCount: state.previousPages.replies.isEmpty
                                 ? 1
@@ -151,6 +157,13 @@ class _ThreadPageState extends State<ThreadPage> {
                                 state,
                                 index,
                                 _onReplySuccess);
+                          },
+                          findChildIndexCallback: (Key key) {
+                            if (key is ValueKey<String?>) {
+                              return state.thread.replies.indexWhere(
+                                  (reply) => reply.replyId == key.value);
+                            }
+                            return null;
                           },
                           childCount: state.thread.replies.length,
                         ),

@@ -35,7 +35,15 @@ class UserThreadListPage extends StatelessWidget {
                         bottom: MediaQuery.of(context).padding.bottom),
                     itemCount:
                         (state as UserThreadListLoaded).userThreadList.length,
+                    findChildIndexCallback: (Key key) {
+                      if (key is ValueKey<int>) {
+                        return state.userThreadList.indexWhere(
+                            (thread) => thread.threadId == key.value);
+                      }
+                      return null;
+                    },
                     itemBuilder: (context, index) => Column(
+                      key: ValueKey(state.userThreadList[index].threadId),
                       children: <Widget>[
                         ListTile(
                           title: Text(
