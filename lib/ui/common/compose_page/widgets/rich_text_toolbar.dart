@@ -295,7 +295,7 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
               Positioned(
                 left: btnPosition.dx,
                 // Place the popup above the toolbar button.
-                bottom: MediaQuery.of(context).size.height - btnPosition.dy + 4,
+                bottom: MediaQuery.sizeOf(context).height - btnPosition.dy + 4,
                 width: popupWidth,
                 child: GestureDetector(
                   onTap: () {}, // prevent taps inside from dismissing

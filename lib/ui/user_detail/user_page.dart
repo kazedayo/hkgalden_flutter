@@ -46,7 +46,14 @@ class UserPage extends StatelessWidget {
                       : OctoImage(
                           width: 25,
                           height: 25,
-                          image: NetworkImage(user.avatar),
+                          image: ResizeImage(
+                            NetworkImage(user.avatar),
+                            width: (25 * MediaQuery.devicePixelRatioOf(context))
+                                .toInt(),
+                            height:
+                                (25 * MediaQuery.devicePixelRatioOf(context))
+                                    .toInt(),
+                          ),
                           placeholderBuilder: (context) => SizedBox.fromSize(
                             size: const Size.square(30),
                           ),

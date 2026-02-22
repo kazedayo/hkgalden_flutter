@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-double displayHeight(BuildContext context) =>
-    MediaQuery.of(context).size.height;
+double displayHeight(BuildContext context) => MediaQuery.sizeOf(context).height;
 
-double displayWidth(BuildContext context) => MediaQuery.of(context).size.width;
+double displayWidth(BuildContext context) => MediaQuery.sizeOf(context).width;

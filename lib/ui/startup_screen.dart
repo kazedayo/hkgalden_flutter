@@ -139,8 +139,8 @@ class StaggerAnimation extends StatelessWidget {
                   child: SvgPicture.asset('assets/icon-hkgalden.svg')),
             ),
           ),
-          Opacity(
-            opacity: opacity.value,
+          FadeTransition(
+            opacity: opacity,
             child: const ProgressSpinner(),
           ),
           const Spacer(),

@@ -34,7 +34,7 @@ class _LinkDialogState extends State<_LinkDialog> {
           return AlertDialog(
             title: const Text('插入連結'),
             content: SizedBox(
-              width: MediaQuery.of(context).size.width,
+              width: MediaQuery.sizeOf(context).width,
               child: TextField(
                 controller: _urlController,
                 autofocus: true,

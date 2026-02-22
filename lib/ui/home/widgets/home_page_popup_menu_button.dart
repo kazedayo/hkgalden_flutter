@@ -4,8 +4,8 @@ part of '../home_page.dart';
 class _PopupMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final double deviceWidth = MediaQuery.of(context).size.width;
-    final double deviceHeight = MediaQuery.of(context).size.height;
+    final double deviceWidth = MediaQuery.sizeOf(context).width;
+    final double deviceHeight = MediaQuery.sizeOf(context).height;
     return PopupMenuButton(
       offset: Offset(deviceWidth, -deviceHeight),
       itemBuilder: (context) => [

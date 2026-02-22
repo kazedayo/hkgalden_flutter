@@ -27,11 +27,12 @@ void _jumpToPage(BuildContext context, Thread thread) {
             ),
           ),
           ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: displayHeight(context) / 2),
+            constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(context).height / 2),
             child: ListView.builder(
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).padding.bottom),
               shrinkWrap: true,
+              padding:
+                  EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
               itemCount: (thread.replies.last.floor.toDouble() / 50.0).ceil(),
               itemBuilder: (context, index) => Card(
                 color: Colors.transparent,

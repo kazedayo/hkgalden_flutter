@@ -11,12 +11,10 @@ class ListLoadingSkeleton extends StatelessWidget {
         child: Shimmer.fromColors(
           baseColor: Theme.of(context).primaryColor,
           highlightColor: Theme.of(context).scaffoldBackgroundColor,
-          child: ListView(
+          child: ListView.builder(
             physics: const NeverScrollableScrollPhysics(),
-            children: List.generate(
-              10,
-              (index) => ListLoadingSkeletonCell(),
-            ),
+            itemCount: 10,
+            itemBuilder: (context, index) => const ListLoadingSkeletonCell(),
           ),
         ),
       );

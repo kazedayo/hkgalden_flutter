@@ -96,8 +96,13 @@ class _ImageEmbedBuilder extends EmbedBuilder {
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Image.network(
-        imageUrl as String,
+      child: Image(
+        image: ResizeImage(
+          NetworkImage(imageUrl as String),
+          width: (MediaQuery.sizeOf(context).width *
+                  MediaQuery.devicePixelRatioOf(context))
+              .toInt(),
+        ),
         fit: BoxFit.contain,
       ),
     );

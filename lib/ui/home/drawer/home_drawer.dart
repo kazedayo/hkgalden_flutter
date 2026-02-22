@@ -10,16 +10,23 @@ class HomeDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final ChannelLoaded state =
         BlocProvider.of<ChannelBloc>(context).state as ChannelLoaded;
-    return GridView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 180, childAspectRatio: 2.5),
-      itemBuilder: (context, index) => ChannelCell(
-        channel: state.channels[index],
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        child: Wrap(
+          spacing: 8.0,
+          runSpacing: 10.0,
+          alignment: WrapAlignment.start,
+          children: state.channels
+              .map(
+                (channel) => SizedBox(
+                  width: (MediaQuery.sizeOf(context).width - 32) / 3,
+                  child: ChannelCell(channel: channel),
+                ),
+              )
+              .toList(),
+        ),
       ),
-      itemCount: state.channels.length,
     );
   }
 }

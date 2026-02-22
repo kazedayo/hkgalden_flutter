@@ -67,7 +67,7 @@ class _ImageInsertDialogState extends State<_ImageInsertDialog> {
         return AlertDialog(
           title: const Text('插入圖片'),
           content: SizedBox(
-            width: MediaQuery.of(context).size.width,
+            width: MediaQuery.sizeOf(context).width,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

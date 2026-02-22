@@ -20,7 +20,7 @@ import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton_cell.da
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
 import 'package:hkgalden_flutter/ui/user_detail/block_list_page.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
-import 'package:hkgalden_flutter/utils/device_properties.dart';
+
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/utils/token_store.dart';
