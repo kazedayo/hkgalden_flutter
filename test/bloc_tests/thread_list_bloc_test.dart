@@ -20,8 +20,8 @@ void main() {
       threadListBloc = ThreadListBloc(repository: repository);
     });
 
-    test('initial state should be ThreadListLoading', () {
-      expect(threadListBloc.state, ThreadListLoading());
+    test('initial state should be ThreadListInit', () {
+      expect(threadListBloc.state, ThreadListInit());
     });
 
     blocTest('emits ThreadListLoaded state when RequestThreadListEvent added',

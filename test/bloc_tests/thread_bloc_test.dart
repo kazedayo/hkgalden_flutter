@@ -17,6 +17,22 @@ void main() {
     late ThreadRepository repository;
     late ThreadBloc threadBloc;
 
+    final fixedDate = DateTime.utc(2024, 1, 1);
+    final sampleReply = Reply(
+      floor: 1,
+      author: const User(
+        userId: '1',
+        nickName: 'nickName',
+        avatar: 'avatar',
+        userGroup: [
+          UserGroup(groupId: 'groupId', groupName: 'groupName'),
+        ],
+        blockedUsers: [],
+      ),
+      authorNickname: 'authorNickname',
+      date: fixedDate,
+    );
+
     setUp(() {
       repository = MockThreadRepository();
       when(repository.getThread(1, 1))
@@ -26,77 +42,72 @@ void main() {
       threadBloc = ThreadBloc(repository: repository);
     });
 
-    test('initial state should be ThreadLoading', () {
-      expect(threadBloc.state, ThreadLoading());
+    test('initial state should be ThreadInit', () {
+      expect(threadBloc.state, ThreadInit());
     });
 
-    blocTest('emits ThreadLoaded state when RequestThreadEvent added',
-        build: () => threadBloc,
-        act: (ThreadBloc bloc) => bloc.add(const RequestThreadEvent(
-            threadId: 1, page: 1, isInitialLoad: true)),
-        expect: () => [isA<ThreadLoaded>()],
-        verify: (_) => verify(repository.getThread(1, 1)).called(1));
+    blocTest(
+      'emits ThreadLoaded state when RequestThreadEvent added',
+      build: () => threadBloc,
+      act: (ThreadBloc bloc) => bloc.add(
+        const RequestThreadEvent(threadId: 1, page: 1, isInitialLoad: true),
+      ),
+      expect: () => [isA<ThreadLoading>(), isA<ThreadLoaded>()],
+      verify: (_) => verify(repository.getThread(1, 1)).called(1),
+    );
 
     blocTest(
-        'emits new state when RequestThreadEvent w/ isInitialLoad = false added',
-        build: () => threadBloc,
-        act: (ThreadBloc bloc) => bloc
-          ..add(const RequestThreadEvent(
-              threadId: 1, page: 1, isInitialLoad: true))
-          ..add(const RequestThreadEvent(
-              threadId: 1, page: 2, isInitialLoad: false)),
-        expect: () => [
-              ThreadLoaded(
-                  thread: Thread.initial(),
-                  previousPages: Thread.initial(),
-                  currentPage: 1,
-                  endPage: 1),
-              ThreadAppending(),
-              ThreadLoaded(
-                  thread: Thread.initial(),
-                  previousPages: Thread.initial(),
-                  currentPage: 2,
-                  endPage: 2)
-            ]);
+      'emits new state when RequestThreadEvent w/ isInitialLoad = false added',
+      build: () => threadBloc,
+      act: (ThreadBloc bloc) => bloc
+        ..add(
+          const RequestThreadEvent(threadId: 1, page: 1, isInitialLoad: true),
+        )
+        ..add(
+          const RequestThreadEvent(threadId: 1, page: 2, isInitialLoad: false),
+        ),
+      expect: () => [
+        ThreadLoading(),
+        ThreadLoaded(
+          thread: Thread.initial(),
+          previousPages: Thread.initial(),
+          currentPage: 1,
+          endPage: 1,
+        ),
+        ThreadAppending(),
+        ThreadLoaded(
+          thread: Thread.initial(),
+          previousPages: Thread.initial(),
+          currentPage: 2,
+          endPage: 2,
+        ),
+      ],
+    );
 
-    blocTest('emits new state when AppendReplyToThreadEvent added',
-        build: () => threadBloc,
-        act: (ThreadBloc bloc) => bloc
-          ..add(const RequestThreadEvent(
-              threadId: 1, page: 1, isInitialLoad: true))
-          ..add(AppendReplyToThreadEvent(
-              reply: Reply(
-                  floor: 1,
-                  author: const User(
-                      userId: "1",
-                      nickName: "nickName",
-                      avatar: "avatar",
-                      userGroup: [
-                        UserGroup(groupId: "groupId", groupName: "groupName")
-                      ],
-                      blockedUsers: []),
-                  authorNickname: "authorNickname",
-                  date: DateTime.now()))),
-        expect: () => [
-              ThreadLoaded(
-                  thread: Thread.initial().copyWith(replies: [
-                    Reply(
-                        floor: 1,
-                        author: const User(
-                            userId: "1",
-                            nickName: "nickName",
-                            avatar: "avatar",
-                            userGroup: [
-                              UserGroup(
-                                  groupId: "groupId", groupName: "groupName")
-                            ],
-                            blockedUsers: []),
-                        authorNickname: "authorNickname",
-                        date: DateTime.now())
-                  ]),
-                  previousPages: Thread.initial(),
-                  currentPage: 1,
-                  endPage: 1)
-            ]);
+    blocTest(
+      'emits new state when AppendReplyToThreadEvent added',
+      build: () => threadBloc,
+      act: (ThreadBloc bloc) => bloc
+        ..add(
+          const RequestThreadEvent(threadId: 1, page: 1, isInitialLoad: true),
+        )
+        ..add(AppendReplyToThreadEvent(reply: sampleReply)),
+      expect: () => [
+        ThreadLoading(),
+        ThreadLoaded(
+          thread: Thread.initial(),
+          previousPages: Thread.initial(),
+          currentPage: 1,
+          endPage: 1,
+        ),
+        ThreadAppending(),
+        ThreadLoaded(
+          thread: Thread.initial().copyWith(replies: [sampleReply]),
+          previousPages: Thread.initial(),
+          currentPage: 1,
+          endPage: 1,
+        ),
+      ],
+    );
   });
 }
