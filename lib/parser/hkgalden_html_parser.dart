@@ -1,5 +1,6 @@
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
+import 'package:hkgalden_flutter/parser/galden_node_types.dart';
 import 'package:universal_html/html.dart';
 import 'package:universal_html/parsing.dart';
 
@@ -12,216 +13,289 @@ class HKGaldenHtmlParser {
     ..allowInlineStyles()
     ..allowImages(_AllowAllUriPolicy())
     ..allowNavigation(_AllowAllUriPolicy())
-    ..allowCustomElement('p', attributes: ['hex', 'data-nodetype'])
+    ..allowCustomElement('p', attributes: ['hex', GaldenNodeTypes.dataNodetype])
     ..allowCustomElement('icon', attributes: ['src'])
     ..allowCustomElement('span', attributes: [
-      'data-nodetype',
-      'data-id',
-      'data-src',
-      'data-value',
-      'data-href',
-      'data-pack-id',
-      'data-sx',
-      'data-sy',
-      'data-alt',
+      GaldenNodeTypes.dataNodetype,
+      GaldenNodeTypes.dataId,
+      GaldenNodeTypes.dataSrc,
+      GaldenNodeTypes.dataValue,
+      GaldenNodeTypes.dataHref,
+      GaldenNodeTypes.dataPackId,
+      GaldenNodeTypes.dataSx,
+      GaldenNodeTypes.dataSy,
+      GaldenNodeTypes.dataAlt,
       'hex'
     ]);
 
   String? parse(String htmlString) {
-    final htmlDocument = parseHtmlDocument(htmlString.replaceAll(
-        'p data-nodetype', 'p class')); //hacky way to parse center / right
+    try {
+      final htmlDocument = parseHtmlDocument(htmlString);
 
-    final List<Element> childElement = htmlDocument.body!.children;
-    _elementParsing(childElement);
-    return htmlDocument.body!.innerHtml;
+      final body = htmlDocument.body;
+      if (body == null) {
+        return htmlString;
+      }
+
+      final List<Element> childElement = body.children;
+      _elementParsing(childElement);
+      return body.innerHtml;
+    } catch (_) {
+      return htmlString;
+    }
   }
 
   void _elementParsing(List<Element> elements) {
-    elements.forEach((element) {
-      if (element.tagName != 'SPAN') {
+    // Snapshot: replaceWith mutates the live children list during iteration.
+    final snapshot = List<Element>.from(elements);
+    for (final element in snapshot) {
+      if (element.tagName == 'SPAN') {
+        // Process nested spans/alignment first (in-place), then transform this span
+        // by reparenting already-transformed children — no HTML re-serialization.
         _elementParsing(element.children);
+        final transformed = _spanParsing(element);
+        if (!identical(transformed, element)) {
+          element.replaceWith(transformed);
+        }
       } else {
-        element.replaceWith(_spanParsing(element));
+        _applyAlignmentClassIfNeeded(element);
+        // Walk non-span children so nested spans (and nested alignment) are processed.
+        _elementParsing(element.children);
       }
-    });
+    }
+  }
+
+  /// Maps block alignment `data-nodetype` on P/DIV to CSS class names used by
+  /// [HtmlStyles] (`p.center` / `p.right`).
+  void _applyAlignmentClassIfNeeded(Element element) {
+    final tag = element.tagName;
+    if (tag != 'P' && tag != 'DIV') {
+      return;
+    }
+    final nodeType = element.getAttribute(GaldenNodeTypes.dataNodetype);
+    if (nodeType == GaldenNodeTypes.center ||
+        nodeType == GaldenNodeTypes.right) {
+      element
+        ..setAttribute('class', nodeType!)
+        ..attributes.remove(GaldenNodeTypes.dataNodetype);
+    }
+  }
+
+  /// Moves all child nodes from [from] into [to] (reparent, no serialization).
+  void _moveChildNodes(Element from, Element to) {
+    final nodes = List<Node>.from(from.nodes);
+    for (final node in nodes) {
+      to.append(node);
+    }
+  }
+
+  /// Builds a simple wrapper element, reparenting [element]'s children into it.
+  Element _wrapWithMovedChildren(Element element, Element wrapper) {
+    _moveChildNodes(element, wrapper);
+    return wrapper;
   }
 
   Element _spanParsing(Element element) {
-    switch (element.getAttribute('data-nodetype')) {
+    switch (element.getAttribute(GaldenNodeTypes.dataNodetype)) {
       //parse icon
-      case 'smiley':
+      case GaldenNodeTypes.smiley:
+        final packId = element.getAttribute(GaldenNodeTypes.dataPackId);
+        final id = element.getAttribute(GaldenNodeTypes.dataId);
+        if (packId == null ||
+            packId.isEmpty ||
+            id == null ||
+            id.isEmpty) {
+          return element;
+        }
         return Element.tag('icon')
           ..setAttribute(
             'src',
-            'https://s.hkgalden.org/smilies/${element.getAttribute('data-pack-id')}/${element.getAttribute('data-id')}.gif',
+            'https://s.hkgalden.org/smilies/$packId/$id.gif',
           );
       //parse image
-      case 'img':
+      case GaldenNodeTypes.img:
+        final src = element.getAttribute(GaldenNodeTypes.dataSrc);
+        if (src == null || src.isEmpty) {
+          return element;
+        }
         return Element.img()
           ..setAttribute(
             'src',
-            element.getAttribute('data-src')!,
+            src,
           );
       //parse link
-      case 'a':
-        return Element.a()
+      case GaldenNodeTypes.a:
+        final href = element.getAttribute(GaldenNodeTypes.dataHref);
+        if (href == null || href.isEmpty) {
+          return element;
+        }
+        final anchor = Element.a()
           ..setAttribute(
             'href',
-            element.getAttribute('data-href')!,
-          )
-          ..setInnerHtml(element.getAttribute('data-href'),
-              validator: validator);
+            href,
+          );
+        if (element.hasChildNodes()) {
+          _moveChildNodes(element, anchor);
+        } else {
+          anchor.appendText(href);
+        }
+        return anchor;
       //parse color
-      case 'color':
-        return Element.span()
-          ..setAttribute('class', 'color')
-          ..setAttribute('hex', element.getAttribute('data-value')!)
-          ..setInnerHtml(parse(element.innerHtml!), validator: validator);
+      case GaldenNodeTypes.color:
+        final value = element.getAttribute(GaldenNodeTypes.dataValue);
+        if (value == null || value.isEmpty) {
+          return element;
+        }
+        return _wrapWithMovedChildren(
+          element,
+          Element.span()
+            ..setAttribute('class', 'color')
+            ..setAttribute('hex', value),
+        );
       //parse bold
-      case 'b':
-        return Element.tag('b')
-          ..setInnerHtml(parse(element.innerHtml!), validator: validator);
+      case GaldenNodeTypes.b:
+        return _wrapWithMovedChildren(element, Element.tag('b'));
       //parse italic
-      case 'i':
-        return Element.tag('i')
-          ..setInnerHtml(parse(element.innerHtml!), validator: validator);
+      case GaldenNodeTypes.i:
+        return _wrapWithMovedChildren(element, Element.tag('i'));
       //parse underline
-      case 'u':
-        return Element.tag('u')
-          ..setInnerHtml(parse(element.innerHtml!), validator: validator);
+      case GaldenNodeTypes.u:
+        return _wrapWithMovedChildren(element, Element.tag('u'));
       //parse strikethrough
-      case 's':
-        return Element.tag('s')
-          ..setInnerHtml(parse(element.innerHtml!), validator: validator);
-      //parse center alignment
-      // case 'center':
-      //   return Element.div()
-      //     ..setAttribute('class', 'center')
-      //     ..setInnerHtml(parse(element.innerHtml), validator: validator);
-      //   break;
-      //parse right alignment
-      // case 'right':
-      //   return Element.div()
-      //     ..setAttribute('class', 'right')
-      //     ..setInnerHtml(parse(element.innerHtml), validator: validator);
-      //   break;
+      case GaldenNodeTypes.s:
+        return _wrapWithMovedChildren(element, Element.tag('s'));
+      //parse center alignment (span form)
+      case GaldenNodeTypes.center:
+        return _wrapWithMovedChildren(
+          element,
+          Element.div()..setAttribute('class', GaldenNodeTypes.center),
+        );
+      //parse right alignment (span form)
+      case GaldenNodeTypes.right:
+        return _wrapWithMovedChildren(
+          element,
+          Element.div()..setAttribute('class', GaldenNodeTypes.right),
+        );
       //parse h1
-      case 'h1':
-        return Element.span()
-          ..setAttribute('class', 'h1')
-          ..setInnerHtml(parse(element.innerHtml!), validator: validator);
+      case GaldenNodeTypes.h1:
+        return _wrapWithMovedChildren(
+          element,
+          Element.span()..setAttribute('class', 'h1'),
+        );
       //parse h2
-      case 'h2':
-        return Element.span()
-          ..setAttribute('class', 'h2')
-          ..setInnerHtml(parse(element.innerHtml!), validator: validator);
+      case GaldenNodeTypes.h2:
+        return _wrapWithMovedChildren(
+          element,
+          Element.span()..setAttribute('class', 'h2'),
+        );
       //parse h3
-      case 'h3':
-        return Element.span()
-          ..setAttribute('class', 'h3')
-          ..setInnerHtml(parse(element.innerHtml!), validator: validator);
+      case GaldenNodeTypes.h3:
+        return _wrapWithMovedChildren(
+          element,
+          Element.span()..setAttribute('class', 'h3'),
+        );
       default:
         return element;
     }
   }
 
-  //dumb method, may change to recursive function
-  String? commentWithQuotes(Reply reply, SessionUserState state) {
-    final Reply? rootParent = reply.parent;
-
-    final htmlDoc = parseHtmlDocument(reply.content!);
-
-    //print(htmlDoc.body.children);
-
-    if (rootParent != null &&
-        ((state is SessionUserLoaded &&
-                !state.sessionUser.blockedUsers
-                    .contains(rootParent.author.userId)) ||
-            state is SessionUserUndefined)) {
-      if (rootParent.parent != null &&
-          ((state is SessionUserLoaded &&
-                  !state.sessionUser.blockedUsers
-                      .contains(rootParent.parent!.author.userId)) ||
-              state is SessionUserUndefined)) {
-        if (rootParent.parent!.parent != null &&
-            ((state is SessionUserLoaded &&
-                    !state.sessionUser.blockedUsers
-                        .contains(rootParent.parent!.parent!.author.userId)) ||
-                state is SessionUserUndefined)) {
-          htmlDoc.body!.setInnerHtml('''
-                <blockquote style><blockquote><blockquote>
-                <div class="quoteName">${rootParent.parent!.parent!.authorNickname} 說:</div>
-                ${rootParent.parent!.parent!.content}</blockquote>
-                <div class="quoteName">${rootParent.parent!.authorNickname} 說:</div>
-                ${rootParent.parent!.content}</blockquote>
-                <div class="quoteName">${rootParent.authorNickname} 說:</div>
-                ${rootParent.content}</blockquote>${htmlDoc.body!.innerHtml}
-              ''', validator: validator);
-          //print('result: ${htmlDoc.body.innerHtml}');
-          return htmlDoc.body!.innerHtml;
-        }
-        htmlDoc.body!.setInnerHtml('''
-            <blockquote><blockquote>
-            <div class="quoteName">${rootParent.parent!.authorNickname} 說:</div>
-            ${rootParent.parent!.content}</blockquote>
-            <div class="quoteName">${rootParent.authorNickname} 說:</div>
-            ${rootParent.content}</blockquote>${htmlDoc.body!.innerHtml}''',
-            validator: validator);
-        //print('result: ${htmlDoc.body.innerHtml}');
-        return htmlDoc.body!.innerHtml;
-      }
-      htmlDoc.body!.setInnerHtml('''
-          <blockquote>
-          <div class="quoteName">${rootParent.authorNickname} 說:</div>
-          ${rootParent.content}</blockquote>${htmlDoc.body!.innerHtml}''',
-          validator: validator);
-      //print('result: ${htmlDoc.body.innerHtml}');
-      return htmlDoc.body!.innerHtml;
+  /// Builds nested quote HTML for a [reply], walking its parent chain.
+  ///
+  /// When [includeStartAsQuote] is true (used by [replyWithQuotes]), [reply]
+  /// itself is the outermost quoted entry. When false (used by
+  /// [commentWithQuotes]), only parents are quoted and [reply]'s body is
+  /// appended after the quote chain.
+  ///
+  /// [isBlocked] when non-null skips/stops at blocked authors. When null, all
+  /// authors are included (e.g. [SessionUserUndefined]).
+  String? _buildQuoteChain(
+    Reply reply, {
+    required bool includeStartAsQuote,
+    bool Function(String userId)? isBlocked,
+    int maxDepth = 3,
+  }) {
+    final String baseHtml =
+        includeStartAsQuote ? '' : (reply.content ?? '');
+    final htmlDoc = parseHtmlDocument(baseHtml);
+    final body = htmlDoc.body;
+    if (body == null) {
+      return includeStartAsQuote ? '' : (reply.content ?? '');
     }
-    return htmlDoc.body!.innerHtml;
+
+    // Collect quote entries closest-first, then reverse for nesting.
+    final List<Reply> chain = <Reply>[];
+
+    if (includeStartAsQuote) {
+      if (isBlocked != null && isBlocked(reply.author.userId)) {
+        return body.innerHtml;
+      }
+      chain.add(reply);
+    }
+
+    Reply? current = reply.parent;
+    while (current != null && chain.length < maxDepth) {
+      if (isBlocked != null && isBlocked(current.author.userId)) {
+        // Match prior if-tree: stop walking when a blocked author is hit.
+        break;
+      }
+      chain.add(current);
+      current = current.parent;
+    }
+
+    if (chain.isEmpty) {
+      return body.innerHtml;
+    }
+
+    // deepest first for nested open/close structure
+    final List<Reply> deepestFirst = chain.reversed.toList();
+    final buffer = StringBuffer();
+    for (var i = 0; i < deepestFirst.length; i++) {
+      buffer.write('<blockquote>');
+    }
+    for (final quoted in deepestFirst) {
+      buffer
+        ..write('<div class="quoteName">${quoted.authorNickname} 說:</div>')
+        ..write(quoted.content ?? '')
+        ..write('</blockquote>');
+    }
+
+    if (includeStartAsQuote) {
+      body.setInnerHtml(buffer.toString(), validator: validator);
+    } else {
+      body.setInnerHtml(
+        '${buffer.toString()}${body.innerHtml}',
+        validator: validator,
+      );
+    }
+    return body.innerHtml;
+  }
+
+  String? commentWithQuotes(Reply reply, SessionUserState state) {
+    if (state is SessionUserLoaded) {
+      return _buildQuoteChain(
+        reply,
+        includeStartAsQuote: false,
+        isBlocked: (userId) =>
+            state.sessionUser.blockedUsers.contains(userId),
+      );
+    }
+    if (state is SessionUserUndefined) {
+      return _buildQuoteChain(
+        reply,
+        includeStartAsQuote: false,
+      );
+    }
+    // Other states (e.g. loading): body only, no quotes.
+    final htmlDoc = parseHtmlDocument(reply.content ?? '');
+    return htmlDoc.body?.innerHtml ?? reply.content ?? '';
   }
 
   String? replyWithQuotes(Reply reply, SessionUserLoaded state) {
-    final htmlDoc = parseHtmlDocument('');
-
-    if (!state.sessionUser.blockedUsers.contains(reply.author.userId)) {
-      if (reply.parent != null &&
-          !state.sessionUser.blockedUsers
-              .contains(reply.parent!.author.userId)) {
-        if (reply.parent!.parent != null &&
-            !state.sessionUser.blockedUsers
-                .contains(reply.parent!.parent!.author.userId)) {
-          htmlDoc.body!.setInnerHtml('''
-            <blockquote style><blockquote><blockquote>
-            <div class="quoteName">${reply.parent!.parent!.authorNickname} 說:</div>
-            ${reply.parent!.parent!.content}</blockquote>
-            <div class="quoteName">${reply.parent!.authorNickname} 說:</div>
-            ${reply.parent!.content}</blockquote>
-            <div class="quoteName">${reply.authorNickname} 說:</div>
-            ${reply.content}</blockquote>${htmlDoc.body!.innerHtml}''',
-              validator: validator);
-          //print('result: ${htmlDoc.body.innerHtml}');
-          return htmlDoc.body!.innerHtml;
-        }
-        htmlDoc.body!.setInnerHtml('''
-              <blockquote><blockquote>
-              <div class="quoteName">${reply.parent!.authorNickname} 說:</div>
-              ${reply.parent!.content}</blockquote>
-              <div class="quoteName">${reply.authorNickname} 說:</div>
-              ${reply.content}</blockquote>${htmlDoc.body!.innerHtml}''',
-            validator: validator);
-        //print('result: ${htmlDoc.body.innerHtml}');
-        return htmlDoc.body!.innerHtml;
-      }
-      htmlDoc.body!.setInnerHtml('''
-            <blockquote>
-            <div class="quoteName">${reply.authorNickname} 說:</div>
-            ${reply.content}</blockquote>${htmlDoc.body!.innerHtml}''',
-          validator: validator);
-      //print('result: ${htmlDoc.body.innerHtml}');
-      return htmlDoc.body!.innerHtml;
-    }
-    return htmlDoc.body!.innerHtml;
+    return _buildQuoteChain(
+      reply,
+      includeStartAsQuote: true,
+      isBlocked: (userId) => state.sessionUser.blockedUsers.contains(userId),
+    );
   }
 }
 
