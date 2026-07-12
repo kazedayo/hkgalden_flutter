@@ -28,6 +28,17 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # .env is a Flutter asset (flutter_dotenv) and is gitignored; materialize from secrets for CI.
+      - name: Create .env
+        env:
+          HKGALDEN_CLIENT_ID: ${{ secrets.HKGALDEN_CLIENT_ID }}
+        run: |
+          if [ -z "$HKGALDEN_CLIENT_ID" ]; then
+            echo "::error::Repository secret HKGALDEN_CLIENT_ID is not set"
+            exit 1
+          fi
+          printf 'HKGALDEN_CLIENT_ID=%s\n' "$HKGALDEN_CLIENT_ID" > .env
+
       - name: Build release APK
         run: flutter build apk --release
 
