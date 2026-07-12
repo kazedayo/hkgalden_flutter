@@ -19,9 +19,10 @@ Widget _generatePreviousPageSliver(
   final cell = _buildCommentCell(
       context, scrollController, state, reply, onReplySuccess);
 
+  final key = ValueKey<Object>(_replyListKey(reply));
   if (reply.floor % 50 == 1) {
     return Column(
-      key: ValueKey(reply.replyId),
+      key: key,
       children: <Widget>[
         if (reply.floor != 1 && (reply.floor / 50.0).ceil() == state.currentPage)
           ThreadPageLoadingSkeletonCell(),
@@ -33,7 +34,7 @@ Widget _generatePreviousPageSliver(
 
   // Match findChildIndexCallback (ValueKey) for stable element reuse on prepend.
   return KeyedSubtree(
-    key: ValueKey(reply.replyId),
+    key: key,
     child: cell,
   );
 }

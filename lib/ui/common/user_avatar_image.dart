@@ -42,6 +42,7 @@ class UserAvatarImage extends StatelessWidget {
                 width: cacheSize,
                 height: cacheSize,
               ),
+              gaplessPlayback: true,
               placeholderBuilder: (context) =>
                   SizedBox.fromSize(size: Size.square(size)),
             ),

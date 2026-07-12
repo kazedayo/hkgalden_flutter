@@ -6,22 +6,26 @@ class LastReplyTimer extends StatelessWidget {
   const LastReplyTimer({super.key, required this.time});
 
   static String formatRelativeTime(DateTime timeObj) {
-    final now = DateTime.now();
-    final difference = now.difference(timeObj);
-
-    if (difference.inDays >= 365) {
-      return '${(difference.inDays / 365).floor()}y';
-    } else if (difference.inDays >= 30) {
-      return '${(difference.inDays / 30).floor()}mo';
-    } else if (difference.inDays > 0) {
-      return '${difference.inDays}d';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m';
-    } else {
-      return '${difference.inSeconds > 0 ? difference.inSeconds : 0}s';
+    final seconds = DateTime.now().difference(timeObj).inSeconds;
+    if (seconds < 60) {
+      return '${seconds < 0 ? 0 : seconds}s';
     }
+    final minutes = seconds ~/ 60;
+    if (minutes < 60) {
+      return '${minutes}m';
+    }
+    final hours = minutes ~/ 60;
+    if (hours < 24) {
+      return '${hours}h';
+    }
+    final days = hours ~/ 24;
+    if (days < 30) {
+      return '${days}d';
+    }
+    if (days < 365) {
+      return '${days ~/ 30}mo';
+    }
+    return '${days ~/ 365}y';
   }
 
   @override

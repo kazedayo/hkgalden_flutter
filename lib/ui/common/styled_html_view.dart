@@ -8,7 +8,6 @@ import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/utils/html_styles.dart';
 import 'package:octo_image/octo_image.dart';
-
 import 'package:url_launcher/url_launcher.dart';
 
 class StyledHtmlView extends StatefulWidget {
@@ -73,10 +72,17 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
             tagsToExtend: {'icon'},
             builder: (extensionContext) {
               final src = extensionContext.attributes['src'] ?? '';
+              final dpr = MediaQuery.devicePixelRatioOf(context);
+              final cachePx = (48 * dpr).round();
               return Padding(
                 padding: const EdgeInsets.all(3.0),
                 child: OctoImage(
-                  image: NetworkImage(src),
+                  image: ResizeImage(
+                    NetworkImage(src),
+                    width: cachePx,
+                    height: cachePx,
+                  ),
+                  gaplessPlayback: true,
                   placeholderBuilder: (context) => const SizedBox(),
                 ),
               );
@@ -94,7 +100,6 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
       data: MediaQuery.of(context).copyWith(
         textScaler: TextScaler.linear(1.0),
       ),
-      // Isolate HTML paint from parent chrome (app bar elevation, etc.).
       child: RepaintBoundary(
         child: _cachedHtml!,
       ),
@@ -155,12 +160,12 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
               NetworkImage(widget.src),
               width: widget.cacheWidth,
             ),
+            gaplessPlayback: true,
             placeholderBuilder: (context) => const Padding(
               padding: EdgeInsets.all(8.0),
               child: ProgressSpinner(),
             ),
             errorBuilder: (context, error, stackTrace) {
-              // Schedule state update after this frame — avoid setState during build.
               if (!_hasError) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted) {

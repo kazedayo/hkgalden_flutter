@@ -59,6 +59,7 @@ class ComposePageState extends State<ComposePage> {
   late TextEditingController _titleFieldController;
   late FocusNode _focusNode;
   late FocusNode _titleFocusNode;
+
   /// Cached quote preview so parent rebuilds (e.g. sending spinner) do not
   /// re-run [HKGaldenHtmlParser.replyWithQuotes].
   String? _cachedQuoteHtml;
@@ -218,7 +219,7 @@ class ComposePageState extends State<ComposePage> {
                                 fillColor: Theme.of(context)
                                     .colorScheme
                                     .surfaceContainerHighest
-                                    .withOpacity(0.5),
+                                    .withValues(alpha: 0.5),
                                 border: OutlineInputBorder(
                                     borderSide: BorderSide.none,
                                     borderRadius: BorderRadius.circular(8)),

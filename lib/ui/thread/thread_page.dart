@@ -17,6 +17,7 @@ import 'package:hkgalden_flutter/ui/thread/comment_cell/comment_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton_header.dart';
+import 'package:hkgalden_flutter/utils/parsed_comment_html_cache.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
@@ -40,16 +41,29 @@ class ThreadPage extends StatefulWidget {
 class _ThreadPageState extends State<ThreadPage> {
   late ScrollController _scrollController;
   late ThreadPageCubit _threadPageCubit;
+  int? _previousImageCacheMaxBytes;
+
+  /// Cap decoded image memory while on the thread page (reduces GC pressure).
+  static const int _kThreadImageCacheMaxBytes = 48 << 20; // 48 MiB
 
   @override
   void initState() {
     _scrollController = ScrollController();
     _threadPageCubit = ThreadPageCubit();
+    final imageCache = PaintingBinding.instance.imageCache;
+    _previousImageCacheMaxBytes = imageCache.maximumSizeBytes;
+    if (imageCache.maximumSizeBytes > _kThreadImageCacheMaxBytes) {
+      imageCache.maximumSizeBytes = _kThreadImageCacheMaxBytes;
+    }
     super.initState();
   }
 
   @override
   void dispose() {
+    final previous = _previousImageCacheMaxBytes;
+    if (previous != null) {
+      PaintingBinding.instance.imageCache.maximumSizeBytes = previous;
+    }
     _scrollController.dispose();
     super.dispose();
   }
@@ -117,6 +131,16 @@ class _ThreadPageState extends State<ThreadPage> {
               } else {
                 _threadPageCubit.setOnLastPage(true);
               }
+              // Parse quote HTML when data arrives so cells hit cache mid-scroll.
+              final session =
+                  BlocProvider.of<SessionUserBloc>(context).state;
+              ParsedCommentHtmlCache.instance.prewarm(
+                [
+                  ...state.thread.replies,
+                  ...state.previousPages.replies,
+                ],
+                session,
+              );
             }
           },
           buildWhen: (prev, state) =>
@@ -131,9 +155,25 @@ class _ThreadPageState extends State<ThreadPage> {
               if (state is ThreadLoading) {
                 return ThreadPageLoadingSkeleton();
               } else if (state is ThreadLoaded) {
+                // O(1) key → index maps for findChildIndexCallback.
+                // Must match ValueKey(_replyListKey(reply)); never use null keys.
+                final replyKeyToIndex = <Object, int>{
+                  for (var i = 0; i < state.thread.replies.length; i++)
+                    _replyListKey(state.thread.replies[i]): i,
+                };
+                // Previous sliver builder uses reversed indices:
+                // dataIndex → builderIndex = length - dataIndex - 1
+                final previousKeyToBuilderIndex = <Object, int>{
+                  for (var i = 0; i < state.previousPages.replies.length; i++)
+                    _replyListKey(state.previousPages.replies[i]):
+                        state.previousPages.replies.length - i - 1,
+                };
                 return CustomScrollView(
                   center: centerKey,
                   controller: _scrollController,
+                  // Prefetch more off-screen so flings hit already-laid-out cells.
+                  // ignore: deprecated_member_use — ScrollCacheExtent is not exported via material.dart
+                  cacheExtent: 2000,
                   slivers: <Widget>[
                     SliverList(
                       delegate: SliverChildBuilderDelegate(
@@ -147,17 +187,8 @@ class _ThreadPageState extends State<ThreadPage> {
                               _onReplySuccess);
                         },
                         findChildIndexCallback: (Key key) {
-                          if (key is ValueKey<String?>) {
-                            final dataIndex = state.previousPages.replies
-                                .indexWhere(
-                                    (reply) => reply.replyId == key.value);
-                            if (dataIndex < 0) {
-                              return null;
-                            }
-                            // Previous sliver is reversed in the builder.
-                            return state.previousPages.replies.length -
-                                dataIndex -
-                                1;
+                          if (key is ValueKey) {
+                            return previousKeyToBuilderIndex[key.value];
                           }
                           return null;
                         },
@@ -178,10 +209,8 @@ class _ThreadPageState extends State<ThreadPage> {
                               _onReplySuccess);
                         },
                         findChildIndexCallback: (Key key) {
-                          if (key is ValueKey<String?>) {
-                            final dataIndex = state.thread.replies.indexWhere(
-                                (reply) => reply.replyId == key.value);
-                            return dataIndex < 0 ? null : dataIndex;
+                          if (key is ValueKey) {
+                            return replyKeyToIndex[key.value];
                           }
                           return null;
                         },

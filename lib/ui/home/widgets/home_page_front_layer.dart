@@ -81,6 +81,25 @@ bool _sameBlockedUsers(SessionUserState a, SessionUserState b) {
   return true;
 }
 
+List<Thread> _filterVisibleThreads(
+  List<Thread> threads,
+  Set<String> blockedUserIds,
+) {
+  if (blockedUserIds.isEmpty) {
+    // Fast path: only drop threads with empty replies.
+    return [
+      for (final thread in threads)
+        if (thread.replies.isNotEmpty) thread,
+    ];
+  }
+  return [
+    for (final thread in threads)
+      if (thread.replies.isNotEmpty &&
+          !blockedUserIds.contains(thread.replies[0].author.userId))
+        thread,
+  ];
+}
+
 Widget _frontLayerBody(
   BuildContext context,
   ThreadListState state,
@@ -98,20 +117,20 @@ Widget _frontLayerBody(
         ? sessionState.sessionUser.blockedUsers.toSet()
         : const <String>{};
 
-    final visibleThreads = state.threads
-        .where((thread) => thread.replies.isNotEmpty &&
-            !blockedUserIds.contains(thread.replies[0].author.userId))
-        .toList(growable: false);
+    final visibleThreads =
+        _filterVisibleThreads(state.threads, blockedUserIds);
 
-    final threadIdToIndex = {
+    final threadIdToIndex = <int, int>{
       for (var i = 0; i < visibleThreads.length; i++)
-        visibleThreads[i].threadId: i
+        visibleThreads[i].threadId: i,
     };
 
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 80),
       controller: scrollController,
-      cacheExtent: 500,
+      // Prefetch a bit more off-screen so flings hit already-laid-out cells.
+      // ignore: deprecated_member_use — ScrollCacheExtent is not exported via material.dart
+      cacheExtent: 900,
       itemCount: visibleThreads.length + 1,
       findChildIndexCallback: (Key key) {
         if (key is ValueKey<int>) {
@@ -127,7 +146,8 @@ Widget _frontLayerBody(
                 (prev is ThreadListAppending) != (next is ThreadListAppending),
             builder: (context, listState) {
               if (listState is ThreadListAppending) {
-                return const ListLoadingSkeletonCell(enabled: true);
+                // Lightweight footer (full skeleton reserved for initial load).
+                return const _ThreadListLoadMoreFooter();
               }
               return const SizedBox.shrink();
             },
@@ -162,4 +182,26 @@ Widget _frontLayerBody(
     );
   }
   return const SizedBox();
+}
+
+/// Minimal load-more indicator — avoids Chip/SafeArea/shimmer cost mid-scroll.
+class _ThreadListLoadMoreFooter extends StatelessWidget {
+  const _ThreadListLoadMoreFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: SizedBox(
+          width: 22,
+          height: 22,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            color: AppTheme.activeColor,
+          ),
+        ),
+      ),
+    );
+  }
 }

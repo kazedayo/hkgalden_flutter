@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Compact icon + label pair. Kept for reuse outside the thread list.
 class IconTextItem extends StatelessWidget {
   final IconData icon;
   final String text;

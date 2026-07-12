@@ -16,7 +16,6 @@ import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/error_page.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
 import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton.dart';
-import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton_cell.dart';
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
 import 'package:hkgalden_flutter/ui/user_detail/block_list_page.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
@@ -75,7 +74,8 @@ class HomePageState extends State<HomePage>
         resizeToAvoidBottomInset: false,
         appBar: _buildAppBar(),
         frontLayer: Theme(
-          data: Theme.of(context).copyWith(highlightColor: const Color(0xff373d3c)),
+          data: Theme.of(context)
+              .copyWith(highlightColor: const Color(0xff373d3c)),
           child: _buildFrontLayer(
             context,
             threadListBloc,
