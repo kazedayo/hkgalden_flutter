@@ -100,14 +100,22 @@ class HKGaldenApi {
   final GraphQLClient _client;
 
   /// Runs a query and returns null on GraphQL/network failure.
+  ///
+  /// [fetchPolicy] defaults to the client default (`cacheAndNetwork`). Prefer
+  /// [FetchPolicy.networkOnly] for list queries: with `cacheAndNetwork`, a
+  /// cache hit returns immediately and never waits for the network, so stale
+  /// `Thread.replies` (overwritten by a detail fetch) can show wrong last-reply
+  /// times.
   Future<T?> _query<T>(
     String document, {
     Map<String, dynamic>? variables,
+    FetchPolicy? fetchPolicy,
     required FutureOr<T> Function(Map<String, dynamic> data) parse,
   }) async {
     final QueryResult result = await _client.query(QueryOptions(
       document: gql(document),
       variables: variables ?? const {},
+      fetchPolicy: fetchPolicy,
     ));
     if (result.hasException || result.data == null) {
       return null;
@@ -233,6 +241,7 @@ class HKGaldenApi {
         'channelId': channelId,
         'page': page,
       },
+      fetchPolicy: FetchPolicy.networkOnly,
       parse: (data) async {
         final List<dynamic> result =
             data['threadsByChannel'] as List<dynamic>;
@@ -283,6 +292,7 @@ class HKGaldenApi {
         'userId': userId,
         'page': page,
       },
+      fetchPolicy: FetchPolicy.networkOnly,
       parse: (data) async {
         final List<dynamic> result = data['threadsByUser'] as List<dynamic>;
         return compute(threadListFromJson, result);

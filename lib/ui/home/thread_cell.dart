@@ -28,18 +28,17 @@ class ThreadCell extends StatelessWidget {
       color: isLocked ? AppTheme.lockedColor : AppTheme.activeColor,
     );
 
-    // Prefer the latest reply date when present (same rule as before).
-    final lastReply = thread.replies.length == 2
-        ? thread.replies[1]
-        : thread.replies[0];
-    final timeText =
-        LastReplyTimer.formatRelativeTime(lastReply.date.toLocal());
-    final authorNickname = thread.replies[0].authorNickname;
+    // List API returns [OP, lastReply]; after viewing a thread the GraphQL
+    // cache can replace `replies` with a full page — always pick by floor.
+    final timeText = LastReplyTimer.formatRelativeTime(
+      thread.latestReply.date.toLocal(),
+    );
+    final authorNickname = thread.originalPost.authorNickname;
     final replyCount = thread.totalReplies.toString();
 
     // Single flattened metadata row (avoids 3 nested IconTextItem Rows).
     final metaRow = Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Icon(Icons.face_rounded, size: 13, color: metaColor),
         const SizedBox(width: 5),

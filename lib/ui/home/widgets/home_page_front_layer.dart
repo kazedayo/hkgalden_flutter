@@ -95,7 +95,7 @@ List<Thread> _filterVisibleThreads(
   return [
     for (final thread in threads)
       if (thread.replies.isNotEmpty &&
-          !blockedUserIds.contains(thread.replies[0].author.userId))
+          !blockedUserIds.contains(thread.originalPost.author.userId))
         thread,
   ];
 }

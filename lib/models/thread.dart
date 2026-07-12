@@ -69,6 +69,21 @@ class Thread extends Equatable {
     );
   }
 
+  /// Original post (floor 1). List payloads usually include it as the first
+  /// reply; when the array is polluted (e.g. a later page from cache), use
+  /// the lowest floor present.
+  Reply get originalPost {
+    assert(replies.isNotEmpty);
+    return replies.reduce((a, b) => a.floor <= b.floor ? a : b);
+  }
+
+  /// Most recent reply by floor. List payloads are typically
+  /// `[floor 1, lastFloor]`; never assume index `1` when length ≠ 2.
+  Reply get latestReply {
+    assert(replies.isNotEmpty);
+    return replies.reduce((a, b) => a.floor >= b.floor ? a : b);
+  }
+
   @override
   List<Object> get props =>
       [threadId, title, status, replies, totalReplies, tagName, tagColor];
