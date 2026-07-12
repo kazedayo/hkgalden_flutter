@@ -57,76 +57,87 @@ class _ThreadPageState extends State<ThreadPage> {
   @override
   Widget build(BuildContext context) {
     const Key centerKey = ValueKey('second-sliver-list');
-    final SessionUserBloc sessionUserBloc =
-        BlocProvider.of<SessionUserBloc>(context);
     final ThreadPageArguments arguments =
         ModalRoute.of(context)!.settings.arguments! as ThreadPageArguments;
-    _threadPageCubit.setCanReply(sessionUserBloc.state is SessionUserLoaded);
     final route = ModalRoute.of(context);
 
     return MultiBlocProvider(
-        providers: [
-          BlocProvider(create: (context) {
-            final ThreadBloc threadBloc = ThreadBloc(
-                repository: RepositoryProvider.of<ThreadRepository>(context));
+      providers: [
+        BlocProvider(create: (context) {
+          final ThreadBloc threadBloc = ThreadBloc(
+              repository: RepositoryProvider.of<ThreadRepository>(context));
 
-            if (route != null &&
-                route.animation != null &&
-                route.animation!.status != AnimationStatus.completed) {
-              void handler(AnimationStatus status) {
-                if (status == AnimationStatus.completed) {
-                  route.animation!.removeStatusListener(handler);
-                  threadBloc.add(RequestThreadEvent(
-                      threadId: arguments.threadId,
-                      page: arguments.page,
-                      isInitialLoad: true));
-                }
+          if (route != null &&
+              route.animation != null &&
+              route.animation!.status != AnimationStatus.completed) {
+            void handler(AnimationStatus status) {
+              if (status == AnimationStatus.completed) {
+                route.animation!.removeStatusListener(handler);
+                threadBloc.add(RequestThreadEvent(
+                    threadId: arguments.threadId,
+                    page: arguments.page,
+                    isInitialLoad: true));
               }
-
-              route.animation!.addStatusListener(handler);
-            } else {
-              threadBloc.add(RequestThreadEvent(
-                  threadId: arguments.threadId,
-                  page: arguments.page,
-                  isInitialLoad: true));
             }
 
-            _initListener(
-                arguments, threadBloc, _scrollController, _threadPageCubit);
-            return threadBloc;
-          }),
-          BlocProvider(create: (context) => _threadPageCubit)
-        ],
-        child: Scaffold(
-          body: BlocConsumer<ThreadBloc, ThreadState>(
-            listener: (context, state) {
-              if (state is ThreadLoaded) {
-                if ((state.thread.totalReplies.toDouble() / 50.0).ceil() >
-                    state.endPage) {
-                  _threadPageCubit.setOnLastPage(false);
-                } else {
-                  _threadPageCubit.setOnLastPage(true);
-                }
+            route.animation!.addStatusListener(handler);
+          } else {
+            threadBloc.add(RequestThreadEvent(
+                threadId: arguments.threadId,
+                page: arguments.page,
+                isInitialLoad: true));
+          }
+
+          _initListener(
+              arguments, threadBloc, _scrollController, _threadPageCubit);
+          return threadBloc;
+        }),
+        BlocProvider(create: (context) {
+          // Seed from current session (listener only fires on later transitions).
+          _threadPageCubit.setCanReply(
+              BlocProvider.of<SessionUserBloc>(context).state
+                  is SessionUserLoaded);
+          return _threadPageCubit;
+        })
+      ],
+      // Keep canReply in sync with session without side-effects in build.
+      child: BlocListener<SessionUserBloc, SessionUserState>(
+        listenWhen: (prev, next) =>
+            (prev is SessionUserLoaded) != (next is SessionUserLoaded),
+        listener: (context, state) {
+          _threadPageCubit.setCanReply(state is SessionUserLoaded);
+        },
+        // Single Scaffold — no nested outer/inner pair.
+        child: BlocConsumer<ThreadBloc, ThreadState>(
+          listener: (context, state) {
+            if (state is ThreadLoaded) {
+              if ((state.thread.totalReplies.toDouble() / 50.0).ceil() >
+                  state.endPage) {
+                _threadPageCubit.setOnLastPage(false);
+              } else {
+                _threadPageCubit.setOnLastPage(true);
               }
-            },
-            buildWhen: (prev, state) =>
-                state is! ThreadAppending && prev != state,
-            builder: (context, state) => Scaffold(
-              resizeToAvoidBottomInset: false,
-              appBar: PreferredSize(
-                preferredSize: const Size.fromHeight(kToolbarHeight),
-                child: _buildAppBar(context, arguments),
-              ),
-              body: () {
-                if (state is ThreadLoading) {
-                  return ThreadPageLoadingSkeleton();
-                } else if (state is ThreadLoaded) {
-                  return CustomScrollView(
-                    center: centerKey,
-                    controller: _scrollController,
-                    slivers: <Widget>[
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
+            }
+          },
+          buildWhen: (prev, state) =>
+              state is! ThreadAppending && prev != state,
+          builder: (context, state) => Scaffold(
+            resizeToAvoidBottomInset: false,
+            appBar: PreferredSize(
+              preferredSize: const Size.fromHeight(kToolbarHeight),
+              child: _buildAppBar(context, arguments),
+            ),
+            body: () {
+              if (state is ThreadLoading) {
+                return ThreadPageLoadingSkeleton();
+              } else if (state is ThreadLoaded) {
+                return CustomScrollView(
+                  center: centerKey,
+                  controller: _scrollController,
+                  slivers: <Widget>[
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
                           return _generatePreviousPageSliver(
                               context,
                               _scrollController,
@@ -134,65 +145,78 @@ class _ThreadPageState extends State<ThreadPage> {
                               index,
                               arguments.page,
                               _onReplySuccess);
-                        }, findChildIndexCallback: (Key key) {
+                        },
+                        findChildIndexCallback: (Key key) {
                           if (key is ValueKey<String?>) {
-                            return state.previousPages.replies.indexWhere(
-                                (reply) => reply.replyId == key.value);
+                            final dataIndex = state.previousPages.replies
+                                .indexWhere(
+                                    (reply) => reply.replyId == key.value);
+                            if (dataIndex < 0) {
+                              return null;
+                            }
+                            // Previous sliver is reversed in the builder.
+                            return state.previousPages.replies.length -
+                                dataIndex -
+                                1;
                           }
                           return null;
                         },
-                            childCount: state.previousPages.replies.isEmpty
-                                ? 1
-                                : state.previousPages.replies.length),
+                        childCount: state.previousPages.replies.isEmpty
+                            ? 1
+                            : state.previousPages.replies.length,
                       ),
-                      SliverList(
-                        key: centerKey,
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            return _generatePageSliver(
-                                context,
-                                _scrollController,
-                                state,
-                                index,
-                                _onReplySuccess);
-                          },
-                          findChildIndexCallback: (Key key) {
-                            if (key is ValueKey<String?>) {
-                              return state.thread.replies.indexWhere(
-                                  (reply) => reply.replyId == key.value);
-                            }
-                            return null;
-                          },
-                          childCount: state.thread.replies.length,
-                        ),
-                      ),
-                    ],
-                  );
-                } else if (state is ThreadError) {
-                  return ErrorPage(
-                    message: '無法載入主題',
-                    onRetry: () => BlocProvider.of<ThreadBloc>(context).add(
-                      RequestThreadEvent(
-                          threadId: arguments.threadId,
-                          page: arguments.page,
-                          isInitialLoad: true),
                     ),
-                  );
+                    SliverList(
+                      key: centerKey,
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          return _generatePageSliver(
+                              context,
+                              _scrollController,
+                              state,
+                              index,
+                              _onReplySuccess);
+                        },
+                        findChildIndexCallback: (Key key) {
+                          if (key is ValueKey<String?>) {
+                            final dataIndex = state.thread.replies.indexWhere(
+                                (reply) => reply.replyId == key.value);
+                            return dataIndex < 0 ? null : dataIndex;
+                          }
+                          return null;
+                        },
+                        childCount: state.thread.replies.length,
+                      ),
+                    ),
+                  ],
+                );
+              } else if (state is ThreadError) {
+                return ErrorPage(
+                  message: '無法載入主題',
+                  onRetry: () => BlocProvider.of<ThreadBloc>(context).add(
+                    RequestThreadEvent(
+                        threadId: arguments.threadId,
+                        page: arguments.page,
+                        isInitialLoad: true),
+                  ),
+                );
+              }
+              return null;
+            }(),
+            floatingActionButton: () {
+              if (state is ThreadLoaded) {
+                if (state.thread.status == 'locked') {
+                  return null;
+                } else {
+                  return _buildFab(
+                      context, _scrollController, state, _onReplySuccess);
                 }
-              }(),
-              floatingActionButton: () {
-                if (state is ThreadLoaded) {
-                  if (state.thread.status == 'locked') {
-                    return null;
-                  } else {
-                    return _buildFab(
-                        context, _scrollController, state, _onReplySuccess);
-                  }
-                }
-              }(),
-            ),
+              }
+              return null;
+            }(),
           ),
         ),
+      ),
     );
   }
 }

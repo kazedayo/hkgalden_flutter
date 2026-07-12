@@ -18,5 +18,5 @@ class ThreadPageState extends Equatable {
           elevation: elevation ?? this.elevation);
 
   @override
-  List<Object> get props => [onLastPage, elevation];
+  List<Object> get props => [onLastPage, canReply, elevation];
 }

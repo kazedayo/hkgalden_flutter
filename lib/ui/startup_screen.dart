@@ -21,31 +21,56 @@ class StartupScreen extends StatefulWidget {
 class StartupScreenState extends State<StartupScreen>
     with TickerProviderStateMixin {
   late AnimationController _controller;
-  late String token;
+  bool _kickoffStarted = false;
 
   @override
   void initState() {
+    super.initState();
     final ParagraphBuilder pb = ParagraphBuilder(
         ParagraphStyle(locale: PlatformDispatcher.instance.locale));
     pb.addText('\ud83d\ude01'); // smiley face emoji
     pb.build().layout(const ParagraphConstraints(width: 100));
-    initToken();
-    super.initState();
     _controller = AnimationController(
         duration: const Duration(milliseconds: 2000), vsync: this);
+    // One-shot bootstrap after first frame so context has blocs available.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrapOnce());
   }
 
-  Future<void> initToken() async {
+  /// Loads token, plays splash animation, then dispatches initial data loads
+  /// exactly once (never from [build]).
+  Future<void> _bootstrapOnce() async {
+    if (_kickoffStarted || !mounted) {
+      return;
+    }
+    _kickoffStarted = true;
+
     final String? readToken = await TokenStore().readToken();
+    final String token;
     if (readToken == null) {
       await TokenStore().writeToken('');
-      setState(() {
-        token = '';
-      });
+      token = '';
     } else {
-      setState(() {
-        token = readToken;
-      });
+      token = readToken;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    await _controller.forward();
+    if (!mounted) {
+      return;
+    }
+
+    final threadListBloc = BlocProvider.of<ThreadListBloc>(context);
+    final channelBloc = BlocProvider.of<ChannelBloc>(context);
+    final sessionUserBloc = BlocProvider.of<SessionUserBloc>(context);
+
+    threadListBloc.add(const RequestThreadListEvent(
+        channelId: 'bw', page: 1, isRefresh: false));
+    channelBloc.add(RequestChannelsEvent());
+    if (token.isNotEmpty) {
+      sessionUserBloc.add(RequestSessionUserEvent());
     }
   }
 
@@ -57,19 +82,6 @@ class StartupScreenState extends State<StartupScreen>
 
   @override
   Widget build(BuildContext context) {
-    final ThreadListBloc threadListBloc =
-        BlocProvider.of<ThreadListBloc>(context);
-    final ChannelBloc channelBloc = BlocProvider.of<ChannelBloc>(context);
-    final SessionUserBloc sessionUserBloc =
-        BlocProvider.of<SessionUserBloc>(context);
-    _controller.forward().whenComplete(() {
-      threadListBloc.add(const RequestThreadListEvent(
-          channelId: 'bw', page: 1, isRefresh: false));
-      channelBloc.add(RequestChannelsEvent());
-      if (token != '') {
-        sessionUserBloc.add(RequestSessionUserEvent());
-      }
-    });
     return Scaffold(
       body: BlocListener<ThreadListBloc, ThreadListState>(
         listener: (context, state) {

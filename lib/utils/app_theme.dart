@@ -15,6 +15,8 @@ class AppTheme {
   static const Color lockedColor = Colors.grey;
   static const Color activeColor = Colors.white;
   static const Color barrierColor = Colors.black87;
+  /// Left border color for nested quote blocks in thread HTML.
+  static const Color quoteLineColor = Color(0xFF4B5B53);
   static final Color skeletonColor = Colors.grey.withOpacity(0.3);
 
   static ThemeData generate(BuildContext context) {

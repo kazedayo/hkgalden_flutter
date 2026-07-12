@@ -66,39 +66,31 @@ class HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     final ThreadListBloc threadListBloc =
         BlocProvider.of<ThreadListBloc>(context);
-    final SessionUserBloc sessionUserBloc =
-        BlocProvider.of<SessionUserBloc>(context);
-    final ChannelBloc channelBloc = BlocProvider.of<ChannelBloc>(context);
-    return BlocBuilder<ThreadListBloc, ThreadListState>(
-      buildWhen: (prev, state) => prev != state,
-      builder: (context, state) {
-        return Scaffold(
-          body: Stack(
-            fit: StackFit.expand,
-            children: [
-              BackdropScaffold(
-                resizeToAvoidBottomInset: false,
-                appBar: _buildAppBar(),
-                frontLayer: _buildFrontLayer(
-                    context,
-                    threadListBloc,
-                    channelBloc,
-                    state,
-                    sessionUserBloc,
-                    _scrollController,
-                    _loadThread,
-                    _jumpToPage),
-                frontLayerScrim: Colors.black.withAlpha(177),
-                stickyFrontLayer: true,
-                backLayer: HomeDrawer(),
-                backLayerBackgroundColor:
-                    Theme.of(context).scaffoldBackgroundColor,
-                floatingActionButton: _buildFab(context, threadListBloc),
-              ),
-            ],
+    // Scaffold chrome (app bar, drawer, FAB) is outside ThreadListBloc so
+    // list load/append does not rebuild them.
+    return Scaffold(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          BackdropScaffold(
+            resizeToAvoidBottomInset: false,
+            appBar: _buildAppBar(),
+            frontLayer: _buildFrontLayer(
+              context,
+              threadListBloc,
+              _scrollController,
+              _loadThread,
+              _jumpToPage,
+            ),
+            frontLayerScrim: Colors.black.withAlpha(177),
+            stickyFrontLayer: true,
+            backLayer: const HomeDrawer(),
+            backLayerBackgroundColor:
+                Theme.of(context).scaffoldBackgroundColor,
+            floatingActionButton: _buildFab(context, threadListBloc),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }

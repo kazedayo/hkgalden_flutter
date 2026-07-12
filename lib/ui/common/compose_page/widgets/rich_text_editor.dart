@@ -8,7 +8,7 @@ part of '../compose_page.dart';
 ///
 /// Supported formatting: Bold, Italic, Underline, Strikethrough,
 /// Center/Right alignment, H1/H2/H3, and hyperlinks.
-class _RichTextEditor extends StatelessWidget {
+class _RichTextEditor extends StatefulWidget {
   final QuillController controller;
   final FocusNode focusNode;
   final Future<String> Function(File)? imagePickCallback;
@@ -20,14 +20,27 @@ class _RichTextEditor extends StatelessWidget {
   });
 
   @override
+  State<_RichTextEditor> createState() => _RichTextEditorState();
+}
+
+class _RichTextEditorState extends State<_RichTextEditor> {
+  late final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Expanded(
           child: QuillEditor(
-            controller: controller,
-            focusNode: focusNode,
-            scrollController: ScrollController(),
+            controller: widget.controller,
+            focusNode: widget.focusNode,
+            scrollController: _scrollController,
             config: QuillEditorConfig(
               autoFocus: true,
               expands: true,
@@ -43,8 +56,8 @@ class _RichTextEditor extends StatelessWidget {
           ),
         ),
         _RichTextToolbar(
-          controller: controller,
-          imagePickCallback: imagePickCallback,
+          controller: widget.controller,
+          imagePickCallback: widget.imagePickCallback,
         ),
       ],
     );

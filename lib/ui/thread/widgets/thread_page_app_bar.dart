@@ -2,6 +2,7 @@ part of '../thread_page.dart';
 
 Widget _buildAppBar(BuildContext context, ThreadPageArguments arguments) {
   return BlocBuilder<ThreadPageCubit, ThreadPageState>(
+    buildWhen: (prev, next) => prev.elevation != next.elevation,
     builder: (context, state) => AppBar(
       elevation: state.elevation,
       automaticallyImplyLeading: false,

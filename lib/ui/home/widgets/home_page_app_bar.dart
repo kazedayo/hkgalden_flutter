@@ -7,38 +7,42 @@ PreferredSize _buildAppBar() {
       builder: (context, state) => AppBar(
         leading: _LeadingButton(),
         title: BlocBuilder<ChannelBloc, ChannelState>(
-          builder: (context, state) => Text.rich(
-            TextSpan(
-              children: [
-                WidgetSpan(
-                  alignment: PlaceholderAlignment.middle,
-                  child: Hero(
-                    tag: 'logo',
-                    child: SvgPicture.asset(
-                      'assets/icon-hkgalden.svg',
-                      width: 27,
-                      height: 27,
+          builder: (context, channelState) {
+            if (channelState is! ChannelLoaded) {
+              return const SizedBox.shrink();
+            }
+            final match = channelState.channels.where(
+                (channel) => channel.channelId == channelState.selectedChannelId);
+            final channelName =
+                match.isEmpty ? '' : match.first.channelName;
+            return Text.rich(
+              TextSpan(
+                children: [
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: Hero(
+                      tag: 'logo',
+                      child: SvgPicture.asset(
+                        'assets/icon-hkgalden.svg',
+                        width: 27,
+                        height: 27,
+                      ),
                     ),
                   ),
-                ),
-                const WidgetSpan(
-                  child: SizedBox(
-                    width: 5,
+                  const WidgetSpan(
+                    child: SizedBox(
+                      width: 5,
+                    ),
                   ),
-                ),
-                TextSpan(
-                  text: (state as ChannelLoaded)
-                      .channels
-                      .where((channel) =>
-                          channel.channelId == state.selectedChannelId)
-                      .first
-                      .channelName,
-                  style: const TextStyle(
-                      fontSize: 19, fontWeight: FontWeight.w700),
-                ),
-              ],
-            ),
-          ),
+                  TextSpan(
+                    text: channelName,
+                    style: const TextStyle(
+                        fontSize: 19, fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
         actions: [
           if (state is SessionUserLoaded)
@@ -60,14 +64,16 @@ PreferredSize _buildAppBar() {
                 if (!context.mounted) return;
                 BlocProvider.of<SessionUserBloc>(context)
                     .add(RequestSessionUserEvent());
-                BlocProvider.of<ThreadListBloc>(context).add(
-                  RequestThreadListEvent(
-                      channelId: (BlocProvider.of<ChannelBloc>(context).state
-                              as ChannelLoaded)
-                          .selectedChannelId,
-                      page: 1,
-                      isRefresh: false),
-                );
+                final channelState =
+                    BlocProvider.of<ChannelBloc>(context).state;
+                if (channelState is ChannelLoaded) {
+                  BlocProvider.of<ThreadListBloc>(context).add(
+                    RequestThreadListEvent(
+                        channelId: channelState.selectedChannelId,
+                        page: 1,
+                        isRefresh: false),
+                  );
+                }
               },
             ),
         ],

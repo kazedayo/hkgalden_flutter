@@ -8,25 +8,31 @@ class HomeDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ChannelLoaded state =
-        BlocProvider.of<ChannelBloc>(context).state as ChannelLoaded;
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-        child: Wrap(
-          spacing: 8.0,
-          runSpacing: 10.0,
-          alignment: WrapAlignment.start,
-          children: state.channels
-              .map(
-                (channel) => SizedBox(
-                  width: (MediaQuery.sizeOf(context).width - 32) / 3,
-                  child: ChannelCell(channel: channel),
-                ),
-              )
-              .toList(),
-        ),
-      ),
+    // Self-contained listener: home scaffold no longer rebuilds with the list.
+    return BlocBuilder<ChannelBloc, ChannelState>(
+      builder: (context, state) {
+        if (state is! ChannelLoaded) {
+          return const SizedBox.shrink();
+        }
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+            child: Wrap(
+              spacing: 8.0,
+              runSpacing: 10.0,
+              alignment: WrapAlignment.start,
+              children: state.channels
+                  .map(
+                    (channel) => SizedBox(
+                      width: (MediaQuery.sizeOf(context).width - 32) / 3,
+                      child: ChannelCell(channel: channel),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+        );
+      },
     );
   }
 }

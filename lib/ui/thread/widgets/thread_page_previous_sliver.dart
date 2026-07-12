@@ -21,6 +21,7 @@ Widget _generatePreviousPageSliver(
 
   if (reply.floor % 50 == 1) {
     return Column(
+      key: ValueKey(reply.replyId),
       children: <Widget>[
         if (reply.floor != 1 && (reply.floor / 50.0).ceil() == state.currentPage)
           ThreadPageLoadingSkeletonCell(),
@@ -30,5 +31,9 @@ Widget _generatePreviousPageSliver(
     );
   }
 
-  return cell;
+  // Match findChildIndexCallback (ValueKey) for stable element reuse on prepend.
+  return KeyedSubtree(
+    key: ValueKey(reply.replyId),
+    child: cell,
+  );
 }

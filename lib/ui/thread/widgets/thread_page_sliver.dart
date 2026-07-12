@@ -13,11 +13,9 @@ Widget _buildCommentCell(
     key: PageStorageKey(reply.replyId),
     threadId: state.thread.threadId,
     reply: reply,
-    onLastPage: pageState.onLastPage,
     onSent: (sent) {
       onReplySuccess(context, scrollController, sent, pageState.onLastPage);
     },
-    canReply: pageState.canReply,
     threadLocked: state.thread.status == 'locked',
   );
 }

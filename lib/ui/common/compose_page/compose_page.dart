@@ -55,18 +55,19 @@ class ComposePage extends StatefulWidget {
 class ComposePageState extends State<ComposePage> {
   late Tag _tag;
   late String _channelId;
-  late String _title;
   late QuillController _controller;
   late TextEditingController _titleFieldController;
   late FocusNode _focusNode;
   late FocusNode _titleFocusNode;
+  /// Cached quote preview so parent rebuilds (e.g. sending spinner) do not
+  /// re-run [HKGaldenHtmlParser.replyWithQuotes].
+  String? _cachedQuoteHtml;
 
   @override
   void initState() {
     //default to tag '吹水'
     _tag = const Tag(id: '02NP3MVYm', name: '吹水', color: Color(0xff457cb0));
     _channelId = '';
-    _title = '';
     _controller = QuillController.basic();
     _titleFieldController = TextEditingController();
     _focusNode = FocusNode();
@@ -91,6 +92,8 @@ class ComposePageState extends State<ComposePage> {
         threadRepository: RepositoryProvider.of<ThreadRepository>(context),
       ),
       child: BlocConsumer<ComposeCubit, ComposeState>(
+        listenWhen: (prev, next) =>
+            next is ComposeSuccess || next is ComposeFailure,
         listener: (context, state) {
           if (state is ComposeSuccess) {
             if (widget.composeMode == ComposeMode.newPost) {
@@ -103,6 +106,13 @@ class ComposePageState extends State<ComposePage> {
             ScaffoldMessenger.of(context)
                 .showSnackBar(SnackBar(content: Text(state.message)));
           }
+        },
+        // Rebuild only when the sending flag flips so Quill/title do not
+        // rebuild on unrelated compose states.
+        buildWhen: (prev, next) {
+          final wasSending = prev is ComposeSending;
+          final isSending = next is ComposeSending;
+          return wasSending != isSending;
         },
         builder: (context, state) {
           final isSending = state is ComposeSending;
@@ -133,7 +143,8 @@ class ComposePageState extends State<ComposePage> {
                         ? null
                         : () {
                             if (widget.composeMode == ComposeMode.newPost) {
-                              if (_title == '' ||
+                              final title = _titleFieldController.text;
+                              if (title.isEmpty ||
                                   _controller.document.toString() == '/n') {
                                 showCustomDialog(
                                   context: context,
@@ -143,7 +154,7 @@ class ComposePageState extends State<ComposePage> {
                                 return;
                               }
                               context.read<ComposeCubit>().createThread(
-                                  _title, _tag.id!, _getZefyrEditorContent());
+                                  title, _tag.id!, _getZefyrEditorContent());
                             } else {
                               context.read<ComposeCubit>().sendReply(
                                   widget.threadId!, _getZefyrEditorContent(),
@@ -214,11 +225,8 @@ class ComposePageState extends State<ComposePage> {
                                 hintText: '標題',
                                 contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 4, vertical: 10)),
-                            onChanged: (value) {
-                              setState(() {
-                                _title = value;
-                              });
-                            },
+                            // Title is read from the controller on submit —
+                            // avoid setState on every keystroke (rebuilds Quill).
                           ),
                         )
                       ],
@@ -234,9 +242,7 @@ class ComposePageState extends State<ComposePage> {
                       reverse: true,
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       child: StyledHtmlView(
-                        htmlString: HKGaldenHtmlParser().replyWithQuotes(
-                            widget.parentReply!,
-                            sessionUserBloc.state as SessionUserLoaded)!,
+                        htmlString: _quoteHtml(sessionUserBloc),
                         floor: widget.parentReply!.floor,
                       ),
                     ),
@@ -258,6 +264,11 @@ class ComposePageState extends State<ComposePage> {
         },
       ),
     );
+  }
+
+  String _quoteHtml(SessionUserBloc sessionUserBloc) {
+    return _cachedQuoteHtml ??= HKGaldenHtmlParser().replyWithQuotes(
+        widget.parentReply!, sessionUserBloc.state as SessionUserLoaded)!;
   }
 
   String _getZefyrEditorContent() {
