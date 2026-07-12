@@ -102,6 +102,8 @@ class AppTheme {
         highlightElevation: 1,
         foregroundColor: Colors.white,
         backgroundColor: accentColor,
+        // M3 default is a rounded square; CircleBorder gives a smooth round FAB.
+        shape: CircleBorder(),
       ),
 
       iconTheme: const IconThemeData(color: Colors.white),

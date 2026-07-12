@@ -1,11 +1,17 @@
 part of '../thread_page.dart';
 
+/// Shared with the home FAB so the iOS Cupertino push/pop keeps a continuous
+/// hero flight in the corner.
+const Object _kFabHeroTag = 'hkgalden_fab';
+
 FloatingActionButton _buildFab(
-    BuildContext context,
-    ScrollController scrollController,
-    ThreadLoaded state,
-    Function(BuildContext, ScrollController, Reply, bool) onReplySuccess) {
+  BuildContext context,
+  ScrollController scrollController,
+  ThreadPageArguments arguments,
+  Function(BuildContext, ScrollController, Reply, bool) onReplySuccess,
+) {
   return FloatingActionButton(
+    heroTag: _kFabHeroTag,
     onPressed: () => !BlocProvider.of<ThreadPageCubit>(context).state.canReply
         ? showCustomAlert(
             context: context,
@@ -18,10 +24,14 @@ FloatingActionButton _buildFab(
             context: context,
             builder: (context) => ComposePage(
               composeMode: ComposeMode.reply,
-              threadId: state.thread.threadId,
+              threadId: arguments.threadId,
               onSent: (reply) {
-                onReplySuccess(context, scrollController, reply,
-                    BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
+                onReplySuccess(
+                  context,
+                  scrollController,
+                  reply,
+                  BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
+                );
               },
             ),
           ),

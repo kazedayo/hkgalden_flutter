@@ -236,17 +236,17 @@ class _ThreadPageState extends State<ThreadPage> {
                 }
                 return null;
               }(),
-              floatingActionButton: () {
-                if (state is ThreadLoaded) {
-                  if (state.thread.status == 'locked') {
-                    return null;
-                  } else {
-                    return _buildFab(
-                        context, _scrollController, state, _onReplySuccess);
-                  }
-                }
-                return null;
-              }(),
+              // Show FAB for the whole route when unlocked so the shared Hero
+              // has a destination during the iOS push animation (load is
+              // deferred until the transition finishes).
+              floatingActionButton: arguments.locked
+                  ? null
+                  : _buildFab(
+                      context,
+                      _scrollController,
+                      arguments,
+                      _onReplySuccess,
+                    ),
             ),
           ),
         ),
