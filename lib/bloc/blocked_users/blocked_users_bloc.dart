@@ -19,9 +19,12 @@ class BlockedUsersBloc extends Bloc<BlockedUsersEvent, BlockedUsersState> {
 
   FutureOr<void> _onRequestBlockedUsersEvent(
       RequestBlockedUsersEvent event, Emitter<BlockedUsersState> emit) async {
+    emit(BlockedUsersLoading());
     final List<User>? blockedUsers = await _repository.getBlockedUsers();
     if (blockedUsers != null) {
       emit(BlockedUsersLoaded(blockedUsers: blockedUsers));
+    } else {
+      emit(BlockedUsersError());
     }
   }
 }

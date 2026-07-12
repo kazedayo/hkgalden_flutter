@@ -20,11 +20,14 @@ class UserThreadListBloc
 
   FutureOr<void> _onRequestUserThreadListEvent(RequestUserThreadListEvent event,
       Emitter<UserThreadListState> emit) async {
+    emit(UserThreadListLoading());
     final List<Thread>? userThreadList =
         await _repository.getUserThreadList(event.userId, event.page);
     if (userThreadList != null) {
       emit(UserThreadListLoaded(
           page: event.page, userThreadList: userThreadList));
+    } else {
+      emit(UserThreadListError());
     }
   }
 }

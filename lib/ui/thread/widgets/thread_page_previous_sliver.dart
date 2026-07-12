@@ -12,66 +12,23 @@ Widget _generatePreviousPageSliver(
       visible: page != 1,
       child: ThreadPageLoadingSkeletonCell(),
     );
-  } else {
-    if (state.previousPages
-                .replies[state.previousPages.replies.length - index - 1].floor %
-            50 ==
-        1) {
-      return Column(
-        children: <Widget>[
-          if (state
-                      .previousPages
-                      .replies[state.previousPages.replies.length - index - 1]
-                      .floor !=
-                  1 &&
-              (state
-                              .previousPages
-                              .replies[state.previousPages.replies.length -
-                                  index -
-                                  1]
-                              .floor /
-                          50.0)
-                      .ceil() ==
-                  state.currentPage)
-            ThreadPageLoadingSkeletonCell(),
-          _PageHeader(
-            floor: state.previousPages
-                .replies[state.previousPages.replies.length - index - 1].floor,
-          ),
-          CommentCell(
-            key: PageStorageKey(state
-                .previousPages
-                .replies[state.previousPages.replies.length - index - 1]
-                .replyId),
-            threadId: state.thread.threadId,
-            reply: state.previousPages
-                .replies[state.previousPages.replies.length - index - 1],
-            onLastPage:
-                BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
-            onSent: (reply) {
-              onReplySuccess(context, scrollController, reply,
-                  BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
-            },
-            canReply: BlocProvider.of<ThreadPageCubit>(context).state.canReply,
-            threadLocked: state.thread.status == 'locked',
-          ),
-        ],
-      );
-    } else {
-      return CommentCell(
-        key: PageStorageKey(state.previousPages
-            .replies[state.previousPages.replies.length - index - 1].replyId),
-        threadId: state.thread.threadId,
-        reply: state.previousPages
-            .replies[state.previousPages.replies.length - index - 1],
-        onLastPage: BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
-        onSent: (reply) {
-          onReplySuccess(context, scrollController, reply,
-              BlocProvider.of<ThreadPageCubit>(context).state.onLastPage);
-        },
-        canReply: BlocProvider.of<ThreadPageCubit>(context).state.canReply,
-        threadLocked: state.thread.status == 'locked',
-      );
-    }
   }
+
+  final reply =
+      state.previousPages.replies[state.previousPages.replies.length - index - 1];
+  final cell = _buildCommentCell(
+      context, scrollController, state, reply, onReplySuccess);
+
+  if (reply.floor % 50 == 1) {
+    return Column(
+      children: <Widget>[
+        if (reply.floor != 1 && (reply.floor / 50.0).ceil() == state.currentPage)
+          ThreadPageLoadingSkeletonCell(),
+        _PageHeader(floor: reply.floor),
+        cell,
+      ],
+    );
+  }
+
+  return cell;
 }

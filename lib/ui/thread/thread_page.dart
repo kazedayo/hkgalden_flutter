@@ -64,9 +64,7 @@ class _ThreadPageState extends State<ThreadPage> {
     _threadPageCubit.setCanReply(sessionUserBloc.state is SessionUserLoaded);
     final route = ModalRoute.of(context);
 
-    return RepositoryProvider(
-      create: (context) => ThreadRepository(),
-      child: MultiBlocProvider(
+    return MultiBlocProvider(
         providers: [
           BlocProvider(create: (context) {
             final ThreadBloc threadBloc = ThreadBloc(
@@ -195,7 +193,6 @@ class _ThreadPageState extends State<ThreadPage> {
             ),
           ),
         ),
-      ),
     );
   }
 }

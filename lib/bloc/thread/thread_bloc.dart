@@ -62,7 +62,8 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
               endPage: event.page));
         }
       } else {
-        emit(ThreadError());
+        // Keep the already-loaded thread visible on pagination failure.
+        emit(previousState);
       }
     }
   }

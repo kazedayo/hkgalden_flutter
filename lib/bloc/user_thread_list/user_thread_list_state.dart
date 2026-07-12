@@ -9,6 +9,8 @@ abstract class UserThreadListState extends Equatable {
 
 class UserThreadListLoading extends UserThreadListState {}
 
+class UserThreadListError extends UserThreadListState {}
+
 class UserThreadListLoaded extends UserThreadListState {
   final int page;
   final List<Thread> userThreadList;

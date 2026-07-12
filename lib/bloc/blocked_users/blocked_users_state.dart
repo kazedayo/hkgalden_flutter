@@ -9,6 +9,8 @@ abstract class BlockedUsersState extends Equatable {
 
 class BlockedUsersLoading extends BlockedUsersState {}
 
+class BlockedUsersError extends BlockedUsersState {}
+
 class BlockedUsersLoaded extends BlockedUsersState {
   final List<User> blockedUsers;
 

@@ -1,24 +1,34 @@
-import 'package:bloc/bloc.dart';
-import 'package:hkgalden_flutter/bloc/cubit/compose_state.dart';
-import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
-import 'package:hkgalden_flutter/networking/image_upload_api.dart';
-import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
 import 'dart:convert';
 
+import 'package:bloc/bloc.dart';
+import 'package:hkgalden_flutter/bloc/cubit/compose_state.dart';
+import 'package:hkgalden_flutter/networking/image_upload_api.dart';
+import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
+import 'package:hkgalden_flutter/repository/thread_repository.dart';
+
 class ComposeCubit extends Cubit<ComposeState> {
-  // Ultimately these should be passed in as a Repository,
-  // but for now we route the direct API calls here to separate them from the UI.
-  ComposeCubit() : super(ComposeInitial());
+  ComposeCubit({
+    required ThreadRepository threadRepository,
+    ImageUploadApi? imageUploadApi,
+    DeltaJsonParser? deltaJsonParser,
+  })  : _threadRepository = threadRepository,
+        _imageUploadApi = imageUploadApi ?? ImageUploadApi(),
+        _deltaJsonParser = deltaJsonParser ?? DeltaJsonParser(),
+        super(ComposeInitial());
+
+  final ThreadRepository _threadRepository;
+  final ImageUploadApi _imageUploadApi;
+  final DeltaJsonParser _deltaJsonParser;
 
   Future<void> createThread(
       String title, String tagId, String quillContentStr) async {
     emit(ComposeSending());
     try {
-      final htmlContent = await DeltaJsonParser()
+      final htmlContent = await _deltaJsonParser
           .toGaldenHtml(json.decode(quillContentStr) as List<dynamic>);
 
       final threadId =
-          await HKGaldenApi().createThread(title, [tagId], htmlContent);
+          await _threadRepository.createThread(title, [tagId], htmlContent);
 
       if (threadId != null) {
         emit(ComposeSuccess(result: threadId));
@@ -34,13 +44,13 @@ class ComposeCubit extends Cubit<ComposeState> {
       {String? parentId}) async {
     emit(ComposeSending());
     try {
-      final htmlContent = await DeltaJsonParser()
+      final htmlContent = await _deltaJsonParser
           .toGaldenHtml(json.decode(quillContentStr) as List<dynamic>);
 
-      final sentReply = await HKGaldenApi().sendReply(
+      final sentReply = await _threadRepository.sendReply(
         threadId,
         htmlContent,
-        parentId: parentId ?? '',
+        parentId: parentId,
       );
 
       if (sentReply != null) {
@@ -53,7 +63,7 @@ class ComposeCubit extends Cubit<ComposeState> {
     }
   }
 
-  Future<String> uploadImage(String filePath) async {
-    return await ImageUploadApi().uploadImage(filePath);
+  Future<String> uploadImage(String filePath) {
+    return _imageUploadApi.uploadImage(filePath);
   }
 }

@@ -7,9 +7,11 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
+import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/repository/channel_repository.dart';
 import 'package:hkgalden_flutter/repository/session_user_repository.dart';
 import 'package:hkgalden_flutter/repository/thread_list_repository.dart';
+import 'package:hkgalden_flutter/repository/thread_repository.dart';
 import 'package:hkgalden_flutter/ui/startup_screen.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
 import 'dart:io';
@@ -39,9 +41,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider(create: (context) => ChannelRepository()),
-        RepositoryProvider(create: (context) => SessionUserRepository()),
-        RepositoryProvider(create: (context) => ThreadListRepository())
+        RepositoryProvider(create: (context) => HKGaldenApi()),
+        RepositoryProvider(
+            create: (context) => ChannelRepository(
+                api: RepositoryProvider.of<HKGaldenApi>(context))),
+        RepositoryProvider(
+            create: (context) => SessionUserRepository(
+                api: RepositoryProvider.of<HKGaldenApi>(context))),
+        RepositoryProvider(
+            create: (context) => ThreadListRepository(
+                api: RepositoryProvider.of<HKGaldenApi>(context))),
+        RepositoryProvider(
+            create: (context) => ThreadRepository(
+                api: RepositoryProvider.of<HKGaldenApi>(context))),
       ],
       child: MultiBlocProvider(
         providers: [

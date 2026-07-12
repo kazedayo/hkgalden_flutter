@@ -23,6 +23,7 @@ import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:hkgalden_flutter/bloc/cubit/compose_cubit.dart';
 import 'package:hkgalden_flutter/bloc/cubit/compose_state.dart';
 import 'package:hkgalden_flutter/bloc/cubit/url_validation_cubit.dart';
+import 'package:hkgalden_flutter/repository/thread_repository.dart';
 
 part 'widgets/compose_page_tag_select_dialog.dart';
 part 'widgets/quill_editor.dart';
@@ -86,7 +87,9 @@ class ComposePageState extends State<ComposePage> {
   Widget build(BuildContext context) {
     final sessionUserBloc = BlocProvider.of<SessionUserBloc>(context);
     return BlocProvider(
-      create: (context) => ComposeCubit(),
+      create: (context) => ComposeCubit(
+        threadRepository: RepositoryProvider.of<ThreadRepository>(context),
+      ),
       child: BlocConsumer<ComposeCubit, ComposeState>(
         listener: (context, state) {
           if (state is ComposeSuccess) {
