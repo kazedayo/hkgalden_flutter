@@ -69,26 +69,31 @@ class HomePageState extends State<HomePage>
     // list load/append does not rebuild them.
     // Theme for list highlight is hoisted here so ThreadListBloc rebuilds
     // do not re-resolve Theme.of(context).copyWith on every list emission.
-    return Scaffold(
-      body: BackdropScaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: _buildAppBar(),
-        frontLayer: Theme(
-          data: Theme.of(context)
-              .copyWith(highlightColor: const Color(0xff373d3c)),
-          child: _buildFrontLayer(
-            context,
-            threadListBloc,
-            _scrollController,
-            _loadThread,
-            _jumpToPage,
+    // Register the list controller as primary so iOS status-bar taps
+    // (Scaffold.handleStatusBarTap) scroll this list to the top.
+    return PrimaryScrollController(
+      controller: _scrollController,
+      child: Scaffold(
+        body: BackdropScaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: _buildAppBar(),
+          frontLayer: Theme(
+            data: Theme.of(context)
+                .copyWith(highlightColor: const Color(0xff373d3c)),
+            child: _buildFrontLayer(
+              context,
+              threadListBloc,
+              _scrollController,
+              _loadThread,
+              _jumpToPage,
+            ),
           ),
+          frontLayerScrim: Colors.black.withAlpha(177),
+          stickyFrontLayer: true,
+          backLayer: const HomeDrawer(),
+          backLayerBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          floatingActionButton: _buildFab(context, threadListBloc),
         ),
-        frontLayerScrim: Colors.black.withAlpha(177),
-        stickyFrontLayer: true,
-        backLayer: const HomeDrawer(),
-        backLayerBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        floatingActionButton: _buildFab(context, threadListBloc),
       ),
     );
   }

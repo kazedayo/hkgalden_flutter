@@ -145,104 +145,109 @@ class _ThreadPageState extends State<ThreadPage> {
           },
           buildWhen: (prev, state) =>
               state is! ThreadAppending && prev != state,
-          builder: (context, state) => Scaffold(
-            resizeToAvoidBottomInset: false,
-            appBar: PreferredSize(
-              preferredSize: const Size.fromHeight(kToolbarHeight),
-              child: _buildAppBar(context, arguments),
-            ),
-            body: () {
-              if (state is ThreadLoading) {
-                return ThreadPageLoadingSkeleton();
-              } else if (state is ThreadLoaded) {
-                // O(1) key → index maps for findChildIndexCallback.
-                // Must match ValueKey(_replyListKey(reply)); never use null keys.
-                final replyKeyToIndex = <Object, int>{
-                  for (var i = 0; i < state.thread.replies.length; i++)
-                    _replyListKey(state.thread.replies[i]): i,
-                };
-                // Previous sliver builder uses reversed indices:
-                // dataIndex → builderIndex = length - dataIndex - 1
-                final previousKeyToBuilderIndex = <Object, int>{
-                  for (var i = 0; i < state.previousPages.replies.length; i++)
-                    _replyListKey(state.previousPages.replies[i]):
-                        state.previousPages.replies.length - i - 1,
-                };
-                return CustomScrollView(
-                  center: centerKey,
-                  controller: _scrollController,
-                  // Prefetch more off-screen so flings hit already-laid-out cells.
-                  // ignore: deprecated_member_use — ScrollCacheExtent is not exported via material.dart
-                  cacheExtent: 2000,
-                  slivers: <Widget>[
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          return _generatePreviousPageSliver(
-                              context,
-                              _scrollController,
-                              state,
-                              index,
-                              arguments.page,
-                              _onReplySuccess);
-                        },
-                        findChildIndexCallback: (Key key) {
-                          if (key is ValueKey) {
-                            return previousKeyToBuilderIndex[key.value];
-                          }
-                          return null;
-                        },
-                        childCount: state.previousPages.replies.isEmpty
-                            ? 1
-                            : state.previousPages.replies.length,
+          // Register the thread scroll controller as primary so iOS status-bar
+          // taps scroll this view to the top (Scaffold.handleStatusBarTap).
+          builder: (context, state) => PrimaryScrollController(
+            controller: _scrollController,
+            child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              appBar: PreferredSize(
+                preferredSize: const Size.fromHeight(kToolbarHeight),
+                child: _buildAppBar(context, arguments),
+              ),
+              body: () {
+                if (state is ThreadLoading) {
+                  return ThreadPageLoadingSkeleton();
+                } else if (state is ThreadLoaded) {
+                  // O(1) key → index maps for findChildIndexCallback.
+                  // Must match ValueKey(_replyListKey(reply)); never use null keys.
+                  final replyKeyToIndex = <Object, int>{
+                    for (var i = 0; i < state.thread.replies.length; i++)
+                      _replyListKey(state.thread.replies[i]): i,
+                  };
+                  // Previous sliver builder uses reversed indices:
+                  // dataIndex → builderIndex = length - dataIndex - 1
+                  final previousKeyToBuilderIndex = <Object, int>{
+                    for (var i = 0; i < state.previousPages.replies.length; i++)
+                      _replyListKey(state.previousPages.replies[i]):
+                          state.previousPages.replies.length - i - 1,
+                  };
+                  return CustomScrollView(
+                    center: centerKey,
+                    controller: _scrollController,
+                    // Prefetch more off-screen so flings hit already-laid-out cells.
+                    // ignore: deprecated_member_use — ScrollCacheExtent is not exported via material.dart
+                    cacheExtent: 2000,
+                    slivers: <Widget>[
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return _generatePreviousPageSliver(
+                                context,
+                                _scrollController,
+                                state,
+                                index,
+                                arguments.page,
+                                _onReplySuccess);
+                          },
+                          findChildIndexCallback: (Key key) {
+                            if (key is ValueKey) {
+                              return previousKeyToBuilderIndex[key.value];
+                            }
+                            return null;
+                          },
+                          childCount: state.previousPages.replies.isEmpty
+                              ? 1
+                              : state.previousPages.replies.length,
+                        ),
                       ),
-                    ),
-                    SliverList(
-                      key: centerKey,
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          return _generatePageSliver(
-                              context,
-                              _scrollController,
-                              state,
-                              index,
-                              _onReplySuccess);
-                        },
-                        findChildIndexCallback: (Key key) {
-                          if (key is ValueKey) {
-                            return replyKeyToIndex[key.value];
-                          }
-                          return null;
-                        },
-                        childCount: state.thread.replies.length,
+                      SliverList(
+                        key: centerKey,
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return _generatePageSliver(
+                                context,
+                                _scrollController,
+                                state,
+                                index,
+                                _onReplySuccess);
+                          },
+                          findChildIndexCallback: (Key key) {
+                            if (key is ValueKey) {
+                              return replyKeyToIndex[key.value];
+                            }
+                            return null;
+                          },
+                          childCount: state.thread.replies.length,
+                        ),
                       ),
+                    ],
+                  );
+                } else if (state is ThreadError) {
+                  return ErrorPage(
+                    message: '無法載入主題',
+                    onRetry: () => BlocProvider.of<ThreadBloc>(context).add(
+                      RequestThreadEvent(
+                          threadId: arguments.threadId,
+                          page: arguments.page,
+                          isInitialLoad: true),
                     ),
-                  ],
-                );
-              } else if (state is ThreadError) {
-                return ErrorPage(
-                  message: '無法載入主題',
-                  onRetry: () => BlocProvider.of<ThreadBloc>(context).add(
-                    RequestThreadEvent(
-                        threadId: arguments.threadId,
-                        page: arguments.page,
-                        isInitialLoad: true),
-                  ),
-                );
-              }
-              return null;
-            }(),
-            floatingActionButton: () {
-              if (state is ThreadLoaded) {
-                if (state.thread.status == 'locked') {
-                  return null;
-                } else {
-                  return _buildFab(
-                      context, _scrollController, state, _onReplySuccess);
+                  );
                 }
-              }
-              return null;
-            }(),
+                return null;
+              }(),
+              floatingActionButton: () {
+                if (state is ThreadLoaded) {
+                  if (state.thread.status == 'locked') {
+                    return null;
+                  } else {
+                    return _buildFab(
+                        context, _scrollController, state, _onReplySuccess);
+                  }
+                }
+                return null;
+              }(),
+            ),
           ),
         ),
       ),
