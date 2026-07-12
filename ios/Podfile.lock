@@ -1,0 +1,22 @@
+PODS:
+  - adaptive_platform_ui (0.1.0):
+    - Flutter
+  - Flutter (1.0.0)
+
+DEPENDENCIES:
+  - adaptive_platform_ui (from `.symlinks/plugins/adaptive_platform_ui/ios`)
+  - Flutter (from `Flutter`)
+
+EXTERNAL SOURCES:
+  adaptive_platform_ui:
+    :path: ".symlinks/plugins/adaptive_platform_ui/ios"
+  Flutter:
+    :path: Flutter
+
+SPEC CHECKSUMS:
+  adaptive_platform_ui: f54f620666d1797636f9ef06f49137ef2cc13611
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+
+PODFILE CHECKSUM: 1f85f41d29895adb6024bbaeb3f51de3aa480b92
+
+COCOAPODS: 1.16.2

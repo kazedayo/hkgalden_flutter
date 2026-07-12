@@ -147,10 +147,10 @@ class ComposePageState extends State<ComposePage> {
                               final title = _titleFieldController.text;
                               if (title.isEmpty ||
                                   _controller.document.toString() == '/n') {
-                                showCustomDialog(
+                                showCustomAlert(
                                   context: context,
-                                  builder: (context) => const CustomAlertDialog(
-                                      title: '注意!', content: '內文/標題不能為空'),
+                                  title: '注意!',
+                                  content: '內文/標題不能為空',
                                 );
                                 return;
                               }

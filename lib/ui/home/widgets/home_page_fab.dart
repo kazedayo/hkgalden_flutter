@@ -17,12 +17,10 @@ FloatingActionButton _buildFab(
                   ),
                 ),
               )
-            : showCustomDialog(
+            : showCustomAlert(
                 context: context,
-                builder: (context) => const CustomAlertDialog(
-                  title: '未登入',
-                  content: '請先登入',
-                ),
+                title: '未登入',
+                content: '請先登入',
               ),
     child: const Icon(Icons.create_rounded),
   );

@@ -173,13 +173,10 @@ class _CommentCellState extends State<CommentCell>
                                                       },
                                                     ),
                                                   )
-                                                : showCustomDialog(
+                                                : showCustomAlert(
                                                     context: context,
-                                                    builder: (context) =>
-                                                        const CustomAlertDialog(
-                                                      title: '未登入',
-                                                      content: '請先登入',
-                                                    ),
+                                                    title: '未登入',
+                                                    content: '請先登入',
                                                   ),
                                           );
                                         },

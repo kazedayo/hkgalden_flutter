@@ -101,10 +101,10 @@ class _CommentUserPopover extends StatelessWidget {
               onTap: () {
                 Navigator.of(context).pop();
                 if (sessionUserBloc.state is! SessionUserLoaded) {
-                  showCustomDialog(
+                  showCustomAlert(
                     context: context,
-                    builder: (context) =>
-                        const CustomAlertDialog(title: '未登入', content: '請先登入'),
+                    title: '未登入',
+                    content: '請先登入',
                   );
                 } else {
                   sessionUserBloc.add(

@@ -1,7 +1,38 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+/// Shows a simple adaptive OK alert.
+///
+/// - **iOS 26+:** native Liquid Glass `UIAlertController` via
+///   [AdaptiveAlertDialog]
+/// - **iOS &lt; 26:** classic [CupertinoAlertDialog]
+/// - **Android:** Material [AlertDialog]
+Future<void> showCustomAlert({
+  required BuildContext context,
+  required String title,
+  required String content,
+  String okLabel = 'OK',
+}) {
+  return AdaptiveAlertDialog.show(
+    context: context,
+    title: title,
+    message: content,
+    actions: [
+      AlertAction(
+        title: okLabel,
+        style: AlertActionStyle.primary,
+        onPressed: () {},
+      ),
+    ],
+  );
+}
+
+/// Legacy widget form kept for call sites that still build a dialog tree.
+///
+/// Prefer [showCustomAlert] so iOS 26+ gets Liquid Glass. This widget remains
+/// Cupertino/Material painted chrome (no native glass).
 class CustomAlertDialog extends StatelessWidget {
   final String title;
   final String content;
@@ -42,9 +73,13 @@ class CustomAlertDialog extends StatelessWidget {
             );
 }
 
-void showCustomDialog(
-        {required BuildContext context,
-        required Widget Function(BuildContext) builder}) =>
+/// Generic dialog host for fully custom [builder] content.
+///
+/// For simple title/content OK alerts use [showCustomAlert] instead.
+void showCustomDialog({
+  required BuildContext context,
+  required Widget Function(BuildContext) builder,
+}) =>
     Theme.of(context).platform == TargetPlatform.iOS
         ? showCupertinoDialog(
             context: context,

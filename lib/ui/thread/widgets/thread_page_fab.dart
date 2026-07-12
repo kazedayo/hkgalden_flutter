@@ -7,12 +7,11 @@ FloatingActionButton _buildFab(
     Function(BuildContext, ScrollController, Reply, bool) onReplySuccess) {
   return FloatingActionButton(
     onPressed: () => !BlocProvider.of<ThreadPageCubit>(context).state.canReply
-        ? showCustomDialog(
+        ? showCustomAlert(
             context: context,
-            builder: (context) => const CustomAlertDialog(
-                  title: '未登入',
-                  content: '請先登入',
-                ))
+            title: '未登入',
+            content: '請先登入',
+          )
         : showBarModalBottomSheet(
             duration: const Duration(milliseconds: 300),
             animationCurve: Curves.easeOut,
