@@ -2,6 +2,9 @@ part of '../home_page.dart';
 
 /// List/error/skeleton only — scoped under [ThreadListBloc] so chrome above
 /// does not rebuild when the list appends or refreshes.
+///
+/// Caller must wrap with [Theme] for list highlight color (hoisted out of
+/// list rebuilds).
 Widget _buildFrontLayer(
   BuildContext context,
   ThreadListBloc threadListBloc,
@@ -9,57 +12,54 @@ Widget _buildFrontLayer(
   Function(BuildContext, Thread) loadThread,
   Function(BuildContext, Thread) jumpToPage,
 ) {
-  return Theme(
-    data: Theme.of(context).copyWith(highlightColor: const Color(0xff373d3c)),
-    child: Material(
-      color: Theme.of(context).primaryColor,
-      child: BlocBuilder<ThreadListBloc, ThreadListState>(
-        // Skip pure append-in-flight transitions that share the same threads.
-        buildWhen: (prev, state) {
-          if (state is ThreadListAppending) {
-            return false;
-          }
-          return prev != state;
-        },
-        builder: (context, state) {
-          final channelBloc = BlocProvider.of<ChannelBloc>(context);
+  return Material(
+    color: Theme.of(context).primaryColor,
+    child: BlocBuilder<ThreadListBloc, ThreadListState>(
+      // Skip pure append-in-flight transitions that share the same threads.
+      buildWhen: (prev, state) {
+        if (state is ThreadListAppending) {
+          return false;
+        }
+        return prev != state;
+      },
+      builder: (context, state) {
+        final channelBloc = BlocProvider.of<ChannelBloc>(context);
 
-          return RefreshIndicator(
-            color: AppTheme.activeColor,
-            strokeWidth: 2.5,
-            onRefresh: () {
-              final channelState = channelBloc.state;
-              if (channelState is! ChannelLoaded) {
-                return Future<void>.value();
-              }
-              threadListBloc.add(RequestThreadListEvent(
-                  channelId: channelState.selectedChannelId,
-                  page: 1,
-                  isRefresh: true));
-              return threadListBloc.stream
-                  .firstWhere((element) => element is! ThreadListLoading);
+        return RefreshIndicator(
+          color: AppTheme.activeColor,
+          strokeWidth: 2.5,
+          onRefresh: () {
+            final channelState = channelBloc.state;
+            if (channelState is! ChannelLoaded) {
+              return Future<void>.value();
+            }
+            threadListBloc.add(RequestThreadListEvent(
+                channelId: channelState.selectedChannelId,
+                page: 1,
+                isRefresh: true));
+            return threadListBloc.stream
+                .firstWhere((element) => element is! ThreadListLoading);
+          },
+          // Nested SessionUser builder: refilter when block list changes
+          // without depending on an unrelated thread-list emission.
+          child: BlocBuilder<SessionUserBloc, SessionUserState>(
+            buildWhen: (prev, next) =>
+                !_sameBlockedUsers(prev, next) ||
+                (prev is SessionUserLoaded) != (next is SessionUserLoaded),
+            builder: (context, sessionState) {
+              return _frontLayerBody(
+                context,
+                state,
+                sessionState,
+                channelBloc,
+                scrollController,
+                loadThread,
+                jumpToPage,
+              );
             },
-            // Nested SessionUser builder: refilter when block list changes
-            // without depending on an unrelated thread-list emission.
-            child: BlocBuilder<SessionUserBloc, SessionUserState>(
-              buildWhen: (prev, next) =>
-                  !_sameBlockedUsers(prev, next) ||
-                  (prev is SessionUserLoaded) != (next is SessionUserLoaded),
-              builder: (context, sessionState) {
-                return _frontLayerBody(
-                  context,
-                  state,
-                  sessionState,
-                  channelBloc,
-                  scrollController,
-                  loadThread,
-                  jumpToPage,
-                );
-              },
-            ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     ),
   );
 }
@@ -121,7 +121,17 @@ Widget _frontLayerBody(
       },
       itemBuilder: (context, index) {
         if (index == visibleThreads.length) {
-          return const ListLoadingSkeletonCell(enabled: true);
+          // Footer listens only for append membership so cells stay cold.
+          return BlocBuilder<ThreadListBloc, ThreadListState>(
+            buildWhen: (prev, next) =>
+                (prev is ThreadListAppending) != (next is ThreadListAppending),
+            builder: (context, listState) {
+              if (listState is ThreadListAppending) {
+                return const ListLoadingSkeletonCell(enabled: true);
+              }
+              return const SizedBox.shrink();
+            },
+          );
         }
         final thread = visibleThreads[index];
         return ThreadCell(

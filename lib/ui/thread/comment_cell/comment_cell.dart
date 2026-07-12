@@ -36,13 +36,9 @@ class CommentCell extends StatefulWidget {
   State<CommentCell> createState() => _CommentCellState();
 }
 
-class _CommentCellState extends State<CommentCell>
-    with AutomaticKeepAliveClientMixin {
+class _CommentCellState extends State<CommentCell> {
   late String _parsedHtml;
   late SessionUserBloc _sessionUserBloc;
-
-  @override
-  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -74,7 +70,6 @@ class _CommentCellState extends State<CommentCell>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // AutomaticKeepAliveClientMixin
     // Reactive block filter: rebuild only when this author's blocked status flips.
     return BlocBuilder<SessionUserBloc, SessionUserState>(
       buildWhen: (prev, next) => _isAuthorBlocked(prev) != _isAuthorBlocked(next),

@@ -38,10 +38,7 @@ Widget _generatePageSliver(
       children: <Widget>[
         _PageHeader(floor: reply.floor),
         cell,
-        _PageFooter(
-          onLastPage:
-              BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
-        )
+        _PageFooter(),
       ],
     );
   } else if (isPageStart && state.thread.replies.length != 1) {
@@ -57,10 +54,7 @@ Widget _generatePageSliver(
       key: ValueKey(reply.replyId),
       children: <Widget>[
         cell,
-        _PageFooter(
-          onLastPage:
-              BlocProvider.of<ThreadPageCubit>(context).state.onLastPage,
-        ),
+        _PageFooter(),
       ],
     );
   } else {

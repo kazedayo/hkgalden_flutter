@@ -68,28 +68,27 @@ class HomePageState extends State<HomePage>
         BlocProvider.of<ThreadListBloc>(context);
     // Scaffold chrome (app bar, drawer, FAB) is outside ThreadListBloc so
     // list load/append does not rebuild them.
+    // Theme for list highlight is hoisted here so ThreadListBloc rebuilds
+    // do not re-resolve Theme.of(context).copyWith on every list emission.
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          BackdropScaffold(
-            resizeToAvoidBottomInset: false,
-            appBar: _buildAppBar(),
-            frontLayer: _buildFrontLayer(
-              context,
-              threadListBloc,
-              _scrollController,
-              _loadThread,
-              _jumpToPage,
-            ),
-            frontLayerScrim: Colors.black.withAlpha(177),
-            stickyFrontLayer: true,
-            backLayer: const HomeDrawer(),
-            backLayerBackgroundColor:
-                Theme.of(context).scaffoldBackgroundColor,
-            floatingActionButton: _buildFab(context, threadListBloc),
+      body: BackdropScaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: _buildAppBar(),
+        frontLayer: Theme(
+          data: Theme.of(context).copyWith(highlightColor: const Color(0xff373d3c)),
+          child: _buildFrontLayer(
+            context,
+            threadListBloc,
+            _scrollController,
+            _loadThread,
+            _jumpToPage,
           ),
-        ],
+        ),
+        frontLayerScrim: Colors.black.withAlpha(177),
+        stickyFrontLayer: true,
+        backLayer: const HomeDrawer(),
+        backLayerBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        floatingActionButton: _buildFab(context, threadListBloc),
       ),
     );
   }

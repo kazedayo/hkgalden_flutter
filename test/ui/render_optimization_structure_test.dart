@@ -69,8 +69,11 @@ void main() {
     late String appBar;
     late String threadPageState;
     late String richTextEditor;
+    late String richTextToolbar;
     late String composePage;
     late String homeDrawer;
+    late String threadPageFooter;
+    late String threadPageSliver;
 
     setUpAll(() {
       String read(String path) {
@@ -91,8 +94,14 @@ void main() {
           read('lib/models/ui_state_models/thread_page_state.dart');
       richTextEditor =
           read('lib/ui/common/compose_page/widgets/rich_text_editor.dart');
+      richTextToolbar =
+          read('lib/ui/common/compose_page/widgets/rich_text_toolbar.dart');
       composePage = read('lib/ui/common/compose_page/compose_page.dart');
       homeDrawer = read('lib/ui/home/drawer/home_drawer.dart');
+      threadPageFooter =
+          read('lib/ui/thread/widgets/thread_page_footer.dart');
+      threadPageSliver =
+          read('lib/ui/thread/widgets/thread_page_sliver.dart');
     });
 
     test('H1: home Scaffold is outside ThreadListBloc builder', () {
@@ -105,7 +114,9 @@ void main() {
 
     test('H1/M5: front layer pre-filters blocked threads', () {
       expect(frontLayer.contains('visibleThreads'), isTrue);
-      expect(frontLayer.contains('SizedBox.shrink()'), isFalse);
+      // Cells for blocked authors are filtered out of the list, not hidden
+      // per-row with Visibility/SizedBox in the itemBuilder thread branch.
+      expect(frontLayer.contains('blockedUserIds'), isTrue);
     });
 
     test('M8: home list rebuilds on SessionUser block list changes', () {
@@ -137,10 +148,68 @@ void main() {
       expect(styledHtml.contains('RepaintBoundary'), isTrue);
     });
 
-    test('H2: CommentCell uses keep-alive and RepaintBoundary', () {
-      expect(commentCell.contains('AutomaticKeepAliveClientMixin'), isTrue);
+    test('R1: StyledHtmlView memoizes Html across rebuilds', () {
+      expect(styledHtml.contains('_cachedHtml'), isTrue);
+      expect(styledHtml.contains('didUpdateWidget'), isTrue);
+      expect(styledHtml.contains('Object.hash'), isTrue);
+      expect(styledHtml.contains('_cachedCacheWidth'), isTrue);
+      expect(styledHtml.contains('_cachedThemeKey'), isTrue);
+      expect(styledHtml.contains('RepaintBoundary'), isTrue);
+      expect(styledHtml.contains('_HtmlNetworkImage'), isTrue);
+    });
+
+    test('R2: CommentCell drops keep-alive; keeps RepaintBoundary', () {
+      expect(commentCell.contains('AutomaticKeepAliveClientMixin'), isFalse);
+      expect(commentCell.contains('wantKeepAlive'), isFalse);
       expect(commentCell.contains('RepaintBoundary'), isTrue);
-      expect(commentCell.contains('wantKeepAlive'), isTrue);
+    });
+
+    test('R3: toolbar setState only when selection flags change', () {
+      expect(richTextToolbar.contains('_onSelectionChanged'), isTrue);
+      // Guard: early return when flags unchanged.
+      expect(richTextToolbar.contains('isBold == _isBold'), isTrue);
+      expect(richTextToolbar.contains('parsedColor == _activeColor'), isTrue);
+      expect(richTextToolbar.contains('return;'), isTrue);
+    });
+
+    test('R4: list Theme is hoisted to home_page, not front layer', () {
+      expect(homePage.contains('highlightColor: const Color(0xff373d3c)'),
+          isTrue);
+      expect(homePage.contains('frontLayer: Theme('), isTrue);
+      expect(frontLayer.contains('highlightColor'), isFalse);
+      expect(frontLayer.contains('return Theme('), isFalse);
+      expect(frontLayer.contains('return Material('), isTrue);
+    });
+
+    test('R5: footer reads onLastPage from ThreadPageCubit', () {
+      expect(threadPageFooter.contains('onLastPage'), isTrue);
+      expect(
+          threadPageFooter.contains(
+              'BlocBuilder<ThreadPageCubit, ThreadPageState>'),
+          isTrue);
+      expect(
+          threadPageFooter
+              .contains('prev.onLastPage != next.onLastPage'),
+          isTrue);
+      expect(threadPageFooter.contains('BlocBuilder<ThreadBloc'), isTrue);
+      // Call sites pass no onLastPage param.
+      expect(threadPageSliver.contains('_PageFooter()'), isTrue);
+      expect(threadPageSliver.contains('onLastPage:'), isFalse);
+    });
+
+    test('R6: end shimmer only when ThreadListAppending', () {
+      expect(frontLayer.contains('SizedBox.shrink()'), isTrue);
+      expect(frontLayer.contains('ThreadListAppending'), isTrue);
+      expect(
+          frontLayer.contains(
+              '(prev is ThreadListAppending) != (next is ThreadListAppending)'),
+          isTrue);
+      expect(
+          frontLayer.contains('ListLoadingSkeletonCell(enabled: true)'),
+          isTrue);
+      // Parent still skips append for main list body.
+      expect(frontLayer.contains('if (state is ThreadListAppending)'), isTrue);
+      expect(frontLayer.contains('return false;'), isTrue);
     });
 
     test('M8: CommentCell reactively filters blocked authors', () {

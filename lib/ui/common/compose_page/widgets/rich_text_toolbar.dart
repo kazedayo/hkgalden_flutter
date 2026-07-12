@@ -193,16 +193,39 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
       } catch (_) {}
     }
 
+    final isBold = attrs.containsKey(Attribute.bold.key);
+    final isItalic = attrs.containsKey(Attribute.italic.key);
+    final isUnderline = attrs.containsKey(Attribute.underline.key);
+    final isStrikethrough = attrs.containsKey(Attribute.strikeThrough.key);
+    final isCenterAlign = align?.value == 'center';
+    final isRightAlign = align?.value == 'right';
+    final isH1 = attrs[Attribute.font.key]?.value == 'h1';
+    final isH2 = attrs[Attribute.font.key]?.value == 'h2';
+    final isH3 = attrs[Attribute.font.key]?.value == 'h3';
+
+    if (isBold == _isBold &&
+        isItalic == _isItalic &&
+        isUnderline == _isUnderline &&
+        isStrikethrough == _isStrikethrough &&
+        isCenterAlign == _isCenterAlign &&
+        isRightAlign == _isRightAlign &&
+        isH1 == _isH1 &&
+        isH2 == _isH2 &&
+        isH3 == _isH3 &&
+        parsedColor == _activeColor) {
+      return;
+    }
+
     setState(() {
-      _isBold = attrs.containsKey(Attribute.bold.key);
-      _isItalic = attrs.containsKey(Attribute.italic.key);
-      _isUnderline = attrs.containsKey(Attribute.underline.key);
-      _isStrikethrough = attrs.containsKey(Attribute.strikeThrough.key);
-      _isCenterAlign = align?.value == 'center';
-      _isRightAlign = align?.value == 'right';
-      _isH1 = attrs[Attribute.font.key]?.value == 'h1';
-      _isH2 = attrs[Attribute.font.key]?.value == 'h2';
-      _isH3 = attrs[Attribute.font.key]?.value == 'h3';
+      _isBold = isBold;
+      _isItalic = isItalic;
+      _isUnderline = isUnderline;
+      _isStrikethrough = isStrikethrough;
+      _isCenterAlign = isCenterAlign;
+      _isRightAlign = isRightAlign;
+      _isH1 = isH1;
+      _isH2 = isH2;
+      _isH3 = isH3;
       _activeColor = parsedColor;
     });
   }

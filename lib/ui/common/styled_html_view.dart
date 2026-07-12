@@ -26,11 +26,69 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
   /// Stable per-view identity for Hero tags (not re-rolled on parent rebuild).
   late final int _randomHash = Random().nextInt(1000);
 
+  /// Memoized [Html] subtree — reused when content/layout/theme inputs match.
+  Widget? _cachedHtml;
+  int? _cachedCacheWidth;
+  int? _cachedThemeKey;
+
+  @override
+  void didUpdateWidget(covariant StyledHtmlView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.htmlString != oldWidget.htmlString ||
+        widget.floor != oldWidget.floor) {
+      _cachedHtml = null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final int cacheWidth = (MediaQuery.sizeOf(context).width *
             MediaQuery.devicePixelRatioOf(context))
         .toInt();
+    final theme = Theme.of(context);
+    final int themeKey =
+        Object.hash(theme.brightness, theme.colorScheme.onSurface);
+
+    // Do not reuse across rotation (cacheWidth) or theme flips.
+    if (_cachedHtml == null ||
+        _cachedCacheWidth != cacheWidth ||
+        _cachedThemeKey != themeKey) {
+      _cachedHtml = Html(
+        data: widget.htmlString,
+        extensions: [
+          TagExtension(
+            tagsToExtend: {'img'},
+            builder: (extensionContext) {
+              final src = extensionContext.attributes['src'] ?? '';
+              final heroTag = '${widget.floor}_${src}_$_randomHash';
+              return _HtmlNetworkImage(
+                src: src,
+                cacheWidth: cacheWidth,
+                heroTag: heroTag,
+                onOpen: () => _showImageView(context, src, heroTag),
+              );
+            },
+          ),
+          TagExtension(
+            tagsToExtend: {'icon'},
+            builder: (extensionContext) {
+              final src = extensionContext.attributes['src'] ?? '';
+              return Padding(
+                padding: const EdgeInsets.all(3.0),
+                child: OctoImage(
+                  image: NetworkImage(src),
+                  placeholderBuilder: (context) => const SizedBox(),
+                ),
+              );
+            },
+          ),
+        ],
+        style: HtmlStyles.generate(context),
+        onLinkTap: (url, _, __) => _launchURL(context, url!),
+      );
+      _cachedCacheWidth = cacheWidth;
+      _cachedThemeKey = themeKey;
+    }
 
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
@@ -38,39 +96,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
       ),
       // Isolate HTML paint from parent chrome (app bar elevation, etc.).
       child: RepaintBoundary(
-        child: Html(
-          data: widget.htmlString,
-          extensions: [
-            TagExtension(
-              tagsToExtend: {'img'},
-              builder: (extensionContext) {
-                final src = extensionContext.attributes['src'] ?? '';
-                final heroTag = '${widget.floor}_${src}_$_randomHash';
-                return _HtmlNetworkImage(
-                  src: src,
-                  cacheWidth: cacheWidth,
-                  heroTag: heroTag,
-                  onOpen: () => _showImageView(context, src, heroTag),
-                );
-              },
-            ),
-            TagExtension(
-              tagsToExtend: {'icon'},
-              builder: (extensionContext) {
-                final src = extensionContext.attributes['src'] ?? '';
-                return Padding(
-                  padding: const EdgeInsets.all(3.0),
-                  child: OctoImage(
-                    image: NetworkImage(src),
-                    placeholderBuilder: (context) => const SizedBox(),
-                  ),
-                );
-              },
-            ),
-          ],
-          style: HtmlStyles.generate(context),
-          onLinkTap: (url, _, __) => _launchURL(context, url!),
-        ),
+        child: _cachedHtml!,
       ),
     );
   }
