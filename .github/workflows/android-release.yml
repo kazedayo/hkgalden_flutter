@@ -57,12 +57,14 @@ jobs:
             exit 1
           fi
 
+          # Keystore lives under android/app/; storeFile is resolved by Gradle relative
+          # to the :app module (android/app/), not android/.
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
           {
             echo "storePassword=$ANDROID_KEYSTORE_PASSWORD"
             echo "keyPassword=$ANDROID_KEY_PASSWORD"
             echo "keyAlias=$ANDROID_KEY_ALIAS"
-            echo "storeFile=app/upload-keystore.jks"
+            echo "storeFile=upload-keystore.jks"
           } > android/key.properties
 
       - name: Build release APK
