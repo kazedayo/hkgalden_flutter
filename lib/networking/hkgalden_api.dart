@@ -102,10 +102,10 @@ class HKGaldenApi {
   /// Runs a query and returns null on GraphQL/network failure.
   ///
   /// [fetchPolicy] defaults to the client default (`cacheAndNetwork`). Prefer
-  /// [FetchPolicy.networkOnly] for list queries: with `cacheAndNetwork`, a
-  /// cache hit returns immediately and never waits for the network, so stale
-  /// `Thread.replies` (overwritten by a detail fetch) can show wrong last-reply
-  /// times.
+  /// [FetchPolicy.networkOnly] for list and thread-content queries: with
+  /// `cacheAndNetwork`, a cache hit returns immediately and never waits for
+  /// the network. Thread is normalized by id, so page K replies overwrite page
+  /// N in the cache and a later open of page N can show K's floors.
   Future<T?> _query<T>(
     String document, {
     Map<String, dynamic>? variables,
@@ -216,6 +216,10 @@ class HKGaldenApi {
         'id': threadId,
         'page': page,
       },
+      // Thread is normalized by id in GraphQLCache; replies from page K overwrite
+      // page N. cacheAndNetwork then reopens page N with K's floors (often N-1
+      // after an upward paginate). Always hit the network for thread content.
+      fetchPolicy: FetchPolicy.networkOnly,
       parse: (data) async {
         final Map<String, dynamic> result =
             data['thread'] as Map<String, dynamic>;

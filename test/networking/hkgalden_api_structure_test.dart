@@ -45,4 +45,16 @@ void main() {
   test('GraphQLClient is injectable for shared-client usage', () {
     expect(apiSource.contains('HKGaldenApi({GraphQLClient? client})'), isTrue);
   });
+
+  test('getThreadQuery uses networkOnly to avoid cross-page cache pollution',
+      () {
+    // Thread is normalized by id; page N-1 replies must not be served as page N.
+    final getThreadStart = apiSource.indexOf('Future<Thread?> getThreadQuery');
+    expect(getThreadStart, greaterThanOrEqualTo(0));
+    final getThreadEnd = apiSource.indexOf(
+        'Future<List<Thread>?> getThreadListQuery', getThreadStart);
+    expect(getThreadEnd, greaterThan(getThreadStart));
+    final getThreadBody = apiSource.substring(getThreadStart, getThreadEnd);
+    expect(getThreadBody.contains('FetchPolicy.networkOnly'), isTrue);
+  });
 }

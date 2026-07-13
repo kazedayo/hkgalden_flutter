@@ -75,10 +75,11 @@ void main() {
           endPage: 1,
         ),
         ThreadAppending(),
+        // Downward append advances endPage only; currentPage stays window start.
         ThreadLoaded(
           thread: Thread.initial(),
           previousPages: Thread.initial(),
-          currentPage: 2,
+          currentPage: 1,
           endPage: 2,
         ),
       ],

@@ -1,6 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/cubit/thread_page_cubit.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
@@ -27,6 +28,7 @@ part 'widgets/thread_page_app_bar.dart';
 part 'widgets/thread_page_fab.dart';
 part 'widgets/thread_page_footer.dart';
 part 'widgets/thread_page_header.dart';
+part 'widgets/thread_page_previous_pull_indicator.dart';
 part 'widgets/thread_page_previous_sliver.dart';
 part 'widgets/thread_page_sliver.dart';
 
@@ -38,18 +40,40 @@ class ThreadPage extends StatefulWidget {
   _ThreadPageState createState() => _ThreadPageState();
 }
 
-class _ThreadPageState extends State<ThreadPage> {
+class _ThreadPageState extends State<ThreadPage>
+    with SingleTickerProviderStateMixin {
   late ScrollController _scrollController;
   late ThreadPageCubit _threadPageCubit;
   int? _previousImageCacheMaxBytes;
+
+  /// Ensures the centered main window lands at offset 0 once after first load.
+  bool _didPinInitialCenter = false;
+
+  /// RefreshIndicator-style previous pull (manual extent, not parkable cells).
+  bool _previousPullArmed = false;
+  bool _previousPullLoading = false;
+  bool _previousPullFingerDown = false;
+  final ValueNotifier<double> _previousPullExtent = ValueNotifier<double>(0);
+
+  /// Single snap-back controller (reused — do not create per gesture).
+  late final AnimationController _previousPullSnapController;
+  double _pullSnapBegin = 0;
+  double _pullSnapEnd = 0;
+  int _pullSnapGeneration = 0;
 
   /// Cap decoded image memory while on the thread page (reduces GC pressure).
   static const int _kThreadImageCacheMaxBytes = 48 << 20; // 48 MiB
 
   @override
   void initState() {
-    _scrollController = ScrollController();
+    // keepScrollOffset: false — avoid restoring a previous visit's offset
+    // onto a new jump-in.
+    _scrollController = ScrollController(keepScrollOffset: false);
     _threadPageCubit = ThreadPageCubit();
+    _previousPullSnapController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+    )..addListener(_onPullSnapTick);
     final imageCache = PaintingBinding.instance.imageCache;
     _previousImageCacheMaxBytes = imageCache.maximumSizeBytes;
     if (imageCache.maximumSizeBytes > _kThreadImageCacheMaxBytes) {
@@ -64,8 +88,223 @@ class _ThreadPageState extends State<ThreadPage> {
     if (previous != null) {
       PaintingBinding.instance.imageCache.maximumSizeBytes = previous;
     }
+    _previousPullSnapController
+      ..removeListener(_onPullSnapTick)
+      ..dispose();
+    _previousPullExtent.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onPullSnapTick() {
+    final t =
+        Curves.easeOutCubic.transform(_previousPullSnapController.value);
+    _previousPullExtent.value =
+        _pullSnapBegin + (_pullSnapEnd - _pullSnapBegin) * t;
+  }
+
+  void _stopPullSnapAnimation() {
+    if (_previousPullSnapController.isAnimating) {
+      // Invalidate in-flight whenComplete so a stopped run cannot clobber state.
+      _pullSnapGeneration++;
+      _previousPullSnapController.stop();
+    }
+  }
+
+  void _clearPreviousPull({bool animate = false}) {
+    _previousPullArmed = false;
+    _previousPullLoading = false;
+    _previousPullFingerDown = false;
+    if (animate && _previousPullExtent.value > 0) {
+      _animatePullExtentTo(0);
+    } else {
+      _stopPullSnapAnimation();
+      if (_previousPullExtent.value != 0) {
+        _previousPullExtent.value = 0;
+      }
+    }
+  }
+
+  void _setPullExtent(double value) {
+    final next = value.clamp(0.0, _kPreviousPullIndicatorMaxExtent);
+    if (next != _previousPullExtent.value) {
+      _previousPullExtent.value = next;
+    }
+    // Arm = haptic only; never snap or commit here.
+    if (next >= _kPreviousPullArmExtent) {
+      if (!_previousPullArmed) {
+        _previousPullArmed = true;
+        HapticFeedback.mediumImpact();
+      }
+    } else if (next < _kPreviousPullDisarmExtent) {
+      _previousPullArmed = false;
+    }
+  }
+
+  void _animatePullExtentTo(double target) {
+    _stopPullSnapAnimation();
+    final begin = _previousPullExtent.value;
+    if ((begin - target).abs() < 0.5) {
+      _previousPullExtent.value = target;
+      if (target == 0) {
+        _previousPullArmed = false;
+      }
+      return;
+    }
+    _pullSnapBegin = begin;
+    _pullSnapEnd = target;
+    final generation = ++_pullSnapGeneration;
+    _previousPullSnapController.forward(from: 0).whenComplete(() {
+      if (!mounted || generation != _pullSnapGeneration) {
+        return;
+      }
+      _previousPullExtent.value = target;
+      if (target == 0) {
+        _previousPullArmed = false;
+      }
+    });
+  }
+
+  /// Whether metrics are at the leading edge (top for a downward axis).
+  ///
+  /// Prefer [ScrollMetrics.extentBefore] like [RefreshIndicator] — works with
+  /// a centered [CustomScrollView] where minScrollExtent may be negative.
+  bool _isAtScrollTop(ScrollMetrics metrics) => metrics.extentBefore <= 0.5;
+
+  /// Manual previous pull (same notification model as [RefreshIndicator]):
+  /// - At top, [OverscrollNotification] grows pull (clamping does not move pixels)
+  /// - Content is translated by pull extent; skeleton fills the gap
+  /// - Cross arm threshold → haptic only (hold, no snap)
+  /// - Finger up short → animate extent to 0
+  /// - Finger up armed → load previous; hold indicator until data arrives
+  bool _onThreadScrollNotification(
+    ScrollNotification notification,
+    ThreadBloc threadBloc,
+  ) {
+    if (notification.depth != 0 || notification.metrics.axis != Axis.vertical) {
+      return false;
+    }
+
+    final state = threadBloc.state;
+    if (state is ThreadAppending) {
+      // Keep loading indicator; ignore further pull input.
+      return false;
+    }
+    if (state is! ThreadLoaded || state.currentPage <= 1) {
+      if (_previousPullExtent.value > 0 || _previousPullArmed) {
+        _clearPreviousPull();
+      }
+      return false;
+    }
+
+    if (_previousPullLoading) {
+      return false;
+    }
+
+    final metrics = notification.metrics;
+    if (!metrics.hasContentDimensions) {
+      return false;
+    }
+
+    // AxisDirection.down: pulling past the top produces negative overscroll /
+    // positive scrollDelta when releasing into content — same as RefreshIndicator.
+    final axisDown = metrics.axisDirection == AxisDirection.down ||
+        metrics.axisDirection == AxisDirection.right;
+
+    if (notification is ScrollStartNotification) {
+      if (notification.dragDetails != null && _isAtScrollTop(metrics)) {
+        _previousPullFingerDown = true;
+        _stopPullSnapAnimation();
+      }
+    } else if (notification is OverscrollNotification) {
+      // Primary path under ClampingScrollPhysics: pixels stay put at the edge,
+      // so ScrollUpdate often never fires — only overscroll does.
+      if (notification.dragDetails == null) {
+        return false;
+      }
+      if (!_previousPullFingerDown && !_isAtScrollTop(metrics)) {
+        return false;
+      }
+      _previousPullFingerDown = true;
+      _stopPullSnapAnimation();
+      // RefreshIndicator: dragOffset -= overscroll (down axis).
+      // Negative leading overscroll → pull extent increases.
+      final delta = axisDown ? -notification.overscroll : notification.overscroll;
+      if (delta != 0) {
+        _setPullExtent(
+          _previousPullExtent.value + delta * _kPreviousPullDragFactor,
+        );
+      }
+    } else if (notification is ScrollUpdateNotification) {
+      // Once pulled, scrollDelta reduces/increases extent as the user moves.
+      // Also covers ballistic settle; only apply while a pull is active or at top
+      // with an active finger drag.
+      final scrollDelta = notification.scrollDelta;
+      if (scrollDelta == null || scrollDelta == 0) {
+        return false;
+      }
+      final pulling = _previousPullExtent.value > 0 ||
+          (_previousPullFingerDown && _isAtScrollTop(metrics));
+      if (!pulling) {
+        return false;
+      }
+      if (notification.dragDetails != null) {
+        _previousPullFingerDown = true;
+      }
+      // RefreshIndicator: dragOffset -= scrollDelta (down axis).
+      final delta = axisDown ? -scrollDelta : scrollDelta;
+      _setPullExtent(
+        _previousPullExtent.value + delta * _kPreviousPullDragFactor,
+      );
+    } else if (notification is ScrollEndNotification) {
+      if (_previousPullFingerDown || _previousPullExtent.value > 0) {
+        _previousPullFingerDown = false;
+        _handlePreviousPullRelease(threadBloc, state);
+      }
+    }
+
+    return false;
+  }
+
+  /// Hide the Android/iOS overscroll glow while the user is pull-dragging.
+  bool _onOverscrollIndicatorNotification(
+    OverscrollIndicatorNotification notification,
+  ) {
+    if (notification.depth != 0 || !notification.leading) {
+      return false;
+    }
+    if (_previousPullFingerDown || _previousPullExtent.value > 0) {
+      notification.disallowIndicator();
+      return true;
+    }
+    return false;
+  }
+
+  void _handlePreviousPullRelease(
+    ThreadBloc threadBloc,
+    ThreadLoaded state,
+  ) {
+    if (_previousPullLoading) {
+      return;
+    }
+    if (_previousPullArmed && state.currentPage > 1) {
+      _previousPullArmed = false;
+      _previousPullLoading = true;
+      // Keep full skeleton height until data arrives (do not shrink on commit).
+      _stopPullSnapAnimation();
+      _previousPullExtent.value = _kPreviousPullIndicatorMaxExtent;
+      threadBloc.add(RequestThreadEvent(
+        threadId: state.thread.threadId,
+        page: state.currentPage - 1,
+        isInitialLoad: false,
+      ));
+      return;
+    }
+    // Incomplete pull — ease the content back; no sudden clear.
+    _previousPullArmed = false;
+    if (_previousPullExtent.value > 0) {
+      _animatePullExtentTo(0);
+    }
   }
 
   @override
@@ -141,6 +380,59 @@ class _ThreadPageState extends State<ThreadPage> {
                 ],
                 session,
               );
+              // Previous pull finished: replace the pull gap with real content
+              // in place (no ease-back, no jump to the top of history).
+              if (_previousPullLoading || _previousPullExtent.value > 0) {
+                final wasLoading = _previousPullLoading;
+                // Handoff the same gap we held while loading (full skeleton).
+                final preserveGap = wasLoading
+                    ? _kPreviousPullIndicatorMaxExtent
+                    : _previousPullExtent.value;
+                _previousPullLoading = false;
+                _previousPullArmed = false;
+                _previousPullFingerDown = false;
+                _stopPullSnapAnimation();
+                if (wasLoading && state.previousPages.replies.isNotEmpty) {
+                  // Keep the translate until after layout, then convert the gap
+                  // into a scroll offset into previousPages (above center) so
+                  // the skeleton region becomes real posts without a visual jump.
+                  SchedulerBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted || !_scrollController.hasClients) {
+                      return;
+                    }
+                    final position = _scrollController.position;
+                    if (position.hasContentDimensions &&
+                        position.minScrollExtent < 0) {
+                      // Negative offset = into previous content; magnitude ≈ pull gap.
+                      final target =
+                          (-preserveGap).clamp(position.minScrollExtent, 0.0);
+                      position.jumpTo(target);
+                    }
+                    // Drop pull chrome in the same frame as the offset handoff.
+                    if (_previousPullExtent.value != 0) {
+                      _previousPullExtent.value = 0;
+                    }
+                  });
+                } else {
+                  _previousPullExtent.value = 0;
+                }
+              }
+              // Pin to the center sliver (requested page) on first content frame.
+              if (!_didPinInitialCenter &&
+                  state.previousPages.replies.isEmpty) {
+                _didPinInitialCenter = true;
+                SchedulerBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted || !_scrollController.hasClients) {
+                    return;
+                  }
+                  final position = _scrollController.position;
+                  if (position.hasContentDimensions && position.pixels != 0) {
+                    _scrollController.jumpTo(0);
+                  }
+                });
+              }
+            } else if (state is ThreadError) {
+              _clearPreviousPull(animate: true);
             }
           },
           buildWhen: (prev, state) =>
@@ -172,56 +464,95 @@ class _ThreadPageState extends State<ThreadPage> {
                       _replyListKey(state.previousPages.replies[i]):
                           state.previousPages.replies.length - i - 1,
                   };
-                  return CustomScrollView(
-                    center: centerKey,
-                    controller: _scrollController,
-                    // Prefetch more off-screen so flings hit already-laid-out cells.
-                    // ignore: deprecated_member_use — ScrollCacheExtent is not exported via material.dart
-                    cacheExtent: 2000,
-                    slivers: <Widget>[
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            return _generatePreviousPageSliver(
-                                context,
-                                _scrollController,
-                                state,
-                                index,
-                                arguments.page,
-                                _onReplySuccess);
-                          },
-                          findChildIndexCallback: (Key key) {
-                            if (key is ValueKey) {
-                              return previousKeyToBuilderIndex[key.value];
-                            }
-                            return null;
-                          },
-                          childCount: state.previousPages.replies.isEmpty
-                              ? 1
-                              : state.previousPages.replies.length,
-                        ),
+                  final previousCount = state.previousPages.replies.length;
+                  return NotificationListener<OverscrollIndicatorNotification>(
+                    onNotification: _onOverscrollIndicatorNotification,
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (notification) =>
+                          _onThreadScrollNotification(
+                        notification,
+                        BlocProvider.of<ThreadBloc>(context),
                       ),
-                      SliverList(
-                        key: centerKey,
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            return _generatePageSliver(
-                                context,
-                                _scrollController,
-                                state,
-                                index,
-                                _onReplySuccess);
-                          },
-                          findChildIndexCallback: (Key key) {
-                            if (key is ValueKey) {
-                              return replyKeyToIndex[key.value];
-                            }
-                            return null;
-                          },
-                          childCount: state.thread.replies.length,
-                        ),
+                      child: ListenableBuilder(
+                        listenable: _previousPullExtent,
+                        builder: (context, _) {
+                          final pullExtent = _previousPullExtent.value;
+                          // While loading we already parked extent at handoff size.
+                          final displayExtent = pullExtent;
+                          return Stack(
+                            clipBehavior: Clip.hardEdge,
+                            children: [
+                              // Gap fill + skeleton above the translated list.
+                              _PreviousPullIndicator(
+                                extent: displayExtent,
+                                loading: _previousPullLoading,
+                              ),
+                              // Content slides down with the pull (RefreshIndicator).
+                              Transform.translate(
+                                offset: Offset(0, displayExtent),
+                                child: CustomScrollView(
+                                  center: centerKey,
+                                  controller: _scrollController,
+                                  // Clamping: pull is driven by OverscrollNotification
+                                  // (same as RefreshIndicator), not rubber-band physics.
+                                  physics: const AlwaysScrollableScrollPhysics(
+                                    parent: ClampingScrollPhysics(),
+                                  ),
+                                  // Prefetch more off-screen so flings hit laid-out cells.
+                                  // ignore: deprecated_member_use — ScrollCacheExtent is not exported via material.dart
+                                  cacheExtent: 2000,
+                                  slivers: <Widget>[
+                                    SliverList(
+                                      delegate: SliverChildBuilderDelegate(
+                                        (context, index) {
+                                          return _generatePreviousPageSliver(
+                                              context,
+                                              _scrollController,
+                                              state,
+                                              index,
+                                              _onReplySuccess);
+                                        },
+                                        findChildIndexCallback:
+                                            previousCount == 0
+                                                ? null
+                                                : (Key key) {
+                                                    if (key is ValueKey) {
+                                                      return previousKeyToBuilderIndex[
+                                                          key.value];
+                                                    }
+                                                    return null;
+                                                  },
+                                        childCount: previousCount,
+                                      ),
+                                    ),
+                                    SliverList(
+                                      key: centerKey,
+                                      delegate: SliverChildBuilderDelegate(
+                                        (context, index) {
+                                          return _generatePageSliver(
+                                              context,
+                                              _scrollController,
+                                              state,
+                                              index,
+                                              _onReplySuccess);
+                                        },
+                                        findChildIndexCallback: (Key key) {
+                                          if (key is ValueKey) {
+                                            return replyKeyToIndex[key.value];
+                                          }
+                                          return null;
+                                        },
+                                        childCount: state.thread.replies.length,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
-                    ],
+                    ),
                   );
                 } else if (state is ThreadError) {
                   return ErrorPage(

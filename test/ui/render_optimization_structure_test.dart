@@ -74,6 +74,7 @@ void main() {
     late String homeDrawer;
     late String threadPageFooter;
     late String threadPageSliver;
+    late String threadPageScrollListener;
 
     setUpAll(() {
       String read(String path) {
@@ -102,6 +103,8 @@ void main() {
           read('lib/ui/thread/widgets/thread_page_footer.dart');
       threadPageSliver =
           read('lib/ui/thread/widgets/thread_page_sliver.dart');
+      threadPageScrollListener = read(
+          'lib/ui/thread/functions/thread_page_scroll_controller_listener.dart');
     });
 
     test('H1: home Scaffold is outside ThreadListBloc builder', () {
@@ -230,18 +233,16 @@ void main() {
 
     test('M1: previous sliver keys with ValueKey for findChildIndexCallback',
         () {
-      expect(previousSliver.contains('ValueKey(reply.replyId)'), isTrue);
+      expect(previousSliver.contains('ValueKey<Object>(_replyListKey(reply))'),
+          isTrue);
       expect(previousSliver.contains('KeyedSubtree'), isTrue);
       final threadPage = File('lib/ui/thread/thread_page.dart').readAsStringSync();
-      // Builder is reversed; callback must convert data index → builder index.
+      // O(1) map: data index → reversed builder index for previous sliver.
+      expect(threadPage.contains('previousKeyToBuilderIndex'), isTrue);
       expect(
           threadPage.contains(
-              'state.previousPages.replies.length -\n                                dataIndex -\n                                1') ||
-              threadPage.contains(
-                  'state.previousPages.replies.length - dataIndex - 1') ||
-              threadPage.contains('dataIndex -'),
+              'state.previousPages.replies.length - i - 1'),
           isTrue);
-      expect(threadPage.contains('dataIndex < 0'), isTrue);
       expect(threadPage.contains('BlocListener<SessionUserBloc'), isTrue);
     });
 
@@ -271,5 +272,55 @@ void main() {
           isFalse);
       expect(composePage.contains('_cachedQuoteHtml'), isTrue);
     });
+
+    test('previous page uses RefreshIndicator-style pull, not in-list skeleton',
+        () {
+      expect(
+          threadPageScrollListener.contains('_kPreviousPullArmExtent'),
+          isTrue);
+      // Next page still uses the controller listener; previous does not.
+      expect(threadPageScrollListener.contains('endPage + 1'), isTrue);
+      expect(threadPageScrollListener.contains('currentPage - 1'), isFalse);
+      final threadPage =
+          File('lib/ui/thread/thread_page.dart').readAsStringSync();
+      expect(threadPage.contains('_onThreadScrollNotification'), isTrue);
+      expect(threadPage.contains('_previousPullArmed'), isTrue);
+      expect(threadPage.contains('HapticFeedback.mediumImpact'), isTrue);
+      // Manual pull + content translate; no bouncing fight.
+      expect(threadPage.contains('ClampingScrollPhysics'), isTrue);
+      expect(threadPage.contains('Transform.translate'), isTrue);
+      expect(threadPage.contains('_animatePullExtentTo'), isTrue);
+      expect(threadPage.contains('_PreviousPullIndicator'), isTrue);
+      // Clamping: pull is driven by overscroll (RefreshIndicator model).
+      expect(threadPage.contains('OverscrollNotification'), isTrue);
+      expect(threadPage.contains('extentBefore'), isTrue);
+      // Commit only on ScrollEnd (not idle user-scroll).
+      expect(threadPage.contains('ScrollEndNotification'), isTrue);
+      expect(threadPage.contains('ScrollDirection.idle'), isFalse);
+      expect(threadPage.contains('NotificationListener<ScrollNotification>'),
+          isTrue);
+      // In-list previous skeleton removed — gap indicator only.
+      expect(previousSliver.contains('ThreadPageLoadingSkeletonCell'), isFalse);
+      final pullIndicator = File(
+              'lib/ui/thread/widgets/thread_page_previous_pull_indicator.dart')
+          .readAsStringSync();
+      expect(pullIndicator.contains('ThreadPageLoadingSkeletonCell'), isTrue);
+      expect(pullIndicator.contains('scaffoldBackgroundColor'), isTrue);
+    });
+
+    test('thread page pins center and does not restore scroll offset', () {
+      final threadPage =
+          File('lib/ui/thread/thread_page.dart').readAsStringSync();
+      expect(
+          threadPage.contains('ScrollController(keepScrollOffset: false)'),
+          isTrue);
+      expect(threadPage.contains('_didPinInitialCenter'), isTrue);
+      expect(threadPage.contains('jumpTo(0)'), isTrue);
+      final loadingSkeleton = File(
+              'lib/ui/thread/skeletons/thread_page_loading_skeleton.dart')
+          .readAsStringSync();
+      expect(loadingSkeleton.contains('primary: false'), isTrue);
+    });
   });
 }
+

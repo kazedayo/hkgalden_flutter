@@ -1,9 +1,23 @@
 part of '../thread_page.dart';
 
-/// Distance from either end of the list at which the next/previous page is
-/// requested. Using a threshold (instead of exact extent) starts the fetch
-/// slightly earlier so the response is less likely to land mid-fling.
+/// Prefetch distance for next page (bottom). Starts the fetch slightly early
+/// so the response is less likely to land mid-fling.
 const double _kThreadPageLoadMoreThreshold = 480;
+
+/// Max pull / skeleton reveal height — match [ThreadPageLoadingSkeletonCell.totalHeight].
+/// Also used as the loading hold height and post-load scroll handoff so the
+/// gap never shrinks mid-gesture.
+const double _kPreviousPullIndicatorMaxExtent =
+    ThreadPageLoadingSkeletonCell.totalHeight; // 200
+
+/// Pull distance required to arm previous-page load (≥ 80% of max extent).
+const double _kPreviousPullArmExtent = _kPreviousPullIndicatorMaxExtent * 0.80;
+
+/// Disarm hysteresis while the finger is still down (~70% of max).
+const double _kPreviousPullDisarmExtent = _kPreviousPullIndicatorMaxExtent * 0.70;
+
+/// Slight resistance so the pull feels weighted (1.0 = 1:1 with overscroll).
+const double _kPreviousPullDragFactor = 0.85;
 
 void _initListener(
   ThreadPageArguments arguments,
@@ -11,8 +25,9 @@ void _initListener(
   ScrollController scrollController,
   ThreadPageCubit cubit,
 ) {
-  // Track scroll direction so a short list (both ends inside the threshold)
-  // does not fire prev+next loads in a fighting order.
+  // Track scroll direction so a short list (both ends inside a threshold)
+  // does not fire next loads without intent. Previous page uses manual pull
+  // in [_ThreadPageState._onThreadScrollNotification].
   double? lastPixels;
 
   scrollController.addListener(() {
@@ -24,38 +39,25 @@ void _initListener(
     final pixels = position.pixels;
     final previousPixels = lastPixels;
     lastPixels = pixels;
-    final scrollingDown =
-        previousPixels == null || pixels > previousPixels + 0.5;
-    final scrollingUp =
-        previousPixels == null || pixels < previousPixels - 0.5;
+
+    final hasDelta = previousPixels != null;
+    final scrollingDown = hasDelta && pixels > previousPixels + 0.5;
 
     final state = threadBloc.state;
-    // ThreadAppending is a separate state (does not extend ThreadLoaded), so
-    // this also skips in-flight pagination and avoids casting crashes / spam.
     if (state is ThreadLoaded) {
       final nearBottom = pixels >=
           position.maxScrollExtent - _kThreadPageLoadMoreThreshold;
-      final nearTop =
-          pixels <= position.minScrollExtent + _kThreadPageLoadMoreThreshold;
 
-      // Next page = after endPage (bottom of main window).
-      // Previous page = before currentPage (top of main window).
-      // Do NOT use currentPage+1 for next — after a downward append,
-      // currentPage stays at the window start while endPage advances.
+      // Next page only — previous is pull-to-load.
       if (nearBottom && scrollingDown && !cubit.state.onLastPage) {
         threadBloc.add(RequestThreadEvent(
             threadId: state.thread.threadId,
             page: state.endPage + 1,
             isInitialLoad: false));
-      } else if (nearTop && scrollingUp && state.currentPage > 1) {
-        threadBloc.add(RequestThreadEvent(
-            threadId: state.thread.threadId,
-            page: state.currentPage - 1,
-            isInitialLoad: false));
       }
     }
-    final double newElevation =
-        pixels > position.minScrollExtent ? 4.0 : 0.0;
+    // Elevation relative to the main window start (center at 0).
+    final double newElevation = pixels > 0 ? 4.0 : 0.0;
     if (newElevation != cubit.state.elevation) {
       cubit.setElevation(newElevation);
     }

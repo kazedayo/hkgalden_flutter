@@ -6,45 +6,69 @@ import 'package:hkgalden_flutter/utils/device_properties.dart';
 class ThreadPageLoadingSkeletonCell extends StatelessWidget {
   const ThreadPageLoadingSkeletonCell({super.key});
 
+  /// Outer height including vertical margin — keep in sync with
+  /// `_kPreviousPullIndicatorMaxExtent` on the thread page.
+  static const double totalHeight = 200;
+
+  static const double _verticalMargin = 12;
+  static const double _contentHeight = totalHeight - _verticalMargin * 2; // 176
+
   @override
   Widget build(BuildContext context) => AppShimmer(
-          child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        height: 200,
-        child: Column(
-          children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                const SkeletonBlock(width: 45, height: 45, borderRadius: 100),
-                const SizedBox(width: 15),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        child: Container(
+          margin: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: _verticalMargin,
+          ),
+          height: _contentHeight,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth.isFinite
+                  ? constraints.maxWidth
+                  : displayWidth(context);
+              return SizedBox(
+                width: width,
+                height: _contentHeight,
+                child: Column(
                   children: <Widget>[
-                    const SkeletonBlock(width: 100, height: 20),
-                    const SizedBox(height: 5),
-                    const SkeletonBlock(width: 50, height: 20),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        const SkeletonBlock(
+                            width: 45, height: 45, borderRadius: 100),
+                        const SizedBox(width: 15),
+                        const Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            SkeletonBlock(width: 100, height: 20),
+                            SizedBox(height: 5),
+                            SkeletonBlock(width: 50, height: 20),
+                          ],
+                        ),
+                        const Spacer(),
+                        const SkeletonBlock(width: 100, height: 20),
+                      ],
+                    ),
+                    // Modest gap instead of large Spacer flex (which left a
+                    // tall empty band at the bottom of the pull indicator).
+                    const SizedBox(height: 20),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        SkeletonBlock(height: 25, width: width),
+                        const SizedBox(height: 10),
+                        SkeletonBlock(
+                          height: 25,
+                          width: width / 2,
+                          borderRadius: 100,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-                const Spacer(),
-                const SkeletonBlock(width: 100, height: 20),
-              ],
-            ),
-            const Spacer(),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                SkeletonBlock(height: 25, width: displayWidth(context)),
-                const SizedBox(height: 10),
-                SkeletonBlock(
-                  height: 25,
-                  width: displayWidth(context) / 2,
-                  borderRadius: 100,
-                ),
-              ],
-            ),
-            const Spacer(flex: 2)
-          ],
+              );
+            },
+          ),
         ),
-      ));
+      );
 }
