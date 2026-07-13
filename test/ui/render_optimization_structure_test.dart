@@ -142,13 +142,23 @@ void main() {
       expect(buildBody.contains('RequestThreadListEvent'), isFalse);
     });
 
-    test('H3/M4: StyledHtmlView uses local image state and fixed hero tag', () {
+    test('H3/M4: StyledHtmlView keeps Hero + short OctoImage fade', () {
       expect(styledHtml.contains('StyledHtmlViewCubit'), isFalse);
       expect(styledHtml.contains('_HtmlNetworkImage'), isTrue);
       expect(styledHtml.contains(r'${widget.floor}_${src}_$_randomHash'), isTrue);
       // Broken Dart interpolation must not remain.
       expect(styledHtml.contains(r'$state.randomHash'), isFalse);
       expect(styledHtml.contains('RepaintBoundary'), isTrue);
+      expect(styledHtml.contains('Hero('), isTrue);
+      expect(styledHtml.contains('placeholderBuilder: _heroPlaceholder'), isTrue);
+      expect(styledHtml.contains('OctoImage('), isTrue);
+      expect(styledHtml.contains('gaplessPlayback: true'), isTrue);
+      // Short fade (not OctoImage defaults of 500ms / 1000ms).
+      expect(styledHtml.contains('_kImageFadeIn'), isTrue);
+      expect(styledHtml.contains('_kImageFadeOut'), isTrue);
+      expect(styledHtml.contains('milliseconds: 150'), isTrue);
+      expect(styledHtml.contains('data-sx'), isTrue);
+      expect(styledHtml.contains('data-sy'), isTrue);
     });
 
     test('R1: StyledHtmlView memoizes Html across rebuilds', () {

@@ -186,6 +186,9 @@ void main() {
       );
       expect(output, isNot(contains('data-nodetype="img"')));
       expect(output, isNot(contains('data-src=')));
+      // Pixel size preserved for thread layout reservation.
+      expect(output, contains('data-sx="100"'));
+      expect(output, contains('data-sy="80"'));
     });
   });
 

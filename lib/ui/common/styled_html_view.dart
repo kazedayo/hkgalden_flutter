@@ -10,6 +10,11 @@ import 'package:hkgalden_flutter/utils/html_styles.dart';
 import 'package:octo_image/octo_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// Short OctoImage crossfade (defaults are 500 ms / 1000 ms and feel like a
+/// full reload when returning from the image viewer).
+const Duration _kImageFadeIn = Duration(milliseconds: 150);
+const Duration _kImageFadeOut = Duration(milliseconds: 100);
+
 class StyledHtmlView extends StatefulWidget {
   final String htmlString;
   final int floor;
@@ -59,11 +64,17 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
             tagsToExtend: {'img'},
             builder: (extensionContext) {
               final src = extensionContext.attributes['src'] ?? '';
+              final sx = int.tryParse(
+                  extensionContext.attributes['data-sx'] ?? '');
+              final sy = int.tryParse(
+                  extensionContext.attributes['data-sy'] ?? '');
               final heroTag = '${widget.floor}_${src}_$_randomHash';
               return _HtmlNetworkImage(
                 src: src,
                 cacheWidth: cacheWidth,
                 heroTag: heroTag,
+                intrinsicWidth: sx,
+                intrinsicHeight: sy,
                 onOpen: () => _showImageView(context, src, heroTag),
               );
             },
@@ -83,6 +94,8 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                     height: cachePx,
                   ),
                   gaplessPlayback: true,
+                  fadeInDuration: _kImageFadeIn,
+                  fadeOutDuration: _kImageFadeOut,
                   placeholderBuilder: (context) => const SizedBox(),
                 ),
               );
@@ -133,6 +146,8 @@ class _HtmlNetworkImage extends StatefulWidget {
   final String src;
   final int cacheWidth;
   final String heroTag;
+  final int? intrinsicWidth;
+  final int? intrinsicHeight;
   final VoidCallback onOpen;
 
   const _HtmlNetworkImage({
@@ -140,6 +155,8 @@ class _HtmlNetworkImage extends StatefulWidget {
     required this.cacheWidth,
     required this.heroTag,
     required this.onOpen,
+    this.intrinsicWidth,
+    this.intrinsicHeight,
   });
 
   @override
@@ -149,43 +166,147 @@ class _HtmlNetworkImage extends StatefulWidget {
 class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
   bool _hasError = false;
 
+  /// Stable provider so rebuilds hit the same [ImageCache] key.
+  late ImageProvider _imageProvider = _createProvider();
+
+  /// Last successfully laid-out size — used if a frame must re-decode so the
+  /// list does not collapse to the spinner height.
+  Size? _lastLayoutSize;
+
+  ImageProvider _createProvider() {
+    return ResizeImage(
+      NetworkImage(widget.src),
+      width: widget.cacheWidth,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _HtmlNetworkImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.src != widget.src ||
+        oldWidget.cacheWidth != widget.cacheWidth) {
+      _imageProvider = _createProvider();
+      _hasError = false;
+    }
+  }
+
+  double? _reservedHeight(double maxWidth) {
+    final sx = widget.intrinsicWidth;
+    final sy = widget.intrinsicHeight;
+    if (sx != null && sy != null && sx > 0 && sy > 0 && maxWidth.isFinite) {
+      return maxWidth * sy / sx;
+    }
+    if (_lastLayoutSize != null &&
+        _lastLayoutSize!.width > 0 &&
+        maxWidth.isFinite) {
+      return maxWidth *
+          _lastLayoutSize!.height /
+          _lastLayoutSize!.width;
+    }
+    return null;
+  }
+
+  void _rememberSize(Size size) {
+    if (size.width <= 0 || size.height <= 0) {
+      return;
+    }
+    if (_lastLayoutSize == size) {
+      return;
+    }
+    _lastLayoutSize = size;
+  }
+
+  /// Keep the image [Element] mounted (offstage) during Hero flight so size is
+  /// preserved. A short OctoImage fade still runs if the frame re-resolves.
+  static Widget _heroPlaceholder(
+    BuildContext context,
+    Size heroSize,
+    Widget child,
+  ) {
+    return SizedBox(
+      width: heroSize.width,
+      height: heroSize.height,
+      child: Offstage(child: child),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: widget.heroTag,
-      child: Stack(
-        children: [
-          OctoImage(
-            image: ResizeImage(
-              NetworkImage(widget.src),
-              width: widget.cacheWidth,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : MediaQuery.sizeOf(context).width;
+        final reservedHeight = _reservedHeight(maxWidth);
+
+        return Hero(
+          tag: widget.heroTag,
+          placeholderBuilder: _heroPlaceholder,
+          child: Material(
+            type: MaterialType.transparency,
+            child: Stack(
+              children: [
+                OctoImage(
+                  image: _imageProvider,
+                  gaplessPlayback: true,
+                  fadeInDuration: _kImageFadeIn,
+                  fadeOutDuration: _kImageFadeOut,
+                  fit: BoxFit.contain,
+                  width: maxWidth.isFinite ? maxWidth : null,
+                  height: reservedHeight,
+                  placeholderBuilder: (context) {
+                    if (reservedHeight != null) {
+                      return SizedBox(
+                        width: maxWidth,
+                        height: reservedHeight,
+                        child: const Center(child: ProgressSpinner()),
+                      );
+                    }
+                    return const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: ProgressSpinner(),
+                    );
+                  },
+                  imageBuilder: (context, child) {
+                    // Capture once (or when size was lost) for a stable reload
+                    // placeholder — avoid scheduling on every rebuild.
+                    if (_lastLayoutSize == null) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (!mounted) {
+                          return;
+                        }
+                        final box = context.findRenderObject() as RenderBox?;
+                        if (box != null && box.hasSize) {
+                          _rememberSize(box.size);
+                        }
+                      });
+                    }
+                    return child;
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    if (!_hasError) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          setState(() => _hasError = true);
+                        }
+                      });
+                    }
+                    return ImageLoadingError(error.toString());
+                  },
+                ),
+                Positioned.fill(
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _hasError ? null : widget.onOpen,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            gaplessPlayback: true,
-            placeholderBuilder: (context) => const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: ProgressSpinner(),
-            ),
-            errorBuilder: (context, error, stackTrace) {
-              if (!_hasError) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted) {
-                    setState(() => _hasError = true);
-                  }
-                });
-              }
-              return ImageLoadingError(error.toString());
-            },
           ),
-          Positioned.fill(
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: _hasError ? null : widget.onOpen,
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

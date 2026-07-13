@@ -118,11 +118,22 @@ class HKGaldenHtmlParser {
         if (src == null || src.isEmpty) {
           return element;
         }
-        return Element.img()
+        // Keep pixel size so the thread list can reserve layout space and avoid
+        // scroll jumps when a decoded frame is not yet (or no longer) in cache.
+        final sx = element.getAttribute(GaldenNodeTypes.dataSx);
+        final sy = element.getAttribute(GaldenNodeTypes.dataSy);
+        final img = Element.img()
           ..setAttribute(
             'src',
             src,
           );
+        if (sx != null && sx.isNotEmpty) {
+          img.setAttribute(GaldenNodeTypes.dataSx, sx);
+        }
+        if (sy != null && sy.isNotEmpty) {
+          img.setAttribute(GaldenNodeTypes.dataSy, sy);
+        }
+        return img;
       //parse link
       case GaldenNodeTypes.a:
         final href = element.getAttribute(GaldenNodeTypes.dataHref);

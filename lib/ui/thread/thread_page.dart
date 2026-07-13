@@ -62,7 +62,9 @@ class _ThreadPageState extends State<ThreadPage>
   int _pullSnapGeneration = 0;
 
   /// Cap decoded image memory while on the thread page (reduces GC pressure).
-  static const int _kThreadImageCacheMaxBytes = 48 << 20; // 48 MiB
+  /// 96 MiB keeps more in-view comment images resident so returning from the
+  /// full-screen viewer does not re-decode half the page.
+  static const int _kThreadImageCacheMaxBytes = 96 << 20; // 96 MiB
 
   @override
   void initState() {
