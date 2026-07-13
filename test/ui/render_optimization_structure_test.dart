@@ -322,8 +322,13 @@ void main() {
       final threadPage =
           File('lib/ui/thread/thread_page.dart').readAsStringSync();
       expect(
-          threadPage.contains('ScrollController(keepScrollOffset: false)'),
+          threadPage.contains('keepScrollOffset: false'),
           isTrue);
+      // Mid-page restore uses a center anchor; status-bar "top" must reach
+      // minScrollExtent, not offset 0 (restore floor).
+      expect(threadPage.contains('_ThreadScrollController'), isTrue);
+      expect(threadPage.contains('holdCenterAtZero'), isTrue);
+      expect(threadPage.contains('minScrollExtent'), isTrue);
       expect(threadPage.contains('_didPinInitialCenter'), isTrue);
       expect(threadPage.contains('jumpTo(0)'), isTrue);
       final loadingSkeleton = File(

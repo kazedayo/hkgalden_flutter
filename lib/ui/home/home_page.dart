@@ -22,6 +22,7 @@ import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
+import 'package:hkgalden_flutter/utils/thread_reading_position_store.dart';
 import 'package:hkgalden_flutter/utils/token_store.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:package_info_plus/package_info_plus.dart';

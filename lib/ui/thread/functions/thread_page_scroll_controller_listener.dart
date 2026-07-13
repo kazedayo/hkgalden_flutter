@@ -24,6 +24,7 @@ void _initListener(
   ThreadBloc threadBloc,
   ScrollController scrollController,
   ThreadPageCubit cubit,
+  void Function() onScrollTick,
 ) {
   // Track scroll direction so a short list (both ends inside a threshold)
   // does not fire next loads without intent. Previous page uses manual pull
@@ -42,6 +43,10 @@ void _initListener(
 
     final hasDelta = previousPixels != null;
     final scrollingDown = hasDelta && pixels > previousPixels + 0.5;
+
+    // Keep last-seen floor in sync on every scroll tick (not only via
+    // NotificationListener, which early-outs for previous-pull / page 1).
+    onScrollTick();
 
     final state = threadBloc.state;
     if (state is ThreadLoaded) {

@@ -18,8 +18,10 @@ import 'package:hkgalden_flutter/ui/thread/comment_cell/comment_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton_header.dart';
+import 'package:hkgalden_flutter/models/thread_reading_position.dart';
 import 'package:hkgalden_flutter/utils/parsed_comment_html_cache.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
+import 'package:hkgalden_flutter/utils/thread_reading_position_store.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 part 'functions/thread_page_on_reply_success.dart';
@@ -41,13 +43,34 @@ class ThreadPage extends StatefulWidget {
 }
 
 class _ThreadPageState extends State<ThreadPage>
-    with SingleTickerProviderStateMixin {
-  late ScrollController _scrollController;
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+  late _ThreadScrollController _scrollController;
   late ThreadPageCubit _threadPageCubit;
   int? _previousImageCacheMaxBytes;
 
   /// Ensures the centered main window lands at offset 0 once after first load.
   bool _didPinInitialCenter = false;
+
+  /// Floor from route args (last-seen restore request).
+  int? _pendingRestoreFloor;
+  bool _didCaptureArgs = false;
+
+  /// Once resolved from the first loaded page: the floor that anchors the
+  /// [CustomScrollView] center. Scroll offset 0 is the top of this reply —
+  /// independent of image-driven height changes below or above.
+  ///
+  /// Null means center at the first reply of the main window (no mid-page restore).
+  int? _centerAnchorFloor;
+  bool _didResolveCenterAnchor = false;
+
+  /// Built reply cells register here so we can resolve last-seen floor.
+  final _ReplyAnchorRegistry _anchorRegistry = _ReplyAnchorRegistry();
+
+  /// Last resolved reading floor (anchors unregister before parent dispose).
+  int? _cachedLastFloor;
+
+  /// Last known ThreadBloc for dispose-time persistence.
+  ThreadBloc? _threadBloc;
 
   /// RefreshIndicator-style previous pull (manual extent, not parkable cells).
   bool _previousPullArmed = false;
@@ -70,7 +93,9 @@ class _ThreadPageState extends State<ThreadPage>
   void initState() {
     // keepScrollOffset: false — avoid restoring a previous visit's offset
     // onto a new jump-in.
-    _scrollController = ScrollController(keepScrollOffset: false);
+    // Maps status-bar "scroll to top" (animateTo/jumpTo 0) to the true
+    // leading edge when content sits above the restore center anchor.
+    _scrollController = _ThreadScrollController(keepScrollOffset: false);
     _threadPageCubit = ThreadPageCubit();
     _previousPullSnapController = AnimationController(
       vsync: this,
@@ -81,11 +106,24 @@ class _ThreadPageState extends State<ThreadPage>
     if (imageCache.maximumSizeBytes > _kThreadImageCacheMaxBytes) {
       imageCache.maximumSizeBytes = _kThreadImageCacheMaxBytes;
     }
+    WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Persist before process death / background so a kill mid-read is recoverable.
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      _persistReadingPosition();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _persistReadingPosition();
     final previous = _previousImageCacheMaxBytes;
     if (previous != null) {
       PaintingBinding.instance.imageCache.maximumSizeBytes = previous;
@@ -96,6 +134,110 @@ class _ThreadPageState extends State<ThreadPage>
     _previousPullExtent.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  /// Viewport top in global coordinates (body of the scroll view).
+  double? _viewportTopY() {
+    if (!_scrollController.hasClients) {
+      return null;
+    }
+    final notificationContext =
+        _scrollController.position.context.notificationContext;
+    final box = notificationContext?.findRenderObject();
+    if (box is! RenderBox || !box.hasSize || !box.attached) {
+      return null;
+    }
+    return box.localToGlobal(Offset.zero).dy;
+  }
+
+  /// Updates the in-memory last-seen floor from currently built anchors.
+  ///
+  /// Safe during dispose only if anchors still exist; otherwise leaves the
+  /// last value written while the route was interactive.
+  void _updateCachedReadingFloor() {
+    final topY = _viewportTopY();
+    if (topY == null) {
+      return;
+    }
+    final floor = _anchorRegistry.readingFloor(viewportTopY: topY);
+    if (floor != null) {
+      _cachedLastFloor = floor;
+    }
+  }
+
+  void _persistReadingPosition() {
+    final bloc = _threadBloc;
+    if (bloc == null) {
+      return;
+    }
+    final state = bloc.state;
+    if (state is! ThreadLoaded) {
+      return;
+    }
+    // Prefer a live sample while the tree is still mounted with anchors.
+    // On dispose, children unmount first and the registry is empty — use cache.
+    if (_anchorRegistry.hasEntries) {
+      _updateCachedReadingFloor();
+    }
+    final resolvedFloor = _cachedLastFloor ??
+        (state.thread.replies.isNotEmpty
+            ? state.thread.replies.last.floor
+            : null);
+    if (resolvedFloor == null) {
+      return;
+    }
+    _cachedLastFloor = resolvedFloor;
+    final page = ThreadReadingPosition.pageForFloor(resolvedFloor);
+    // Hive updates the in-memory map immediately; no need to await on dispose.
+    ThreadReadingPositionStore.instance.save(
+      state.thread.threadId,
+      page: page,
+      floor: resolvedFloor,
+    );
+  }
+
+  /// Picks the center-sliver anchor floor from the first loaded page.
+  ///
+  /// Mid-page restore puts that floor at CustomScrollView center (offset 0)
+  /// so we never estimate pixel offsets or wait for images to finish loading.
+  void _resolveCenterAnchorIfNeeded(ThreadLoaded state) {
+    if (_didResolveCenterAnchor) {
+      return;
+    }
+    _didResolveCenterAnchor = true;
+    final requested = _pendingRestoreFloor;
+    final replies = state.thread.replies;
+    if (requested == null || requested < 1 || replies.isEmpty) {
+      return;
+    }
+    final idx = replies.indexWhere((r) => r.floor >= requested);
+    if (idx > 0) {
+      // Anchor at the first loaded floor at/after the saved position.
+      _centerAnchorFloor = replies[idx].floor;
+    } else if (idx < 0 && replies.length > 1) {
+      // Saved floor is past this page's last reply — land on the last one.
+      _centerAnchorFloor = replies.last.floor;
+    }
+    // idx == 0 → already at page start; leave _centerAnchorFloor null.
+
+    // Seed last-seen so an immediate pop records the restore target.
+    _cachedLastFloor ??= _centerAnchorFloor ?? replies.first.floor;
+  }
+
+  /// Index of the first main-window reply that belongs in the center sliver.
+  int _centerStartIndex(List<Reply> replies) {
+    final anchor = _centerAnchorFloor;
+    if (anchor == null || replies.isEmpty) {
+      return 0;
+    }
+    final idx = replies.indexWhere((r) => r.floor >= anchor);
+    if (idx > 0) {
+      return idx;
+    }
+    if (idx < 0 && replies.length > 1) {
+      return replies.length - 1;
+    }
+    return 0;
   }
 
   void _onPullSnapTick() {
@@ -188,6 +330,19 @@ class _ThreadPageState extends State<ThreadPage>
     }
 
     final state = threadBloc.state;
+
+    // Reading-position tracking is independent of previous-page pull rules
+    // (those early-out when currentPage <= 1 / ThreadAppending).
+    if (state is ThreadLoaded || state is ThreadAppending) {
+      if (notification is ScrollUpdateNotification ||
+          notification is ScrollEndNotification) {
+        _updateCachedReadingFloor();
+      }
+      if (notification is ScrollEndNotification && state is ThreadLoaded) {
+        _persistReadingPosition();
+      }
+    }
+
     if (state is ThreadAppending) {
       // Keep loading indicator; ignore further pull input.
       return false;
@@ -316,11 +471,20 @@ class _ThreadPageState extends State<ThreadPage>
         ModalRoute.of(context)!.settings.arguments! as ThreadPageArguments;
     final route = ModalRoute.of(context);
 
+    // Capture restore target once per route (floor within the requested page).
+    if (!_didCaptureArgs) {
+      _didCaptureArgs = true;
+      _pendingRestoreFloor = arguments.floor;
+      // Seed cache so an immediate pop still remembers the entry point.
+      _cachedLastFloor = arguments.floor;
+    }
+
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) {
           final ThreadBloc threadBloc = ThreadBloc(
               repository: RepositoryProvider.of<ThreadRepository>(context));
+          _threadBloc = threadBloc;
 
           if (route != null &&
               route.animation != null &&
@@ -344,7 +508,12 @@ class _ThreadPageState extends State<ThreadPage>
           }
 
           _initListener(
-              arguments, threadBloc, _scrollController, _threadPageCubit);
+            arguments,
+            threadBloc,
+            _scrollController,
+            _threadPageCubit,
+            _updateCachedReadingFloor,
+          );
           return threadBloc;
         }),
         BlocProvider(create: (context) {
@@ -419,7 +588,14 @@ class _ThreadPageState extends State<ThreadPage>
                   _previousPullExtent.value = 0;
                 }
               }
-              // Pin to the center sliver (requested page) on first content frame.
+              // Resolve mid-page center anchor before the first pin so the
+              // builder can place the restored floor at scroll offset 0.
+              _resolveCenterAnchorIfNeeded(state);
+
+              // Pin to the center sliver on first content frame. With a mid-page
+              // restore the center *is* the last-seen floor — no pixel jump.
+              // holdCenterAtZero: status-bar remaps jumpTo(0) → minScrollExtent
+              // once prefix/previous content exists; the pin must stay at center.
               if (!_didPinInitialCenter &&
                   state.previousPages.replies.isEmpty) {
                 _didPinInitialCenter = true;
@@ -429,7 +605,12 @@ class _ThreadPageState extends State<ThreadPage>
                   }
                   final position = _scrollController.position;
                   if (position.hasContentDimensions && position.pixels != 0) {
-                    _scrollController.jumpTo(0);
+                    _scrollController.holdCenterAtZero = true;
+                    try {
+                      _scrollController.jumpTo(0);
+                    } finally {
+                      _scrollController.holdCenterAtZero = false;
+                    }
                   }
                 });
               }
@@ -453,11 +634,32 @@ class _ThreadPageState extends State<ThreadPage>
                 if (state is ThreadLoading) {
                   return ThreadPageLoadingSkeleton();
                 } else if (state is ThreadLoaded) {
+                  // Ensure anchor is set even if the listener has not run yet.
+                  _resolveCenterAnchorIfNeeded(state);
+
+                  final allMain = state.thread.replies;
+                  final centerStart = _centerStartIndex(allMain);
+                  final prefixReplies = centerStart > 0
+                      ? allMain.sublist(0, centerStart)
+                      : const <Reply>[];
+                  final centerReplies = centerStart > 0
+                      ? allMain.sublist(centerStart)
+                      : allMain;
+
                   // O(1) key → index maps for findChildIndexCallback.
                   // Must match ValueKey(_replyListKey(reply)); never use null keys.
-                  final replyKeyToIndex = <Object, int>{
-                    for (var i = 0; i < state.thread.replies.length; i++)
-                      _replyListKey(state.thread.replies[i]): i,
+                  //
+                  // Slivers *above* the CustomScrollView center grow upward:
+                  // builder index 0 is adjacent to the center. Chronological
+                  // data must be reversed (same as previousPages).
+                  final prefixKeyToBuilderIndex = <Object, int>{
+                    for (var i = 0; i < prefixReplies.length; i++)
+                      _replyListKey(prefixReplies[i]):
+                          prefixReplies.length - i - 1,
+                  };
+                  final centerKeyToIndex = <Object, int>{
+                    for (var i = 0; i < centerReplies.length; i++)
+                      _replyListKey(centerReplies[i]): i,
                   };
                   // Previous sliver builder uses reversed indices:
                   // dataIndex → builderIndex = length - dataIndex - 1
@@ -467,6 +669,7 @@ class _ThreadPageState extends State<ThreadPage>
                           state.previousPages.replies.length - i - 1,
                   };
                   final previousCount = state.previousPages.replies.length;
+                  final prefixCount = prefixReplies.length;
                   return NotificationListener<OverscrollIndicatorNotification>(
                     onNotification: _onOverscrollIndicatorNotification,
                     child: NotificationListener<ScrollNotification>(
@@ -504,6 +707,8 @@ class _ThreadPageState extends State<ThreadPage>
                                   // ignore: deprecated_member_use — ScrollCacheExtent is not exported via material.dart
                                   cacheExtent: 2000,
                                   slivers: <Widget>[
+                                    // Above center: older pages, then same-page
+                                    // replies before the restore floor.
                                     SliverList(
                                       delegate: SliverChildBuilderDelegate(
                                         (context, index) {
@@ -512,7 +717,8 @@ class _ThreadPageState extends State<ThreadPage>
                                               _scrollController,
                                               state,
                                               index,
-                                              _onReplySuccess);
+                                              _onReplySuccess,
+                                              _anchorRegistry);
                                         },
                                         findChildIndexCallback:
                                             previousCount == 0
@@ -527,24 +733,59 @@ class _ThreadPageState extends State<ThreadPage>
                                         childCount: previousCount,
                                       ),
                                     ),
+                                    if (prefixCount > 0)
+                                      SliverList(
+                                        delegate: SliverChildBuilderDelegate(
+                                          (context, index) {
+                                            // Reverse like previousPages: index 0
+                                            // is the reply just above the center.
+                                            final dataIndex =
+                                                prefixCount - index - 1;
+                                            return _generatePageSliver(
+                                              context,
+                                              _scrollController,
+                                              state,
+                                              prefixReplies,
+                                              dataIndex,
+                                              _onReplySuccess,
+                                              _anchorRegistry,
+                                              isTrailingWindow: false,
+                                            );
+                                          },
+                                          findChildIndexCallback: (Key key) {
+                                            if (key is ValueKey) {
+                                              return prefixKeyToBuilderIndex[
+                                                  key.value];
+                                            }
+                                            return null;
+                                          },
+                                          childCount: prefixCount,
+                                        ),
+                                      ),
+                                    // Center: restored floor (or page start) at
+                                    // scroll offset 0 — stable under image loads.
                                     SliverList(
                                       key: centerKey,
                                       delegate: SliverChildBuilderDelegate(
                                         (context, index) {
                                           return _generatePageSliver(
-                                              context,
-                                              _scrollController,
-                                              state,
-                                              index,
-                                              _onReplySuccess);
+                                            context,
+                                            _scrollController,
+                                            state,
+                                            centerReplies,
+                                            index,
+                                            _onReplySuccess,
+                                            _anchorRegistry,
+                                            isTrailingWindow: true,
+                                          );
                                         },
                                         findChildIndexCallback: (Key key) {
                                           if (key is ValueKey) {
-                                            return replyKeyToIndex[key.value];
+                                            return centerKeyToIndex[key.value];
                                           }
                                           return null;
                                         },
-                                        childCount: state.thread.replies.length,
+                                        childCount: centerReplies.length,
                                       ),
                                     ),
                                   ],
@@ -586,4 +827,151 @@ class _ThreadPageState extends State<ThreadPage>
       ),
     );
   }
+}
+
+/// Scroll controller for the thread [CustomScrollView].
+///
+/// Mid-page restore places the last-seen floor at the scroll *center*
+/// (offset 0). Content above that (same-page prefix + previous pages) lives at
+/// negative offsets, so [minScrollExtent] is the true top.
+///
+/// Scaffold status-bar taps call [animateTo](0), which would land on the
+/// restore floor. When content exists above the center, rewrite 0 →
+/// [ScrollPosition.minScrollExtent] so "scroll to top" reaches the first
+/// loaded reply. Intentional center pins set [holdCenterAtZero].
+class _ThreadScrollController extends ScrollController {
+  _ThreadScrollController({super.keepScrollOffset});
+
+  /// When true, leave offset 0 alone (initial restore pin).
+  bool holdCenterAtZero = false;
+
+  double _resolveRequestedOffset(double offset) {
+    if (offset != 0.0 || holdCenterAtZero || !hasClients) {
+      return offset;
+    }
+    final position = this.position;
+    if (!position.hasContentDimensions) {
+      return offset;
+    }
+    final min = position.minScrollExtent;
+    if (min < -0.5) {
+      return min;
+    }
+    return offset;
+  }
+
+  @override
+  Future<void> animateTo(
+    double offset, {
+    required Duration duration,
+    required Curve curve,
+  }) {
+    return super.animateTo(
+      _resolveRequestedOffset(offset),
+      duration: duration,
+      curve: curve,
+    );
+  }
+
+  @override
+  void jumpTo(double value) {
+    super.jumpTo(_resolveRequestedOffset(value));
+  }
+}
+
+/// Maps currently-built reply floors to their [BuildContext] for last-seen
+/// position tracking while reading.
+class _ReplyAnchorRegistry {
+  final Map<int, BuildContext> _byFloor = {};
+
+  bool get hasEntries => _byFloor.isNotEmpty;
+
+  void register(int floor, BuildContext context) {
+    _byFloor[floor] = context;
+  }
+
+  void unregister(int floor, BuildContext context) {
+    if (identical(_byFloor[floor], context)) {
+      _byFloor.remove(floor);
+    }
+  }
+
+  /// Floor of the reply that best represents the reading position: the last
+  /// reply whose top edge has reached (or passed) the viewport top.
+  int? readingFloor({required double viewportTopY}) {
+    int? bestFloor;
+    var bestTop = double.negativeInfinity;
+    int? nearestBelowFloor;
+    var nearestBelowDist = double.infinity;
+
+    for (final entry in _byFloor.entries) {
+      final box = entry.value.findRenderObject();
+      if (box is! RenderBox || !box.attached || !box.hasSize) {
+        continue;
+      }
+      final top = box.localToGlobal(Offset.zero).dy;
+      final bottom = top + box.size.height;
+      // Skip fully above the viewport by a large margin only if we already
+      // have a better candidate — keep-alives far above still compete via
+      // "max top among tops past the edge", which is correct for reading pos.
+      if (top <= viewportTopY + 24) {
+        // Prefer the reply closest to the top edge from above (largest top).
+        if (top >= bestTop) {
+          bestTop = top;
+          bestFloor = entry.key;
+        }
+      } else if (bottom > viewportTopY) {
+        // Partially / fully below the top edge but still relevant.
+        final dist = top - viewportTopY;
+        if (dist < nearestBelowDist) {
+          nearestBelowDist = dist;
+          nearestBelowFloor = entry.key;
+        }
+      }
+    }
+    return bestFloor ?? nearestBelowFloor;
+  }
+}
+
+/// Registers [floor] with [registry] while this subtree is mounted.
+class _ReplyPositionAnchor extends StatefulWidget {
+  final int floor;
+  final _ReplyAnchorRegistry registry;
+  final Widget child;
+
+  const _ReplyPositionAnchor({
+    required this.floor,
+    required this.registry,
+    required this.child,
+  });
+
+  @override
+  State<_ReplyPositionAnchor> createState() => _ReplyPositionAnchorState();
+}
+
+class _ReplyPositionAnchorState extends State<_ReplyPositionAnchor> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.registry.register(widget.floor, context);
+  }
+
+  @override
+  void didUpdateWidget(covariant _ReplyPositionAnchor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.floor != widget.floor ||
+        oldWidget.registry != widget.registry) {
+      oldWidget.registry.unregister(oldWidget.floor, context);
+      widget.registry.register(widget.floor, context);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.registry.unregister(widget.floor, context);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

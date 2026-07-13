@@ -5,13 +5,14 @@ Widget _generatePreviousPageSliver(
     ScrollController scrollController,
     ThreadLoaded state,
     int index,
-    Function(BuildContext, ScrollController, Reply, bool) onReplySuccess) {
+    Function(BuildContext, ScrollController, Reply, bool) onReplySuccess,
+    _ReplyAnchorRegistry anchorRegistry) {
   // Empty previous history has no in-list skeleton — that affordance is the
   // overscroll pull indicator on ThreadPage (not parkable scroll content).
   final reply =
       state.previousPages.replies[state.previousPages.replies.length - index - 1];
-  final cell = _buildCommentCell(
-      context, scrollController, state, reply, onReplySuccess);
+  final cell = _buildCommentCell(context, scrollController, state, reply,
+      onReplySuccess, anchorRegistry);
 
   final key = ValueKey<Object>(_replyListKey(reply));
   if (reply.floor % 50 == 1) {

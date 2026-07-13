@@ -14,6 +14,7 @@ import 'package:hkgalden_flutter/repository/thread_list_repository.dart';
 import 'package:hkgalden_flutter/repository/thread_repository.dart';
 import 'package:hkgalden_flutter/ui/startup_screen.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
+import 'package:hkgalden_flutter/utils/thread_reading_position_store.dart';
 import 'dart:io';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 
@@ -30,6 +31,7 @@ Future main() async {
 
   await Hive.initFlutter();
   await Hive.openBox('token');
+  await Hive.openBox(ThreadReadingPositionStore.boxName);
   await dotenv.load();
   runApp(MyApp());
 }

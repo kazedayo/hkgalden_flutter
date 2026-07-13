@@ -7,11 +7,16 @@ class ThreadPageArguments {
   final int page;
   final bool locked;
 
+  /// When set, the thread page scrolls to this floor after the initial load.
+  /// Used to restore the last-seen reply within [page].
+  final int? floor;
+
   ThreadPageArguments(
       {required this.title,
       required this.threadId,
       required this.page,
-      required this.locked});
+      required this.locked,
+      this.floor});
 }
 
 class ComposePageArguments {
