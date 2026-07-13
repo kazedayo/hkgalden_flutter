@@ -1,13 +1,5 @@
 part of '../compose_page.dart';
 
-/// A self-contained WYSIWYG rich text editor that combines a [QuillEditor]
-/// with a custom [_RichTextToolbar].
-///
-/// Accepts a [QuillController] and [FocusNode] that are owned by the parent,
-/// so the parent can still read the document content on submit.
-///
-/// Supported formatting: Bold, Italic, Underline, Strikethrough,
-/// Center/Right alignment, H1/H2/H3, and hyperlinks.
 class _RichTextEditor extends StatefulWidget {
   final QuillController controller;
   final FocusNode focusNode;
@@ -63,7 +55,6 @@ class _RichTextEditorState extends State<_RichTextEditor> {
     );
   }
 
-  /// Builds [DefaultStyles] that match the app's current theme.
   DefaultStyles _buildEditorStyles(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     const noSpacing = VerticalSpacing(0.0, 0.0);

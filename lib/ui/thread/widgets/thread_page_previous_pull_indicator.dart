@@ -1,11 +1,6 @@
 part of '../thread_page.dart';
 
-/// Skeleton revealed in the gap above translated content during previous pull.
-///
-/// Uses an opaque scaffold fill so thread posts never show through the shimmer.
-/// The skeleton always lays out at full height inside an [OverflowBox]; only the
-/// outer [Positioned] height grows with the pull — avoids RenderFlex overflow
-/// when the gap is only a few pixels tall.
+/// Pull-gap skeleton; [OverflowBox] keeps full layout while outer height grows.
 class _PreviousPullIndicator extends StatelessWidget {
   const _PreviousPullIndicator({
     required this.extent,
@@ -34,13 +29,11 @@ class _PreviousPullIndicator extends StatelessWidget {
       child: IgnorePointer(
         child: ColoredBox(
           color: bg,
-          // LayoutBuilder gives a finite width from the Positioned constraints.
           child: LayoutBuilder(
             builder: (context, constraints) {
               final width = constraints.maxWidth;
               return ClipRect(
                 child: OverflowBox(
-                  // Reveal from the content edge (bottom of the gap) as pull grows.
                   alignment: Alignment.bottomCenter,
                   minWidth: width,
                   maxWidth: width,

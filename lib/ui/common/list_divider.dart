@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// A thin 1dp divider that uses the theme's [dividerColor] consistently
-/// across all list-item separators in the app.
 class ListDivider extends StatelessWidget {
   final double indent;
 

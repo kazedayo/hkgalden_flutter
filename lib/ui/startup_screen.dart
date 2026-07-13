@@ -32,12 +32,9 @@ class StartupScreenState extends State<StartupScreen>
     pb.build().layout(const ParagraphConstraints(width: 100));
     _controller = AnimationController(
         duration: const Duration(milliseconds: 2000), vsync: this);
-    // One-shot bootstrap after first frame so context has blocs available.
     WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrapOnce());
   }
 
-  /// Loads token, plays splash animation, then dispatches initial data loads
-  /// exactly once (never from [build]).
   Future<void> _bootstrapOnce() async {
     if (_kickoffStarted || !mounted) {
       return;

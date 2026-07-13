@@ -1,7 +1,5 @@
 part of '../compose_page.dart';
 
-/// A dialog that prompts the user to enter an image URL or upload from their device.
-/// Returns the image URL via [Navigator.pop], or `null` on cancel.
 class _ImageInsertDialog extends StatefulWidget {
   final Future<String> Function(File)? imagePickCallback;
 

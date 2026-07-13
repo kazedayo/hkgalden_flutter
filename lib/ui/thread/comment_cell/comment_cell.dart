@@ -40,8 +40,7 @@ class _CommentCellState extends State<CommentCell>
     with AutomaticKeepAliveClientMixin {
   late SessionUserBloc _sessionUserBloc;
 
-  /// Keep recently built cells alive for scroll smoothness. No LRU budget —
-  /// budgeting caused wrong element reuse / out-of-order replies.
+  // No LRU budget — budgeting caused wrong reuse / out-of-order replies.
   @override
   bool get wantKeepAlive => true;
 
@@ -69,7 +68,6 @@ class _CommentCellState extends State<CommentCell>
     return state.sessionUser.blockedUsers.contains(widget.reply.author.userId);
   }
 
-  /// Quote HTML depends on the full blocked set, not only this author.
   bool _sameBlockedSet(SessionUserState a, SessionUserState b) {
     if (a is SessionUserLoaded && b is SessionUserLoaded) {
       final aBlocked = a.sessionUser.blockedUsers;

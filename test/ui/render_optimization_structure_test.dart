@@ -5,9 +5,6 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hkgalden_flutter/utils/html_styles.dart';
 
-/// Structural + unit checks for render-optimization changes.
-/// Drives real shipped [HtmlStyles.generate] and asserts source patterns
-/// that implement rebuild-scope narrowing.
 void main() {
   group('HtmlStyles theme cache (shipped generate)', () {
     setUp(HtmlStyles.clearCache);
@@ -108,7 +105,6 @@ void main() {
     });
 
     test('H1: home Scaffold is outside ThreadListBloc builder', () {
-      // BlocBuilder should live in front layer, not wrap BackdropScaffold.
       expect(homePage.contains('BlocBuilder<ThreadListBloc'), isFalse);
       expect(frontLayer.contains('BlocBuilder<ThreadListBloc'), isTrue);
       expect(frontLayer.contains('ThreadListAppending'), isTrue);
@@ -117,8 +113,6 @@ void main() {
 
     test('H1/M5: front layer pre-filters blocked threads', () {
       expect(frontLayer.contains('visibleThreads'), isTrue);
-      // Cells for blocked authors are filtered out of the list, not hidden
-      // per-row with Visibility/SizedBox in the itemBuilder thread branch.
       expect(frontLayer.contains('blockedUserIds'), isTrue);
     });
 
@@ -134,7 +128,6 @@ void main() {
     test('H4: startup kickoff is not in build()', () {
       expect(startup.contains('_bootstrapOnce'), isTrue);
       expect(startup.contains('_kickoffStarted'), isTrue);
-      // build must not call forward().whenComplete for network kickoff
       final buildIdx = startup.indexOf('Widget build(BuildContext context)');
       expect(buildIdx, greaterThan(0));
       final buildBody = startup.substring(buildIdx);
@@ -146,14 +139,12 @@ void main() {
       expect(styledHtml.contains('StyledHtmlViewCubit'), isFalse);
       expect(styledHtml.contains('_HtmlNetworkImage'), isTrue);
       expect(styledHtml.contains(r'${widget.floor}_${src}_$_randomHash'), isTrue);
-      // Broken Dart interpolation must not remain.
       expect(styledHtml.contains(r'$state.randomHash'), isFalse);
       expect(styledHtml.contains('RepaintBoundary'), isTrue);
       expect(styledHtml.contains('Hero('), isTrue);
       expect(styledHtml.contains('placeholderBuilder: _heroPlaceholder'), isTrue);
       expect(styledHtml.contains('OctoImage('), isTrue);
       expect(styledHtml.contains('gaplessPlayback: true'), isTrue);
-      // Short fade (not OctoImage defaults of 500ms / 1000ms).
       expect(styledHtml.contains('_kImageFadeIn'), isTrue);
       expect(styledHtml.contains('_kImageFadeOut'), isTrue);
       expect(styledHtml.contains('milliseconds: 150'), isTrue);
@@ -179,7 +170,6 @@ void main() {
 
     test('R3: toolbar setState only when selection flags change', () {
       expect(richTextToolbar.contains('_onSelectionChanged'), isTrue);
-      // Guard: early return when flags unchanged.
       expect(richTextToolbar.contains('isBold == _isBold'), isTrue);
       expect(richTextToolbar.contains('parsedColor == _activeColor'), isTrue);
       expect(richTextToolbar.contains('return;'), isTrue);
@@ -205,7 +195,6 @@ void main() {
               .contains('prev.onLastPage != next.onLastPage'),
           isTrue);
       expect(threadPageFooter.contains('BlocBuilder<ThreadBloc'), isTrue);
-      // Call sites pass no onLastPage param.
       expect(threadPageSliver.contains('_PageFooter()'), isTrue);
       expect(threadPageSliver.contains('onLastPage:'), isFalse);
     });
@@ -220,7 +209,6 @@ void main() {
       expect(
           frontLayer.contains('ListLoadingSkeletonCell(enabled: true)'),
           isTrue);
-      // Parent still skips append for main list body.
       expect(frontLayer.contains('if (state is ThreadListAppending)'), isTrue);
       expect(frontLayer.contains('return false;'), isTrue);
     });
@@ -236,7 +224,6 @@ void main() {
       expect(composePage.contains('buildWhen'), isTrue);
       final threadPage =
           File('lib/ui/thread/thread_page.dart').readAsStringSync();
-      // Nested outer Scaffold removed.
       final scaffoldCount = 'Scaffold('.allMatches(threadPage).length;
       expect(scaffoldCount, 1);
     });
@@ -247,7 +234,6 @@ void main() {
           isTrue);
       expect(previousSliver.contains('KeyedSubtree'), isTrue);
       final threadPage = File('lib/ui/thread/thread_page.dart').readAsStringSync();
-      // O(1) map: data index → reversed builder index for previous sliver.
       expect(threadPage.contains('previousKeyToBuilderIndex'), isTrue);
       expect(
           threadPage.contains(
@@ -274,8 +260,6 @@ void main() {
       expect(richTextEditor.contains('class _RichTextEditor extends StatefulWidget'),
           isTrue);
       expect(richTextEditor.contains('ScrollController()'), isTrue);
-      // Not created inline in build as `ScrollController()` on QuillEditor line
-      // without a field — field assignment pattern:
       expect(richTextEditor.contains('_scrollController'), isTrue);
       expect(composePage.contains('_titleFieldController.text'), isTrue);
       expect(composePage.contains("setState(() {\n                              _title"),
@@ -288,7 +272,6 @@ void main() {
       expect(
           threadPageScrollListener.contains('_kPreviousPullArmExtent'),
           isTrue);
-      // Next page still uses the controller listener; previous does not.
       expect(threadPageScrollListener.contains('endPage + 1'), isTrue);
       expect(threadPageScrollListener.contains('currentPage - 1'), isFalse);
       final threadPage =
@@ -296,20 +279,16 @@ void main() {
       expect(threadPage.contains('_onThreadScrollNotification'), isTrue);
       expect(threadPage.contains('_previousPullArmed'), isTrue);
       expect(threadPage.contains('HapticFeedback.mediumImpact'), isTrue);
-      // Manual pull + content translate; no bouncing fight.
       expect(threadPage.contains('ClampingScrollPhysics'), isTrue);
       expect(threadPage.contains('Transform.translate'), isTrue);
       expect(threadPage.contains('_animatePullExtentTo'), isTrue);
       expect(threadPage.contains('_PreviousPullIndicator'), isTrue);
-      // Clamping: pull is driven by overscroll (RefreshIndicator model).
       expect(threadPage.contains('OverscrollNotification'), isTrue);
       expect(threadPage.contains('extentBefore'), isTrue);
-      // Commit only on ScrollEnd (not idle user-scroll).
       expect(threadPage.contains('ScrollEndNotification'), isTrue);
       expect(threadPage.contains('ScrollDirection.idle'), isFalse);
       expect(threadPage.contains('NotificationListener<ScrollNotification>'),
           isTrue);
-      // In-list previous skeleton removed — gap indicator only.
       expect(previousSliver.contains('ThreadPageLoadingSkeletonCell'), isFalse);
       final pullIndicator = File(
               'lib/ui/thread/widgets/thread_page_previous_pull_indicator.dart')
@@ -324,8 +303,6 @@ void main() {
       expect(
           threadPage.contains('keepScrollOffset: false'),
           isTrue);
-      // Mid-page restore uses a center anchor; status-bar "top" must reach
-      // minScrollExtent, not offset 0 (restore floor).
       expect(threadPage.contains('_ThreadScrollController'), isTrue);
       expect(threadPage.contains('holdCenterAtZero'), isTrue);
       expect(threadPage.contains('minScrollExtent'), isTrue);

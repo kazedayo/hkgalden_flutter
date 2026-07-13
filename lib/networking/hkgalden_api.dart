@@ -9,7 +9,6 @@ import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/utils/token_store.dart';
 
-/// GraphQL document fragments shared across thread/reply operations.
 class _GqlFragments {
   static const commentFields = r'''
     fragment CommentFields on Reply {
@@ -49,7 +48,6 @@ class _GqlFragments {
     }
   ''';
 
-  /// Selection set for list-style thread items (channel / user thread lists).
   static const threadListFields = '''
     id
     title
@@ -99,13 +97,9 @@ class HKGaldenApi {
 
   final GraphQLClient _client;
 
-  /// Runs a query and returns null on GraphQL/network failure.
-  ///
-  /// [fetchPolicy] defaults to the client default (`cacheAndNetwork`). Prefer
-  /// [FetchPolicy.networkOnly] for list and thread-content queries: with
-  /// `cacheAndNetwork`, a cache hit returns immediately and never waits for
-  /// the network. Thread is normalized by id, so page K replies overwrite page
-  /// N in the cache and a later open of page N can show K's floors.
+  /// Returns null on GraphQL/network failure.
+  /// Prefer [FetchPolicy.networkOnly] for thread content — cache is keyed by id
+  /// so page K replies overwrite page N.
   Future<T?> _query<T>(
     String document, {
     Map<String, dynamic>? variables,
@@ -123,7 +117,7 @@ class HKGaldenApi {
     return parse(result.data!);
   }
 
-  /// Runs a mutation and returns null on GraphQL/network failure.
+  /// Returns null on GraphQL/network failure.
   Future<T?> _mutate<T>(
     String document, {
     Map<String, dynamic>? variables,
@@ -216,9 +210,7 @@ class HKGaldenApi {
         'id': threadId,
         'page': page,
       },
-      // Thread is normalized by id in GraphQLCache; replies from page K overwrite
-      // page N. cacheAndNetwork then reopens page N with K's floors (often N-1
-      // after an upward paginate). Always hit the network for thread content.
+      // Thread cache is by id — always networkOnly so page K does not leak into N.
       fetchPolicy: FetchPolicy.networkOnly,
       parse: (data) async {
         final Map<String, dynamic> result =

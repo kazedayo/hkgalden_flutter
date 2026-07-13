@@ -24,7 +24,6 @@ Widget _buildAppBar(BuildContext context, ThreadPageArguments arguments) {
                 maxLines: 2,
                 minFontSize: 14,
                 maxFontSize: 19,
-                //overflow: TextOverflow.ellipsis
               ),
             )
           ],

@@ -11,16 +11,13 @@ class FullScreenPhotoView extends StatelessWidget {
 
   const FullScreenPhotoView({super.key, this.heroTag, this.url});
 
-  /// Same decode width as [StyledHtmlView] so the viewer reuses the thread
-  /// image cache entry instead of decoding a multi‑megapixel full-res bitmap
-  /// that thrashing the thread page's [ImageCache] cap.
+  /// Match [StyledHtmlView] decode width so the thread image cache is reused.
   static int _screenCacheWidth(BuildContext context) {
     return (MediaQuery.sizeOf(context).width *
             MediaQuery.devicePixelRatioOf(context))
         .toInt();
   }
 
-  /// Keep the image element mounted during flight (matches thread [Hero]s).
   static Widget _heroPlaceholder(
     BuildContext context,
     Size heroSize,

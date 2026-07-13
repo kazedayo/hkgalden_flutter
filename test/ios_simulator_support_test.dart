@@ -2,8 +2,6 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// Structural checks that the iOS project is configured for simulator builds.
-/// These assert on the shipped project files (real paths), not re-implemented logic.
 void main() {
   final root = Directory.current.path;
   final pbx = File('$root/ios/Runner.xcodeproj/project.pbxproj');
@@ -14,7 +12,6 @@ void main() {
   test('project.pbxproj exists and allows iphonesimulator', () {
     expect(pbx.existsSync(), isTrue, reason: 'ios project must exist');
     final content = pbx.readAsStringSync();
-    // Must not restrict platforms to device-only.
     expect(
       content.contains('SUPPORTED_PLATFORMS = iphoneos;'),
       isFalse,
@@ -22,7 +19,6 @@ void main() {
           'SUPPORTED_PLATFORMS = iphoneos excludes the simulator; use '
           '"iphoneos iphonesimulator" instead',
     );
-    // Profile/Release should explicitly list both platforms when set.
     final platformLines = content
         .split('\n')
         .where((l) => l.contains('SUPPORTED_PLATFORMS'))
@@ -79,7 +75,6 @@ void main() {
       isFalse,
       reason: 'CocoaPods Check Manifest phase must be removed after SPM migration',
     );
-    // Podfile removed when all plugins support SPM
     final podfile = File('$root/ios/Podfile');
     expect(podfile.existsSync(), isFalse, reason: 'pure SPM project has no Podfile');
   });

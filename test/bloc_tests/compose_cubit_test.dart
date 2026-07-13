@@ -7,7 +7,6 @@ import 'package:hkgalden_flutter/models/user_group.dart';
 import 'package:hkgalden_flutter/repository/thread_repository.dart';
 import 'package:test/test.dart';
 
-/// Fake repository that records calls on the real [ThreadRepository] API surface.
 class _FakeThreadRepository extends ThreadRepository {
   _FakeThreadRepository({
     this.createThreadResult,
@@ -38,7 +37,6 @@ class _FakeThreadRepository extends ThreadRepository {
 
 void main() {
   group('ComposeCubit', () {
-    // Real Galden-style delta JSON that the shipped DeltaJsonParser accepts.
     const galdenDeltaJson =
         '[{"insert":"hello","attributes":{"b":true}},{"insert":"\\n"}]';
 
@@ -67,7 +65,6 @@ void main() {
       expect(repo.createThreadCalls.single[0], '主題');
       expect(repo.createThreadCalls.single[1], ['tagId']);
       final html = repo.createThreadCalls.single[2] as String;
-      // Real parser wraps content and applies bold → nested structure.
       expect(html, contains('hello'));
       expect(html, contains('data-nodetype'));
       expect(cubit.state, isA<ComposeSuccess>());

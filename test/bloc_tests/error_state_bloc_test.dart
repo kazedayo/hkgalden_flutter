@@ -59,7 +59,6 @@ void main() {
             return [];
           }
           page2Calls++;
-          // Fail only first few times would loop forever before; null always.
           if (page2Calls > 3) {
             fail('append path re-dispatched more than once: $page2Calls');
           }
@@ -79,7 +78,6 @@ void main() {
         const ThreadListLoaded(
             threads: [], currentChannelId: 'bw', currentPage: 1),
         isA<ThreadListAppending>(),
-        // Restored previous loaded state (page 1), not infinite retries.
         const ThreadListLoaded(
             threads: [], currentChannelId: 'bw', currentPage: 1),
       ],

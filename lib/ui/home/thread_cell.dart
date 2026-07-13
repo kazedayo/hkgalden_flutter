@@ -28,15 +28,13 @@ class ThreadCell extends StatelessWidget {
       color: isLocked ? AppTheme.lockedColor : AppTheme.activeColor,
     );
 
-    // List API returns [OP, lastReply]; after viewing a thread the GraphQL
-    // cache can replace `replies` with a full page — always pick by floor.
+    // GraphQL cache may replace [OP, last] with a full page — pick by floor.
     final timeText = LastReplyTimer.formatRelativeTime(
       thread.latestReply.date.toLocal(),
     );
     final authorNickname = thread.originalPost.authorNickname;
     final replyCount = thread.totalReplies.toString();
 
-    // Single flattened metadata row (avoids 3 nested IconTextItem Rows).
     final metaRow = Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[

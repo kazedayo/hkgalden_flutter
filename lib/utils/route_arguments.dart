@@ -7,8 +7,7 @@ class ThreadPageArguments {
   final int page;
   final bool locked;
 
-  /// When set, the thread page scrolls to this floor after the initial load.
-  /// Used to restore the last-seen reply within [page].
+  /// Optional floor to restore after initial load.
   final int? floor;
 
   ThreadPageArguments(

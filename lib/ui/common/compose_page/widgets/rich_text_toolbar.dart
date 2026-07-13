@@ -1,6 +1,5 @@
 part of '../compose_page.dart';
 
-/// The 20-colour palette used on the hkGalden website (exact hex values).
 const List<Color> _kGaldenPalette = [
   Color(0xFFFFFFFF),
   Color(0xFFF44F44),
@@ -24,10 +23,7 @@ const List<Color> _kGaldenPalette = [
   Color(0xFF000000),
 ];
 
-// ── Colour picker popup ────────────────────────────────────────────────────────
 
-/// A 4×5 grid of colour swatches that fires [onColorSelected] when a colour is
-/// tapped, or [onClearColor] when the user wants to remove the current colour.
 class _ColorPickerPopup extends StatelessWidget {
   final Color? activeColor;
   final ValueChanged<Color> onColorSelected;
@@ -56,7 +52,6 @@ class _ColorPickerPopup extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Clear / default row ──────────────────────────────────────────
             GestureDetector(
               onTap: onClearColor,
               child: Container(
@@ -75,7 +70,6 @@ class _ColorPickerPopup extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            // ── 4 × 5 palette grid ───────────────────────────────────────────
             SizedBox(
               width: 5 * 28.0 + 4 * 4.0, // 5 columns × swatch + gaps
               child: Wrap(
@@ -83,7 +77,6 @@ class _ColorPickerPopup extends StatelessWidget {
                 runSpacing: 4,
                 children: _kGaldenPalette.map((color) {
                   final isActive = activeColor == color;
-                  // White swatch needs a visible border on all themes.
                   final isWhite = color == const Color(0xFFFFFFFF);
                   return GestureDetector(
                     onTap: () => onColorSelected(color),
@@ -123,13 +116,7 @@ class _ColorPickerPopup extends StatelessWidget {
   }
 }
 
-// ── Toolbar ────────────────────────────────────────────────────────────────────
 
-/// A scrollable formatting toolbar that keeps its buttons in sync with the
-/// current [QuillController] selection state.
-///
-/// Supported operations: Text colour, Bold, Italic, Underline, Strikethrough,
-/// Center/Right align, H1/H2/H3, and link insertion.
 class _RichTextToolbar extends StatefulWidget {
   final QuillController controller;
   final Future<String> Function(File)? imagePickCallback;
@@ -144,23 +131,19 @@ class _RichTextToolbar extends StatefulWidget {
 }
 
 class _RichTextToolbarState extends State<_RichTextToolbar> {
-  // ── Inline style toggles ────────────────────────────────────────────────
   bool _isBold = false;
   bool _isItalic = false;
   bool _isUnderline = false;
   bool _isStrikethrough = false;
 
-  // ── Block-level toggles ─────────────────────────────────────────────────
   bool _isCenterAlign = false;
   bool _isRightAlign = false;
   bool _isH1 = false;
   bool _isH2 = false;
   bool _isH3 = false;
 
-  // ── Color ────────────────────────────────────────────────────────────────
   Color? _activeColor;
 
-  // ── Color picker overlay ─────────────────────────────────────────────────
   OverlayEntry? _colorOverlay;
   final GlobalKey _colorBtnKey = GlobalKey();
 
@@ -230,7 +213,6 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
     });
   }
 
-  // ── Toggle helpers ────────────────────────────────────────────────────────
 
   void _toggle(Attribute attribute, bool isActive) {
     widget.controller.formatSelection(
@@ -287,7 +269,6 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
         TextSelection.collapsed(offset: index + 1), ChangeSource.local);
   }
 
-  // ── Color picker ──────────────────────────────────────────────────────────
 
   void _toggleColorPicker() {
     if (_colorOverlay != null) {
@@ -305,8 +286,7 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
     final overlay = Overlay.of(context);
     final btnPosition = renderBox.localToGlobal(Offset.zero);
 
-    // Calculate where the popup should appear (above the button if near bottom).
-    const popupWidth = 5 * 28.0 + 4 * 4.0 + 20; // swatches + gaps + padding
+    const popupWidth = 5 * 28.0 + 4 * 4.0 + 20;
 
     _colorOverlay = OverlayEntry(
       builder: (ctx) {
@@ -317,7 +297,6 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
             children: [
               Positioned(
                 left: btnPosition.dx,
-                // Place the popup above the toolbar button.
                 bottom: MediaQuery.sizeOf(context).height - btnPosition.dy + 4,
                 width: popupWidth,
                 child: GestureDetector(
@@ -361,7 +340,6 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
     widget.controller.formatSelection(const ColorAttribute(null));
   }
 
-  // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -380,7 +358,6 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
           child: Row(
             children: [
-              // ── Text colour ────────────────────────────────────────────────
               _ColorButton(
                 key: _colorBtnKey,
                 activeColor: _activeColor,
@@ -390,7 +367,6 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
 
               _buildDivider(dividerColor),
 
-              // ── Inline formatting ──────────────────────────────────────────
               _ToolbarButton(
                 icon: Icons.format_bold_rounded,
                 isActive: _isBold,
@@ -418,7 +394,6 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
 
               _buildDivider(dividerColor),
 
-              // ── Alignment ──────────────────────────────────────────────────
               _ToolbarButton(
                 icon: Icons.format_align_center_rounded,
                 isActive: _isCenterAlign,
@@ -435,7 +410,6 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
 
               _buildDivider(dividerColor),
 
-              // ── Headings ───────────────────────────────────────────────────
               _ToolbarButton(
                 label: 'H1',
                 isActive: _isH1,
@@ -456,7 +430,6 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
 
               _buildDivider(dividerColor),
 
-              // ── Link ───────────────────────────────────────────────────────
               _ToolbarButton(
                 icon: Icons.link_rounded,
                 isActive: false,
@@ -483,10 +456,7 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
       );
 }
 
-// ── Colour button widget ───────────────────────────────────────────────────────
 
-/// A toolbar button that shows the current text colour as a coloured stripe
-/// below the paint-bucket icon. Tapping it opens/closes the colour palette.
 class _ColorButton extends StatelessWidget {
   final Color? activeColor;
   final bool isPickerOpen;

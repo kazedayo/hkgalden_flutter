@@ -93,7 +93,6 @@ void main() {
     test(
       'invalid image URL still produces img with default sx/sy and does not hang',
       () async {
-        // Inject a failing resolver so CI never depends on NetworkImage timing.
         final failingParser = DeltaJsonParser(
           imageSizeResolver: (url) => Future<({int width, int height})>.error(
             StateError('failed to load $url'),
@@ -116,7 +115,6 @@ void main() {
           html,
           contains('data-sy="${DeltaJsonParser.defaultImageHeight}"'),
         );
-        // Numeric attributes (not empty / non-numeric).
         expect(html, matches(RegExp(r'data-sx="\d+"')));
         expect(html, matches(RegExp(r'data-sy="\d+"')));
       },
@@ -188,8 +186,6 @@ void main() {
     test(
       'bold+color attributes yield identical HTML regardless of map key order',
       () async {
-        // LinkedHashMap preserves insertion order; different construction
-        // order must not change wrap nesting.
         final attrsBoldFirst = <String, dynamic>{
           'b': true,
           'color': '#ff0000',
@@ -209,7 +205,6 @@ void main() {
         ]);
 
         expect(htmlBoldFirst, htmlColorFirst);
-        // Outer → inner: color then bold around text
         expect(
           htmlBoldFirst,
           '<div id="pmc"><p>'
@@ -225,7 +220,6 @@ void main() {
       final html = await parser.toGaldenHtml([
         {
           'insert': 'x',
-          // Deliberate non-priority insertion order
           'attributes': <String, dynamic>{
             'b': true,
             'a': 'https://example.com',
@@ -235,7 +229,6 @@ void main() {
         {'insert': '\n'},
       ]);
 
-      // Outer → inner: a → color → b → text
       expect(
         html,
         '<div id="pmc"><p>'
@@ -318,7 +311,6 @@ void main() {
               'embed': {
                 'type': 'smiley',
                 'id': 'A7WUrp9FZ62',
-                // packId intentionally omitted
                 'sx': 21,
                 'sy': 17,
               },
@@ -329,9 +321,7 @@ void main() {
 
         expect(html, isNot(contains('data-nodetype="smiley"')));
         expect(html, isNot(contains('data-pack-id=')));
-        // Incomplete smiley must not emit a partial span with only data-id.
         expect(html, isNot(contains('data-id="A7WUrp9FZ62"')));
-        // Escaped insert text remains (space placeholder).
         expect(html, '<div id="pmc"><p> </p></div>');
       },
     );
@@ -363,10 +353,6 @@ void main() {
   });
 }
 
-/// Builds a delta op that exercises the parser's image embed attribute path.
-///
-/// Non-empty insert text is required so `_applyAttributes` runs; the embed
-/// branch replaces that text with the img span.
 Map<String, dynamic> _imageEmbedOp(String source) {
   return {
     'insert': ' ',

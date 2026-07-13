@@ -1,14 +1,9 @@
 part of '../compose_page.dart';
 
-/// A reusable toolbar button that shows an active state when toggled on.
-/// Active: filled accent-coloured rounded rect with
-/// white icon/label on top — clear and unambiguous on any background.
-/// Inactive: dim grey icon/label, transparent background.
 class _ToolbarButton extends StatelessWidget {
   final bool isActive;
   final VoidCallback onPressed;
 
-  /// Mutually-exclusive: supply [icon] OR [label].
   final IconData? icon;
   final String? label;
 
@@ -37,7 +32,6 @@ class _ToolbarButton extends StatelessWidget {
         onTap: onPressed,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          // Generous padding for a ≥ 44 pt touch target.
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: isActive ? _activeBackground : Colors.transparent,

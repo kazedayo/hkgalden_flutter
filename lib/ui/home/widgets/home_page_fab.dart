@@ -1,6 +1,5 @@
 part of '../home_page.dart';
 
-/// Must match thread page FAB so push/pop share one hero flight.
 const Object _kFabHeroTag = 'hkgalden_fab';
 
 FloatingActionButton _buildFab(

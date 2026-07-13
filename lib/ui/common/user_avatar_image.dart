@@ -4,10 +4,6 @@ import 'package:hkgalden_flutter/models/user_group.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
 import 'package:octo_image/octo_image.dart';
 
-/// Combines [AvatarWidget] with the SVG-fallback / [OctoImage] network-load
-/// logic so callers only need to pass an [avatarUrl] string.
-///
-/// When [avatarUrl] is empty the default HKGalden SVG icon is shown instead.
 class UserAvatarImage extends StatelessWidget {
   final String avatarUrl;
   final List<UserGroup> userGroup;

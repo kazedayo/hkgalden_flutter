@@ -10,8 +10,7 @@ import 'package:hkgalden_flutter/utils/html_styles.dart';
 import 'package:octo_image/octo_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Short OctoImage crossfade (defaults are 500 ms / 1000 ms and feel like a
-/// full reload when returning from the image viewer).
+// Short fade — OctoImage defaults feel like a full reload after the image viewer.
 const Duration _kImageFadeIn = Duration(milliseconds: 150);
 const Duration _kImageFadeOut = Duration(milliseconds: 100);
 
@@ -27,10 +26,7 @@ class StyledHtmlView extends StatefulWidget {
 }
 
 class _StyledHtmlViewState extends State<StyledHtmlView> {
-  /// Stable per-view identity for Hero tags (not re-rolled on parent rebuild).
   late final int _randomHash = Random().nextInt(1000);
-
-  /// Memoized [Html] subtree — reused when content/layout/theme inputs match.
   Widget? _cachedHtml;
   int? _cachedCacheWidth;
   int? _cachedThemeKey;
@@ -53,7 +49,6 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
     final int themeKey =
         Object.hash(theme.brightness, theme.colorScheme.onSurface);
 
-    // Do not reuse across rotation (cacheWidth) or theme flips.
     if (_cachedHtml == null ||
         _cachedCacheWidth != cacheWidth ||
         _cachedThemeKey != themeKey) {
@@ -140,8 +135,6 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
   }
 }
 
-/// Image leaf with local error state so a failed load does not rebuild the
-/// entire [Html] tree for the comment.
 class _HtmlNetworkImage extends StatefulWidget {
   final String src;
   final int cacheWidth;
@@ -166,11 +159,8 @@ class _HtmlNetworkImage extends StatefulWidget {
 class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
   bool _hasError = false;
 
-  /// Stable provider so rebuilds hit the same [ImageCache] key.
   late ImageProvider _imageProvider = _createProvider();
-
-  /// Last successfully laid-out size — used if a frame must re-decode so the
-  /// list does not collapse to the spinner height.
+  // Last laid-out size — avoids collapsing to spinner height on re-decode.
   Size? _lastLayoutSize;
 
   ImageProvider _createProvider() {
@@ -216,8 +206,6 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
     _lastLayoutSize = size;
   }
 
-  /// Keep the image [Element] mounted (offstage) during Hero flight so size is
-  /// preserved. A short OctoImage fade still runs if the frame re-resolves.
   static Widget _heroPlaceholder(
     BuildContext context,
     Size heroSize,
@@ -268,8 +256,6 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
                     );
                   },
                   imageBuilder: (context, child) {
-                    // Capture once (or when size was lost) for a stable reload
-                    // placeholder — avoid scheduling on every rebuild.
                     if (_lastLayoutSize == null) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (!mounted) {

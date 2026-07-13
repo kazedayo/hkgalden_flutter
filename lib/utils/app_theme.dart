@@ -2,21 +2,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Color Constants
   static const Color primaryColor = Color(0xff2e3533);
   static const Color backgroundColor = Color(0xff1b1f1e);
   static const Color accentColor = Color(0xff45c17c);
   static const Color selectionColor = Color(0x6645c17c);
   static const Color dividerColor = Colors.white10;
 
-  // Semantic mappings for hardcoded colors found in analysis
   static const Color textSecondary = Colors.grey;
   static const Color linkColor = Colors.blueAccent;
   static const Color lockedColor = Colors.grey;
   static const Color activeColor = Colors.white;
   static const Color barrierColor = Colors.black87;
 
-  /// Left border color for nested quote blocks in thread HTML.
   static const Color quoteLineColor = Color(0xFF4B5B53);
   static final Color skeletonColor = Colors.grey.withValues(alpha: 0.3);
 
@@ -24,13 +21,11 @@ class AppTheme {
     return ThemeData(
       visualDensity: VisualDensity.compact,
 
-      // Colors
       primaryColor: primaryColor,
       canvasColor: backgroundColor,
       scaffoldBackgroundColor: backgroundColor,
       dividerColor: dividerColor,
 
-      // Color Scheme
       colorScheme: ColorScheme.fromSwatch(
         brightness: Brightness.dark,
         primarySwatch: Colors
@@ -49,7 +44,6 @@ class AppTheme {
         error: Colors.redAccent,
       ),
 
-      // Component Themes
       appBarTheme: const AppBarTheme(
         backgroundColor: backgroundColor,
         surfaceTintColor: Colors.transparent,
@@ -102,7 +96,6 @@ class AppTheme {
         highlightElevation: 1,
         foregroundColor: Colors.white,
         backgroundColor: accentColor,
-        // M3 default is a rounded square; CircleBorder gives a smooth round FAB.
         shape: CircleBorder(),
       ),
 

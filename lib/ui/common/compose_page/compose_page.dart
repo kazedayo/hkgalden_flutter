@@ -60,13 +60,10 @@ class ComposePageState extends State<ComposePage> {
   late FocusNode _focusNode;
   late FocusNode _titleFocusNode;
 
-  /// Cached quote preview so parent rebuilds (e.g. sending spinner) do not
-  /// re-run [HKGaldenHtmlParser.replyWithQuotes].
   String? _cachedQuoteHtml;
 
   @override
   void initState() {
-    //default to tag '吹水'
     _tag = const Tag(id: '02NP3MVYm', name: '吹水', color: Color(0xff457cb0));
     _channelId = '';
     _controller = QuillController.basic();
@@ -108,8 +105,6 @@ class ComposePageState extends State<ComposePage> {
                 .showSnackBar(SnackBar(content: Text(state.message)));
           }
         },
-        // Rebuild only when the sending flag flips so Quill/title do not
-        // rebuild on unrelated compose states.
         buildWhen: (prev, next) {
           final wasSending = prev is ComposeSending;
           final isSending = next is ComposeSending;
@@ -226,8 +221,7 @@ class ComposePageState extends State<ComposePage> {
                                 hintText: '標題',
                                 contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 4, vertical: 10)),
-                            // Title is read from the controller on submit —
-                            // avoid setState on every keystroke (rebuilds Quill).
+                            // Avoid setState per keystroke (rebuilds Quill).
                           ),
                         )
                       ],
@@ -293,7 +287,6 @@ class ComposePageState extends State<ComposePage> {
         ),
       ),
     );
-    // Use the cubit to trigger upload
     return context.read<ComposeCubit>().uploadImage(file.path).then((value) {
       if (mounted) {
         scaffoldMessenger.hideCurrentSnackBar();

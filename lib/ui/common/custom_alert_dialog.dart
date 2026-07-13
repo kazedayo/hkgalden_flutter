@@ -3,12 +3,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-/// Shows a simple adaptive OK alert.
-///
-/// - **iOS 26+:** native Liquid Glass `UIAlertController` via
-///   [AdaptiveAlertDialog]
-/// - **iOS &lt; 26:** classic [CupertinoAlertDialog]
-/// - **Android:** Material [AlertDialog]
+/// Adaptive OK alert (Liquid Glass on iOS 26+, Cupertino/Material otherwise).
 Future<void> showCustomAlert({
   required BuildContext context,
   required String title,
@@ -29,10 +24,7 @@ Future<void> showCustomAlert({
   );
 }
 
-/// Legacy widget form kept for call sites that still build a dialog tree.
-///
-/// Prefer [showCustomAlert] so iOS 26+ gets Liquid Glass. This widget remains
-/// Cupertino/Material painted chrome (no native glass).
+/// Prefer [showCustomAlert] for iOS 26+ Liquid Glass.
 class CustomAlertDialog extends StatelessWidget {
   final String title;
   final String content;
@@ -73,9 +65,6 @@ class CustomAlertDialog extends StatelessWidget {
             );
 }
 
-/// Generic dialog host for fully custom [builder] content.
-///
-/// For simple title/content OK alerts use [showCustomAlert] instead.
 void showCustomDialog({
   required BuildContext context,
   required Widget Function(BuildContext) builder,

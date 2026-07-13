@@ -6,8 +6,6 @@ class HtmlStyles {
   static int? _cacheKey;
   static Map<String, Style>? _cached;
 
-  /// Theme-keyed cache so repeated [StyledHtmlView] builds do not reallocate
-  /// the full style map when colors/fonts are unchanged.
   static Map<String, Style> generate(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -83,7 +81,6 @@ class HtmlStyles {
     return styles;
   }
 
-  /// Test hook: clear theme style cache.
   @visibleForTesting
   static void clearCache() {
     _cacheKey = null;

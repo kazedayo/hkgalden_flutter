@@ -45,7 +45,6 @@ class ThreadListBloc extends Bloc<ThreadListEvent, ThreadListState> {
             currentChannelId: event.channelId,
             currentPage: event.page));
       } else {
-        // Restore previous page data; avoid infinite re-dispatch on failure.
         emit(previousState);
       }
     }

@@ -1,9 +1,7 @@
 import 'package:hive/hive.dart';
 import 'package:hkgalden_flutter/models/thread_reading_position.dart';
 
-/// Persists per-thread last-seen page + floor across app launches.
-///
-/// Uses a Hive box of plain maps (no type adapter) keyed by thread id string.
+/// Persists last-seen page + floor per thread (Hive box of plain maps).
 class ThreadReadingPositionStore {
   ThreadReadingPositionStore._();
 
@@ -12,7 +10,6 @@ class ThreadReadingPositionStore {
 
   static const String boxName = 'thread_reading_positions';
 
-  /// Soft cap so the box does not grow without bound.
   static const int maxEntries = 200;
 
   Box get _box => Hive.box(boxName);

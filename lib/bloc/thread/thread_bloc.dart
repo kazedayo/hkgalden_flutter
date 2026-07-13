@@ -36,9 +36,7 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
         emit(ThreadError());
       }
     } else {
-      // Ignore pagination while loading/appending/error — avoids cast crashes
-      // when the scroll listener queues multiple RequestThreadEvent before the
-      // first emit(ThreadAppending) runs.
+      // Ignore non-loaded states: scroll can queue events before ThreadAppending emits.
       final current = state;
       if (current is! ThreadLoaded) {
         return;
@@ -48,17 +46,8 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
       final Thread? thread =
           await _repository.getThread(event.threadId, event.page);
       if (thread != null) {
-        // currentPage = earliest page in the main sliver window
-        // endPage     = latest page in the main sliver window
-        // previousPages = pages loaded upward (above the main window)
-        //
-        // When scrolling down, only endPage advances — currentPage must stay
-        // put. Otherwise currentPage becomes the bottom page while main
-        // replies still contain earlier pages, and a subsequent "load previous"
-        // re-fetches those floors into previousPages → duplicate ordering
-        // (e.g. p2 … p1 … p2).
+        // currentPage/endPage bound the main window; only endPage advances on scroll-down.
         if (event.page < previousState.currentPage) {
-          // Scrolling up: prepend older page above the main window.
           emit(ThreadLoaded(
               thread: previousState.thread,
               previousPages: thread.copyWith(
@@ -68,7 +57,6 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
               currentPage: event.page,
               endPage: previousState.endPage));
         } else if (event.page > previousState.endPage) {
-          // Scrolling down: append newer page; keep the main window start.
           emit(ThreadLoaded(
               thread: previousState.thread.copyWith(
                   replies: previousState.thread.replies.toList()
@@ -78,19 +66,15 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
               endPage: event.page));
         } else if (event.page == previousState.endPage &&
             previousState.currentPage == previousState.endPage) {
-          // Single-page window: full replace (refresh of the only loaded page).
           emit(ThreadLoaded(
               thread: previousState.thread.copyWith(replies: thread.replies),
               previousPages: previousState.previousPages,
               currentPage: previousState.currentPage,
               endPage: previousState.endPage));
         } else {
-          // Page already covered by the main window [currentPage, endPage] —
-          // ignore to avoid duplicate inserts / scrambled order.
           emit(previousState);
         }
       } else {
-        // Keep the already-loaded thread visible on pagination failure.
         emit(previousState);
       }
     }

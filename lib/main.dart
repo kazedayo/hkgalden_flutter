@@ -25,7 +25,6 @@ Future main() async {
     try {
       await FlutterDisplayMode.setHighRefreshRate();
     } catch (_) {
-      // Ignore if setting high refresh rate fails.
     }
   }
 

@@ -6,8 +6,7 @@ import 'package:hkgalden_flutter/utils/device_properties.dart';
 class ThreadPageLoadingSkeletonCell extends StatelessWidget {
   const ThreadPageLoadingSkeletonCell({super.key});
 
-  /// Outer height including vertical margin — keep in sync with
-  /// `_kPreviousPullIndicatorMaxExtent` on the thread page.
+  /// Keep in sync with `_kPreviousPullIndicatorMaxExtent`.
   static const double totalHeight = 200;
 
   static const double _verticalMargin = 12;
@@ -49,8 +48,6 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
                         const SkeletonBlock(width: 100, height: 20),
                       ],
                     ),
-                    // Modest gap instead of large Spacer flex (which left a
-                    // tall empty band at the bottom of the pull indicator).
                     const SizedBox(height: 20),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

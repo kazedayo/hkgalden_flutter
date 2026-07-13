@@ -50,7 +50,6 @@ void main() {
       const String html = '<div><span data-nodetype="img"></span></div>';
       final String? output = parser.parse(html);
       expect(output, isNotNull);
-      // Original span kept when data-src is missing
       expect(output, contains('data-nodetype="img"'));
     });
 
@@ -104,7 +103,6 @@ void main() {
       expect(() => output = parser.parse(html), returnsNormally);
       expect(output, isNotNull);
       expect(output, contains('click me'));
-      // Original span kept when data-href is missing
       expect(output, contains('data-nodetype="a"'));
       expect(output, isNot(contains('<a ')));
       expect(output, isNot(contains('<a>')));
@@ -117,7 +115,6 @@ void main() {
       expect(() => output = parser.parse(html), returnsNormally);
       expect(output, isNotNull);
       expect(output, contains('colored?'));
-      // Original span kept when data-value is missing
       expect(output, contains('data-nodetype="color"'));
       expect(output, isNot(contains('class="color"')));
       expect(output, isNot(contains('hex=')));
@@ -129,7 +126,6 @@ void main() {
       String? output;
       expect(() => output = parser.parse(html), returnsNormally);
       expect(output, isNotNull);
-      // Incomplete smiley must not become an icon tag
       expect(output, isNot(contains('<icon')));
       expect(output, contains('data-nodetype="smiley"'));
       expect(output, contains('data-id="A7WUrp9FZ62"'));
@@ -138,13 +134,11 @@ void main() {
     test('empty string parse does not throw', () {
       String? output;
       expect(() => output = parser.parse(''), returnsNormally);
-      // Non-crashing result: null is fine only if not thrown; prefer empty-ish
       expect(output, isNotNull);
       expect(output, isA<String>());
     });
 
     test('malformed HTML still returns a string', () {
-      // Broken nesting / unclosed tags should not crash the parser.
       const String html =
           '<div><span data-nodetype="b"><i>unclosed and <<<<weird';
       String? output;
@@ -166,7 +160,6 @@ void main() {
       expect(output, contains('<u>'));
       expect(output, contains('</u>'));
       expect(output, isNot(contains('data-nodetype')));
-      // Nested order preserved: b wraps i wraps u
       expect(
         output,
         contains('<b><i><u>styled</u></i></b>'),
@@ -186,7 +179,6 @@ void main() {
       );
       expect(output, isNot(contains('data-nodetype="img"')));
       expect(output, isNot(contains('data-src=')));
-      // Pixel size preserved for thread layout reservation.
       expect(output, contains('data-sx="100"'));
       expect(output, contains('data-sy="80"'));
     });
@@ -294,11 +286,9 @@ void main() {
       expect(result, isNotNull);
       final blockquoteCount = '<blockquote>'.allMatches(result!).length;
       expect(blockquoteCount, 3);
-      // Closest three parents included
       expect(result, contains('Nick1 說:'));
       expect(result, contains('Nick2 說:'));
       expect(result, contains('Nick3 說:'));
-      // Fourth parent beyond maxDepth excluded
       expect(result, isNot(contains('Nick4 說:')));
       expect(result, isNot(contains('content4')));
       expect(result, contains('reply body'));

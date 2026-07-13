@@ -1,7 +1,5 @@
 part of '../compose_page.dart';
 
-/// A simple dialog that prompts the user to enter a URL for a hyperlink.
-/// Returns the trimmed URL string via [Navigator.pop], or `null` on cancel.
 class _LinkDialog extends StatefulWidget {
   const _LinkDialog();
 

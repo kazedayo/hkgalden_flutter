@@ -1,10 +1,9 @@
 part of '../thread_page.dart';
 
-/// Stable list key — never use a null [ValueKey] (collides across replies).
+/// Never use a null [ValueKey] (collides across replies).
 Object _replyListKey(Reply reply) =>
     reply.replyId ?? 'floor_${reply.floor}';
 
-/// Shared [CommentCell] wiring for thread page slivers.
 Widget _buildCommentCell(
   BuildContext context,
   ScrollController scrollController,
@@ -18,8 +17,6 @@ Widget _buildCommentCell(
     floor: reply.floor,
     registry: anchorRegistry,
     child: CommentCell(
-      // Key only on the outer sliver child (Column/KeyedSubtree). Nested
-      // PageStorageKey(null) previously collided when replyId was null.
       threadId: state.thread.threadId,
       reply: reply,
       onSent: (sent) {
@@ -30,11 +27,6 @@ Widget _buildCommentCell(
   );
 }
 
-/// Builds one item for a main-window reply list slice.
-///
-/// [replies] is either the center slice (from restore floor → end) or the
-/// prefix slice (before the center anchor). [isTrailingWindow] is true only
-/// for the center slice so the load-more footer appears once at the real end.
 Widget _generatePageSliver(
   BuildContext context,
   ScrollController scrollController,

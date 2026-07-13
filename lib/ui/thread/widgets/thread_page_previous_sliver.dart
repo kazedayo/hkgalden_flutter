@@ -7,8 +7,6 @@ Widget _generatePreviousPageSliver(
     int index,
     Function(BuildContext, ScrollController, Reply, bool) onReplySuccess,
     _ReplyAnchorRegistry anchorRegistry) {
-  // Empty previous history has no in-list skeleton — that affordance is the
-  // overscroll pull indicator on ThreadPage (not parkable scroll content).
   final reply =
       state.previousPages.replies[state.previousPages.replies.length - index - 1];
   final cell = _buildCommentCell(context, scrollController, state, reply,
@@ -25,7 +23,6 @@ Widget _generatePreviousPageSliver(
     );
   }
 
-  // Match findChildIndexCallback (ValueKey) for stable element reuse on prepend.
   return KeyedSubtree(
     key: key,
     child: cell,

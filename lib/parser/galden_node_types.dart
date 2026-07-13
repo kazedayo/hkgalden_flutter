@@ -1,7 +1,4 @@
-/// Shared Galden HTML `data-nodetype` values and attribute names
-/// used by the Galden HTML and Delta JSON parsers.
 abstract final class GaldenNodeTypes {
-  // Attribute names
   static const String dataNodetype = 'data-nodetype';
   static const String dataId = 'data-id';
   static const String dataPackId = 'data-pack-id';
@@ -12,7 +9,6 @@ abstract final class GaldenNodeTypes {
   static const String dataSy = 'data-sy';
   static const String dataAlt = 'data-alt';
 
-  // Node type values
   static const String smiley = 'smiley';
   static const String img = 'img';
   static const String a = 'a';

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// A grey rounded rectangle used as a placeholder inside shimmer skeletons.
 class SkeletonBlock extends StatelessWidget {
   final double width;
   final double height;

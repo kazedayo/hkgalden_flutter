@@ -8,7 +8,6 @@ class HomeDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Self-contained listener: home scaffold no longer rebuilds with the list.
     return BlocBuilder<ChannelBloc, ChannelState>(
       builder: (context, state) {
         if (state is! ChannelLoaded) {

@@ -47,7 +47,6 @@ class ChannelCell extends StatelessWidget {
                           page: 1,
                           isRefresh: false),
                     );
-                    //Navigator.pop(context);
                     Backdrop.of(context).concealBackLayer();
                   },
             child: Padding(

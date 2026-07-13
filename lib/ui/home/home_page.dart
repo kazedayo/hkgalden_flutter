@@ -66,12 +66,7 @@ class HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     final ThreadListBloc threadListBloc =
         BlocProvider.of<ThreadListBloc>(context);
-    // Scaffold chrome (app bar, drawer, FAB) is outside ThreadListBloc so
-    // list load/append does not rebuild them.
-    // Theme for list highlight is hoisted here so ThreadListBloc rebuilds
-    // do not re-resolve Theme.of(context).copyWith on every list emission.
-    // Register the list controller as primary so iOS status-bar taps
-    // (Scaffold.handleStatusBarTap) scroll this list to the top.
+    // Chrome outside ThreadListBloc; primary scroll for status-bar jump-to-top.
     return PrimaryScrollController(
       controller: _scrollController,
       child: Scaffold(

@@ -46,12 +46,10 @@ class HKGaldenHtmlParser {
   }
 
   void _elementParsing(List<Element> elements) {
-    // Snapshot: replaceWith mutates the live children list during iteration.
+    // replaceWith mutates live children — iterate a snapshot.
     final snapshot = List<Element>.from(elements);
     for (final element in snapshot) {
       if (element.tagName == 'SPAN') {
-        // Process nested spans/alignment first (in-place), then transform this span
-        // by reparenting already-transformed children — no HTML re-serialization.
         _elementParsing(element.children);
         final transformed = _spanParsing(element);
         if (!identical(transformed, element)) {
@@ -59,14 +57,11 @@ class HKGaldenHtmlParser {
         }
       } else {
         _applyAlignmentClassIfNeeded(element);
-        // Walk non-span children so nested spans (and nested alignment) are processed.
         _elementParsing(element.children);
       }
     }
   }
 
-  /// Maps block alignment `data-nodetype` on P/DIV to CSS class names used by
-  /// [HtmlStyles] (`p.center` / `p.right`).
   void _applyAlignmentClassIfNeeded(Element element) {
     final tag = element.tagName;
     if (tag != 'P' && tag != 'DIV') {
@@ -81,7 +76,6 @@ class HKGaldenHtmlParser {
     }
   }
 
-  /// Moves all child nodes from [from] into [to] (reparent, no serialization).
   void _moveChildNodes(Element from, Element to) {
     final nodes = List<Node>.from(from.nodes);
     for (final node in nodes) {
@@ -89,7 +83,6 @@ class HKGaldenHtmlParser {
     }
   }
 
-  /// Builds a simple wrapper element, reparenting [element]'s children into it.
   Element _wrapWithMovedChildren(Element element, Element wrapper) {
     _moveChildNodes(element, wrapper);
     return wrapper;
@@ -97,7 +90,6 @@ class HKGaldenHtmlParser {
 
   Element _spanParsing(Element element) {
     switch (element.getAttribute(GaldenNodeTypes.dataNodetype)) {
-      //parse icon
       case GaldenNodeTypes.smiley:
         final packId = element.getAttribute(GaldenNodeTypes.dataPackId);
         final id = element.getAttribute(GaldenNodeTypes.dataId);
@@ -112,14 +104,11 @@ class HKGaldenHtmlParser {
             'src',
             'https://s.hkgalden.org/smilies/$packId/$id.gif',
           );
-      //parse image
       case GaldenNodeTypes.img:
         final src = element.getAttribute(GaldenNodeTypes.dataSrc);
         if (src == null || src.isEmpty) {
           return element;
         }
-        // Keep pixel size so the thread list can reserve layout space and avoid
-        // scroll jumps when a decoded frame is not yet (or no longer) in cache.
         final sx = element.getAttribute(GaldenNodeTypes.dataSx);
         final sy = element.getAttribute(GaldenNodeTypes.dataSy);
         final img = Element.img()
@@ -134,7 +123,6 @@ class HKGaldenHtmlParser {
           img.setAttribute(GaldenNodeTypes.dataSy, sy);
         }
         return img;
-      //parse link
       case GaldenNodeTypes.a:
         final href = element.getAttribute(GaldenNodeTypes.dataHref);
         if (href == null || href.isEmpty) {
@@ -151,7 +139,6 @@ class HKGaldenHtmlParser {
           anchor.appendText(href);
         }
         return anchor;
-      //parse color
       case GaldenNodeTypes.color:
         final value = element.getAttribute(GaldenNodeTypes.dataValue);
         if (value == null || value.isEmpty) {
@@ -163,43 +150,34 @@ class HKGaldenHtmlParser {
             ..setAttribute('class', 'color')
             ..setAttribute('hex', value),
         );
-      //parse bold
       case GaldenNodeTypes.b:
         return _wrapWithMovedChildren(element, Element.tag('b'));
-      //parse italic
       case GaldenNodeTypes.i:
         return _wrapWithMovedChildren(element, Element.tag('i'));
-      //parse underline
       case GaldenNodeTypes.u:
         return _wrapWithMovedChildren(element, Element.tag('u'));
-      //parse strikethrough
       case GaldenNodeTypes.s:
         return _wrapWithMovedChildren(element, Element.tag('s'));
-      //parse center alignment (span form)
       case GaldenNodeTypes.center:
         return _wrapWithMovedChildren(
           element,
           Element.div()..setAttribute('class', GaldenNodeTypes.center),
         );
-      //parse right alignment (span form)
       case GaldenNodeTypes.right:
         return _wrapWithMovedChildren(
           element,
           Element.div()..setAttribute('class', GaldenNodeTypes.right),
         );
-      //parse h1
       case GaldenNodeTypes.h1:
         return _wrapWithMovedChildren(
           element,
           Element.span()..setAttribute('class', 'h1'),
         );
-      //parse h2
       case GaldenNodeTypes.h2:
         return _wrapWithMovedChildren(
           element,
           Element.span()..setAttribute('class', 'h2'),
         );
-      //parse h3
       case GaldenNodeTypes.h3:
         return _wrapWithMovedChildren(
           element,
@@ -210,15 +188,6 @@ class HKGaldenHtmlParser {
     }
   }
 
-  /// Builds nested quote HTML for a [reply], walking its parent chain.
-  ///
-  /// When [includeStartAsQuote] is true (used by [replyWithQuotes]), [reply]
-  /// itself is the outermost quoted entry. When false (used by
-  /// [commentWithQuotes]), only parents are quoted and [reply]'s body is
-  /// appended after the quote chain.
-  ///
-  /// [isBlocked] when non-null skips/stops at blocked authors. When null, all
-  /// authors are included (e.g. [SessionUserUndefined]).
   String? _buildQuoteChain(
     Reply reply, {
     required bool includeStartAsQuote,
@@ -233,7 +202,6 @@ class HKGaldenHtmlParser {
       return includeStartAsQuote ? '' : (reply.content ?? '');
     }
 
-    // Collect quote entries closest-first, then reverse for nesting.
     final List<Reply> chain = <Reply>[];
 
     if (includeStartAsQuote) {
@@ -246,7 +214,6 @@ class HKGaldenHtmlParser {
     Reply? current = reply.parent;
     while (current != null && chain.length < maxDepth) {
       if (isBlocked != null && isBlocked(current.author.userId)) {
-        // Match prior if-tree: stop walking when a blocked author is hit.
         break;
       }
       chain.add(current);
@@ -257,7 +224,6 @@ class HKGaldenHtmlParser {
       return body.innerHtml;
     }
 
-    // deepest first for nested open/close structure
     final List<Reply> deepestFirst = chain.reversed.toList();
     final buffer = StringBuffer();
     for (var i = 0; i < deepestFirst.length; i++) {
@@ -296,7 +262,6 @@ class HKGaldenHtmlParser {
         includeStartAsQuote: false,
       );
     }
-    // Other states (e.g. loading): body only, no quotes.
     final htmlDoc = parseHtmlDocument(reply.content ?? '');
     return htmlDoc.body?.innerHtml ?? reply.content ?? '';
   }

@@ -1,10 +1,6 @@
 part of '../home_page.dart';
 
-/// List/error/skeleton only — scoped under [ThreadListBloc] so chrome above
-/// does not rebuild when the list appends or refreshes.
-///
-/// Caller must wrap with [Theme] for list highlight color (hoisted out of
-/// list rebuilds).
+/// List body only — kept under [ThreadListBloc] so chrome stays cold.
 Widget _buildFrontLayer(
   BuildContext context,
   ThreadListBloc threadListBloc,
@@ -15,7 +11,6 @@ Widget _buildFrontLayer(
   return Material(
     color: Theme.of(context).primaryColor,
     child: BlocBuilder<ThreadListBloc, ThreadListState>(
-      // Skip pure append-in-flight transitions that share the same threads.
       buildWhen: (prev, state) {
         if (state is ThreadListAppending) {
           return false;
@@ -40,8 +35,6 @@ Widget _buildFrontLayer(
             return threadListBloc.stream
                 .firstWhere((element) => element is! ThreadListLoading);
           },
-          // Nested SessionUser builder: refilter when block list changes
-          // without depending on an unrelated thread-list emission.
           child: BlocBuilder<SessionUserBloc, SessionUserState>(
             buildWhen: (prev, next) =>
                 !_sameBlockedUsers(prev, next) ||
@@ -86,7 +79,6 @@ List<Thread> _filterVisibleThreads(
   Set<String> blockedUserIds,
 ) {
   if (blockedUserIds.isEmpty) {
-    // Fast path: only drop threads with empty replies.
     return [
       for (final thread in threads)
         if (thread.replies.isNotEmpty) thread,
@@ -128,7 +120,6 @@ Widget _frontLayerBody(
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 80),
       controller: scrollController,
-      // Prefetch a bit more off-screen so flings hit already-laid-out cells.
       // ignore: deprecated_member_use — ScrollCacheExtent is not exported via material.dart
       cacheExtent: 900,
       itemCount: visibleThreads.length + 1,
@@ -140,13 +131,11 @@ Widget _frontLayerBody(
       },
       itemBuilder: (context, index) {
         if (index == visibleThreads.length) {
-          // Footer listens only for append membership so cells stay cold.
           return BlocBuilder<ThreadListBloc, ThreadListState>(
             buildWhen: (prev, next) =>
                 (prev is ThreadListAppending) != (next is ThreadListAppending),
             builder: (context, listState) {
               if (listState is ThreadListAppending) {
-                // Lightweight footer (full skeleton reserved for initial load).
                 return const _ThreadListLoadMoreFooter();
               }
               return const SizedBox.shrink();
@@ -184,7 +173,6 @@ Widget _frontLayerBody(
   return const SizedBox();
 }
 
-/// Minimal load-more indicator — avoids Chip/SafeArea/shimmer cost mid-scroll.
 class _ThreadListLoadMoreFooter extends StatelessWidget {
   const _ThreadListLoadMoreFooter();
 

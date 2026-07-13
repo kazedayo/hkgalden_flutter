@@ -1,7 +1,5 @@
 part of '../thread_page.dart';
 
-/// Shared with the home FAB so the iOS Cupertino push/pop keeps a continuous
-/// hero flight in the corner.
 const Object _kFabHeroTag = 'hkgalden_fab';
 
 FloatingActionButton _buildFab(
