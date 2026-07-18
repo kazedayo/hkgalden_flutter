@@ -5,8 +5,11 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/common/image_loading_error.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
+import 'package:hkgalden_flutter/ui/common/youtube_link_preview.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
+import 'package:hkgalden_flutter/utils/app_theme.dart';
 import 'package:hkgalden_flutter/utils/html_styles.dart';
+import 'package:hkgalden_flutter/utils/youtube_url.dart';
 import 'package:octo_image/octo_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -55,6 +58,47 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
       _cachedHtml = Html(
         data: widget.htmlString,
         extensions: [
+          MatcherExtension(
+            matcher: (extensionContext) {
+              if (extensionContext.elementName != 'a') {
+                return false;
+              }
+              final href = extensionContext.attributes['href'];
+              return YoutubeUrl.tryParseVideoId(href) != null;
+            },
+            builder: (extensionContext) {
+              final href = extensionContext.attributes['href'] ?? '';
+              final videoId = YoutubeUrl.tryParseVideoId(href)!;
+              // Keep the original anchor text/URL, preview is additive below.
+              final linkLabel = () {
+                final text =
+                    extensionContext.element?.text.trim() ?? '';
+                return text.isNotEmpty ? text : href;
+              }();
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GestureDetector(
+                    onTap: () => _launchURL(context, href),
+                    behavior: HitTestBehavior.opaque,
+                    child: Text(
+                      linkLabel,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: AppTheme.linkColor,
+                            decoration: TextDecoration.none,
+                          ),
+                    ),
+                  ),
+                  YoutubeLinkPreview(
+                    href: href,
+                    videoId: videoId,
+                    onOpen: () => _launchURL(context, href),
+                  ),
+                ],
+              );
+            },
+          ),
           TagExtension(
             tagsToExtend: {'img'},
             builder: (extensionContext) {
@@ -98,7 +142,8 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
           ),
         ],
         style: HtmlStyles.generate(context),
-        onLinkTap: (url, _, __) => _launchURL(context, url!),
+        onLinkTap: (url, attributes, element) =>
+            _launchURL(context, url!),
       );
       _cachedCacheWidth = cacheWidth;
       _cachedThemeKey = themeKey;
