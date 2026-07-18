@@ -50,3 +50,5 @@ ios/fastlane/report.xml
 
 # FVM Version Cache
 .fvm/
+# Local agent instructions
+AGENTS.md
