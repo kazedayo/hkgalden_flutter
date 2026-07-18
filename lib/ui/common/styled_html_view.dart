@@ -117,7 +117,13 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                 heroTag: heroTag,
                 intrinsicWidth: sx,
                 intrinsicHeight: sy,
-                onOpen: () => _showImageView(context, src, heroTag),
+                onOpen: () => _showImageView(
+                  context,
+                  src,
+                  heroTag,
+                  intrinsicWidth: sx,
+                  intrinsicHeight: sy,
+                ),
               );
             },
           ),
@@ -204,12 +210,20 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
     }
   }
 
-  void _showImageView(BuildContext context, String url, String heroTag) {
+  void _showImageView(
+    BuildContext context,
+    String url,
+    String heroTag, {
+    int? intrinsicWidth,
+    int? intrinsicHeight,
+  }) {
     Navigator.of(context).push(
       FadeRoute(
         page: FullScreenPhotoView(
           heroTag: heroTag,
           url: url,
+          intrinsicWidth: intrinsicWidth,
+          intrinsicHeight: intrinsicHeight,
         ),
       ),
     );
