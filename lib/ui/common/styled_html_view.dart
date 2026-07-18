@@ -250,6 +250,8 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
                         child: const Center(child: ProgressSpinner()),
                       );
                     }
+                    // No intrinsic size yet — avoid Center (unbounded height in
+                    // scrollables). ProgressSpinner stays square on its own.
                     return const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: ProgressSpinner(),
