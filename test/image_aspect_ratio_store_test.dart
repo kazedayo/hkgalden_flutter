@@ -46,4 +46,19 @@ void main() {
       expect(maxWidth * ImageAspectRatioStore.fallbackAspectRatio, 300.0);
     });
   });
+
+  group('ImageAspectRatioStore.isValidNaturalWidth', () {
+    test('accepts positive finite widths', () {
+      expect(ImageAspectRatioStore.isValidNaturalWidth(1), isTrue);
+      expect(ImageAspectRatioStore.isValidNaturalWidth(320), isTrue);
+    });
+
+    test('rejects non-positive and non-finite widths', () {
+      expect(ImageAspectRatioStore.isValidNaturalWidth(0), isFalse);
+      expect(ImageAspectRatioStore.isValidNaturalWidth(-10), isFalse);
+      expect(ImageAspectRatioStore.isValidNaturalWidth(double.nan), isFalse);
+      expect(
+          ImageAspectRatioStore.isValidNaturalWidth(double.infinity), isFalse);
+    });
+  });
 }

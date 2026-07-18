@@ -240,36 +240,87 @@ class _HtmlNetworkImage extends StatefulWidget {
 class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
   bool _hasError = false;
 
-  late ImageProvider _imageProvider = _createProvider();
+  late ImageProvider _imageProvider;
+  int? _appliedDecodeWidth;
+
   /// Decoded pixel aspect (height/width). Never from the reserved layout box.
   double? _decodedAspectRatio;
+
+  /// Natural width in image/CSS pixels when known from attrs or Hive cache.
+  double? _naturalWidthPx;
+
   ImageStream? _imageStream;
   ImageStreamListener? _imageStreamListener;
 
-  ImageProvider _createProvider() {
+  ImageProvider _createProvider(int decodeWidth) {
     return ResizeImage(
       NetworkImage(widget.src),
-      width: widget.cacheWidth,
+      width: decodeWidth > 0 ? decodeWidth : widget.cacheWidth,
     );
+  }
+
+  /// Cap decode size so small images are not decoded larger than they need.
+  int _decodeWidthFor(double devicePixelRatio) {
+    final natural = _naturalWidthLogical();
+    if (natural == null) {
+      return widget.cacheWidth;
+    }
+    final naturalPhysical = max(1, (natural * devicePixelRatio).round());
+    return min(widget.cacheWidth, naturalPhysical);
+  }
+
+  void _syncNaturalWidthFromAttrsOrCache() {
+    final sx = widget.intrinsicWidth;
+    if (sx != null && sx > 0) {
+      _naturalWidthPx = sx.toDouble();
+      return;
+    }
+    _naturalWidthPx ??=
+        ImageAspectRatioStore.instance.naturalWidth(widget.src);
+  }
+
+  void _ensureImageProvider(double devicePixelRatio) {
+    final decodeWidth = _decodeWidthFor(devicePixelRatio);
+    if (_appliedDecodeWidth == decodeWidth) {
+      return;
+    }
+    _appliedDecodeWidth = decodeWidth;
+    _imageProvider = _createProvider(decodeWidth);
+    _listenForDecodedSize();
   }
 
   @override
   void initState() {
     super.initState();
+    _syncNaturalWidthFromAttrsOrCache();
+    // MediaQuery not available yet; start with cacheWidth and refine in
+    // didChangeDependencies once DPR is known.
+    _appliedDecodeWidth = widget.cacheWidth;
+    _imageProvider = _createProvider(widget.cacheWidth);
     _listenForDecodedSize();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _ensureImageProvider(MediaQuery.devicePixelRatioOf(context));
   }
 
   @override
   void didUpdateWidget(covariant _HtmlNetworkImage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.src != widget.src ||
-        oldWidget.cacheWidth != widget.cacheWidth) {
-      _imageProvider = _createProvider();
+        oldWidget.cacheWidth != widget.cacheWidth ||
+        oldWidget.intrinsicWidth != widget.intrinsicWidth ||
+        oldWidget.intrinsicHeight != widget.intrinsicHeight) {
       _hasError = false;
       if (oldWidget.src != widget.src) {
         _decodedAspectRatio = null;
+        _naturalWidthPx = null;
       }
-      _listenForDecodedSize();
+      _syncNaturalWidthFromAttrsOrCache();
+      _appliedDecodeWidth = null;
+      _ensureImageProvider(MediaQuery.devicePixelRatioOf(context));
     }
   }
 
@@ -302,7 +353,13 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
         if (ratio == null) {
           return;
         }
-        ImageAspectRatioStore.instance.save(widget.src, ratio);
+        // Prefer attr/cache natural width — ResizeImage width is not natural.
+        final naturalW = _naturalWidthLogical();
+        ImageAspectRatioStore.instance.save(
+          widget.src,
+          ratio,
+          naturalWidth: naturalW,
+        );
         if (!mounted) {
           return;
         }
@@ -317,26 +374,41 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
     stream.addListener(listener);
   }
 
-  // Priority: intrinsic attrs → decoded pixels → cache → 3/4 fallback.
-  double? _reservedHeight(double maxWidth) {
-    if (!maxWidth.isFinite || maxWidth <= 0) {
-      return null;
+  /// Natural width in logical pixels; null if still unknown.
+  double? _naturalWidthLogical() {
+    final sx = widget.intrinsicWidth;
+    if (sx != null && sx > 0) {
+      return sx.toDouble();
     }
+    if (_naturalWidthPx != null && _naturalWidthPx! > 0) {
+      return _naturalWidthPx;
+    }
+    return ImageAspectRatioStore.instance.naturalWidth(widget.src);
+  }
+
+  /// Layout size: never wider than [maxWidth], and never upscale past natural.
+  ({double width, double height}) _layoutSize(double maxWidth) {
+    final natural = _naturalWidthLogical();
+    final width =
+        natural != null ? min(maxWidth, natural) : maxWidth;
+    return (width: width, height: _heightForWidth(width));
+  }
+
+  double _heightForWidth(double width) {
     final sx = widget.intrinsicWidth;
     final sy = widget.intrinsicHeight;
     if (sx != null && sy != null && sx > 0 && sy > 0) {
-      return maxWidth * sy / sx;
+      return width * sy / sx;
     }
     final decoded = _decodedAspectRatio;
     if (decoded != null) {
-      return maxWidth * decoded;
+      return width * decoded;
     }
-    final cached =
-        ImageAspectRatioStore.instance.aspectRatio(widget.src);
+    final cached = ImageAspectRatioStore.instance.aspectRatio(widget.src);
     if (cached != null) {
-      return maxWidth * cached;
+      return width * cached;
     }
-    return maxWidth * ImageAspectRatioStore.fallbackAspectRatio;
+    return width * ImageAspectRatioStore.fallbackAspectRatio;
   }
 
   static Widget _heroPlaceholder(
@@ -358,63 +430,66 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
         final maxWidth = constraints.maxWidth.isFinite
             ? constraints.maxWidth
             : MediaQuery.sizeOf(context).width;
-        final reservedHeight = _reservedHeight(maxWidth);
-        final errorHeight = reservedHeight ?? 80.0;
+        final size = _layoutSize(maxWidth);
+        final displayWidth = size.width;
+        final displayHeight = size.height;
 
-        return Hero(
-          tag: widget.heroTag,
-          placeholderBuilder: _heroPlaceholder,
-          child: Material(
-            type: MaterialType.transparency,
-            child: Stack(
-              children: [
-                OctoImage(
-                  image: _imageProvider,
-                  gaplessPlayback: true,
-                  fadeInDuration: _kImageFadeIn,
-                  fadeOutDuration: _kImageFadeOut,
-                  fit: BoxFit.contain,
-                  width: maxWidth.isFinite ? maxWidth : null,
-                  height: reservedHeight,
-                  placeholderBuilder: (context) {
-                    if (reservedHeight != null) {
-                      return SizedBox(
-                        width: maxWidth,
-                        height: reservedHeight,
-                        child: const Center(child: ProgressSpinner()),
-                      );
-                    }
-                    return const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: ProgressSpinner(),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    if (!_hasError) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) {
-                          setState(() => _hasError = true);
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: Hero(
+            tag: widget.heroTag,
+            placeholderBuilder: _heroPlaceholder,
+            child: Material(
+              type: MaterialType.transparency,
+              child: SizedBox(
+                width: displayWidth,
+                height: displayHeight,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    OctoImage(
+                      image: _imageProvider,
+                      gaplessPlayback: true,
+                      fadeInDuration: _kImageFadeIn,
+                      fadeOutDuration: _kImageFadeOut,
+                      fit: BoxFit.contain,
+                      width: displayWidth,
+                      height: displayHeight,
+                      placeholderBuilder: (context) {
+                        return SizedBox(
+                          width: displayWidth,
+                          height: displayHeight,
+                          child: const Center(child: ProgressSpinner()),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        if (!_hasError) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) {
+                              setState(() => _hasError = true);
+                            }
+                          });
                         }
-                      });
-                    }
-                    return SizedBox(
-                      width: maxWidth.isFinite ? maxWidth : null,
-                      height: errorHeight,
-                      child: Center(
-                        child: ImageLoadingError(error.toString()),
-                      ),
-                    );
-                  },
-                ),
-                Positioned.fill(
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _hasError ? null : widget.onOpen,
+                        return SizedBox(
+                          width: displayWidth,
+                          height: displayHeight,
+                          child: Center(
+                            child: ImageLoadingError(error.toString()),
+                          ),
+                        );
+                      },
                     ),
-                  ),
+                    Positioned.fill(
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: _hasError ? null : widget.onOpen,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         );

@@ -160,16 +160,20 @@ void main() {
       expect(aspectStore.contains("boxName = 'image_aspect_ratios'"), isTrue);
       expect(aspectStore.contains('fallbackAspectRatio'), isTrue);
       expect(aspectStore.contains('maxEntries = 500'), isTrue);
+      expect(aspectStore.contains('naturalWidth'), isTrue);
       expect(mainDart.contains('ImageAspectRatioStore.boxName'), isTrue);
       expect(styledHtml.contains('ImageAspectRatioStore'), isTrue);
       expect(styledHtml.contains('fallbackAspectRatio'), isTrue);
-      expect(styledHtml.contains('_reservedHeight'), isTrue);
+      expect(styledHtml.contains('_layoutSize'), isTrue);
+      expect(styledHtml.contains('_naturalWidthLogical'), isTrue);
+      // Do not upscale past natural pixel width (data-sx / cache).
+      expect(styledHtml.contains('min(maxWidth, natural)'), isTrue);
       // Decode stream provides true aspect — not the reserved layout box.
       expect(styledHtml.contains('_listenForDecodedSize'), isTrue);
       expect(styledHtml.contains('_decodedAspectRatio'), isTrue);
       // Error tile stays a fixed reserved box, not a bare shrinking row.
       expect(styledHtml.contains('ImageLoadingError'), isTrue);
-      expect(styledHtml.contains('errorHeight'), isTrue);
+      expect(styledHtml.contains('displayHeight'), isTrue);
     });
 
     test('R1: StyledHtmlView memoizes Html across rebuilds', () {
