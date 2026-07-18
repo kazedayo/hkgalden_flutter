@@ -81,7 +81,9 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                 children: [
                   GestureDetector(
                     onTap: () => _launchURL(context, href),
-                    behavior: HitTestBehavior.opaque,
+                    // translucent so SelectionArea can still participate in
+                    // long-press / drag selection of the link label.
+                    behavior: HitTestBehavior.translucent,
                     child: Text(
                       linkLabel,
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -153,9 +155,42 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
       data: MediaQuery.of(context).copyWith(
         textScaler: TextScaler.linear(1.0),
       ),
-      child: RepaintBoundary(
-        child: _cachedHtml!,
+      child: SelectionArea(
+        // Framework only auto-clears after Copy on Android; always deselect
+        // after Copy here. Select All keeps the selection (default behavior).
+        contextMenuBuilder: _selectionContextMenuBuilder,
+        child: RepaintBoundary(
+          child: _cachedHtml!,
+        ),
       ),
+    );
+  }
+
+  /// Builds the selection toolbar; Copy always clears selection afterward.
+  static Widget _selectionContextMenuBuilder(
+    BuildContext context,
+    SelectableRegionState selectableRegionState,
+  ) {
+    final buttonItems = selectableRegionState.contextMenuButtonItems
+        .map((ContextMenuButtonItem item) {
+      if (item.type != ContextMenuButtonType.copy) {
+        return item;
+      }
+      return ContextMenuButtonItem(
+        type: ContextMenuButtonType.copy,
+        onPressed: () {
+          // Default handler copies to the clipboard (and may partially update
+          // UI per platform). Always clear selection afterward.
+          item.onPressed?.call();
+          selectableRegionState.clearSelection();
+          selectableRegionState.hideToolbar();
+        },
+      );
+    }).toList();
+
+    return AdaptiveTextSelectionToolbar.buttonItems(
+      anchors: selectableRegionState.contextMenuAnchors,
+      buttonItems: buttonItems,
     );
   }
 

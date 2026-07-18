@@ -160,6 +160,17 @@ void main() {
       expect(styledHtml.contains('_cachedThemeKey'), isTrue);
       expect(styledHtml.contains('RepaintBoundary'), isTrue);
       expect(styledHtml.contains('_HtmlNetworkImage'), isTrue);
+      // SelectionArea wraps outside the cached Html so selection UI is not memoized.
+      expect(styledHtml.contains('SelectionArea('), isTrue);
+      final selectionIdx = styledHtml.indexOf('SelectionArea(');
+      final repaintIdx = styledHtml.indexOf('RepaintBoundary(', selectionIdx);
+      final cachedIdx = styledHtml.indexOf('_cachedHtml!', repaintIdx);
+      expect(repaintIdx, greaterThan(selectionIdx));
+      expect(cachedIdx, greaterThan(repaintIdx));
+      // Copy clears selection; Select All keeps it (default button item).
+      expect(styledHtml.contains('contextMenuBuilder:'), isTrue);
+      expect(styledHtml.contains('ContextMenuButtonType.copy'), isTrue);
+      expect(styledHtml.contains('clearSelection()'), isTrue);
     });
 
     test('R2: CommentCell drops keep-alive; keeps RepaintBoundary', () {
