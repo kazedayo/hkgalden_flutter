@@ -1,7 +1,7 @@
 import 'package:hive/hive.dart';
 import 'package:hkgalden_flutter/models/thread_reading_position.dart';
 
-/// Persists last-seen page + floor per thread (Hive box of plain maps).
+/// Last-seen page/floor per thread (Hive).
 class ThreadReadingPositionStore {
   ThreadReadingPositionStore._();
 

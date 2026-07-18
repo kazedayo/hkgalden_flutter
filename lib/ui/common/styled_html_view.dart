@@ -14,7 +14,6 @@ import 'package:hkgalden_flutter/utils/youtube_url.dart';
 import 'package:octo_image/octo_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// Short fade — OctoImage defaults feel like a full reload after the image viewer.
 const Duration _kImageFadeIn = Duration(milliseconds: 150);
 const Duration _kImageFadeOut = Duration(milliseconds: 100);
 
@@ -70,7 +69,6 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
             builder: (extensionContext) {
               final href = extensionContext.attributes['href'] ?? '';
               final videoId = YoutubeUrl.tryParseVideoId(href)!;
-              // Keep the original anchor text/URL, preview is additive below.
               final linkLabel = () {
                 final text =
                     extensionContext.element?.text.trim() ?? '';
@@ -82,8 +80,6 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                 children: [
                   GestureDetector(
                     onTap: () => _launchURL(context, href),
-                    // translucent so SelectionArea can still participate in
-                    // long-press / drag selection of the link label.
                     behavior: HitTestBehavior.translucent,
                     child: Text(
                       linkLabel,
@@ -163,8 +159,7 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
         textScaler: TextScaler.linear(1.0),
       ),
       child: SelectionArea(
-        // Framework only auto-clears after Copy on Android; always deselect
-        // after Copy here. Select All keeps the selection (default behavior).
+        // Copy should always clear selection (Android only does this by default).
         contextMenuBuilder: _selectionContextMenuBuilder,
         child: RepaintBoundary(
           child: _cachedHtml!,
@@ -173,7 +168,6 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
     );
   }
 
-  /// Builds the selection toolbar; Copy always clears selection afterward.
   static Widget _selectionContextMenuBuilder(
     BuildContext context,
     SelectableRegionState selectableRegionState,
@@ -186,8 +180,6 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
       return ContextMenuButtonItem(
         type: ContextMenuButtonType.copy,
         onPressed: () {
-          // Default handler copies to the clipboard (and may partially update
-          // UI per platform). Always clear selection afterward.
           item.onPressed?.call();
           selectableRegionState.clearSelection();
           selectableRegionState.hideToolbar();
@@ -257,10 +249,7 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
   late ImageProvider _imageProvider;
   int? _appliedDecodeWidth;
 
-  /// Decoded pixel aspect (height/width). Never from the reserved layout box.
   double? _decodedAspectRatio;
-
-  /// Natural width in image/CSS pixels when known from attrs or Hive cache.
   double? _naturalWidthPx;
 
   ImageStream? _imageStream;
@@ -273,7 +262,6 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
     );
   }
 
-  /// Cap decode size so small images are not decoded larger than they need.
   int _decodeWidthFor(double devicePixelRatio) {
     final natural = _naturalWidthLogical();
     if (natural == null) {
@@ -307,8 +295,6 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
   void initState() {
     super.initState();
     _syncNaturalWidthFromAttrsOrCache();
-    // MediaQuery not available yet; start with cacheWidth and refine in
-    // didChangeDependencies once DPR is known.
     _appliedDecodeWidth = widget.cacheWidth;
     _imageProvider = _createProvider(widget.cacheWidth);
     _listenForDecodedSize();
@@ -367,7 +353,6 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
         if (ratio == null) {
           return;
         }
-        // Prefer attr/cache natural width — ResizeImage width is not natural.
         final naturalW = _naturalWidthLogical();
         ImageAspectRatioStore.instance.save(
           widget.src,
@@ -388,7 +373,6 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
     stream.addListener(listener);
   }
 
-  /// Natural width in logical pixels; null if still unknown.
   double? _naturalWidthLogical() {
     final sx = widget.intrinsicWidth;
     if (sx != null && sx > 0) {
@@ -400,7 +384,6 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
     return ImageAspectRatioStore.instance.naturalWidth(widget.src);
   }
 
-  /// Layout size: never wider than [maxWidth], and never upscale past natural.
   ({double width, double height}) _layoutSize(double maxWidth) {
     final natural = _naturalWidthLogical();
     final width =

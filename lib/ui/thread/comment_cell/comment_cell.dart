@@ -40,7 +40,6 @@ class _CommentCellState extends State<CommentCell>
     with AutomaticKeepAliveClientMixin {
   late SessionUserBloc _sessionUserBloc;
 
-  // No LRU budget — budgeting caused wrong reuse / out-of-order replies.
   @override
   bool get wantKeepAlive => true;
 

@@ -54,25 +54,18 @@ class _ThreadPageState extends State<ThreadPage>
   int? _pendingRestoreFloor;
   bool _didCaptureArgs = false;
 
-  /// Floor at CustomScrollView center (offset 0); null = first main-window reply.
   int? _centerAnchorFloor;
   bool _didResolveCenterAnchor = false;
 
-  /// When true, initial restore targets the trailing edge instead of pinning a
-  /// center floor (avoids empty space below the refresh footer on last reply).
+  /// Last-reply restore: scroll to end instead of center-pinning.
   bool _pendingRestoreToTrailingEdge = false;
 
-  /// Keep chasing trailing-edge alignment (pad + jump) until user scrolls or
-  /// the settle window ends — covers late image/inset layout on Android.
   bool _trailingEdgeLayoutActive = false;
 
-  /// Top spacer in the center window when trailing content is shorter than the
-  /// viewport so the refresh footer sits on the bottom edge.
-  /// ValueNotifier avoids full-page setState (a common restore flicker source).
+  /// Bottom-align short last pages without setState on the whole page.
   final ValueNotifier<double> _trailingTopPad = ValueNotifier<double>(0);
 
-  /// When false, loaded thread content is painted invisible until the first
-  /// restore pin has stabilized — hides the one-frame wrong-offset flash.
+  /// Hide pre-pin frames until restore offset stabilizes.
   final ValueNotifier<bool> _restoreVisualReady = ValueNotifier<bool>(true);
 
   int _restoreStableFrames = 0;
@@ -80,7 +73,6 @@ class _ThreadPageState extends State<ThreadPage>
   double? _restoreStabilityPixels;
   bool _restoreRevealTimeoutScheduled = false;
 
-  /// Measures footer bottom for trailing-edge shortfall compensation.
   final GlobalKey _footerMeasureKey = GlobalKey(debugLabel: 'threadPageFooter');
 
   bool _restoreSettling = false;
@@ -153,7 +145,6 @@ class _ThreadPageState extends State<ThreadPage>
     _restoreSettling = false;
     _restoreSettleGeneration++;
     _trailingEdgeLayoutActive = false;
-    // Never leave content stuck invisible if the user interrupts restore.
     _revealRestoreContent();
   }
 
@@ -164,7 +155,6 @@ class _ThreadPageState extends State<ThreadPage>
     _restoreVisualReady.value = true;
   }
 
-  /// After pin(s), reveal once pad/offset stop moving (or hit a short timeout).
   void _noteRestorePinApplied() {
     if (_restoreVisualReady.value || !_scrollController.hasClients) {
       return;
@@ -216,7 +206,6 @@ class _ThreadPageState extends State<ThreadPage>
     if ((nextPad - _trailingTopPad.value).abs() <= 0.5) {
       return;
     }
-    // Metrics can fire mid-layout; defer notifier update to the next frame.
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_trailingEdgeLayoutActive) {
         return;
@@ -228,8 +217,6 @@ class _ThreadPageState extends State<ThreadPage>
     });
   }
 
-  /// Pin last-reply restore to the visual bottom: jump when scrollable, else
-  /// grow [_trailingTopPad] so short content is bottom-aligned in the viewport.
   void _syncTrailingEdgeLayout() {
     if (!_trailingEdgeLayoutActive || !_pendingRestoreToTrailingEdge) {
       return;
@@ -242,8 +229,6 @@ class _ThreadPageState extends State<ThreadPage>
       return;
     }
 
-    // While content is still hidden, chase tightly; after reveal, ignore
-    // sub-pixel metric noise that would read as a flicker.
     final threshold = _restoreVisualReady.value ? 1.5 : 0.5;
 
     final topY = _viewportTopY();
@@ -254,7 +239,6 @@ class _ThreadPageState extends State<ThreadPage>
       final shortfall = viewportBottom - footerBottom;
 
       if (shortfall > threshold) {
-        // Empty space under the footer: add top pad and/or scroll to max.
         final nextPad = (_trailingTopPad.value + shortfall)
             .clamp(0.0, position.viewportDimension);
         if ((nextPad - _trailingTopPad.value).abs() > threshold) {
@@ -262,7 +246,6 @@ class _ThreadPageState extends State<ThreadPage>
           return;
         }
       } else if (shortfall < -threshold) {
-        // Footer past the bottom: shrink pad first, then scroll.
         if (_trailingTopPad.value > threshold) {
           final nextPad = (_trailingTopPad.value + shortfall)
               .clamp(0.0, position.viewportDimension);
@@ -274,7 +257,6 @@ class _ThreadPageState extends State<ThreadPage>
       }
     }
 
-    // No early-out on maxScrollExtent == 0: jump is a no-op when unscrollable.
     if ((position.pixels - position.maxScrollExtent).abs() > threshold) {
       _scrollController.jumpTo(position.maxScrollExtent);
     }
@@ -318,9 +300,7 @@ class _ThreadPageState extends State<ThreadPage>
         SchedulerBinding.instance.addPostFrameCallback((_) => tick());
       } else {
         _restoreSettling = false;
-        // Ensure we never finish settle still invisible.
         _revealRestoreContent();
-        // Trailing layout stays active for late metrics until user drag.
       }
     }
 
@@ -348,7 +328,6 @@ class _ThreadPageState extends State<ThreadPage>
     if (!position.hasContentDimensions) {
       return false;
     }
-    // 1px slack for float layout; bounce may sit slightly past max while idle.
     return position.pixels >= position.maxScrollExtent - 1.0;
   }
 
@@ -396,13 +375,10 @@ class _ThreadPageState extends State<ThreadPage>
     if (state is! ThreadLoaded) {
       return;
     }
-    // On dispose anchors unmount first — fall back to cache / trailing edge.
     if (_anchorRegistry.hasEntries) {
       _updateCachedReadingFloor();
     } else if (_isAtScrollTrailingEdge() &&
         state.thread.replies.isNotEmpty) {
-      // Children already disposed; viewport-top cache can lag behind a short
-      // final page that never reached the top of the viewport.
       final lastLoaded = state.thread.replies.last.floor;
       final resolved = ThreadReadingPosition.resolveFloorForPersistence(
         viewportTopFloor: _cachedLastFloor,
@@ -441,9 +417,6 @@ class _ThreadPageState extends State<ThreadPage>
       return;
     }
     final lastFloor = replies.last.floor;
-    // Last-reply (or past end) restore: scroll to trailing edge so the refresh
-    // footer sits at the bottom without empty viewport padding below it.
-    // Center-pinning the last reply would park it at the top of the viewport.
     if (requested >= lastFloor) {
       _pendingRestoreToTrailingEdge = true;
       _cachedLastFloor ??= lastFloor;
@@ -539,7 +512,6 @@ class _ThreadPageState extends State<ThreadPage>
     });
   }
 
-  // extentBefore works with centered CustomScrollView (minScrollExtent may be negative).
   bool _isAtScrollTop(ScrollMetrics metrics) => metrics.extentBefore <= 0.5;
 
   bool _onThreadScrollNotification(
@@ -606,7 +578,6 @@ class _ThreadPageState extends State<ThreadPage>
         _stopPullSnapAnimation();
       }
     } else if (notification is OverscrollNotification) {
-      // Clamping: overscroll is the primary pull signal (pixels don't move at edge).
       if (notification.dragDetails == null) {
         return false;
       }
@@ -697,7 +668,6 @@ class _ThreadPageState extends State<ThreadPage>
       _didCaptureArgs = true;
       _pendingRestoreFloor = arguments.floor;
       _cachedLastFloor = arguments.floor;
-      // Floor restore will pin after first layout — hide that first wrong frame.
       if (arguments.floor != null) {
         _restoreVisualReady.value = false;
       }
@@ -781,7 +751,6 @@ class _ThreadPageState extends State<ThreadPage>
                 _previousPullFingerDown = false;
                 _stopPullSnapAnimation();
                 if (wasLoading && state.previousPages.replies.isNotEmpty) {
-                  // After layout: convert pull gap into scroll offset (no visual jump).
                   SchedulerBinding.instance.addPostFrameCallback((_) {
                     if (!mounted || !_scrollController.hasClients) {
                       return;
@@ -803,7 +772,6 @@ class _ThreadPageState extends State<ThreadPage>
               }
               _resolveCenterAnchorIfNeeded(state);
 
-              // Initial restore pin (+ settle loop for late image/embed layout).
               if (!_didPinInitialCenter &&
                   state.previousPages.replies.isEmpty) {
                 _didPinInitialCenter = true;
@@ -840,7 +808,6 @@ class _ThreadPageState extends State<ThreadPage>
                       ? allMain.sublist(centerStart)
                       : allMain;
 
-                  // Above-center slivers reverse chronological order (index 0 nearest center).
                   final prefixKeyToBuilderIndex = <Object, int>{
                     for (var i = 0; i < prefixReplies.length; i++)
                       _replyListKey(prefixReplies[i]):
@@ -858,9 +825,6 @@ class _ThreadPageState extends State<ThreadPage>
                   final previousCount = state.previousPages.replies.length;
                   final prefixCount = prefixReplies.length;
                   final trailingEdge = _pendingRestoreToTrailingEdge;
-                  // Inset the scroll viewport above the system nav bar so the
-                  // footer need not carry SafeArea padding inside scroll content
-                  // (avoids a dead strip under the refresh button on Android).
                   return SafeArea(
                     top: false,
                     child: NotificationListener<OverscrollIndicatorNotification>(
@@ -897,8 +861,6 @@ class _ThreadPageState extends State<ThreadPage>
                                   ),
                                   Transform.translate(
                                     offset: Offset(0, displayExtent),
-                                    // Opacity 0 until restore pin stabilizes —
-                                    // same layout/scroll math, no wrong-offset flash.
                                     child: IgnorePointer(
                                       ignoring: !restoreReady,
                                       child: Opacity(
@@ -906,9 +868,6 @@ class _ThreadPageState extends State<ThreadPage>
                                         child: CustomScrollView(
                                           center: centerKey,
                                           controller: _scrollController,
-                                          // Leading clamps when previous pages exist so
-                                          // pull-to-previous gets OverscrollNotification;
-                                          // trailing (and leading on page 1) bounces on iOS/macOS.
                                           physics:
                                               AlwaysScrollableScrollPhysics(
                                             parent: ThreadScrollPhysics(
@@ -923,7 +882,6 @@ class _ThreadPageState extends State<ThreadPage>
                                           // ignore: deprecated_member_use — ScrollCacheExtent is not exported via material.dart
                                           cacheExtent: 2000,
                                           slivers: <Widget>[
-                                            // Above center: previous pages + prefix before restore floor.
                                             SliverList(
                                               delegate:
                                                   SliverChildBuilderDelegate(
@@ -982,8 +940,6 @@ class _ThreadPageState extends State<ThreadPage>
                                                   childCount: prefixCount,
                                                 ),
                                               ),
-                                            // Last-reply restore: zero/pad center so replies
-                                            // grow downward; pad bottom-aligns short pages.
                                             if (trailingEdge)
                                               SliverToBoxAdapter(
                                                 key: centerKey,
@@ -1029,8 +985,6 @@ class _ThreadPageState extends State<ThreadPage>
                                       ),
                                     ),
                                   ),
-                                  // Keep loading chrome until pin lands so we never
-                                  // flash a blank frame or the pre-pin scroll offset.
                                   if (!restoreReady)
                                     const Positioned.fill(
                                       child: ThreadPageLoadingSkeleton(),
@@ -1056,7 +1010,6 @@ class _ThreadPageState extends State<ThreadPage>
                 }
                 return null;
               }(),
-              // FAB present for Hero flight even while thread is still loading.
               floatingActionButton: arguments.locked
                   ? null
                   : _buildFab(
@@ -1073,8 +1026,7 @@ class _ThreadPageState extends State<ThreadPage>
   }
 }
 
-/// Remaps status-bar jumpTo/animateTo(0) → minScrollExtent when content sits
-/// above the center restore floor. Set [holdCenterAtZero] during the initial pin.
+/// Remaps status-bar jumpTo(0) to minScrollExtent when content sits above center.
 class _ThreadScrollController extends ScrollController {
   _ThreadScrollController({super.keepScrollOffset});
 
@@ -1158,7 +1110,6 @@ class _ReplyAnchorRegistry {
     return bestFloor ?? nearestBelowFloor;
   }
 
-  /// Highest floor whose cell intersects the viewport (top inclusive, bottom exclusive-ish).
   int? lastVisibleFloor({
     required double viewportTopY,
     required double viewportBottomY,
@@ -1171,7 +1122,6 @@ class _ReplyAnchorRegistry {
       }
       final top = box.localToGlobal(Offset.zero).dy;
       final bottom = top + box.size.height;
-      // Visible if any pixel intersects [viewportTopY, viewportBottomY).
       if (bottom > viewportTopY && top < viewportBottomY) {
         if (bestFloor == null || entry.key > bestFloor) {
           bestFloor = entry.key;

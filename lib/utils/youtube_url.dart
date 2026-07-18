@@ -1,8 +1,6 @@
-/// Helpers for recognizing YouTube watch/share URLs in thread HTML.
 abstract final class YoutubeUrl {
   static final RegExp _videoIdPattern = RegExp(r'^[A-Za-z0-9_-]{11}$');
 
-  /// Returns an 11-character video id when [url] is a known YouTube form.
   static String? tryParseVideoId(String? url) {
     if (url == null) {
       return null;
@@ -73,7 +71,6 @@ abstract final class YoutubeUrl {
     return null;
   }
 
-  /// Static thumbnail — no network round-trip for the image URL itself.
   static String thumbnailUrl(String videoId) =>
       'https://img.youtube.com/vi/$videoId/hqdefault.jpg';
 

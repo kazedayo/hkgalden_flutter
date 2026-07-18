@@ -15,7 +15,7 @@ class YoutubeOEmbedInfo {
   });
 }
 
-/// In-memory oEmbed cache so list scroll does not re-hit YouTube per cell rebuild.
+/// In-memory oEmbed title cache (avoids re-fetch on list rebuild).
 class YoutubeOEmbedCache {
   YoutubeOEmbedCache._({http.Client? client}) : _client = client ?? http.Client();
 
@@ -25,7 +25,6 @@ class YoutubeOEmbedCache {
   final Map<String, Future<YoutubeOEmbedInfo?>> _inflight = {};
   final Map<String, YoutubeOEmbedInfo?> _resolved = {};
 
-  /// Test seam — inject a client and clear caches.
   factory YoutubeOEmbedCache.forTesting(http.Client client) {
     return YoutubeOEmbedCache._(client: client);
   }

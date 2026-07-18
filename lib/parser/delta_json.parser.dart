@@ -76,7 +76,6 @@ class DeltaJsonParser {
     return '<div id="pmc">${result.toString().replaceAll('<p></p>', '')}</div>';
   }
 
-  // Fixed wrap order (inner→outer): embed, s, u, i, b, font, color, link.
   Future<String> _applyAttributes(
       String text, Map<String, dynamic> attributes) async {
     String styled = _escapeHtmlText(text);
@@ -197,7 +196,7 @@ class DeltaJsonParser {
     );
     final resolver = _imageSizeResolver ?? _resolveImageDimensionFromNetwork;
     try {
-      // Re-wrap: throw-only resolvers infer Future<Never>, breaking timeout typing.
+      // Re-wrap so timeout typing is Future<({int,int})>, not Future<Never>.
       final future = Future<({int width, int height})>(() async {
         return resolver(url);
       });

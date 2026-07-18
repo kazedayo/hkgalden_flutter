@@ -2,7 +2,7 @@ import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 
-/// Cache of [HKGaldenHtmlParser.commentWithQuotes] keyed by reply/parent/blocks.
+/// Parsed comment HTML cache keyed by reply/parent/blocks.
 class ParsedCommentHtmlCache {
   static final ParsedCommentHtmlCache instance = ParsedCommentHtmlCache._();
   ParsedCommentHtmlCache._();

@@ -1,6 +1,5 @@
 part of '../thread_page.dart';
 
-/// Pull-gap skeleton; [OverflowBox] keeps full layout while outer height grows.
 class _PreviousPullIndicator extends StatelessWidget {
   const _PreviousPullIndicator({
     required this.extent,

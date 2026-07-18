@@ -3,7 +3,6 @@ part of '../thread_page.dart';
 class _PageFooter extends StatelessWidget {
   const _PageFooter({this.measureKey});
 
-  /// Optional key for trailing-edge restore shortfall measurement.
   final GlobalKey? measureKey;
 
   @override
@@ -20,8 +19,6 @@ class _PageFooter extends StatelessWidget {
                 return false;
               }
             },
-            // Bottom system inset is applied by SafeArea around the scroll view
-            // so this footer does not leave a dead padded strip under the button.
             builder: (context, state) => KeyedSubtree(
               key: measureKey,
               child: !pageState.onLastPage

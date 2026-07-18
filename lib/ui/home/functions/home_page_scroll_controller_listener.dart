@@ -1,6 +1,5 @@
 part of '../home_page.dart';
 
-/// Prefetch distance from list end for next-page load.
 const double _kThreadListLoadMoreThreshold = 480;
 
 void _initListener(BuildContext context, ScrollController scrollController) {
@@ -15,7 +14,6 @@ void _initListener(BuildContext context, ScrollController scrollController) {
         return;
       }
       final state = BlocProvider.of<ThreadListBloc>(context).state;
-      // ThreadListAppending extends ThreadListLoaded — skip in-flight appends.
       if (state is! ThreadListLoaded || state is ThreadListAppending) {
         return;
       }

@@ -221,7 +221,6 @@ class ComposePageState extends State<ComposePage> {
                                 hintText: '標題',
                                 contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 4, vertical: 10)),
-                            // Avoid setState per keystroke (rebuilds Quill).
                           ),
                         )
                       ],

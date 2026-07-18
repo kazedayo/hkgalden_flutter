@@ -6,7 +6,6 @@ import 'package:hkgalden_flutter/utils/device_properties.dart';
 class ThreadPageLoadingSkeletonCell extends StatelessWidget {
   const ThreadPageLoadingSkeletonCell({super.key});
 
-  /// Keep in sync with `_kPreviousPullIndicatorMaxExtent`.
   static const double totalHeight = 200;
 
   static const double _verticalMargin = 12;

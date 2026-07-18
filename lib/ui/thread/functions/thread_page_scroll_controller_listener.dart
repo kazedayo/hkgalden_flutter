@@ -2,7 +2,6 @@ part of '../thread_page.dart';
 
 const double _kThreadPageLoadMoreThreshold = 480;
 
-/// Match [ThreadPageLoadingSkeletonCell.totalHeight].
 const double _kPreviousPullIndicatorMaxExtent =
     ThreadPageLoadingSkeletonCell.totalHeight; // 200
 
@@ -19,7 +18,6 @@ void _initListener(
   ThreadPageCubit cubit,
   void Function() onScrollTick,
 ) {
-  // Track direction so short lists don't fire next-page without intent.
   double? lastPixels;
 
   scrollController.addListener(() {

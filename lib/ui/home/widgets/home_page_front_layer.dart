@@ -1,6 +1,6 @@
 part of '../home_page.dart';
 
-/// List body only — kept under [ThreadListBloc] so chrome stays cold.
+/// List body under [ThreadListBloc] (chrome stays outside).
 Widget _buildFrontLayer(
   BuildContext context,
   ThreadListBloc threadListBloc,

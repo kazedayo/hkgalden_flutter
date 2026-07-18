@@ -36,7 +36,6 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
         emit(ThreadError());
       }
     } else {
-      // Ignore non-loaded states: scroll can queue events before ThreadAppending emits.
       final current = state;
       if (current is! ThreadLoaded) {
         return;
@@ -46,7 +45,6 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
       final Thread? thread =
           await _repository.getThread(event.threadId, event.page);
       if (thread != null) {
-        // currentPage/endPage bound the main window; only endPage advances on scroll-down.
         if (event.page < previousState.currentPage) {
           emit(ThreadLoaded(
               thread: previousState.thread,

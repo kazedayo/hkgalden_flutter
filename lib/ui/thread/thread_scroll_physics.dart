@@ -4,10 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
-/// Whether thread list should use rubber-band bounce overscroll.
-///
-/// iOS / macOS get bounce; Android and others keep clamping so Material
-/// stretch/glow can own the overscroll UX.
 bool threadScrollBounceEnabled(TargetPlatform platform) {
   return switch (platform) {
     TargetPlatform.iOS || TargetPlatform.macOS => true,
@@ -15,14 +11,7 @@ bool threadScrollBounceEnabled(TargetPlatform platform) {
   };
 }
 
-/// Asymmetric scroll physics for the thread page list.
-///
-/// - When [bounceEnabled] is false, both edges clamp (Android-style).
-/// - When [bounceEnabled] is true and [clampLeading] is false, both edges
-///   rubber-band (iOS-style).
-/// - When [bounceEnabled] is true and [clampLeading] is true, the leading
-///   edge clamps so previous-page pull can receive [OverscrollNotification],
-///   while the trailing edge still bounces.
+/// Thread list physics: optional leading clamp + optional trailing bounce.
 class ThreadScrollPhysics extends ScrollPhysics {
   const ThreadScrollPhysics({
     required this.clampLeading,
@@ -30,12 +19,7 @@ class ThreadScrollPhysics extends ScrollPhysics {
     super.parent,
   });
 
-  /// When true, clamp the leading edge (underscroll / hit minScrollExtent)
-  /// so previous-page pull receives OverscrollNotification like RefreshIndicator.
   final bool clampLeading;
-
-  /// When true, allow rubber-band overscroll on edges that are not clamped.
-  /// Set false on Android/Fuchsia/etc. so Material stretch/glow owns overscroll UX.
   final bool bounceEnabled;
 
   bool get _bounceLeading => bounceEnabled && !clampLeading;
@@ -51,7 +35,6 @@ class ThreadScrollPhysics extends ScrollPhysics {
     );
   }
 
-  /// Friction factor matching [BouncingScrollPhysics] (normal deceleration).
   double frictionFactor(double overscrollFraction) {
     return 0.52 * math.pow(1 - overscrollFraction, 2);
   }
@@ -65,8 +48,6 @@ class ThreadScrollPhysics extends ScrollPhysics {
       return offset;
     }
 
-    // Zero out pasts on edges that must not bounce so friction only applies
-    // to bouncing overscroll.
     final double overscrollPastStart = _bounceLeading
         ? math.max(position.minScrollExtent - position.pixels, 0.0)
         : 0.0;
@@ -132,26 +113,20 @@ class ThreadScrollPhysics extends ScrollPhysics {
       return true;
     }());
 
-    // Leading (toward minScrollExtent)
     if (!_bounceLeading) {
       if (value < position.pixels && position.pixels <= position.minScrollExtent) {
-        // Underscroll.
         return value - position.pixels;
       }
       if (value < position.minScrollExtent && position.minScrollExtent < position.pixels) {
-        // Hit top edge.
         return value - position.minScrollExtent;
       }
     }
 
-    // Trailing (toward maxScrollExtent)
     if (!_bounceTrailing) {
       if (position.maxScrollExtent <= position.pixels && position.pixels < value) {
-        // Overscroll.
         return value - position.pixels;
       }
       if (position.pixels < position.maxScrollExtent && position.maxScrollExtent < value) {
-        // Hit bottom edge.
         return value - position.maxScrollExtent;
       }
     }
@@ -164,7 +139,6 @@ class ThreadScrollPhysics extends ScrollPhysics {
     final Tolerance tolerance = toleranceFor(position);
 
     if (!bounceEnabled) {
-      // Identical to ClampingScrollPhysics.
       if (position.outOfRange) {
         double? end;
         if (position.pixels > position.maxScrollExtent) {
@@ -198,9 +172,7 @@ class ThreadScrollPhysics extends ScrollPhysics {
       );
     }
 
-    // bounceEnabled == true
     if (position.outOfRange) {
-      // If past min while clampLeading, snap back with clamping spring.
       if (clampLeading && position.pixels < position.minScrollExtent) {
         return ScrollSpringSimulation(
           spring,
@@ -210,7 +182,6 @@ class ThreadScrollPhysics extends ScrollPhysics {
           tolerance: tolerance,
         );
       }
-      // Otherwise bounce (past max, or past min when leading allowed).
       return BouncingScrollSimulation(
         spring: spring,
         position: position.pixels,
@@ -225,12 +196,10 @@ class ThreadScrollPhysics extends ScrollPhysics {
       return null;
     }
 
-    // Clamped leading: do not start a fling that only pushes further into the wall.
     if (clampLeading && velocity < 0.0 && position.pixels <= position.minScrollExtent) {
       return null;
     }
 
-    // iOS-style fling that may rubber-band at trailing (and leading if allowed).
     return BouncingScrollSimulation(
       spring: spring,
       position: position.pixels,
@@ -250,7 +219,6 @@ class ThreadScrollPhysics extends ScrollPhysics {
     if (!bounceEnabled) {
       return super.carriedMomentum(existingVelocity);
     }
-    // Match BouncingScrollPhysics momentum build-up.
     return existingVelocity.sign *
         math.min(0.000816 * math.pow(existingVelocity.abs(), 1.967).toDouble(), 40000.0);
   }

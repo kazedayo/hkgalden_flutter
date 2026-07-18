@@ -4,7 +4,7 @@ import 'package:hkgalden_flutter/utils/youtube_oembed_cache.dart';
 import 'package:hkgalden_flutter/utils/youtube_url.dart';
 import 'package:octo_image/octo_image.dart';
 
-/// Title/thumbnail preview shown under a YouTube link (does not replace it).
+/// Compact preview under a YouTube link (link text stays above).
 class YoutubeLinkPreview extends StatefulWidget {
   final String href;
   final String videoId;
@@ -53,7 +53,6 @@ class _YoutubeLinkPreviewState extends State<YoutubeLinkPreview> {
         final maxWidth = constraints.maxWidth.isFinite
             ? constraints.maxWidth
             : MediaQuery.sizeOf(context).width;
-        // Keep a compact card — full-bleed 16:9 is heavy in long threads.
         final thumbWidth = (maxWidth * 0.38).clamp(96.0, 140.0);
         final thumbHeight = thumbWidth * 9 / 16;
 

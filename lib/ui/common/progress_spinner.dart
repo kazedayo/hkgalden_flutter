@@ -18,10 +18,7 @@ class ProgressSpinner extends StatelessWidget {
                 valueColor: const AlwaysStoppedAnimation<Color>(Colors.grey),
               );
 
-    // Parents like OctoImage (via StackFit.passthrough) can apply tight
-    // non-square constraints. SizedBox alone cannot resist those, so the
-    // indicator would lay out as an ellipse. UnconstrainedBox lets the
-    // spinner keep a fixed square size and stay centered in the space.
+    // UnconstrainedBox: resist non-square tight constraints (e.g. OctoImage).
     return UnconstrainedBox(
       child: SizedBox.square(
         dimension: size,

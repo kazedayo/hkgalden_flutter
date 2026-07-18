@@ -1,7 +1,6 @@
 import 'package:hive/hive.dart';
 
-/// Persists decoded image height/width ratios (and optional natural widths)
-/// keyed by URL (Hive box of maps).
+/// Hive cache of image aspect ratios (and optional natural widths) by URL.
 class ImageAspectRatioStore {
   ImageAspectRatioStore._();
 
@@ -11,7 +10,6 @@ class ImageAspectRatioStore {
 
   static const int maxEntries = 500;
 
-  /// Fallback height/width when no intrinsic size or cache entry exists.
   static const double fallbackAspectRatio = 3 / 4;
 
   Box get _box => Hive.box(boxName);
@@ -44,7 +42,6 @@ class ImageAspectRatioStore {
     return null;
   }
 
-  /// Natural image width in logical/CSS-style pixels (from `data-sx` or decode).
   double? naturalWidth(String url) {
     if (url.isEmpty) {
       return null;

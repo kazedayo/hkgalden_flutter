@@ -69,13 +69,13 @@ class Thread extends Equatable {
     );
   }
 
-  /// OP: lowest floor present (list cache may pollute replies with a full page).
+  /// Lowest floor (list cache may include a full page of replies).
   Reply get originalPost {
     assert(replies.isNotEmpty);
     return replies.reduce((a, b) => a.floor <= b.floor ? a : b);
   }
 
-  /// Highest floor — never assume index `1` when length ≠ 2.
+  /// Highest floor (do not assume index 1).
   Reply get latestReply {
     assert(replies.isNotEmpty);
     return replies.reduce((a, b) => a.floor >= b.floor ? a : b);

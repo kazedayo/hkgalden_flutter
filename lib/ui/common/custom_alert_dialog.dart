@@ -3,7 +3,6 @@ import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-/// Adaptive OK alert (Liquid Glass on iOS 26+, Cupertino/Material otherwise).
 Future<void> showCustomAlert({
   required BuildContext context,
   required String title,
@@ -24,7 +23,6 @@ Future<void> showCustomAlert({
   );
 }
 
-/// Prefer [showCustomAlert] for iOS 26+ Liquid Glass.
 class CustomAlertDialog extends StatelessWidget {
   final String title;
   final String content;

@@ -66,7 +66,6 @@ class HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     final ThreadListBloc threadListBloc =
         BlocProvider.of<ThreadListBloc>(context);
-    // Chrome outside ThreadListBloc; primary scroll for status-bar jump-to-top.
     return PrimaryScrollController(
       controller: _scrollController,
       child: Scaffold(

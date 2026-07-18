@@ -7,7 +7,6 @@ class ThreadPageArguments {
   final int page;
   final bool locked;
 
-  /// Optional floor to restore after initial load.
   final int? floor;
 
   ThreadPageArguments(

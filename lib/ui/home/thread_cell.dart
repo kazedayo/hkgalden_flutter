@@ -28,7 +28,7 @@ class ThreadCell extends StatelessWidget {
       color: isLocked ? AppTheme.lockedColor : AppTheme.activeColor,
     );
 
-    // GraphQL cache may replace [OP, last] with a full page — pick by floor.
+    // Cache may replace [OP, last] with a full page — pick by floor.
     final timeText = LastReplyTimer.formatRelativeTime(
       thread.latestReply.date.toLocal(),
     );

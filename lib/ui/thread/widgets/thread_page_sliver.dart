@@ -1,6 +1,5 @@
 part of '../thread_page.dart';
 
-/// Never use a null [ValueKey] (collides across replies).
 Object _replyListKey(Reply reply) =>
     reply.replyId ?? 'floor_${reply.floor}';
 

@@ -10,7 +10,6 @@ class ThreadPageLoadingSkeleton extends StatelessWidget {
         baseColor: Theme.of(context).scaffoldBackgroundColor,
         highlightColor: Theme.of(context).primaryColor,
         child: ListView.builder(
-          // Own controller — do not steal ThreadPage's PrimaryScrollController.
           primary: false,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: 5,

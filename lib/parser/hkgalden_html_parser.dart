@@ -46,7 +46,6 @@ class HKGaldenHtmlParser {
   }
 
   void _elementParsing(List<Element> elements) {
-    // replaceWith mutates live children — iterate a snapshot.
     final snapshot = List<Element>.from(elements);
     for (final element in snapshot) {
       if (element.tagName == 'SPAN') {

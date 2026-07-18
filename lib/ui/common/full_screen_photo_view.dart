@@ -12,10 +12,7 @@ class FullScreenPhotoView extends StatefulWidget {
   final String? url;
   final String? heroTag;
 
-  /// Natural pixel width from `data-sx` when opened from a thread image.
   final int? intrinsicWidth;
-
-  /// Natural pixel height from `data-sy` when opened from a thread image.
   final int? intrinsicHeight;
 
   const FullScreenPhotoView({
@@ -31,7 +28,6 @@ class FullScreenPhotoView extends StatefulWidget {
 }
 
 class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
-  /// Natural size in logical/CSS-style pixels (image pixel dimensions).
   Size? _naturalSize;
 
   ImageStream? _sizeStream;
@@ -96,8 +92,6 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
       return;
     }
     _stopSizeListener();
-    // Full decode once when attrs/cache omit size (ResizeImage would lie about
-    // intrinsic size if we pre-scaled to the screen).
     final stream = NetworkImage(url).resolve(const ImageConfiguration());
     late final ImageStreamListener listener;
     listener = ImageStreamListener(
@@ -130,7 +124,6 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
     stream.addListener(listener);
   }
 
-  /// Fit inside the screen without upscaling past natural size.
   Size? _displaySize(BuildContext context) {
     final natural = _naturalSize;
     if (natural == null || natural.width <= 0 || natural.height <= 0) {
@@ -152,7 +145,6 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
     return Size(w, h);
   }
 
-  /// Decode at most screen width, and never above natural×DPR when known.
   int _decodeWidth(BuildContext context) {
     final dpr = MediaQuery.devicePixelRatioOf(context);
     final screenCap =
@@ -168,8 +160,6 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
   ImageProvider _imageProvider(BuildContext context) {
     final network = NetworkImage(widget.url!);
     final natural = _naturalSize;
-    // Until natural size is known, avoid ResizeImage so layout uses true
-    // intrinsic pixels (no fake full-screen intrinsic from a screen-wide decode).
     if (natural == null) {
       return network;
     }
@@ -199,9 +189,6 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
     final maxW = displayWidth(context);
     final maxH = displayHeight(context);
 
-    // When size is known, lock layout to fitted natural size (no upscale).
-    // When unknown, constrain to the screen and let Image use intrinsic size
-    // (still no upscale once decoded; large images scale down via constraints).
     final image = display != null
         ? Image(
             image: _imageProvider(context),

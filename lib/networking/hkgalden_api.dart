@@ -97,9 +97,7 @@ class HKGaldenApi {
 
   final GraphQLClient _client;
 
-  /// Returns null on GraphQL/network failure.
-  /// Prefer [FetchPolicy.networkOnly] for thread content — cache is keyed by id
-  /// so page K replies overwrite page N.
+  /// Returns null on failure. Prefer networkOnly — cache is keyed by thread id.
   Future<T?> _query<T>(
     String document, {
     Map<String, dynamic>? variables,
@@ -117,7 +115,7 @@ class HKGaldenApi {
     return parse(result.data!);
   }
 
-  /// Returns null on GraphQL/network failure.
+  /// Returns null on failure.
   Future<T?> _mutate<T>(
     String document, {
     Map<String, dynamic>? variables,
@@ -210,7 +208,6 @@ class HKGaldenApi {
         'id': threadId,
         'page': page,
       },
-      // Thread cache is by id — always networkOnly so page K does not leak into N.
       fetchPolicy: FetchPolicy.networkOnly,
       parse: (data) async {
         final Map<String, dynamic> result =
