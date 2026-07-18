@@ -173,9 +173,10 @@ void main() {
       expect(styledHtml.contains('clearSelection()'), isTrue);
     });
 
-    test('R2: CommentCell drops keep-alive; keeps RepaintBoundary', () {
-      expect(commentCell.contains('AutomaticKeepAliveClientMixin'), isFalse);
-      expect(commentCell.contains('wantKeepAlive'), isFalse);
+    test('R2: CommentCell keeps alive; keeps RepaintBoundary', () {
+      // Keep-alive avoids wrong reuse / out-of-order replies after LRU budgeting.
+      expect(commentCell.contains('AutomaticKeepAliveClientMixin'), isTrue);
+      expect(commentCell.contains('wantKeepAlive => true'), isTrue);
       expect(commentCell.contains('RepaintBoundary'), isTrue);
     });
 
@@ -210,18 +211,20 @@ void main() {
       expect(threadPageSliver.contains('onLastPage:'), isFalse);
     });
 
-    test('R6: end shimmer only when ThreadListAppending', () {
-      expect(frontLayer.contains('SizedBox.shrink()'), isTrue);
-      expect(frontLayer.contains('ThreadListAppending'), isTrue);
+    test('R6: load-more footer only when ThreadListAppending', () {
+      // Outer list skips rebuilds while appending; footer listens independently.
+      expect(frontLayer.contains('if (state is ThreadListAppending)'), isTrue);
+      expect(frontLayer.contains('return false;'), isTrue);
       expect(
           frontLayer.contains(
               '(prev is ThreadListAppending) != (next is ThreadListAppending)'),
           isTrue);
-      expect(
-          frontLayer.contains('ListLoadingSkeletonCell(enabled: true)'),
+      expect(frontLayer.contains('if (listState is ThreadListAppending)'),
           isTrue);
-      expect(frontLayer.contains('if (state is ThreadListAppending)'), isTrue);
-      expect(frontLayer.contains('return false;'), isTrue);
+      expect(frontLayer.contains('_ThreadListLoadMoreFooter'), isTrue);
+      expect(frontLayer.contains('CircularProgressIndicator'), isTrue);
+      expect(frontLayer.contains('SizedBox.shrink()'), isTrue);
+      expect(frontLayer.contains('ListLoadingSkeletonCell'), isFalse);
     });
 
     test('M8: CommentCell reactively filters blocked authors', () {
