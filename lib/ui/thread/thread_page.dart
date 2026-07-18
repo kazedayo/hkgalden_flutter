@@ -58,13 +58,35 @@ class _ThreadPageState extends State<ThreadPage>
   int? _centerAnchorFloor;
   bool _didResolveCenterAnchor = false;
 
-  /// When true, initial restore jumps to maxScrollExtent instead of pinning a
+  /// When true, initial restore targets the trailing edge instead of pinning a
   /// center floor (avoids empty space below the refresh footer on last reply).
   bool _pendingRestoreToTrailingEdge = false;
 
+  /// Keep chasing trailing-edge alignment (pad + jump) until user scrolls or
+  /// the settle window ends — covers late image/inset layout on Android.
+  bool _trailingEdgeLayoutActive = false;
+
+  /// Top spacer in the center window when trailing content is shorter than the
+  /// viewport so the refresh footer sits on the bottom edge.
+  /// ValueNotifier avoids full-page setState (a common restore flicker source).
+  final ValueNotifier<double> _trailingTopPad = ValueNotifier<double>(0);
+
+  /// When false, loaded thread content is painted invisible until the first
+  /// restore pin has stabilized — hides the one-frame wrong-offset flash.
+  final ValueNotifier<bool> _restoreVisualReady = ValueNotifier<bool>(true);
+
+  int _restoreStableFrames = 0;
+  double? _restoreStabilityPad;
+  double? _restoreStabilityPixels;
+  bool _restoreRevealTimeoutScheduled = false;
+
+  /// Measures footer bottom for trailing-edge shortfall compensation.
+  final GlobalKey _footerMeasureKey = GlobalKey(debugLabel: 'threadPageFooter');
+
   bool _restoreSettling = false;
   int _restoreSettleGeneration = 0;
-  static const Duration _kRestoreSettleDuration = Duration(milliseconds: 1000);
+  static const Duration _kRestoreSettleDuration = Duration(milliseconds: 1500);
+  static const Duration _kRestoreRevealTimeout = Duration(milliseconds: 220);
 
   final _ReplyAnchorRegistry _anchorRegistry = _ReplyAnchorRegistry();
   int? _cachedLastFloor;
@@ -121,6 +143,8 @@ class _ThreadPageState extends State<ThreadPage>
       ..removeListener(_onPullSnapTick)
       ..dispose();
     _previousPullExtent.dispose();
+    _trailingTopPad.dispose();
+    _restoreVisualReady.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -128,6 +152,132 @@ class _ThreadPageState extends State<ThreadPage>
   void _cancelRestoreSettle() {
     _restoreSettling = false;
     _restoreSettleGeneration++;
+    _trailingEdgeLayoutActive = false;
+    // Never leave content stuck invisible if the user interrupts restore.
+    _revealRestoreContent();
+  }
+
+  void _revealRestoreContent() {
+    if (_restoreVisualReady.value) {
+      return;
+    }
+    _restoreVisualReady.value = true;
+  }
+
+  /// After pin(s), reveal once pad/offset stop moving (or hit a short timeout).
+  void _noteRestorePinApplied() {
+    if (_restoreVisualReady.value || !_scrollController.hasClients) {
+      return;
+    }
+    final position = _scrollController.position;
+    if (!position.hasContentDimensions) {
+      return;
+    }
+
+    final pad = _trailingTopPad.value;
+    final pixels = position.pixels;
+    final padStable = _restoreStabilityPad != null &&
+        (pad - _restoreStabilityPad!).abs() <= 0.5;
+    final pixelsStable = _restoreStabilityPixels != null &&
+        (pixels - _restoreStabilityPixels!).abs() <= 0.5;
+    if (padStable && pixelsStable) {
+      _restoreStableFrames++;
+    } else {
+      _restoreStableFrames = 0;
+    }
+    _restoreStabilityPad = pad;
+    _restoreStabilityPixels = pixels;
+
+    if (_restoreStableFrames >= 2) {
+      _revealRestoreContent();
+      return;
+    }
+
+    if (!_restoreRevealTimeoutScheduled) {
+      _restoreRevealTimeoutScheduled = true;
+      Future<void>.delayed(_kRestoreRevealTimeout, () {
+        if (!mounted) {
+          return;
+        }
+        _revealRestoreContent();
+      });
+    }
+  }
+
+  double? _footerBottomY() {
+    final box = _footerMeasureKey.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.hasSize || !box.attached) {
+      return null;
+    }
+    return box.localToGlobal(Offset(0, box.size.height)).dy;
+  }
+
+  void _setTrailingTopPad(double nextPad) {
+    if ((nextPad - _trailingTopPad.value).abs() <= 0.5) {
+      return;
+    }
+    // Metrics can fire mid-layout; defer notifier update to the next frame.
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_trailingEdgeLayoutActive) {
+        return;
+      }
+      if ((nextPad - _trailingTopPad.value).abs() <= 0.5) {
+        return;
+      }
+      _trailingTopPad.value = nextPad;
+    });
+  }
+
+  /// Pin last-reply restore to the visual bottom: jump when scrollable, else
+  /// grow [_trailingTopPad] so short content is bottom-aligned in the viewport.
+  void _syncTrailingEdgeLayout() {
+    if (!_trailingEdgeLayoutActive || !_pendingRestoreToTrailingEdge) {
+      return;
+    }
+    if (!_scrollController.hasClients) {
+      return;
+    }
+    final position = _scrollController.position;
+    if (!position.hasContentDimensions) {
+      return;
+    }
+
+    // While content is still hidden, chase tightly; after reveal, ignore
+    // sub-pixel metric noise that would read as a flicker.
+    final threshold = _restoreVisualReady.value ? 1.5 : 0.5;
+
+    final topY = _viewportTopY();
+    final footerBottom = _footerBottomY();
+
+    if (topY != null && footerBottom != null) {
+      final viewportBottom = topY + position.viewportDimension;
+      final shortfall = viewportBottom - footerBottom;
+
+      if (shortfall > threshold) {
+        // Empty space under the footer: add top pad and/or scroll to max.
+        final nextPad = (_trailingTopPad.value + shortfall)
+            .clamp(0.0, position.viewportDimension);
+        if ((nextPad - _trailingTopPad.value).abs() > threshold) {
+          _setTrailingTopPad(nextPad);
+          return;
+        }
+      } else if (shortfall < -threshold) {
+        // Footer past the bottom: shrink pad first, then scroll.
+        if (_trailingTopPad.value > threshold) {
+          final nextPad = (_trailingTopPad.value + shortfall)
+              .clamp(0.0, position.viewportDimension);
+          if ((nextPad - _trailingTopPad.value).abs() > threshold) {
+            _setTrailingTopPad(nextPad);
+            return;
+          }
+        }
+      }
+    }
+
+    // No early-out on maxScrollExtent == 0: jump is a no-op when unscrollable.
+    if ((position.pixels - position.maxScrollExtent).abs() > threshold) {
+      _scrollController.jumpTo(position.maxScrollExtent);
+    }
   }
 
   void _applyRestorePin({required bool trailingEdge}) {
@@ -139,10 +289,7 @@ class _ThreadPageState extends State<ThreadPage>
       return;
     }
     if (trailingEdge) {
-      if (position.maxScrollExtent > 0 &&
-          (position.pixels - position.maxScrollExtent).abs() > 0.5) {
-        _scrollController.jumpTo(position.maxScrollExtent);
-      }
+      _syncTrailingEdgeLayout();
     } else if (position.pixels != 0) {
       _scrollController.holdCenterAtZero = true;
       try {
@@ -151,10 +298,14 @@ class _ThreadPageState extends State<ThreadPage>
         _scrollController.holdCenterAtZero = false;
       }
     }
+    _noteRestorePinApplied();
   }
 
   void _startRestoreSettle({required bool trailingEdge}) {
     _restoreSettling = true;
+    if (trailingEdge) {
+      _trailingEdgeLayoutActive = true;
+    }
     final gen = ++_restoreSettleGeneration;
     final deadline = DateTime.now().add(_kRestoreSettleDuration);
 
@@ -167,6 +318,9 @@ class _ThreadPageState extends State<ThreadPage>
         SchedulerBinding.instance.addPostFrameCallback((_) => tick());
       } else {
         _restoreSettling = false;
+        // Ensure we never finish settle still invisible.
+        _revealRestoreContent();
+        // Trailing layout stays active for late metrics until user drag.
       }
     }
 
@@ -396,7 +550,7 @@ class _ThreadPageState extends State<ThreadPage>
       return false;
     }
 
-    if (_restoreSettling) {
+    if (_restoreSettling || _trailingEdgeLayoutActive) {
       final isUserDrag = (notification is ScrollStartNotification &&
               notification.dragDetails != null) ||
           (notification is ScrollUpdateNotification &&
@@ -404,6 +558,12 @@ class _ThreadPageState extends State<ThreadPage>
       if (isUserDrag) {
         _cancelRestoreSettle();
       }
+    }
+
+    if (_trailingEdgeLayoutActive &&
+        (notification is ScrollUpdateNotification ||
+            notification is ScrollEndNotification)) {
+      _syncTrailingEdgeLayout();
     }
 
     final state = threadBloc.state;
@@ -537,6 +697,10 @@ class _ThreadPageState extends State<ThreadPage>
       _didCaptureArgs = true;
       _pendingRestoreFloor = arguments.floor;
       _cachedLastFloor = arguments.floor;
+      // Floor restore will pin after first layout — hide that first wrong frame.
+      if (arguments.floor != null) {
+        _restoreVisualReady.value = false;
+      }
     }
 
     return MultiBlocProvider(
@@ -693,127 +857,189 @@ class _ThreadPageState extends State<ThreadPage>
                   };
                   final previousCount = state.previousPages.replies.length;
                   final prefixCount = prefixReplies.length;
-                  return NotificationListener<OverscrollIndicatorNotification>(
-                    onNotification: _onOverscrollIndicatorNotification,
-                    child: NotificationListener<ScrollNotification>(
-                      onNotification: (notification) =>
-                          _onThreadScrollNotification(
-                        notification,
-                        BlocProvider.of<ThreadBloc>(context),
-                      ),
-                      child: ListenableBuilder(
-                        listenable: _previousPullExtent,
-                        builder: (context, _) {
-                          final pullExtent = _previousPullExtent.value;
-                          final displayExtent = pullExtent;
-                          return Stack(
-                            clipBehavior: Clip.hardEdge,
-                            children: [
-                              _PreviousPullIndicator(
-                                extent: displayExtent,
-                                loading: _previousPullLoading,
-                              ),
-                              Transform.translate(
-                                offset: Offset(0, displayExtent),
-                                child: CustomScrollView(
-                                  center: centerKey,
-                                  controller: _scrollController,
-                                  // Leading clamps when previous pages exist so
-                                  // pull-to-previous gets OverscrollNotification;
-                                  // trailing (and leading on page 1) bounces on iOS/macOS.
-                                  physics: AlwaysScrollableScrollPhysics(
-                                    parent: ThreadScrollPhysics(
-                                      clampLeading: state.currentPage > 1,
-                                      bounceEnabled: threadScrollBounceEnabled(
-                                        Theme.of(context).platform,
-                                      ),
-                                    ),
+                  final trailingEdge = _pendingRestoreToTrailingEdge;
+                  // Inset the scroll viewport above the system nav bar so the
+                  // footer need not carry SafeArea padding inside scroll content
+                  // (avoids a dead strip under the refresh button on Android).
+                  return SafeArea(
+                    top: false,
+                    child: NotificationListener<OverscrollIndicatorNotification>(
+                      onNotification: _onOverscrollIndicatorNotification,
+                      child: NotificationListener<ScrollMetricsNotification>(
+                        onNotification: (notification) {
+                          if (_trailingEdgeLayoutActive) {
+                            _syncTrailingEdgeLayout();
+                          }
+                          return false;
+                        },
+                        child: NotificationListener<ScrollNotification>(
+                          onNotification: (notification) =>
+                              _onThreadScrollNotification(
+                            notification,
+                            BlocProvider.of<ThreadBloc>(context),
+                          ),
+                          child: ListenableBuilder(
+                            listenable: Listenable.merge([
+                              _previousPullExtent,
+                              _trailingTopPad,
+                              _restoreVisualReady,
+                            ]),
+                            builder: (context, _) {
+                              final pullExtent = _previousPullExtent.value;
+                              final displayExtent = pullExtent;
+                              final restoreReady = _restoreVisualReady.value;
+                              return Stack(
+                                clipBehavior: Clip.hardEdge,
+                                children: [
+                                  _PreviousPullIndicator(
+                                    extent: displayExtent,
+                                    loading: _previousPullLoading,
                                   ),
-                                  // ignore: deprecated_member_use — ScrollCacheExtent is not exported via material.dart
-                                  cacheExtent: 2000,
-                                  slivers: <Widget>[
-                                    // Above center: previous pages + prefix before restore floor.
-                                    SliverList(
-                                      delegate: SliverChildBuilderDelegate(
-                                        (context, index) {
-                                          return _generatePreviousPageSliver(
-                                              context,
-                                              _scrollController,
-                                              state,
-                                              index,
-                                              _onReplySuccess,
-                                              _anchorRegistry);
-                                        },
-                                        findChildIndexCallback:
-                                            previousCount == 0
-                                                ? null
-                                                : (Key key) {
+                                  Transform.translate(
+                                    offset: Offset(0, displayExtent),
+                                    // Opacity 0 until restore pin stabilizes —
+                                    // same layout/scroll math, no wrong-offset flash.
+                                    child: IgnorePointer(
+                                      ignoring: !restoreReady,
+                                      child: Opacity(
+                                        opacity: restoreReady ? 1 : 0,
+                                        child: CustomScrollView(
+                                          center: centerKey,
+                                          controller: _scrollController,
+                                          // Leading clamps when previous pages exist so
+                                          // pull-to-previous gets OverscrollNotification;
+                                          // trailing (and leading on page 1) bounces on iOS/macOS.
+                                          physics:
+                                              AlwaysScrollableScrollPhysics(
+                                            parent: ThreadScrollPhysics(
+                                              clampLeading:
+                                                  state.currentPage > 1,
+                                              bounceEnabled:
+                                                  threadScrollBounceEnabled(
+                                                Theme.of(context).platform,
+                                              ),
+                                            ),
+                                          ),
+                                          // ignore: deprecated_member_use — ScrollCacheExtent is not exported via material.dart
+                                          cacheExtent: 2000,
+                                          slivers: <Widget>[
+                                            // Above center: previous pages + prefix before restore floor.
+                                            SliverList(
+                                              delegate:
+                                                  SliverChildBuilderDelegate(
+                                                (context, index) {
+                                                  return _generatePreviousPageSliver(
+                                                      context,
+                                                      _scrollController,
+                                                      state,
+                                                      index,
+                                                      _onReplySuccess,
+                                                      _anchorRegistry);
+                                                },
+                                                findChildIndexCallback:
+                                                    previousCount == 0
+                                                        ? null
+                                                        : (Key key) {
+                                                            if (key
+                                                                is ValueKey) {
+                                                              return previousKeyToBuilderIndex[
+                                                                  key.value];
+                                                            }
+                                                            return null;
+                                                          },
+                                                childCount: previousCount,
+                                              ),
+                                            ),
+                                            if (prefixCount > 0)
+                                              SliverList(
+                                                delegate:
+                                                    SliverChildBuilderDelegate(
+                                                  (context, index) {
+                                                    final dataIndex =
+                                                        prefixCount -
+                                                            index -
+                                                            1;
+                                                    return _generatePageSliver(
+                                                      context,
+                                                      _scrollController,
+                                                      state,
+                                                      prefixReplies,
+                                                      dataIndex,
+                                                      _onReplySuccess,
+                                                      _anchorRegistry,
+                                                      isTrailingWindow: false,
+                                                      footerMeasureKey: null,
+                                                    );
+                                                  },
+                                                  findChildIndexCallback:
+                                                      (Key key) {
                                                     if (key is ValueKey) {
-                                                      return previousKeyToBuilderIndex[
+                                                      return prefixKeyToBuilderIndex[
                                                           key.value];
                                                     }
                                                     return null;
                                                   },
-                                        childCount: previousCount,
-                                      ),
-                                    ),
-                                    if (prefixCount > 0)
-                                      SliverList(
-                                        delegate: SliverChildBuilderDelegate(
-                                          (context, index) {
-                                            final dataIndex =
-                                                prefixCount - index - 1;
-                                            return _generatePageSliver(
-                                              context,
-                                              _scrollController,
-                                              state,
-                                              prefixReplies,
-                                              dataIndex,
-                                              _onReplySuccess,
-                                              _anchorRegistry,
-                                              isTrailingWindow: false,
-                                            );
-                                          },
-                                          findChildIndexCallback: (Key key) {
-                                            if (key is ValueKey) {
-                                              return prefixKeyToBuilderIndex[
-                                                  key.value];
-                                            }
-                                            return null;
-                                          },
-                                          childCount: prefixCount,
+                                                  childCount: prefixCount,
+                                                ),
+                                              ),
+                                            // Last-reply restore: zero/pad center so replies
+                                            // grow downward; pad bottom-aligns short pages.
+                                            if (trailingEdge)
+                                              SliverToBoxAdapter(
+                                                key: centerKey,
+                                                child: SizedBox(
+                                                  height:
+                                                      _trailingTopPad.value,
+                                                ),
+                                              ),
+                                            SliverList(
+                                              key: trailingEdge
+                                                  ? null
+                                                  : centerKey,
+                                              delegate:
+                                                  SliverChildBuilderDelegate(
+                                                (context, index) {
+                                                  return _generatePageSliver(
+                                                    context,
+                                                    _scrollController,
+                                                    state,
+                                                    centerReplies,
+                                                    index,
+                                                    _onReplySuccess,
+                                                    _anchorRegistry,
+                                                    isTrailingWindow: true,
+                                                    footerMeasureKey:
+                                                        _footerMeasureKey,
+                                                  );
+                                                },
+                                                findChildIndexCallback:
+                                                    (Key key) {
+                                                  if (key is ValueKey) {
+                                                    return centerKeyToIndex[
+                                                        key.value];
+                                                  }
+                                                  return null;
+                                                },
+                                                childCount:
+                                                    centerReplies.length,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    SliverList(
-                                      key: centerKey,
-                                      delegate: SliverChildBuilderDelegate(
-                                        (context, index) {
-                                          return _generatePageSliver(
-                                            context,
-                                            _scrollController,
-                                            state,
-                                            centerReplies,
-                                            index,
-                                            _onReplySuccess,
-                                            _anchorRegistry,
-                                            isTrailingWindow: true,
-                                          );
-                                        },
-                                        findChildIndexCallback: (Key key) {
-                                          if (key is ValueKey) {
-                                            return centerKeyToIndex[key.value];
-                                          }
-                                          return null;
-                                        },
-                                        childCount: centerReplies.length,
-                                      ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          );
-                        },
+                                  ),
+                                  // Keep loading chrome until pin lands so we never
+                                  // flash a blank frame or the pre-pin scroll offset.
+                                  if (!restoreReady)
+                                    const Positioned.fill(
+                                      child: ThreadPageLoadingSkeleton(),
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
                       ),
                     ),
                   );

@@ -227,7 +227,9 @@ void main() {
               .contains('prev.onLastPage != next.onLastPage'),
           isTrue);
       expect(threadPageFooter.contains('BlocBuilder<ThreadBloc'), isTrue);
-      expect(threadPageSliver.contains('_PageFooter()'), isTrue);
+      // Footer no longer wraps SafeArea; scroll view owns bottom inset.
+      expect(threadPageFooter.contains('SafeArea('), isFalse);
+      expect(threadPageSliver.contains('_PageFooter('), isTrue);
       expect(threadPageSliver.contains('onLastPage:'), isFalse);
     });
 
@@ -348,9 +350,20 @@ void main() {
       expect(threadPage.contains('minScrollExtent'), isTrue);
       expect(threadPage.contains('_didPinInitialCenter'), isTrue);
       expect(threadPage.contains('jumpTo(0)'), isTrue);
-      // Last-reply restore scrolls to trailing edge (no empty space under footer).
+      // Last-reply restore: trailing edge + top pad for short pages.
       expect(threadPage.contains('_pendingRestoreToTrailingEdge'), isTrue);
+      expect(threadPage.contains('_trailingEdgeLayoutActive'), isTrue);
+      expect(threadPage.contains('_trailingTopPad'), isTrue);
+      expect(threadPage.contains('_syncTrailingEdgeLayout'), isTrue);
+      expect(threadPage.contains('_footerMeasureKey'), isTrue);
       expect(threadPage.contains('maxScrollExtent'), isTrue);
+      // Hide pre-pin frames; reveal after pad/offset stabilize.
+      expect(threadPage.contains('_restoreVisualReady'), isTrue);
+      expect(threadPage.contains('_revealRestoreContent'), isTrue);
+      expect(threadPage.contains('_noteRestorePinApplied'), isTrue);
+      expect(threadPage.contains('_kRestoreRevealTimeout'), isTrue);
+      // Viewport owns bottom SafeArea; footer does not pad inside scroll content.
+      expect(threadPage.contains('SafeArea('), isTrue);
       // Restore settle loop re-pins while remote images/embeds change extent.
       expect(threadPage.contains('_restoreSettling'), isTrue);
       expect(threadPage.contains('_startRestoreSettle'), isTrue);

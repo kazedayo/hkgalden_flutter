@@ -36,12 +36,16 @@ Widget _generatePageSliver(
   Function(BuildContext, ScrollController, Reply, bool) onReplySuccess,
   _ReplyAnchorRegistry anchorRegistry, {
   required bool isTrailingWindow,
+  GlobalKey? footerMeasureKey,
 }) {
   final reply = replies[index];
   final isPageStart = reply.floor % 50 == 1;
   final isLast = isTrailingWindow && index == replies.length - 1;
   final cell = _buildCommentCell(context, scrollController, state, reply,
       onReplySuccess, anchorRegistry);
+  final footer = isLast
+      ? _PageFooter(measureKey: footerMeasureKey)
+      : null;
 
   final key = ValueKey<Object>(_replyListKey(reply));
   if (isPageStart && isLast) {
@@ -50,7 +54,7 @@ Widget _generatePageSliver(
       children: <Widget>[
         _PageHeader(floor: reply.floor),
         cell,
-        _PageFooter(),
+        footer!,
       ],
     );
   } else if (isPageStart && !(isLast && replies.length == 1)) {
@@ -66,7 +70,7 @@ Widget _generatePageSliver(
       key: key,
       children: <Widget>[
         cell,
-        _PageFooter(),
+        footer!,
       ],
     );
   } else {
