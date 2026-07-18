@@ -58,6 +58,14 @@ class _ThreadPageState extends State<ThreadPage>
   int? _centerAnchorFloor;
   bool _didResolveCenterAnchor = false;
 
+  /// When true, initial restore jumps to maxScrollExtent instead of pinning a
+  /// center floor (avoids empty space below the refresh footer on last reply).
+  bool _pendingRestoreToTrailingEdge = false;
+
+  bool _restoreSettling = false;
+  int _restoreSettleGeneration = 0;
+  static const Duration _kRestoreSettleDuration = Duration(milliseconds: 1000);
+
   final _ReplyAnchorRegistry _anchorRegistry = _ReplyAnchorRegistry();
   int? _cachedLastFloor;
   ThreadBloc? _threadBloc;
@@ -102,6 +110,7 @@ class _ThreadPageState extends State<ThreadPage>
 
   @override
   void dispose() {
+    _cancelRestoreSettle();
     WidgetsBinding.instance.removeObserver(this);
     _persistReadingPosition();
     final previous = _previousImageCacheMaxBytes;
@@ -114,6 +123,54 @@ class _ThreadPageState extends State<ThreadPage>
     _previousPullExtent.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _cancelRestoreSettle() {
+    _restoreSettling = false;
+    _restoreSettleGeneration++;
+  }
+
+  void _applyRestorePin({required bool trailingEdge}) {
+    if (!_scrollController.hasClients) {
+      return;
+    }
+    final position = _scrollController.position;
+    if (!position.hasContentDimensions) {
+      return;
+    }
+    if (trailingEdge) {
+      if (position.maxScrollExtent > 0 &&
+          (position.pixels - position.maxScrollExtent).abs() > 0.5) {
+        _scrollController.jumpTo(position.maxScrollExtent);
+      }
+    } else if (position.pixels != 0) {
+      _scrollController.holdCenterAtZero = true;
+      try {
+        _scrollController.jumpTo(0);
+      } finally {
+        _scrollController.holdCenterAtZero = false;
+      }
+    }
+  }
+
+  void _startRestoreSettle({required bool trailingEdge}) {
+    _restoreSettling = true;
+    final gen = ++_restoreSettleGeneration;
+    final deadline = DateTime.now().add(_kRestoreSettleDuration);
+
+    void tick() {
+      if (!mounted || gen != _restoreSettleGeneration || !_restoreSettling) {
+        return;
+      }
+      _applyRestorePin(trailingEdge: trailingEdge);
+      if (DateTime.now().isBefore(deadline)) {
+        SchedulerBinding.instance.addPostFrameCallback((_) => tick());
+      } else {
+        _restoreSettling = false;
+      }
+    }
+
+    SchedulerBinding.instance.addPostFrameCallback((_) => tick());
   }
 
   double? _viewportTopY() {
@@ -229,11 +286,18 @@ class _ThreadPageState extends State<ThreadPage>
     if (requested == null || requested < 1 || replies.isEmpty) {
       return;
     }
+    final lastFloor = replies.last.floor;
+    // Last-reply (or past end) restore: scroll to trailing edge so the refresh
+    // footer sits at the bottom without empty viewport padding below it.
+    // Center-pinning the last reply would park it at the top of the viewport.
+    if (requested >= lastFloor) {
+      _pendingRestoreToTrailingEdge = true;
+      _cachedLastFloor ??= lastFloor;
+      return;
+    }
     final idx = replies.indexWhere((r) => r.floor >= requested);
     if (idx > 0) {
       _centerAnchorFloor = replies[idx].floor;
-    } else if (idx < 0 && replies.length > 1) {
-      _centerAnchorFloor = replies.last.floor;
     }
 
     _cachedLastFloor ??= _centerAnchorFloor ?? replies.first.floor;
@@ -330,6 +394,16 @@ class _ThreadPageState extends State<ThreadPage>
   ) {
     if (notification.depth != 0 || notification.metrics.axis != Axis.vertical) {
       return false;
+    }
+
+    if (_restoreSettling) {
+      final isUserDrag = (notification is ScrollStartNotification &&
+              notification.dragDetails != null) ||
+          (notification is ScrollUpdateNotification &&
+              notification.dragDetails != null);
+      if (isUserDrag) {
+        _cancelRestoreSettle();
+      }
     }
 
     final state = threadBloc.state;
@@ -565,25 +639,13 @@ class _ThreadPageState extends State<ThreadPage>
               }
               _resolveCenterAnchorIfNeeded(state);
 
-              // Pin center at offset 0 once; holdCenterAtZero so status-bar remap
-              // does not steal the initial restore pin.
+              // Initial restore pin (+ settle loop for late image/embed layout).
               if (!_didPinInitialCenter &&
                   state.previousPages.replies.isEmpty) {
                 _didPinInitialCenter = true;
-                SchedulerBinding.instance.addPostFrameCallback((_) {
-                  if (!mounted || !_scrollController.hasClients) {
-                    return;
-                  }
-                  final position = _scrollController.position;
-                  if (position.hasContentDimensions && position.pixels != 0) {
-                    _scrollController.holdCenterAtZero = true;
-                    try {
-                      _scrollController.jumpTo(0);
-                    } finally {
-                      _scrollController.holdCenterAtZero = false;
-                    }
-                  }
-                });
+                _startRestoreSettle(
+                  trailingEdge: _pendingRestoreToTrailingEdge,
+                );
               }
             } else if (state is ThreadError) {
               _clearPreviousPull(animate: true);

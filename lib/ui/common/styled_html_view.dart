@@ -9,6 +9,7 @@ import 'package:hkgalden_flutter/ui/common/youtube_link_preview.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
 import 'package:hkgalden_flutter/utils/html_styles.dart';
+import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
 import 'package:hkgalden_flutter/utils/youtube_url.dart';
 import 'package:octo_image/octo_image.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -240,8 +241,10 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
   bool _hasError = false;
 
   late ImageProvider _imageProvider = _createProvider();
-  // Last laid-out size — avoids collapsing to spinner height on re-decode.
-  Size? _lastLayoutSize;
+  /// Decoded pixel aspect (height/width). Never from the reserved layout box.
+  double? _decodedAspectRatio;
+  ImageStream? _imageStream;
+  ImageStreamListener? _imageStreamListener;
 
   ImageProvider _createProvider() {
     return ResizeImage(
@@ -251,39 +254,89 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _listenForDecodedSize();
+  }
+
+  @override
   void didUpdateWidget(covariant _HtmlNetworkImage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.src != widget.src ||
         oldWidget.cacheWidth != widget.cacheWidth) {
       _imageProvider = _createProvider();
       _hasError = false;
+      if (oldWidget.src != widget.src) {
+        _decodedAspectRatio = null;
+      }
+      _listenForDecodedSize();
     }
   }
 
+  @override
+  void dispose() {
+    _stopListeningForDecodedSize();
+    super.dispose();
+  }
+
+  void _stopListeningForDecodedSize() {
+    final stream = _imageStream;
+    final listener = _imageStreamListener;
+    if (stream != null && listener != null) {
+      stream.removeListener(listener);
+    }
+    _imageStream = null;
+    _imageStreamListener = null;
+  }
+
+  void _listenForDecodedSize() {
+    _stopListeningForDecodedSize();
+    final stream = _imageProvider.resolve(const ImageConfiguration());
+    late final ImageStreamListener listener;
+    listener = ImageStreamListener(
+      (ImageInfo info, bool _) {
+        final ratio = ImageAspectRatioStore.aspectRatioFromSize(
+          info.image.width.toDouble(),
+          info.image.height.toDouble(),
+        );
+        if (ratio == null) {
+          return;
+        }
+        ImageAspectRatioStore.instance.save(widget.src, ratio);
+        if (!mounted) {
+          return;
+        }
+        if (_decodedAspectRatio != ratio) {
+          setState(() => _decodedAspectRatio = ratio);
+        }
+      },
+      onError: (Object error, StackTrace? stackTrace) {},
+    );
+    _imageStream = stream;
+    _imageStreamListener = listener;
+    stream.addListener(listener);
+  }
+
+  // Priority: intrinsic attrs → decoded pixels → cache → 3/4 fallback.
   double? _reservedHeight(double maxWidth) {
+    if (!maxWidth.isFinite || maxWidth <= 0) {
+      return null;
+    }
     final sx = widget.intrinsicWidth;
     final sy = widget.intrinsicHeight;
-    if (sx != null && sy != null && sx > 0 && sy > 0 && maxWidth.isFinite) {
+    if (sx != null && sy != null && sx > 0 && sy > 0) {
       return maxWidth * sy / sx;
     }
-    if (_lastLayoutSize != null &&
-        _lastLayoutSize!.width > 0 &&
-        maxWidth.isFinite) {
-      return maxWidth *
-          _lastLayoutSize!.height /
-          _lastLayoutSize!.width;
+    final decoded = _decodedAspectRatio;
+    if (decoded != null) {
+      return maxWidth * decoded;
     }
-    return null;
-  }
-
-  void _rememberSize(Size size) {
-    if (size.width <= 0 || size.height <= 0) {
-      return;
+    final cached =
+        ImageAspectRatioStore.instance.aspectRatio(widget.src);
+    if (cached != null) {
+      return maxWidth * cached;
     }
-    if (_lastLayoutSize == size) {
-      return;
-    }
-    _lastLayoutSize = size;
+    return maxWidth * ImageAspectRatioStore.fallbackAspectRatio;
   }
 
   static Widget _heroPlaceholder(
@@ -306,6 +359,7 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
             ? constraints.maxWidth
             : MediaQuery.sizeOf(context).width;
         final reservedHeight = _reservedHeight(maxWidth);
+        final errorHeight = reservedHeight ?? 80.0;
 
         return Hero(
           tag: widget.heroTag,
@@ -330,26 +384,10 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
                         child: const Center(child: ProgressSpinner()),
                       );
                     }
-                    // No intrinsic size yet — avoid Center (unbounded height in
-                    // scrollables). ProgressSpinner stays square on its own.
                     return const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: ProgressSpinner(),
                     );
-                  },
-                  imageBuilder: (context, child) {
-                    if (_lastLayoutSize == null) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (!mounted) {
-                          return;
-                        }
-                        final box = context.findRenderObject() as RenderBox?;
-                        if (box != null && box.hasSize) {
-                          _rememberSize(box.size);
-                        }
-                      });
-                    }
-                    return child;
                   },
                   errorBuilder: (context, error, stackTrace) {
                     if (!_hasError) {
@@ -359,7 +397,13 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
                         }
                       });
                     }
-                    return ImageLoadingError(error.toString());
+                    return SizedBox(
+                      width: maxWidth.isFinite ? maxWidth : null,
+                      height: errorHeight,
+                      child: Center(
+                        child: ImageLoadingError(error.toString()),
+                      ),
+                    );
                   },
                 ),
                 Positioned.fill(

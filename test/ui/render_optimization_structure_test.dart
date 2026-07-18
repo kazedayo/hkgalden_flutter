@@ -152,6 +152,26 @@ void main() {
       expect(styledHtml.contains('data-sy'), isTrue);
     });
 
+    test('P0: image aspect cache reserves height before decode', () {
+      final aspectStore =
+          File('lib/utils/image_aspect_ratio_store.dart').readAsStringSync();
+      final mainDart = File('lib/main.dart').readAsStringSync();
+      expect(aspectStore.contains('class ImageAspectRatioStore'), isTrue);
+      expect(aspectStore.contains("boxName = 'image_aspect_ratios'"), isTrue);
+      expect(aspectStore.contains('fallbackAspectRatio'), isTrue);
+      expect(aspectStore.contains('maxEntries = 500'), isTrue);
+      expect(mainDart.contains('ImageAspectRatioStore.boxName'), isTrue);
+      expect(styledHtml.contains('ImageAspectRatioStore'), isTrue);
+      expect(styledHtml.contains('fallbackAspectRatio'), isTrue);
+      expect(styledHtml.contains('_reservedHeight'), isTrue);
+      // Decode stream provides true aspect — not the reserved layout box.
+      expect(styledHtml.contains('_listenForDecodedSize'), isTrue);
+      expect(styledHtml.contains('_decodedAspectRatio'), isTrue);
+      // Error tile stays a fixed reserved box, not a bare shrinking row.
+      expect(styledHtml.contains('ImageLoadingError'), isTrue);
+      expect(styledHtml.contains('errorHeight'), isTrue);
+    });
+
     test('R1: StyledHtmlView memoizes Html across rebuilds', () {
       expect(styledHtml.contains('_cachedHtml'), isTrue);
       expect(styledHtml.contains('didUpdateWidget'), isTrue);
@@ -328,6 +348,15 @@ void main() {
       expect(threadPage.contains('minScrollExtent'), isTrue);
       expect(threadPage.contains('_didPinInitialCenter'), isTrue);
       expect(threadPage.contains('jumpTo(0)'), isTrue);
+      // Last-reply restore scrolls to trailing edge (no empty space under footer).
+      expect(threadPage.contains('_pendingRestoreToTrailingEdge'), isTrue);
+      expect(threadPage.contains('maxScrollExtent'), isTrue);
+      // Restore settle loop re-pins while remote images/embeds change extent.
+      expect(threadPage.contains('_restoreSettling'), isTrue);
+      expect(threadPage.contains('_startRestoreSettle'), isTrue);
+      expect(threadPage.contains('_cancelRestoreSettle'), isTrue);
+      expect(threadPage.contains('_applyRestorePin'), isTrue);
+      expect(threadPage.contains('_kRestoreSettleDuration'), isTrue);
       final loadingSkeleton = File(
               'lib/ui/thread/skeletons/thread_page_loading_skeleton.dart')
           .readAsStringSync();
