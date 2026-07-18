@@ -279,7 +279,10 @@ void main() {
       expect(threadPage.contains('_onThreadScrollNotification'), isTrue);
       expect(threadPage.contains('_previousPullArmed'), isTrue);
       expect(threadPage.contains('HapticFeedback.mediumImpact'), isTrue);
-      expect(threadPage.contains('ClampingScrollPhysics'), isTrue);
+      expect(threadPage.contains('ThreadScrollPhysics'), isTrue);
+      expect(threadPage.contains('clampLeading'), isTrue);
+      expect(threadPage.contains('currentPage > 1'), isTrue);
+      expect(threadPage.contains('threadScrollBounceEnabled'), isTrue);
       expect(threadPage.contains('Transform.translate'), isTrue);
       expect(threadPage.contains('_animatePullExtentTo'), isTrue);
       expect(threadPage.contains('_PreviousPullIndicator'), isTrue);
@@ -295,6 +298,9 @@ void main() {
           .readAsStringSync();
       expect(pullIndicator.contains('ThreadPageLoadingSkeletonCell'), isTrue);
       expect(pullIndicator.contains('scaffoldBackgroundColor'), isTrue);
+      final scrollPhysics =
+          File('lib/ui/thread/thread_scroll_physics.dart').readAsStringSync();
+      expect(scrollPhysics.contains('class ThreadScrollPhysics'), isTrue);
     });
 
     test('thread page pins center and does not restore scroll offset', () {

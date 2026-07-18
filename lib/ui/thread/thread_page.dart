@@ -18,6 +18,7 @@ import 'package:hkgalden_flutter/ui/thread/comment_cell/comment_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton_header.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_scroll_physics.dart';
 import 'package:hkgalden_flutter/models/thread_reading_position.dart';
 import 'package:hkgalden_flutter/utils/parsed_comment_html_cache.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
@@ -605,8 +606,16 @@ class _ThreadPageState extends State<ThreadPage>
                                 child: CustomScrollView(
                                   center: centerKey,
                                   controller: _scrollController,
-                                  physics: const AlwaysScrollableScrollPhysics(
-                                    parent: ClampingScrollPhysics(),
+                                  // Leading clamps when previous pages exist so
+                                  // pull-to-previous gets OverscrollNotification;
+                                  // trailing (and leading on page 1) bounces on iOS/macOS.
+                                  physics: AlwaysScrollableScrollPhysics(
+                                    parent: ThreadScrollPhysics(
+                                      clampLeading: state.currentPage > 1,
+                                      bounceEnabled: threadScrollBounceEnabled(
+                                        Theme.of(context).platform,
+                                      ),
+                                    ),
                                   ),
                                   // ignore: deprecated_member_use — ScrollCacheExtent is not exported via material.dart
                                   cacheExtent: 2000,
