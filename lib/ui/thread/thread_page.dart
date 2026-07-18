@@ -129,12 +129,48 @@ class _ThreadPageState extends State<ThreadPage>
     return box.localToGlobal(Offset.zero).dy;
   }
 
+  bool _isAtScrollTrailingEdge() {
+    if (!_scrollController.hasClients) {
+      return false;
+    }
+    final position = _scrollController.position;
+    if (!position.hasContentDimensions) {
+      return false;
+    }
+    // 1px slack for float layout; bounce may sit slightly past max while idle.
+    return position.pixels >= position.maxScrollExtent - 1.0;
+  }
+
   void _updateCachedReadingFloor() {
     final topY = _viewportTopY();
-    if (topY == null) {
-      return;
+    final atEnd = _isAtScrollTrailingEdge();
+
+    int? viewportTopFloor;
+    int? lastVisibleFloor;
+    if (topY != null) {
+      viewportTopFloor = _anchorRegistry.readingFloor(viewportTopY: topY);
+      if (atEnd && _scrollController.hasClients) {
+        final bottomY =
+            topY + _scrollController.position.viewportDimension;
+        lastVisibleFloor = _anchorRegistry.lastVisibleFloor(
+          viewportTopY: topY,
+          viewportBottomY: bottomY,
+        );
+      }
     }
-    final floor = _anchorRegistry.readingFloor(viewportTopY: topY);
+
+    final state = _threadBloc?.state;
+    final lastLoadedFloor = state is ThreadLoaded &&
+            state.thread.replies.isNotEmpty
+        ? state.thread.replies.last.floor
+        : null;
+
+    final floor = ThreadReadingPosition.resolveFloorForPersistence(
+      viewportTopFloor: viewportTopFloor,
+      lastVisibleFloor: lastVisibleFloor,
+      lastLoadedFloor: lastLoadedFloor,
+      atTrailingEdge: atEnd,
+    );
     if (floor != null) {
       _cachedLastFloor = floor;
     }
@@ -149,9 +185,23 @@ class _ThreadPageState extends State<ThreadPage>
     if (state is! ThreadLoaded) {
       return;
     }
-    // On dispose anchors unmount first — fall back to cache.
+    // On dispose anchors unmount first — fall back to cache / trailing edge.
     if (_anchorRegistry.hasEntries) {
       _updateCachedReadingFloor();
+    } else if (_isAtScrollTrailingEdge() &&
+        state.thread.replies.isNotEmpty) {
+      // Children already disposed; viewport-top cache can lag behind a short
+      // final page that never reached the top of the viewport.
+      final lastLoaded = state.thread.replies.last.floor;
+      final resolved = ThreadReadingPosition.resolveFloorForPersistence(
+        viewportTopFloor: _cachedLastFloor,
+        lastVisibleFloor: null,
+        lastLoadedFloor: lastLoaded,
+        atTrailingEdge: true,
+      );
+      if (resolved != null) {
+        _cachedLastFloor = resolved;
+      }
     }
     final resolvedFloor = _cachedLastFloor ??
         (state.thread.replies.isNotEmpty
@@ -818,6 +868,29 @@ class _ReplyAnchorRegistry {
       }
     }
     return bestFloor ?? nearestBelowFloor;
+  }
+
+  /// Highest floor whose cell intersects the viewport (top inclusive, bottom exclusive-ish).
+  int? lastVisibleFloor({
+    required double viewportTopY,
+    required double viewportBottomY,
+  }) {
+    int? bestFloor;
+    for (final entry in _byFloor.entries) {
+      final box = entry.value.findRenderObject();
+      if (box is! RenderBox || !box.attached || !box.hasSize) {
+        continue;
+      }
+      final top = box.localToGlobal(Offset.zero).dy;
+      final bottom = top + box.size.height;
+      // Visible if any pixel intersects [viewportTopY, viewportBottomY).
+      if (bottom > viewportTopY && top < viewportBottomY) {
+        if (bestFloor == null || entry.key > bestFloor) {
+          bestFloor = entry.key;
+        }
+      }
+    }
+    return bestFloor;
   }
 }
 

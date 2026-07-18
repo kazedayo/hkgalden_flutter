@@ -39,4 +39,67 @@ void main() {
       expect(restored.page, 2);
     });
   });
+
+  group('ThreadReadingPosition.resolveFloorForPersistence', () {
+    test('mid-list prefers viewport top floor', () {
+      expect(
+        ThreadReadingPosition.resolveFloorForPersistence(
+          viewportTopFloor: 40,
+          lastVisibleFloor: 51,
+          lastLoadedFloor: 51,
+          atTrailingEdge: false,
+        ),
+        40,
+      );
+    });
+
+    test('trailing edge takes furthest floor so short final page is kept', () {
+      // Page n content still at viewport top; only one reply on page n+1 at end.
+      expect(
+        ThreadReadingPosition.resolveFloorForPersistence(
+          viewportTopFloor: 40,
+          lastVisibleFloor: 51,
+          lastLoadedFloor: 51,
+          atTrailingEdge: true,
+        ),
+        51,
+      );
+    });
+
+    test('trailing edge falls back to last loaded when nothing is visible', () {
+      expect(
+        ThreadReadingPosition.resolveFloorForPersistence(
+          viewportTopFloor: 40,
+          lastVisibleFloor: null,
+          lastLoadedFloor: 51,
+          atTrailingEdge: true,
+        ),
+        51,
+      );
+    });
+
+    test('trailing edge keeps top floor when it is already furthest', () {
+      expect(
+        ThreadReadingPosition.resolveFloorForPersistence(
+          viewportTopFloor: 51,
+          lastVisibleFloor: 51,
+          lastLoadedFloor: 51,
+          atTrailingEdge: true,
+        ),
+        51,
+      );
+    });
+
+    test('returns null when no candidates', () {
+      expect(
+        ThreadReadingPosition.resolveFloorForPersistence(
+          viewportTopFloor: null,
+          lastVisibleFloor: null,
+          lastLoadedFloor: null,
+          atTrailingEdge: true,
+        ),
+        isNull,
+      );
+    });
+  });
 }
