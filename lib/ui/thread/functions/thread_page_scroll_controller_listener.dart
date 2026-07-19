@@ -2,15 +2,6 @@ part of '../thread_page.dart';
 
 const double _kThreadPageLoadMoreThreshold = 480;
 
-const double _kPreviousPullIndicatorMaxExtent =
-    ThreadPageLoadingSkeletonCell.totalHeight; // 200
-
-const double _kPreviousPullArmExtent = _kPreviousPullIndicatorMaxExtent * 0.80;
-
-const double _kPreviousPullDisarmExtent = _kPreviousPullIndicatorMaxExtent * 0.70;
-
-const double _kPreviousPullDragFactor = 0.85;
-
 void _initListener(
   ThreadPageArguments arguments,
   ThreadBloc threadBloc,

@@ -5,11 +5,13 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/common/image_loading_error.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
+import 'package:hkgalden_flutter/ui/common/x_link_preview.dart';
 import 'package:hkgalden_flutter/ui/common/youtube_link_preview.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
 import 'package:hkgalden_flutter/utils/html_styles.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
+import 'package:hkgalden_flutter/utils/x_url.dart';
 import 'package:hkgalden_flutter/utils/youtube_url.dart';
 import 'package:octo_image/octo_image.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -92,6 +94,46 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
                   YoutubeLinkPreview(
                     href: href,
                     videoId: videoId,
+                    onOpen: () => _launchURL(context, href),
+                  ),
+                ],
+              );
+            },
+          ),
+          MatcherExtension(
+            matcher: (extensionContext) {
+              if (extensionContext.elementName != 'a') {
+                return false;
+              }
+              final href = extensionContext.attributes['href'];
+              return XUrl.tryParseStatusId(href) != null;
+            },
+            builder: (extensionContext) {
+              final href = extensionContext.attributes['href'] ?? '';
+              final statusId = XUrl.tryParseStatusId(href)!;
+              final linkLabel = () {
+                final text =
+                    extensionContext.element?.text.trim() ?? '';
+                return text.isNotEmpty ? text : href;
+              }();
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GestureDetector(
+                    onTap: () => _launchURL(context, href),
+                    behavior: HitTestBehavior.translucent,
+                    child: Text(
+                      linkLabel,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: AppTheme.linkColor,
+                            decoration: TextDecoration.none,
+                          ),
+                    ),
+                  ),
+                  XLinkPreview(
+                    href: href,
+                    statusId: statusId,
                     onOpen: () => _launchURL(context, href),
                   ),
                 ],

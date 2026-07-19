@@ -12,8 +12,8 @@ class _PreviousPullIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final height = loading
-        ? _kPreviousPullIndicatorMaxExtent
-        : extent.clamp(0.0, _kPreviousPullIndicatorMaxExtent);
+        ? PreviousPagePullController.maxExtent
+        : extent.clamp(0.0, PreviousPagePullController.maxExtent);
     if (height <= 0) {
       return const SizedBox.shrink();
     }

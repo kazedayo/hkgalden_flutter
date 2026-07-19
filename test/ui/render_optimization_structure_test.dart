@@ -72,6 +72,16 @@ void main() {
     late String threadPageFooter;
     late String threadPageSliver;
     late String threadPageScrollListener;
+    late String threadPage;
+    late String threadPageLoadedBody;
+    late String threadPageScrollController;
+    late String previousPagePullController;
+    late String threadRestoreController;
+    late String replyPositionAnchor;
+    late String previousPullIndicator;
+
+    /// Combined sources for symbols split across the thread page module.
+    late String threadModule;
 
     setUpAll(() {
       String read(String path) {
@@ -102,6 +112,31 @@ void main() {
           read('lib/ui/thread/widgets/thread_page_sliver.dart');
       threadPageScrollListener = read(
           'lib/ui/thread/functions/thread_page_scroll_controller_listener.dart');
+      threadPage = read('lib/ui/thread/thread_page.dart');
+      threadPageLoadedBody =
+          read('lib/ui/thread/widgets/thread_page_loaded_body.dart');
+      threadPageScrollController =
+          read('lib/ui/thread/thread_page_scroll_controller.dart');
+      previousPagePullController =
+          read('lib/ui/thread/previous_page_pull_controller.dart');
+      threadRestoreController =
+          read('lib/ui/thread/thread_restore_controller.dart');
+      replyPositionAnchor =
+          read('lib/ui/thread/reply_position_anchor.dart');
+      previousPullIndicator = read(
+          'lib/ui/thread/widgets/thread_page_previous_pull_indicator.dart');
+      threadModule = [
+        threadPage,
+        threadPageLoadedBody,
+        threadPageScrollController,
+        previousPagePullController,
+        threadRestoreController,
+        replyPositionAnchor,
+        previousPullIndicator,
+        threadPageScrollListener,
+        threadPageSliver,
+        previousSliver,
+      ].join('\n');
     });
 
     test('H1: home Scaffold is outside ThreadListBloc builder', () {
@@ -231,7 +266,7 @@ void main() {
               .contains('prev.onLastPage != next.onLastPage'),
           isTrue);
       expect(threadPageFooter.contains('BlocBuilder<ThreadBloc'), isTrue);
-      // Footer no longer wraps SafeArea; scroll view owns bottom inset.
+      // Footer does not wrap SafeArea; list is edge-to-edge.
       expect(threadPageFooter.contains('SafeArea('), isFalse);
       expect(threadPageSliver.contains('_PageFooter('), isTrue);
       expect(threadPageSliver.contains('onLastPage:'), isFalse);
@@ -309,71 +344,87 @@ void main() {
 
     test('previous page uses RefreshIndicator-style pull, not in-list skeleton',
         () {
-      expect(
-          threadPageScrollListener.contains('_kPreviousPullArmExtent'),
-          isTrue);
+      expect(previousPagePullController.contains('armExtent'), isTrue);
       expect(threadPageScrollListener.contains('endPage + 1'), isTrue);
       expect(threadPageScrollListener.contains('currentPage - 1'), isFalse);
-      final threadPage =
-          File('lib/ui/thread/thread_page.dart').readAsStringSync();
       expect(threadPage.contains('_onThreadScrollNotification'), isTrue);
-      expect(threadPage.contains('_previousPullArmed'), isTrue);
-      expect(threadPage.contains('HapticFeedback.mediumImpact'), isTrue);
-      expect(threadPage.contains('ThreadScrollPhysics'), isTrue);
-      expect(threadPage.contains('clampLeading'), isTrue);
-      expect(threadPage.contains('currentPage > 1'), isTrue);
-      expect(threadPage.contains('threadScrollBounceEnabled'), isTrue);
-      expect(threadPage.contains('Transform.translate'), isTrue);
-      expect(threadPage.contains('_animatePullExtentTo'), isTrue);
-      expect(threadPage.contains('_PreviousPullIndicator'), isTrue);
-      expect(threadPage.contains('OverscrollNotification'), isTrue);
-      expect(threadPage.contains('extentBefore'), isTrue);
-      expect(threadPage.contains('ScrollEndNotification'), isTrue);
-      expect(threadPage.contains('ScrollDirection.idle'), isFalse);
-      expect(threadPage.contains('NotificationListener<ScrollNotification>'),
+      expect(previousPagePullController.contains('armed'), isTrue);
+      expect(
+          previousPagePullController.contains('HapticFeedback.mediumImpact'),
+          isTrue);
+      expect(threadPageLoadedBody.contains('ThreadScrollPhysics'), isTrue);
+      expect(threadPageLoadedBody.contains('clampLeading'), isTrue);
+      expect(threadPageLoadedBody.contains('currentPage > 1'), isTrue);
+      expect(
+          threadPageLoadedBody.contains('threadScrollBounceEnabled'), isTrue);
+      expect(threadPageLoadedBody.contains('Transform.translate'), isTrue);
+      expect(previousPagePullController.contains('animateExtentTo'), isTrue);
+      expect(threadModule.contains('_PreviousPullIndicator'), isTrue);
+      expect(
+          previousPagePullController.contains('OverscrollNotification'),
+          isTrue);
+      expect(previousPagePullController.contains('extentBefore'), isTrue);
+      expect(
+          previousPagePullController.contains('ScrollEndNotification'),
+          isTrue);
+      expect(threadModule.contains('ScrollDirection.idle'), isFalse);
+      expect(
+          threadPageLoadedBody
+              .contains('NotificationListener<ScrollNotification>'),
           isTrue);
       expect(previousSliver.contains('ThreadPageLoadingSkeletonCell'), isFalse);
-      final pullIndicator = File(
-              'lib/ui/thread/widgets/thread_page_previous_pull_indicator.dart')
-          .readAsStringSync();
-      expect(pullIndicator.contains('ThreadPageLoadingSkeletonCell'), isTrue);
-      expect(pullIndicator.contains('scaffoldBackgroundColor'), isTrue);
+      expect(
+          previousPullIndicator.contains('ThreadPageLoadingSkeletonCell'),
+          isTrue);
+      expect(
+          previousPullIndicator.contains('scaffoldBackgroundColor'), isTrue);
       final scrollPhysics =
           File('lib/ui/thread/thread_scroll_physics.dart').readAsStringSync();
       expect(scrollPhysics.contains('class ThreadScrollPhysics'), isTrue);
     });
 
     test('thread page pins center and does not restore scroll offset', () {
-      final threadPage =
-          File('lib/ui/thread/thread_page.dart').readAsStringSync();
+      expect(threadPage.contains('keepScrollOffset: false'), isTrue);
       expect(
-          threadPage.contains('keepScrollOffset: false'),
+          threadPageScrollController.contains('class ThreadPageScrollController'),
           isTrue);
-      expect(threadPage.contains('_ThreadScrollController'), isTrue);
-      expect(threadPage.contains('holdCenterAtZero'), isTrue);
-      expect(threadPage.contains('minScrollExtent'), isTrue);
-      expect(threadPage.contains('_didPinInitialCenter'), isTrue);
-      expect(threadPage.contains('jumpTo(0)'), isTrue);
+      expect(threadPageScrollController.contains('holdCenterAtZero'), isTrue);
+      expect(threadPageScrollController.contains('minScrollExtent'), isTrue);
+      expect(threadRestoreController.contains('didPinInitialCenter'), isTrue);
+      expect(threadRestoreController.contains('jumpTo(0)'), isTrue);
+      expect(threadPageScrollController.contains('void jumpTo(double value)'),
+          isTrue);
       // Last-reply restore: trailing edge + top pad for short pages.
-      expect(threadPage.contains('_pendingRestoreToTrailingEdge'), isTrue);
-      expect(threadPage.contains('_trailingEdgeLayoutActive'), isTrue);
-      expect(threadPage.contains('_trailingTopPad'), isTrue);
+      expect(
+          threadRestoreController.contains('pendingRestoreToTrailingEdge'),
+          isTrue);
+      expect(
+          threadRestoreController.contains('trailingEdgeLayoutActive'),
+          isTrue);
+      expect(threadRestoreController.contains('trailingTopPad'), isTrue);
       expect(threadPage.contains('_syncTrailingEdgeLayout'), isTrue);
       expect(threadPage.contains('_footerMeasureKey'), isTrue);
-      expect(threadPage.contains('maxScrollExtent'), isTrue);
+      expect(threadRestoreController.contains('maxScrollExtent'), isTrue);
       // Hide pre-pin frames; reveal after pad/offset stabilize.
-      expect(threadPage.contains('_restoreVisualReady'), isTrue);
-      expect(threadPage.contains('_revealRestoreContent'), isTrue);
-      expect(threadPage.contains('_noteRestorePinApplied'), isTrue);
-      expect(threadPage.contains('_kRestoreRevealTimeout'), isTrue);
-      // Viewport owns bottom SafeArea; footer does not pad inside scroll content.
-      expect(threadPage.contains('SafeArea('), isTrue);
+      expect(threadRestoreController.contains('visualReady'), isTrue);
+      expect(threadRestoreController.contains('revealContent'), isTrue);
+      expect(threadRestoreController.contains('notePinApplied'), isTrue);
+      expect(threadRestoreController.contains('revealTimeout'), isTrue);
+      // Edge-to-edge viewport; safe area applied as scroll content insets.
+      expect(threadModule.contains('SafeArea('), isFalse);
+      expect(threadPageLoadedBody.contains('viewPadding'), isTrue);
+      expect(threadPageLoadedBody.contains('SliverPadding'), isTrue);
       // Restore settle loop re-pins while remote images/embeds change extent.
-      expect(threadPage.contains('_restoreSettling'), isTrue);
+      expect(threadRestoreController.contains('settling'), isTrue);
       expect(threadPage.contains('_startRestoreSettle'), isTrue);
-      expect(threadPage.contains('_cancelRestoreSettle'), isTrue);
-      expect(threadPage.contains('_applyRestorePin'), isTrue);
-      expect(threadPage.contains('_kRestoreSettleDuration'), isTrue);
+      expect(threadRestoreController.contains('cancelSettle'), isTrue);
+      expect(threadRestoreController.contains('applyPin'), isTrue);
+      expect(threadRestoreController.contains('settleDuration'), isTrue);
+      // Module split: orchestration stays thin; helpers are libraries.
+      expect(threadPage.contains('PreviousPagePullController'), isTrue);
+      expect(threadPage.contains('ThreadRestoreController'), isTrue);
+      expect(threadPage.contains('ReplyAnchorRegistry'), isTrue);
+      expect(threadPage.contains('_buildLoadedThreadBody'), isTrue);
       final loadingSkeleton = File(
               'lib/ui/thread/skeletons/thread_page_loading_skeleton.dart')
           .readAsStringSync();

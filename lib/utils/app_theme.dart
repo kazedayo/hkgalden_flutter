@@ -17,6 +17,18 @@ class AppTheme {
   static const Color quoteLineColor = Color(0xFF4B5B53);
   static final Color skeletonColor = Colors.grey.withValues(alpha: 0.3);
 
+  /// Slightly lifted fill so link previews read as chips on comment cards.
+  /// Solid color only — no elevation/shadows.
+  static Color linkPreviewBackground(ColorScheme scheme) => Color.alphaBlend(
+        Colors.white.withValues(alpha: 0.10),
+        scheme.surface,
+      );
+
+  static const BorderSide linkPreviewBorder =
+      BorderSide(color: Color(0x28FFFFFF));
+
+  static const BorderRadius linkPreviewRadius = BorderRadius.all(Radius.circular(8));
+
   static ThemeData generate(BuildContext context) {
     return ThemeData(
       visualDensity: VisualDensity.compact,

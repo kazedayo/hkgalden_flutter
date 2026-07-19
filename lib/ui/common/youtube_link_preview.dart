@@ -59,8 +59,11 @@ class _YoutubeLinkPreviewState extends State<YoutubeLinkPreview> {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: Material(
-            color: theme.colorScheme.surface.withValues(alpha: 0.9),
-            borderRadius: BorderRadius.circular(8),
+            color: AppTheme.linkPreviewBackground(theme.colorScheme),
+            shape: const RoundedRectangleBorder(
+              borderRadius: AppTheme.linkPreviewRadius,
+              side: AppTheme.linkPreviewBorder,
+            ),
             clipBehavior: Clip.antiAlias,
             child: InkWell(
               onTap: widget.onOpen,

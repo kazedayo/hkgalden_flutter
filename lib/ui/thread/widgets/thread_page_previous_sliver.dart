@@ -6,7 +6,7 @@ Widget _generatePreviousPageSliver(
     ThreadLoaded state,
     int index,
     Function(BuildContext, ScrollController, Reply, bool) onReplySuccess,
-    _ReplyAnchorRegistry anchorRegistry) {
+    ReplyAnchorRegistry anchorRegistry) {
   final reply =
       state.previousPages.replies[state.previousPages.replies.length - index - 1];
   final cell = _buildCommentCell(context, scrollController, state, reply,

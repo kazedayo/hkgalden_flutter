@@ -9,10 +9,10 @@ Widget _buildCommentCell(
   ThreadLoaded state,
   Reply reply,
   Function(BuildContext, ScrollController, Reply, bool) onReplySuccess,
-  _ReplyAnchorRegistry anchorRegistry,
+  ReplyAnchorRegistry anchorRegistry,
 ) {
   final pageState = BlocProvider.of<ThreadPageCubit>(context).state;
-  return _ReplyPositionAnchor(
+  return ReplyPositionAnchor(
     floor: reply.floor,
     registry: anchorRegistry,
     child: CommentCell(
@@ -33,7 +33,7 @@ Widget _generatePageSliver(
   List<Reply> replies,
   int index,
   Function(BuildContext, ScrollController, Reply, bool) onReplySuccess,
-  _ReplyAnchorRegistry anchorRegistry, {
+  ReplyAnchorRegistry anchorRegistry, {
   required bool isTrailingWindow,
   GlobalKey? footerMeasureKey,
 }) {
