@@ -1,43 +1,55 @@
-part of '../thread_page.dart';
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hkgalden_flutter/bloc/cubit/thread_page_cubit.dart';
+import 'package:hkgalden_flutter/models/ui_state_models/thread_page_state.dart';
+import 'package:hkgalden_flutter/utils/route_arguments.dart';
 
-Widget _buildAppBar(BuildContext context, ThreadPageArguments arguments) {
-  return BlocBuilder<ThreadPageCubit, ThreadPageState>(
-    buildWhen: (prev, next) => prev.elevation != next.elevation,
-    builder: (context, state) => AppBar(
-      elevation: state.elevation,
-      automaticallyImplyLeading: false,
-      leading: IconButton(
+PreferredSizeWidget buildThreadPageAppBar(
+  BuildContext context,
+  ThreadPageArguments arguments,
+) {
+  return PreferredSize(
+    preferredSize: const Size.fromHeight(kToolbarHeight),
+    child: BlocBuilder<ThreadPageCubit, ThreadPageState>(
+      buildWhen: (prev, next) => prev.elevation != next.elevation,
+      builder: (context, state) => AppBar(
+        elevation: state.elevation,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
           icon: Icon(Theme.of(context).platform == TargetPlatform.iOS
               ? Icons.arrow_back_ios_rounded
               : Icons.arrow_back_rounded),
-          onPressed: () => Navigator.of(context).pop()),
-      title: SizedBox(
-        height: kToolbarHeight * 0.85,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Flexible(
-              child: AutoSizeText(
-                arguments.title,
-                style: const TextStyle(fontWeight: FontWeight.w700),
-                maxLines: 2,
-                minFontSize: 14,
-                maxFontSize: 19,
-              ),
-            )
-          ],
+          onPressed: () => Navigator.of(context).pop(),
         ),
-      ),
-      actions: [
-        Visibility(
-          visible: arguments.locked,
-          child: const Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: Icon(Icons.lock_rounded),
+        title: SizedBox(
+          height: kToolbarHeight * 0.85,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Flexible(
+                child: AutoSizeText(
+                  arguments.title,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                  maxLines: 2,
+                  minFontSize: 14,
+                  maxFontSize: 19,
+                ),
+              )
+            ],
           ),
-        )
-      ],
+        ),
+        actions: [
+          Visibility(
+            visible: arguments.locked,
+            child: const Padding(
+              padding: EdgeInsets.only(right: 16.0),
+              child: Icon(Icons.lock_rounded),
+            ),
+          )
+        ],
+      ),
     ),
   );
 }

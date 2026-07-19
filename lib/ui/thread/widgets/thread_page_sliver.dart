@@ -1,14 +1,28 @@
-part of '../thread_page.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hkgalden_flutter/bloc/cubit/thread_page_cubit.dart';
+import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
+import 'package:hkgalden_flutter/models/reply.dart';
+import 'package:hkgalden_flutter/ui/thread/comment_cell/comment_cell.dart';
+import 'package:hkgalden_flutter/ui/thread/reply_position_anchor.dart';
+import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_footer.dart';
+import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_header.dart';
 
-Object _replyListKey(Reply reply) =>
-    reply.replyId ?? 'floor_${reply.floor}';
+Object replyListKey(Reply reply) => reply.replyId ?? 'floor_${reply.floor}';
 
-Widget _buildCommentCell(
+typedef ThreadReplySuccessCallback = void Function(
+  BuildContext context,
+  ScrollController scrollController,
+  Reply reply,
+  bool onLastPage,
+);
+
+Widget buildThreadCommentCell(
   BuildContext context,
   ScrollController scrollController,
   ThreadLoaded state,
   Reply reply,
-  Function(BuildContext, ScrollController, Reply, bool) onReplySuccess,
+  ThreadReplySuccessCallback onReplySuccess,
   ReplyAnchorRegistry anchorRegistry,
 ) {
   final pageState = BlocProvider.of<ThreadPageCubit>(context).state;
@@ -26,13 +40,13 @@ Widget _buildCommentCell(
   );
 }
 
-Widget _generatePageSliver(
+Widget generateThreadPageSliver(
   BuildContext context,
   ScrollController scrollController,
   ThreadLoaded state,
   List<Reply> replies,
   int index,
-  Function(BuildContext, ScrollController, Reply, bool) onReplySuccess,
+  ThreadReplySuccessCallback onReplySuccess,
   ReplyAnchorRegistry anchorRegistry, {
   required bool isTrailingWindow,
   GlobalKey? footerMeasureKey,
@@ -40,18 +54,24 @@ Widget _generatePageSliver(
   final reply = replies[index];
   final isPageStart = reply.floor % 50 == 1;
   final isLast = isTrailingWindow && index == replies.length - 1;
-  final cell = _buildCommentCell(context, scrollController, state, reply,
-      onReplySuccess, anchorRegistry);
+  final cell = buildThreadCommentCell(
+    context,
+    scrollController,
+    state,
+    reply,
+    onReplySuccess,
+    anchorRegistry,
+  );
   final footer = isLast
-      ? _PageFooter(measureKey: footerMeasureKey)
+      ? ThreadPageFooter(measureKey: footerMeasureKey)
       : null;
 
-  final key = ValueKey<Object>(_replyListKey(reply));
+  final key = ValueKey<Object>(replyListKey(reply));
   if (isPageStart && isLast) {
     return Column(
       key: key,
       children: <Widget>[
-        _PageHeader(floor: reply.floor),
+        ThreadPageHeader(floor: reply.floor),
         cell,
         footer!,
       ],
@@ -60,7 +80,7 @@ Widget _generatePageSliver(
     return Column(
       key: key,
       children: <Widget>[
-        _PageHeader(floor: reply.floor),
+        ThreadPageHeader(floor: reply.floor),
         cell,
       ],
     );

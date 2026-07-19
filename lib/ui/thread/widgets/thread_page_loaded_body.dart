@@ -1,7 +1,17 @@
-part of '../thread_page.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
+import 'package:hkgalden_flutter/models/reply.dart';
+import 'package:hkgalden_flutter/ui/thread/reply_position_anchor.dart';
+import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_page_scroll_controller.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_scroll_physics.dart';
+import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_previous_pull_indicator.dart';
+import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_previous_sliver.dart';
+import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_sliver.dart';
 
 /// Scroll stack for a loaded thread (previous + prefix + center windows).
-Widget _buildLoadedThreadBody({
+Widget buildLoadedThreadBody({
   required BuildContext context,
   required ThreadLoaded state,
   required ThreadPageScrollController scrollController,
@@ -17,28 +27,28 @@ Widget _buildLoadedThreadBody({
   required bool Function(OverscrollIndicatorNotification) onOverscrollIndicator,
   required bool Function(ScrollNotification) onScrollNotification,
   required VoidCallback onTrailingMetrics,
-  required Function(BuildContext, ScrollController, Reply, bool) onReplySuccess,
+  required ThreadReplySuccessCallback onReplySuccess,
 }) {
   const Key centerKey = ValueKey('second-sliver-list');
 
   final allMain = state.thread.replies;
-  final prefixReplies = centerStartIndex > 0
+  final List<Reply> prefixReplies = centerStartIndex > 0
       ? allMain.sublist(0, centerStartIndex)
       : const <Reply>[];
-  final centerReplies =
+  final List<Reply> centerReplies =
       centerStartIndex > 0 ? allMain.sublist(centerStartIndex) : allMain;
 
   final prefixKeyToBuilderIndex = <Object, int>{
     for (var i = 0; i < prefixReplies.length; i++)
-      _replyListKey(prefixReplies[i]): prefixReplies.length - i - 1,
+      replyListKey(prefixReplies[i]): prefixReplies.length - i - 1,
   };
   final centerKeyToIndex = <Object, int>{
     for (var i = 0; i < centerReplies.length; i++)
-      _replyListKey(centerReplies[i]): i,
+      replyListKey(centerReplies[i]): i,
   };
   final previousKeyToBuilderIndex = <Object, int>{
     for (var i = 0; i < state.previousPages.replies.length; i++)
-      _replyListKey(state.previousPages.replies[i]):
+      replyListKey(state.previousPages.replies[i]):
           state.previousPages.replies.length - i - 1,
   };
   final previousCount = state.previousPages.replies.length;
@@ -71,7 +81,7 @@ Widget _buildLoadedThreadBody({
             return Stack(
               clipBehavior: Clip.hardEdge,
               children: [
-                _PreviousPullIndicator(
+                ThreadPagePreviousPullIndicator(
                   extent: displayExtent,
                   loading: previousPullLoading,
                 ),
@@ -103,7 +113,7 @@ Widget _buildLoadedThreadBody({
                             sliver: SliverList(
                               delegate: SliverChildBuilderDelegate(
                                 (context, index) {
-                                  return _generatePreviousPageSliver(
+                                  return generatePreviousThreadPageSliver(
                                     context,
                                     scrollController,
                                     state,
@@ -136,7 +146,7 @@ Widget _buildLoadedThreadBody({
                                   (context, index) {
                                     final dataIndex =
                                         prefixCount - index - 1;
-                                    return _generatePageSliver(
+                                    return generateThreadPageSliver(
                                       context,
                                       scrollController,
                                       state,
@@ -177,7 +187,7 @@ Widget _buildLoadedThreadBody({
                             sliver: SliverList(
                               delegate: SliverChildBuilderDelegate(
                                 (context, index) {
-                                  return _generatePageSliver(
+                                  return generateThreadPageSliver(
                                     context,
                                     scrollController,
                                     state,

@@ -1,9 +1,9 @@
-part of '../thread_page.dart';
+import 'package:flutter/material.dart';
 
-class _PageHeader extends StatelessWidget {
+class ThreadPageHeader extends StatelessWidget {
   final int floor;
 
-  const _PageHeader({required this.floor});
+  const ThreadPageHeader({super.key, required this.floor});
 
   @override
   Widget build(BuildContext context) => SizedBox(

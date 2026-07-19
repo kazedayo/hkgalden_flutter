@@ -1,7 +1,10 @@
-part of '../thread_page.dart';
+import 'package:flutter/material.dart';
+import 'package:hkgalden_flutter/ui/thread/previous_page_pull_controller.dart';
+import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton_cell.dart';
 
-class _PreviousPullIndicator extends StatelessWidget {
-  const _PreviousPullIndicator({
+class ThreadPagePreviousPullIndicator extends StatelessWidget {
+  const ThreadPagePreviousPullIndicator({
+    super.key,
     required this.extent,
     required this.loading,
   });

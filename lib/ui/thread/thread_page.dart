@@ -1,44 +1,23 @@
-import 'package:auto_size_text/auto_size_text.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/cubit/thread_page_cubit.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
-import 'package:hkgalden_flutter/enums/compose_mode.dart';
-import 'package:hkgalden_flutter/models/reply.dart';
-import 'package:hkgalden_flutter/models/thread_reading_position.dart';
-import 'package:hkgalden_flutter/models/ui_state_models/thread_page_state.dart';
 import 'package:hkgalden_flutter/repository/thread_repository.dart';
-import 'package:hkgalden_flutter/ui/common/compose_page/compose_page.dart';
-import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/error_page.dart';
-import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
-import 'package:hkgalden_flutter/ui/thread/comment_cell/comment_cell.dart';
 import 'package:hkgalden_flutter/ui/thread/previous_page_pull_controller.dart';
 import 'package:hkgalden_flutter/ui/thread/reply_position_anchor.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton.dart';
-import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton_cell.dart';
-import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton_header.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_page_bloc_listener.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_page_on_reply_success.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page_scroll_controller.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_page_scroll_listener.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_reading_position_tracker.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_restore_controller.dart';
-import 'package:hkgalden_flutter/ui/thread/thread_scroll_physics.dart';
-import 'package:hkgalden_flutter/utils/parsed_comment_html_cache.dart';
+import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_app_bar.dart';
+import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_fab.dart';
+import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_loaded_body.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
-import 'package:hkgalden_flutter/utils/thread_reading_position_store.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-
-part 'functions/thread_page_on_reply_success.dart';
-part 'functions/thread_page_scroll_controller_listener.dart';
-part 'widgets/thread_page_app_bar.dart';
-part 'widgets/thread_page_fab.dart';
-part 'widgets/thread_page_footer.dart';
-part 'widgets/thread_page_header.dart';
-part 'widgets/thread_page_previous_pull_indicator.dart';
-part 'widgets/thread_page_previous_sliver.dart';
-part 'widgets/thread_page_sliver.dart';
-part 'widgets/thread_page_loaded_body.dart';
 
 class ThreadPage extends StatefulWidget {
   const ThreadPage({super.key});
@@ -54,6 +33,7 @@ class _ThreadPageState extends State<ThreadPage>
   late final ThreadPageCubit _threadPageCubit;
   late final PreviousPagePullController _previousPull;
   late final ThreadRestoreController _restore;
+  late final ThreadReadingPositionTracker _reading;
 
   int? _previousImageCacheMaxBytes;
   bool _didCaptureArgs = false;
@@ -62,8 +42,6 @@ class _ThreadPageState extends State<ThreadPage>
       GlobalKey(debugLabel: 'threadPageFooter');
 
   final ReplyAnchorRegistry _anchorRegistry = ReplyAnchorRegistry();
-  int? _cachedLastFloor;
-  ThreadBloc? _threadBloc;
 
   static const int _kThreadImageCacheMaxBytes = 96 << 20; // 96 MiB
 
@@ -74,6 +52,10 @@ class _ThreadPageState extends State<ThreadPage>
     _threadPageCubit = ThreadPageCubit();
     _previousPull = PreviousPagePullController(vsync: this);
     _restore = ThreadRestoreController();
+    _reading = ThreadReadingPositionTracker(
+      scrollController: _scrollController,
+      anchorRegistry: _anchorRegistry,
+    );
     final imageCache = PaintingBinding.instance.imageCache;
     _previousImageCacheMaxBytes = imageCache.maximumSizeBytes;
     if (imageCache.maximumSizeBytes > _kThreadImageCacheMaxBytes) {
@@ -113,28 +95,14 @@ class _ThreadPageState extends State<ThreadPage>
     return box.localToGlobal(Offset(0, box.size.height)).dy;
   }
 
-  double? _viewportTopY() {
-    if (!_scrollController.hasClients) {
-      return null;
-    }
-    final notificationContext =
-        _scrollController.position.context.notificationContext;
-    final box = notificationContext?.findRenderObject();
-    if (box is! RenderBox || !box.hasSize || !box.attached) {
-      return null;
-    }
-    return box.localToGlobal(Offset.zero).dy;
+  double get _safeBottom => MediaQuery.viewPaddingOf(context).bottom;
+
+  void _persistReadingPosition() {
+    _reading.persist(safeBottom: _safeBottom);
   }
 
-  bool _isAtScrollTrailingEdge() {
-    if (!_scrollController.hasClients) {
-      return false;
-    }
-    final position = _scrollController.position;
-    if (!position.hasContentDimensions) {
-      return false;
-    }
-    return position.pixels >= position.maxScrollExtent - 1.0;
+  void _updateCachedReadingFloor() {
+    _reading.updateCachedFloor(safeBottom: _safeBottom);
   }
 
   void _syncTrailingEdgeLayout() {
@@ -142,84 +110,8 @@ class _ThreadPageState extends State<ThreadPage>
       mounted: mounted,
       scrollController: _scrollController,
       footerBottomY: _footerBottomY,
-      viewportTopY: _viewportTopY,
-      safeBottom: MediaQuery.viewPaddingOf(context).bottom,
-    );
-  }
-
-  void _updateCachedReadingFloor() {
-    final topY = _viewportTopY();
-    final atEnd = _isAtScrollTrailingEdge();
-
-    int? viewportTopFloor;
-    int? lastVisibleFloor;
-    if (topY != null) {
-      viewportTopFloor = _anchorRegistry.readingFloor(viewportTopY: topY);
-      if (atEnd && _scrollController.hasClients) {
-        final bottomY = topY +
-            _scrollController.position.viewportDimension -
-            MediaQuery.viewPaddingOf(context).bottom;
-        lastVisibleFloor = _anchorRegistry.lastVisibleFloor(
-          viewportTopY: topY,
-          viewportBottomY: bottomY,
-        );
-      }
-    }
-
-    final state = _threadBloc?.state;
-    final lastLoadedFloor = state is ThreadLoaded &&
-            state.thread.replies.isNotEmpty
-        ? state.thread.replies.last.floor
-        : null;
-
-    final floor = ThreadReadingPosition.resolveFloorForPersistence(
-      viewportTopFloor: viewportTopFloor,
-      lastVisibleFloor: lastVisibleFloor,
-      lastLoadedFloor: lastLoadedFloor,
-      atTrailingEdge: atEnd,
-    );
-    if (floor != null) {
-      _cachedLastFloor = floor;
-    }
-  }
-
-  void _persistReadingPosition() {
-    final bloc = _threadBloc;
-    if (bloc == null) {
-      return;
-    }
-    final state = bloc.state;
-    if (state is! ThreadLoaded) {
-      return;
-    }
-    if (_anchorRegistry.hasEntries) {
-      _updateCachedReadingFloor();
-    } else if (_isAtScrollTrailingEdge() &&
-        state.thread.replies.isNotEmpty) {
-      final lastLoaded = state.thread.replies.last.floor;
-      final resolved = ThreadReadingPosition.resolveFloorForPersistence(
-        viewportTopFloor: _cachedLastFloor,
-        lastVisibleFloor: null,
-        lastLoadedFloor: lastLoaded,
-        atTrailingEdge: true,
-      );
-      if (resolved != null) {
-        _cachedLastFloor = resolved;
-      }
-    }
-    final resolvedFloor = _cachedLastFloor ??
-        (state.thread.replies.isNotEmpty
-            ? state.thread.replies.last.floor
-            : null);
-    if (resolvedFloor == null) {
-      return;
-    }
-    _cachedLastFloor = resolvedFloor;
-    final page = ThreadReadingPosition.pageForFloor(resolvedFloor);
-    ThreadReadingPositionStore.instance.save(
-      state.thread.threadId,
-      page: page,
-      floor: resolvedFloor,
+      viewportTopY: _reading.viewportTopY,
+      safeBottom: _safeBottom,
     );
   }
 
@@ -231,7 +123,7 @@ class _ThreadPageState extends State<ThreadPage>
         _restore.pendingRestoreFloor! >= 1;
     _restore.resolveCenterAnchorIfNeeded(state);
     if (hadRestoreRequest) {
-      _cachedLastFloor ??= _restore.seedCachedFloor(state);
+      _reading.cachedLastFloor ??= _restore.seedCachedFloor(state);
     }
   }
 
@@ -241,8 +133,8 @@ class _ThreadPageState extends State<ThreadPage>
       mounted: mounted,
       scrollController: _scrollController,
       footerBottomY: _footerBottomY,
-      viewportTopY: _viewportTopY,
-      safeBottom: () => MediaQuery.viewPaddingOf(context).bottom,
+      viewportTopY: _reading.viewportTopY,
+      safeBottom: () => _safeBottom,
     );
   }
 
@@ -275,7 +167,7 @@ class _ThreadPageState extends State<ThreadPage>
     if (!_didCaptureArgs) {
       _didCaptureArgs = true;
       _restore.captureArgsFloor(arguments.floor);
-      _cachedLastFloor = arguments.floor;
+      _reading.cachedLastFloor = arguments.floor;
     }
 
     return MultiBlocProvider(
@@ -283,7 +175,7 @@ class _ThreadPageState extends State<ThreadPage>
         BlocProvider(create: (context) {
           final ThreadBloc threadBloc = ThreadBloc(
               repository: RepositoryProvider.of<ThreadRepository>(context));
-          _threadBloc = threadBloc;
+          _reading.threadBloc = threadBloc;
 
           if (route != null &&
               route.animation != null &&
@@ -306,12 +198,11 @@ class _ThreadPageState extends State<ThreadPage>
                 isInitialLoad: true));
           }
 
-          _initListener(
-            arguments,
-            threadBloc,
-            _scrollController,
-            _threadPageCubit,
-            _updateCachedReadingFloor,
+          attachThreadPageScrollListener(
+            threadBloc: threadBloc,
+            scrollController: _scrollController,
+            cubit: _threadPageCubit,
+            onScrollTick: _updateCachedReadingFloor,
           );
           return threadBloc;
         }),
@@ -330,42 +221,17 @@ class _ThreadPageState extends State<ThreadPage>
         },
         child: BlocConsumer<ThreadBloc, ThreadState>(
           listener: (context, state) {
-            if (state is ThreadLoaded) {
-              if ((state.thread.totalReplies.toDouble() / 50.0).ceil() >
-                  state.endPage) {
-                _threadPageCubit.setOnLastPage(false);
-              } else {
-                _threadPageCubit.setOnLastPage(true);
-              }
-              final session =
-                  BlocProvider.of<SessionUserBloc>(context).state;
-              ParsedCommentHtmlCache.instance.prewarm(
-                [
-                  ...state.thread.replies,
-                  ...state.previousPages.replies,
-                ],
-                session,
-              );
-              _previousPull.onThreadLoaded(
-                mounted: mounted,
-                scrollController: _scrollController,
-                hasPreviousReplies: state.previousPages.replies.isNotEmpty,
-                schedulePostFrame: (fn) {
-                  SchedulerBinding.instance.addPostFrameCallback((_) => fn());
-                },
-              );
-              _resolveCenterAnchorIfNeeded(state);
-
-              if (!_restore.didPinInitialCenter &&
-                  state.previousPages.replies.isEmpty) {
-                _restore.didPinInitialCenter = true;
-                _startRestoreSettle(
-                  trailingEdge: _restore.pendingRestoreToTrailingEdge,
-                );
-              }
-            } else if (state is ThreadError) {
-              _previousPull.clear(animate: true);
-            }
+            handleThreadPageBlocState(
+              state: state,
+              pageCubit: _threadPageCubit,
+              sessionState: BlocProvider.of<SessionUserBloc>(context).state,
+              previousPull: _previousPull,
+              restore: _restore,
+              mounted: mounted,
+              scrollController: _scrollController,
+              onResolveCenterAnchor: _resolveCenterAnchorIfNeeded,
+              onStartRestoreSettle: _startRestoreSettle,
+            );
           },
           buildWhen: (prev, state) =>
               state is! ThreadAppending && prev != state,
@@ -373,16 +239,13 @@ class _ThreadPageState extends State<ThreadPage>
             controller: _scrollController,
             child: Scaffold(
               resizeToAvoidBottomInset: false,
-              appBar: PreferredSize(
-                preferredSize: const Size.fromHeight(kToolbarHeight),
-                child: _buildAppBar(context, arguments),
-              ),
+              appBar: buildThreadPageAppBar(context, arguments),
               body: () {
                 if (state is ThreadLoading) {
                   return ThreadPageLoadingSkeleton();
                 } else if (state is ThreadLoaded) {
                   _resolveCenterAnchorIfNeeded(state);
-                  return _buildLoadedThreadBody(
+                  return buildLoadedThreadBody(
                     context: context,
                     state: state,
                     scrollController: _scrollController,
@@ -405,7 +268,7 @@ class _ThreadPageState extends State<ThreadPage>
                       BlocProvider.of<ThreadBloc>(context),
                     ),
                     onTrailingMetrics: _syncTrailingEdgeLayout,
-                    onReplySuccess: _onReplySuccess,
+                    onReplySuccess: onThreadReplySuccess,
                   );
                 } else if (state is ThreadError) {
                   return ErrorPage(
@@ -422,11 +285,11 @@ class _ThreadPageState extends State<ThreadPage>
               }(),
               floatingActionButton: arguments.locked
                   ? null
-                  : _buildFab(
+                  : buildThreadPageFab(
                       context,
                       _scrollController,
                       arguments,
-                      _onReplySuccess,
+                      onThreadReplySuccess,
                     ),
             ),
           ),

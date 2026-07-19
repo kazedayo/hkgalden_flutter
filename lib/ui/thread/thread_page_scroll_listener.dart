@@ -1,14 +1,16 @@
-part of '../thread_page.dart';
+import 'package:flutter/widgets.dart';
+import 'package:hkgalden_flutter/bloc/cubit/thread_page_cubit.dart';
+import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
 
-const double _kThreadPageLoadMoreThreshold = 480;
+const double kThreadPageLoadMoreThreshold = 480;
 
-void _initListener(
-  ThreadPageArguments arguments,
-  ThreadBloc threadBloc,
-  ScrollController scrollController,
-  ThreadPageCubit cubit,
-  void Function() onScrollTick,
-) {
+/// Attach load-more + app-bar elevation side effects to [scrollController].
+void attachThreadPageScrollListener({
+  required ThreadBloc threadBloc,
+  required ScrollController scrollController,
+  required ThreadPageCubit cubit,
+  required void Function() onScrollTick,
+}) {
   double? lastPixels;
 
   scrollController.addListener(() {
@@ -28,14 +30,15 @@ void _initListener(
 
     final state = threadBloc.state;
     if (state is ThreadLoaded) {
-      final nearBottom = pixels >=
-          position.maxScrollExtent - _kThreadPageLoadMoreThreshold;
+      final nearBottom =
+          pixels >= position.maxScrollExtent - kThreadPageLoadMoreThreshold;
 
       if (nearBottom && scrollingDown && !cubit.state.onLastPage) {
         threadBloc.add(RequestThreadEvent(
-            threadId: state.thread.threadId,
-            page: state.endPage + 1,
-            isInitialLoad: false));
+          threadId: state.thread.threadId,
+          page: state.endPage + 1,
+          isInitialLoad: false,
+        ));
       }
     }
     final double newElevation = pixels > 0 ? 4.0 : 0.0;

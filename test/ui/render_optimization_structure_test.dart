@@ -79,6 +79,8 @@ void main() {
     late String threadRestoreController;
     late String replyPositionAnchor;
     late String previousPullIndicator;
+    late String readingPositionTracker;
+    late String threadPageBlocListener;
 
     /// Combined sources for symbols split across the thread page module.
     late String threadModule;
@@ -110,8 +112,8 @@ void main() {
           read('lib/ui/thread/widgets/thread_page_footer.dart');
       threadPageSliver =
           read('lib/ui/thread/widgets/thread_page_sliver.dart');
-      threadPageScrollListener = read(
-          'lib/ui/thread/functions/thread_page_scroll_controller_listener.dart');
+      threadPageScrollListener =
+          read('lib/ui/thread/thread_page_scroll_listener.dart');
       threadPage = read('lib/ui/thread/thread_page.dart');
       threadPageLoadedBody =
           read('lib/ui/thread/widgets/thread_page_loaded_body.dart');
@@ -125,6 +127,10 @@ void main() {
           read('lib/ui/thread/reply_position_anchor.dart');
       previousPullIndicator = read(
           'lib/ui/thread/widgets/thread_page_previous_pull_indicator.dart');
+      readingPositionTracker =
+          read('lib/ui/thread/thread_reading_position_tracker.dart');
+      threadPageBlocListener =
+          read('lib/ui/thread/thread_page_bloc_listener.dart');
       threadModule = [
         threadPage,
         threadPageLoadedBody,
@@ -136,6 +142,10 @@ void main() {
         threadPageScrollListener,
         threadPageSliver,
         previousSliver,
+        readingPositionTracker,
+        threadPageBlocListener,
+        appBar,
+        threadPageFooter,
       ].join('\n');
     });
 
@@ -268,7 +278,7 @@ void main() {
       expect(threadPageFooter.contains('BlocBuilder<ThreadBloc'), isTrue);
       // Footer does not wrap SafeArea; list is edge-to-edge.
       expect(threadPageFooter.contains('SafeArea('), isFalse);
-      expect(threadPageSliver.contains('_PageFooter('), isTrue);
+      expect(threadPageSliver.contains('ThreadPageFooter('), isTrue);
       expect(threadPageSliver.contains('onLastPage:'), isFalse);
     });
 
@@ -305,13 +315,12 @@ void main() {
 
     test('M1: previous sliver keys with ValueKey for findChildIndexCallback',
         () {
-      expect(previousSliver.contains('ValueKey<Object>(_replyListKey(reply))'),
+      expect(previousSliver.contains('ValueKey<Object>(replyListKey(reply))'),
           isTrue);
       expect(previousSliver.contains('KeyedSubtree'), isTrue);
-      final threadPage = File('lib/ui/thread/thread_page.dart').readAsStringSync();
-      expect(threadPage.contains('previousKeyToBuilderIndex'), isTrue);
+      expect(threadPageLoadedBody.contains('previousKeyToBuilderIndex'), isTrue);
       expect(
-          threadPage.contains(
+          threadPageLoadedBody.contains(
               'state.previousPages.replies.length - i - 1'),
           isTrue);
       expect(threadPage.contains('BlocListener<SessionUserBloc'), isTrue);
@@ -359,7 +368,7 @@ void main() {
           threadPageLoadedBody.contains('threadScrollBounceEnabled'), isTrue);
       expect(threadPageLoadedBody.contains('Transform.translate'), isTrue);
       expect(previousPagePullController.contains('animateExtentTo'), isTrue);
-      expect(threadModule.contains('_PreviousPullIndicator'), isTrue);
+      expect(threadModule.contains('ThreadPagePreviousPullIndicator'), isTrue);
       expect(
           previousPagePullController.contains('OverscrollNotification'),
           isTrue);
@@ -424,7 +433,14 @@ void main() {
       expect(threadPage.contains('PreviousPagePullController'), isTrue);
       expect(threadPage.contains('ThreadRestoreController'), isTrue);
       expect(threadPage.contains('ReplyAnchorRegistry'), isTrue);
-      expect(threadPage.contains('_buildLoadedThreadBody'), isTrue);
+      expect(threadPage.contains('ThreadReadingPositionTracker'), isTrue);
+      expect(threadPage.contains('handleThreadPageBlocState'), isTrue);
+      expect(threadPage.contains('buildLoadedThreadBody'), isTrue);
+      expect(threadPage.contains('part '), isFalse);
+      expect(readingPositionTracker.contains('class ThreadReadingPositionTracker'),
+          isTrue);
+      expect(threadPageBlocListener.contains('handleThreadPageBlocState'),
+          isTrue);
       final loadingSkeleton = File(
               'lib/ui/thread/skeletons/thread_page_loading_skeleton.dart')
           .readAsStringSync();
