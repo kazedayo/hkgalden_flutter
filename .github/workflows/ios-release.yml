@@ -1,0 +1,239 @@
+# iOS Release — build a signed IPA and upload it to App Store Connect (TestFlight).
+#
+# Required repository secrets (GitHub → Settings → Secrets and variables → Actions):
+#
+#   HKGALDEN_CLIENT_ID
+#     App client id written into .env (same as Android release).
+#
+#   IOS_DISTRIBUTION_CERTIFICATE_BASE64
+#     Base64-encoded Apple Distribution .p12 certificate
+#     (openssl base64 -A -in cert.p12 | pbcopy).
+#
+#   IOS_DISTRIBUTION_CERTIFICATE_PASSWORD
+#     Password protecting the .p12 above.
+#
+#   IOS_PROVISIONING_PROFILE_BASE64
+#     Base64-encoded App Store distribution .mobileprovision for
+#     bundle id org.hkgalden.app.
+#
+#   APP_STORE_CONNECT_API_KEY_ID
+#     App Store Connect API Key ID (e.g. ABC123DEFG).
+#
+#   APP_STORE_CONNECT_ISSUER_ID
+#     App Store Connect API Issuer ID (UUID from Users and Access → Keys).
+#
+#   APP_STORE_CONNECT_API_KEY_BASE64
+#     Base64-encoded AuthKey_<KEY_ID>.p8 private key from App Store Connect.
+#
+# Optional:
+#   IOS_TEAM_ID — Apple Developer Team ID (defaults to R3W953ED69, matching
+#                 DEVELOPMENT_TEAM in ios/Runner.xcodeproj).
+
+name: iOS Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-and-upload:
+    name: Build IPA and upload to App Store Connect
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # .env is a Flutter asset (flutter_dotenv) and is gitignored; materialize from secrets for CI.
+      - name: Create .env
+        env:
+          HKGALDEN_CLIENT_ID: ${{ secrets.HKGALDEN_CLIENT_ID }}
+        run: |
+          if [ -z "$HKGALDEN_CLIENT_ID" ]; then
+            echo "::error::Repository secret HKGALDEN_CLIENT_ID is not set"
+            exit 1
+          fi
+          printf 'HKGALDEN_CLIENT_ID=%s\n' "$HKGALDEN_CLIENT_ID" > .env
+
+      - name: Verify required signing and App Store Connect secrets
+        env:
+          IOS_DISTRIBUTION_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_BASE64 }}
+          IOS_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+        run: |
+          missing=0
+          for name in \
+            IOS_DISTRIBUTION_CERTIFICATE_BASE64 \
+            IOS_DISTRIBUTION_CERTIFICATE_PASSWORD \
+            IOS_PROVISIONING_PROFILE_BASE64 \
+            APP_STORE_CONNECT_API_KEY_ID \
+            APP_STORE_CONNECT_ISSUER_ID \
+            APP_STORE_CONNECT_API_KEY_BASE64
+          do
+            if [ -z "${!name}" ]; then
+              echo "::error::Repository secret $name is not set"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Install Apple certificate and provisioning profile
+        env:
+          IOS_DISTRIBUTION_CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_BASE64 }}
+          IOS_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          CERTIFICATE_PATH="${RUNNER_TEMP}/distribution.p12"
+          PROFILE_PATH="${RUNNER_TEMP}/app.mobileprovision"
+          KEYCHAIN_PATH="${RUNNER_TEMP}/app-signing.keychain-db"
+
+          printf '%s' "$IOS_DISTRIBUTION_CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
+          printf '%s' "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode > "$PROFILE_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          security import "$CERTIFICATE_PATH" \
+            -P "$IOS_DISTRIBUTION_CERTIFICATE_PASSWORD" \
+            -A -t cert -f pkcs12 \
+            -k "$KEYCHAIN_PATH"
+          security set-key-partition-list \
+            -S apple-tool:,apple: \
+            -s -k "$KEYCHAIN_PASSWORD" \
+            "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH" login.keychain
+
+          # Install provisioning profile under its UUID (Xcode looks here).
+          PP_DIR="${HOME}/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PP_DIR"
+          security cms -D -i "$PROFILE_PATH" > "${RUNNER_TEMP}/profile.plist"
+          PP_UUID=$(/usr/libexec/PlistBuddy -c 'Print UUID' "${RUNNER_TEMP}/profile.plist")
+          PP_NAME=$(/usr/libexec/PlistBuddy -c 'Print Name' "${RUNNER_TEMP}/profile.plist")
+          cp "$PROFILE_PATH" "${PP_DIR}/${PP_UUID}.mobileprovision"
+          echo "Installed provisioning profile: ${PP_NAME} (${PP_UUID})"
+          echo "PROVISIONING_PROFILE_NAME=${PP_NAME}" >> "$GITHUB_ENV"
+          echo "PROVISIONING_PROFILE_UUID=${PP_UUID}" >> "$GITHUB_ENV"
+
+      - name: Write ExportOptions.plist and inject manual signing
+        env:
+          IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          TEAM_ID="${IOS_TEAM_ID:-R3W953ED69}"
+
+          # Build ExportOptions from the installed profile name so CI stays in sync.
+          rm -f ios/ExportOptions.ci.plist
+          /usr/libexec/PlistBuddy -c "Add :method string app-store-connect" ios/ExportOptions.ci.plist
+          /usr/libexec/PlistBuddy -c "Add :teamID string ${TEAM_ID}" ios/ExportOptions.ci.plist
+          /usr/libexec/PlistBuddy -c "Add :signingStyle string manual" ios/ExportOptions.ci.plist
+          /usr/libexec/PlistBuddy -c "Add :uploadSymbols bool true" ios/ExportOptions.ci.plist
+          /usr/libexec/PlistBuddy -c "Add :provisioningProfiles dict" ios/ExportOptions.ci.plist
+          /usr/libexec/PlistBuddy -c "Add :provisioningProfiles:org.hkgalden.app string ${PROVISIONING_PROFILE_NAME}" ios/ExportOptions.ci.plist
+          plutil -lint ios/ExportOptions.ci.plist
+
+          # flutter build ipa does NOT forward args after `--` to xcodebuild (they become
+          # the Dart --target path and fail with "Target file ... not found"). Inject
+          # manual signing into Release.xcconfig, which the Runner Release config includes.
+          {
+            echo ""
+            echo "// CI manual signing (injected by ios-release.yml; do not commit)"
+            echo "CODE_SIGN_STYLE=Manual"
+            echo "CODE_SIGN_IDENTITY[sdk=iphoneos*]=Apple Distribution"
+            echo "DEVELOPMENT_TEAM=${TEAM_ID}"
+            echo "PROVISIONING_PROFILE_SPECIFIER=${PROVISIONING_PROFILE_NAME}"
+          } >> ios/Flutter/Release.xcconfig
+          echo "--- ios/Flutter/Release.xcconfig (tail) ---"
+          tail -n 8 ios/Flutter/Release.xcconfig
+
+      - name: Build release IPA
+        run: |
+          set -euo pipefail
+          # Signing comes from Release.xcconfig + ExportOptions.ci.plist (previous step).
+          # Do not pass CODE_SIGN_* after `--` — flutter treats those as --target paths.
+          flutter build ipa --release \
+            --export-options-plist=ios/ExportOptions.ci.plist
+          # Fail clearly if no IPA was produced.
+          shopt -s nullglob
+          ipas=(build/ios/ipa/*.ipa)
+          if [ ${#ipas[@]} -eq 0 ]; then
+            echo "::error::No IPA found under build/ios/ipa/ after flutter build ipa"
+            exit 1
+          fi
+          echo "Built IPA: ${ipas[0]}"
+          echo "IPA_PATH=${ipas[0]}" >> "$GITHUB_ENV"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-ipa
+          path: build/ios/ipa/*.ipa
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload IPA to App Store Connect
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${IPA_PATH:-}" ] || [ ! -f "$IPA_PATH" ]; then
+            echo "::error::IPA_PATH is unset or file missing; build step must produce an IPA"
+            exit 1
+          fi
+
+          # altool / Transporter look for AuthKey_<KEY_ID>.p8 under these paths.
+          PRIVATE_KEYS_DIR="${HOME}/.appstoreconnect/private_keys"
+          mkdir -p "$PRIVATE_KEYS_DIR"
+          KEY_FILE="${PRIVATE_KEYS_DIR}/AuthKey_${APP_STORE_CONNECT_API_KEY_ID}.p8"
+          printf '%s' "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode > "$KEY_FILE"
+          chmod 600 "$KEY_FILE"
+
+          # Prefer modern iTMSTransporter; fall back to altool if needed.
+          if xcrun iTMSTransporter -help >/dev/null 2>&1; then
+            xcrun iTMSTransporter \
+              -m upload \
+              -assetFile "$IPA_PATH" \
+              -apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
+              -apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" \
+              -v informational
+          else
+            xcrun altool \
+              --upload-app \
+              --type ios \
+              -f "$IPA_PATH" \
+              --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
+              --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+          fi
+
+      - name: Clean up keychain and keys
+        if: always()
+        run: |
+          KEYCHAIN_PATH="${RUNNER_TEMP}/app-signing.keychain-db"
+          if [ -f "$KEYCHAIN_PATH" ]; then
+            security delete-keychain "$KEYCHAIN_PATH" || true
+          fi
+          rm -f "${HOME}/.appstoreconnect/private_keys/AuthKey_"*.p8 || true
+          rm -f "${RUNNER_TEMP}/distribution.p12" \
+                "${RUNNER_TEMP}/app.mobileprovision" \
+                "${RUNNER_TEMP}/profile.plist" || true

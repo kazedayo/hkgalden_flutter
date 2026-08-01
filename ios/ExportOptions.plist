@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>method</key>
+	<string>app-store-connect</string>
+	<key>teamID</key>
+	<string>R3W953ED69</string>
+	<key>signingStyle</key>
+	<string>manual</string>
+	<key>uploadSymbols</key>
+	<true/>
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>org.hkgalden.app</key>
+		<string>REPLACE_WITH_APP_STORE_PROFILE_NAME</string>
+	</dict>
+</dict>
+</plist>
