@@ -6,9 +6,11 @@ Widget _buildQuillEditor(
   QuillController controller,
   FocusNode focusNode,
   Future<String> Function(File) imageCallback,
+  List<SmileyPack> smileyPacks,
 ) =>
     _RichTextEditor(
       controller: controller,
       focusNode: focusNode,
       imagePickCallback: imageCallback,
+      smileyPacks: smileyPacks,
     );

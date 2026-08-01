@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:graphql/client.dart';
 import 'package:hkgalden_flutter/models/channel.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
+import 'package:hkgalden_flutter/models/smiley_pack.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/utils/token_store.dart';
@@ -361,6 +362,35 @@ class HKGaldenApi {
       mutation,
       variables: <String, dynamic>{'userId': userId},
       parse: (data) => data['blockUser'] as bool,
+    );
+  }
+
+  /// Returns installed smiley packs (empty list when unauthenticated).
+  Future<List<SmileyPack>?> getInstalledPacksQuery() {
+    const String query = '''
+      query GetInstalledPacks {
+        installedPacks {
+          id
+          title
+          smilies {
+            id
+            alt
+            width
+            height
+          }
+        }
+      }
+    ''';
+
+    return _query(
+      query,
+      parse: (data) {
+        final List<dynamic> result =
+            data['installedPacks'] as List<dynamic>? ?? const [];
+        return result
+            .map((e) => SmileyPack.fromJson(e as Map<String, dynamic>))
+            .toList();
+      },
     );
   }
 }

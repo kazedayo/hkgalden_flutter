@@ -10,6 +10,7 @@ import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/repository/channel_repository.dart';
 import 'package:hkgalden_flutter/repository/session_user_repository.dart';
+import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
 import 'package:hkgalden_flutter/repository/thread_list_repository.dart';
 import 'package:hkgalden_flutter/repository/thread_repository.dart';
 import 'package:hkgalden_flutter/ui/startup_screen.dart';
@@ -56,6 +57,9 @@ class MyApp extends StatelessWidget {
                 api: RepositoryProvider.of<HKGaldenApi>(context))),
         RepositoryProvider(
             create: (context) => ThreadRepository(
+                api: RepositoryProvider.of<HKGaldenApi>(context))),
+        RepositoryProvider(
+            create: (context) => SmileyPackRepository(
                 api: RepositoryProvider.of<HKGaldenApi>(context))),
       ],
       child: MultiBlocProvider(

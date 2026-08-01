@@ -61,6 +61,17 @@ class DeltaJsonParser {
             currentRow.clear();
           }
         }
+      } else if (insert is Map) {
+        // flutter_quill embed shape: {"insert":{"smiley":{...}}} / {"insert":{"image":"url"}}
+        final embedHtml = await _quillEmbedInsertToHtml(
+          Map<String, dynamic>.from(insert),
+        );
+        if (embedHtml != null) {
+          currentRow.write(embedHtml);
+        } else if (attributes.isNotEmpty) {
+          final styled = await _applyAttributes('', attributes);
+          currentRow.write(styled);
+        }
       } else if (insert != null) {
         if (attributes.isNotEmpty) {
           final styled = await _applyAttributes('', attributes);
@@ -135,6 +146,25 @@ class DeltaJsonParser {
     return styled;
   }
 
+  /// Handles flutter_quill native embed inserts (`{"smiley":...}` / `{"image":...}`).
+  Future<String?> _quillEmbedInsertToHtml(Map<String, dynamic> insert) async {
+    final smileyValue = insert['smiley'];
+    if (smileyValue is Map) {
+      return _smileyEmbedToHtml(Map<String, dynamic>.from(smileyValue));
+    }
+
+    final imageValue = insert['image'];
+    if (imageValue is String && imageValue.isNotEmpty) {
+      final image = await _getImageDimension(imageValue);
+      return '<span ${GaldenNodeTypes.dataNodetype}="${GaldenNodeTypes.img}" '
+          '${GaldenNodeTypes.dataSrc}="${_escapeHtmlAttr(imageValue)}" '
+          '${GaldenNodeTypes.dataSx}="${image.width}" '
+          '${GaldenNodeTypes.dataSy}="${image.height}"></span>';
+    }
+
+    return null;
+  }
+
   String? _smileyEmbedToHtml(Map<String, dynamic> embed) {
     final id = _readEmbedString(embed, const [
       'id',
@@ -150,8 +180,9 @@ class DeltaJsonParser {
       return null;
     }
 
-    final sx = _readEmbedString(embed, const ['sx', 'data-sx']);
-    final sy = _readEmbedString(embed, const ['sy', 'data-sy']);
+    // Editor payload uses width/height; Zefyr/legacy and HTML use sx/sy.
+    final sx = _readEmbedString(embed, const ['sx', 'data-sx', 'width']);
+    final sy = _readEmbedString(embed, const ['sy', 'data-sy', 'height']);
     final alt = _readEmbedString(embed, const ['alt', 'data-alt']);
 
     final buffer = StringBuffer()

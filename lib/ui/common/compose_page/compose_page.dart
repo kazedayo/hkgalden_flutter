@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,7 +24,13 @@ import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:hkgalden_flutter/bloc/cubit/compose_cubit.dart';
 import 'package:hkgalden_flutter/bloc/cubit/compose_state.dart';
 import 'package:hkgalden_flutter/bloc/cubit/url_validation_cubit.dart';
+import 'package:hkgalden_flutter/models/smiley.dart';
+import 'package:hkgalden_flutter/models/smiley_pack.dart';
+import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
 import 'package:hkgalden_flutter/repository/thread_repository.dart';
+import 'package:hkgalden_flutter/utils/smiley_cdn.dart';
+import 'package:hkgalden_flutter/utils/smiley_embed.dart';
+import 'package:hkgalden_flutter/utils/smiley_pack_selection.dart';
 
 part 'widgets/compose_page_tag_select_dialog.dart';
 part 'widgets/quill_editor.dart';
@@ -32,6 +39,7 @@ part 'widgets/link_dialog.dart';
 part 'widgets/image_insert_dialog.dart';
 part 'widgets/rich_text_toolbar.dart';
 part 'widgets/rich_text_editor.dart';
+part 'widgets/smiley_pane.dart';
 
 class ComposePage extends StatefulWidget {
   final ComposeMode composeMode;
@@ -61,6 +69,7 @@ class ComposePageState extends State<ComposePage> {
   late FocusNode _titleFocusNode;
 
   String? _cachedQuoteHtml;
+  List<SmileyPack> _smileyPacks = const [];
 
   @override
   void initState() {
@@ -71,6 +80,18 @@ class ComposePageState extends State<ComposePage> {
     _focusNode = FocusNode();
     _titleFocusNode = FocusNode();
     super.initState();
+    _loadSmileyPacks();
+  }
+
+  Future<void> _loadSmileyPacks() async {
+    try {
+      final packs =
+          await context.read<SmileyPackRepository>().getInstalledPacks();
+      if (!mounted || packs == null) return;
+      setState(() => _smileyPacks = packs);
+    } catch (_) {
+      // Unauthenticated / missing provider: empty packs, picker stays hidden.
+    }
   }
 
   @override
@@ -246,10 +267,12 @@ class ComposePageState extends State<ComposePage> {
                 Expanded(
                   child: Builder(builder: (builderContext) {
                     return _buildQuillEditor(
-                        builderContext,
-                        _controller,
-                        _focusNode,
-                        (file) => _onImagePickCallback(builderContext, file));
+                      builderContext,
+                      _controller,
+                      _focusNode,
+                      (file) => _onImagePickCallback(builderContext, file),
+                      _smileyPacks,
+                    );
                   }),
                 )
               ],

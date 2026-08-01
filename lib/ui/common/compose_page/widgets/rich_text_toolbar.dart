@@ -120,10 +120,18 @@ class _ColorPickerPopup extends StatelessWidget {
 class _RichTextToolbar extends StatefulWidget {
   final QuillController controller;
   final Future<String> Function(File)? imagePickCallback;
+  final bool showSmileyButton;
+  final bool isSmileyKeyboardOpen;
+  final VoidCallback? onToggleSmileyKeyboard;
+  final bool applyBottomSafeArea;
 
   const _RichTextToolbar({
     required this.controller,
     this.imagePickCallback,
+    this.showSmileyButton = false,
+    this.isSmileyKeyboardOpen = false,
+    this.onToggleSmileyKeyboard,
+    this.applyBottomSafeArea = true,
   });
 
   @override
@@ -347,104 +355,117 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
         Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12);
     final isColorPickerOpen = _colorOverlay != null;
 
+    final toolbarBody = SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+      child: Row(
+        children: [
+          if (widget.showSmileyButton &&
+              widget.onToggleSmileyKeyboard != null) ...[
+            // Emoji when system keyboard is up; keyboard icon when smiley panel is open.
+            _ToolbarButton(
+              icon: widget.isSmileyKeyboardOpen
+                  ? Icons.keyboard_rounded
+                  : Icons.emoji_emotions_outlined,
+              isActive: widget.isSmileyKeyboardOpen,
+              onPressed: widget.onToggleSmileyKeyboard!,
+            ),
+            const SizedBox(width: 3),
+          ],
+          _ColorButton(
+            key: _colorBtnKey,
+            activeColor: _activeColor,
+            isPickerOpen: isColorPickerOpen,
+            onPressed: _toggleColorPicker,
+          ),
+
+          _buildDivider(dividerColor),
+
+          _ToolbarButton(
+            icon: Icons.format_bold_rounded,
+            isActive: _isBold,
+            onPressed: () => _toggle(Attribute.bold, _isBold),
+          ),
+          const SizedBox(width: 3),
+          _ToolbarButton(
+            icon: Icons.format_italic_rounded,
+            isActive: _isItalic,
+            onPressed: () => _toggle(Attribute.italic, _isItalic),
+          ),
+          const SizedBox(width: 3),
+          _ToolbarButton(
+            icon: Icons.format_underlined_rounded,
+            isActive: _isUnderline,
+            onPressed: () => _toggle(Attribute.underline, _isUnderline),
+          ),
+          const SizedBox(width: 3),
+          _ToolbarButton(
+            icon: Icons.format_strikethrough_rounded,
+            isActive: _isStrikethrough,
+            onPressed: () =>
+                _toggle(Attribute.strikeThrough, _isStrikethrough),
+          ),
+
+          _buildDivider(dividerColor),
+
+          _ToolbarButton(
+            icon: Icons.format_align_center_rounded,
+            isActive: _isCenterAlign,
+            onPressed: () =>
+                _toggleAlignment(Attribute.centerAlignment, _isCenterAlign),
+          ),
+          const SizedBox(width: 3),
+          _ToolbarButton(
+            icon: Icons.format_align_right_rounded,
+            isActive: _isRightAlign,
+            onPressed: () =>
+                _toggleAlignment(Attribute.rightAlignment, _isRightAlign),
+          ),
+
+          _buildDivider(dividerColor),
+
+          _ToolbarButton(
+            label: 'H1',
+            isActive: _isH1,
+            onPressed: () => _toggleSize('h1', _isH1),
+          ),
+          const SizedBox(width: 3),
+          _ToolbarButton(
+            label: 'H2',
+            isActive: _isH2,
+            onPressed: () => _toggleSize('h2', _isH2),
+          ),
+          const SizedBox(width: 3),
+          _ToolbarButton(
+            label: 'H3',
+            isActive: _isH3,
+            onPressed: () => _toggleSize('h3', _isH3),
+          ),
+
+          _buildDivider(dividerColor),
+
+          _ToolbarButton(
+            icon: Icons.link_rounded,
+            isActive: false,
+            onPressed: () => _insertLink(context),
+          ),
+
+          _ToolbarButton(
+            icon: Icons.image_rounded,
+            isActive: false,
+            onPressed: () => _insertImage(context),
+          ),
+        ],
+      ),
+    );
+
     return Container(
       decoration: BoxDecoration(
         border: Border(top: BorderSide(color: dividerColor)),
       ),
-      child: SafeArea(
-        top: false,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-          child: Row(
-            children: [
-              _ColorButton(
-                key: _colorBtnKey,
-                activeColor: _activeColor,
-                isPickerOpen: isColorPickerOpen,
-                onPressed: _toggleColorPicker,
-              ),
-
-              _buildDivider(dividerColor),
-
-              _ToolbarButton(
-                icon: Icons.format_bold_rounded,
-                isActive: _isBold,
-                onPressed: () => _toggle(Attribute.bold, _isBold),
-              ),
-              const SizedBox(width: 3),
-              _ToolbarButton(
-                icon: Icons.format_italic_rounded,
-                isActive: _isItalic,
-                onPressed: () => _toggle(Attribute.italic, _isItalic),
-              ),
-              const SizedBox(width: 3),
-              _ToolbarButton(
-                icon: Icons.format_underlined_rounded,
-                isActive: _isUnderline,
-                onPressed: () => _toggle(Attribute.underline, _isUnderline),
-              ),
-              const SizedBox(width: 3),
-              _ToolbarButton(
-                icon: Icons.format_strikethrough_rounded,
-                isActive: _isStrikethrough,
-                onPressed: () =>
-                    _toggle(Attribute.strikeThrough, _isStrikethrough),
-              ),
-
-              _buildDivider(dividerColor),
-
-              _ToolbarButton(
-                icon: Icons.format_align_center_rounded,
-                isActive: _isCenterAlign,
-                onPressed: () =>
-                    _toggleAlignment(Attribute.centerAlignment, _isCenterAlign),
-              ),
-              const SizedBox(width: 3),
-              _ToolbarButton(
-                icon: Icons.format_align_right_rounded,
-                isActive: _isRightAlign,
-                onPressed: () =>
-                    _toggleAlignment(Attribute.rightAlignment, _isRightAlign),
-              ),
-
-              _buildDivider(dividerColor),
-
-              _ToolbarButton(
-                label: 'H1',
-                isActive: _isH1,
-                onPressed: () => _toggleSize('h1', _isH1),
-              ),
-              const SizedBox(width: 3),
-              _ToolbarButton(
-                label: 'H2',
-                isActive: _isH2,
-                onPressed: () => _toggleSize('h2', _isH2),
-              ),
-              const SizedBox(width: 3),
-              _ToolbarButton(
-                label: 'H3',
-                isActive: _isH3,
-                onPressed: () => _toggleSize('h3', _isH3),
-              ),
-
-              _buildDivider(dividerColor),
-
-              _ToolbarButton(
-                icon: Icons.link_rounded,
-                isActive: false,
-                onPressed: () => _insertLink(context),
-              ),
-
-              _ToolbarButton(
-                icon: Icons.image_rounded,
-                isActive: false,
-                onPressed: () => _insertImage(context),
-              ),
-            ],
-          ),
-        ),
-      ),
+      child: widget.applyBottomSafeArea
+          ? SafeArea(top: false, child: toolbarBody)
+          : toolbarBody,
     );
   }
 

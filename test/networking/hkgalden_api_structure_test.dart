@@ -49,4 +49,19 @@ void main() {
     final getThreadBody = apiSource.substring(getThreadStart, getThreadEnd);
     expect(getThreadBody.contains('FetchPolicy.networkOnly'), isTrue);
   });
+
+  test('getInstalledPacksQuery requests installedPacks with smiley fields', () {
+    expect(apiSource.contains('getInstalledPacksQuery'), isTrue);
+    expect(apiSource.contains('installedPacks'), isTrue);
+    final start = apiSource.indexOf('getInstalledPacksQuery');
+    expect(start, greaterThanOrEqualTo(0));
+    final body = apiSource.substring(start);
+    expect(body.contains('id'), isTrue);
+    expect(body.contains('title'), isTrue);
+    expect(body.contains('smilies'), isTrue);
+    expect(body.contains('alt'), isTrue);
+    expect(body.contains('width'), isTrue);
+    expect(body.contains('height'), isTrue);
+    expect(body.contains('SmileyPack.fromJson'), isTrue);
+  });
 }

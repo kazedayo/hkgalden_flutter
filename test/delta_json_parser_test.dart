@@ -302,6 +302,53 @@ void main() {
     );
 
     test(
+      'quill-native smiley insert {smiley:{...}} with width/height maps to sx/sy',
+      () async {
+        final html = await parser.toGaldenHtml([
+          {
+            'insert': {
+              'smiley': {
+                'id': 'A7WUrp9FZ62',
+                'packId': 'hkg',
+                'width': 21,
+                'height': 17,
+                'alt': '[sosad]',
+              },
+            },
+          },
+          {'insert': '\n'},
+        ]);
+
+        expect(html, contains('data-nodetype="smiley"'));
+        expect(html, contains('data-id="A7WUrp9FZ62"'));
+        expect(html, contains('data-pack-id="hkg"'));
+        expect(html, contains('data-sx="21"'));
+        expect(html, contains('data-sy="17"'));
+        expect(html, contains('data-alt="[sosad]"'));
+      },
+    );
+
+    test(
+      'quill-native image insert {image:url} produces img span',
+      () async {
+        final sizedParser = DeltaJsonParser(
+          imageSizeResolver: (url) async => (width: 640, height: 480),
+        );
+        final html = await sizedParser.toGaldenHtml([
+          {
+            'insert': {'image': 'https://cdn.example.com/a.png'},
+          },
+          {'insert': '\n'},
+        ]);
+
+        expect(html, contains('data-nodetype="img"'));
+        expect(html, contains('data-src="https://cdn.example.com/a.png"'));
+        expect(html, contains('data-sx="640"'));
+        expect(html, contains('data-sy="480"'));
+      },
+    );
+
+    test(
       'smiley embed missing packId does not throw and does not emit incomplete smiley',
       () async {
         final html = await parser.toGaldenHtml([
