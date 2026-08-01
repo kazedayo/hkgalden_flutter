@@ -54,3 +54,10 @@ ios/ExportOptions.ci.plist
 .fvm/
 # Local agent instructions
 AGENTS.md
+
+# Local Apple CSR/key material (never commit)
+distribution.csr
+distribution.key
+*.p12
+*.mobileprovision
+AuthKey_*.p8
