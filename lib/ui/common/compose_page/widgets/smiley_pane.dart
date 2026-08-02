@@ -12,10 +12,7 @@ class _SmileyPane extends StatefulWidget {
   final QuillController controller;
   final List<SmileyPack> packs;
 
-  const _SmileyPane({
-    required this.controller,
-    required this.packs,
-  });
+  const _SmileyPane({required this.controller, required this.packs});
 
   @override
   State<_SmileyPane> createState() => _SmileyPaneState();
@@ -107,7 +104,9 @@ class _SmileyPaneState extends State<_SmileyPane> {
                     controller: _packsScrollController,
                     primary: false,
                     padding: const EdgeInsets.symmetric(
-                        vertical: 6, horizontal: 6),
+                      vertical: 6,
+                      horizontal: 6,
+                    ),
                     itemCount: widget.packs.length,
                     itemBuilder: (context, index) {
                       final p = widget.packs[index];
@@ -116,8 +115,10 @@ class _SmileyPaneState extends State<_SmileyPane> {
                       }
                       final first = p.smilies.first;
                       final selected = p.id == _currentPackId;
-                      final url =
-                          smileyGifUrl(packId: p.id, smileyId: first.id);
+                      final url = smileyGifUrl(
+                        packId: p.id,
+                        smileyId: first.id,
+                      );
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2),
                         child: Material(
@@ -138,13 +139,13 @@ class _SmileyPaneState extends State<_SmileyPane> {
                                 gaplessPlayback: true,
                                 errorBuilder: (context, error, stackTrace) =>
                                     Icon(
-                                  Icons.emoji_emotions_outlined,
-                                  size: 22,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurface
-                                      .withValues(alpha: 0.4),
-                                ),
+                                      Icons.emoji_emotions_outlined,
+                                      size: 22,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.4),
+                                    ),
                               ),
                             ),
                           ),
@@ -167,7 +168,19 @@ class _SmileyPaneState extends State<_SmileyPane> {
                             runSpacing: 4,
                             children: pack.smilies.map((smiley) {
                               final url = smileyGifUrl(
-                                  packId: pack.id, smileyId: smiley.id);
+                                packId: pack.id,
+                                smileyId: smiley.id,
+                              );
+                              // Height-bounded with variable width so wide
+                              // smileys render just as large as 1:1 ones.
+                              const baseHeight = 28.0;
+                              final aspect = smiley.height == 0
+                                  ? 1.0
+                                  : smiley.width / smiley.height;
+                              final imageWidth = (baseHeight * aspect).clamp(
+                                6.0,
+                                72.0,
+                              );
                               return InkWell(
                                 borderRadius: BorderRadius.circular(4),
                                 onTap: () => _onSmileyTap(smiley),
@@ -175,20 +188,20 @@ class _SmileyPaneState extends State<_SmileyPane> {
                                   padding: const EdgeInsets.all(6),
                                   child: Image.network(
                                     url,
-                                    width: 36,
-                                    height: 36,
+                                    width: imageWidth,
+                                    height: baseHeight,
                                     fit: BoxFit.contain,
                                     gaplessPlayback: true,
                                     semanticLabel: smiley.alt,
                                     errorBuilder:
                                         (context, error, stackTrace) => Icon(
-                                      Icons.broken_image_outlined,
-                                      size: 20,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface
-                                          .withValues(alpha: 0.35),
-                                    ),
+                                          Icons.broken_image_outlined,
+                                          size: 20,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withValues(alpha: 0.35),
+                                        ),
                                   ),
                                 ),
                               );
