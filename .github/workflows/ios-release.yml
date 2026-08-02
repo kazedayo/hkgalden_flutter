@@ -168,7 +168,14 @@ jobs:
           set -euo pipefail
           # Signing comes from Release.xcconfig + ExportOptions.ci.plist (previous step).
           # Do not pass CODE_SIGN_* after `--` — flutter treats those as --target paths.
+          #
+          # App Store Connect rejects a build whose CFBundleVersion has already been
+          # uploaded. GITHUB_RUN_NUMBER strictly increases with every run of this
+          # workflow (each push is a new run), so it always yields an unused, higher
+          # build number than the previous upload. It overrides the `+<build>` in
+          # pubspec.yaml for the iOS build only; Android is unaffected.
           flutter build ipa --release \
+            --build-number=$GITHUB_RUN_NUMBER \
             --export-options-plist=ios/ExportOptions.ci.plist
           # Fail clearly if no IPA was produced.
           shopt -s nullglob
