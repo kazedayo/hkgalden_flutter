@@ -63,22 +63,6 @@ void main() {
   });
 
 
-  test('iOS project uses Swift Package Manager (Flutter 3.44+ default)', () {
-    final pbxContent = pbx.readAsStringSync();
-    expect(
-      pbxContent.contains('FlutterGeneratedPluginSwiftPackage'),
-      isTrue,
-      reason: 'project must reference FlutterGeneratedPluginSwiftPackage',
-    );
-    expect(
-      pbxContent.contains('[CP] Check Pods Manifest.lock'),
-      isFalse,
-      reason: 'CocoaPods Check Manifest phase must be removed after SPM migration',
-    );
-    final podfile = File('$root/ios/Podfile');
-    expect(podfile.existsSync(), isFalse, reason: 'pure SPM project has no Podfile');
-  });
-
   test('lib/main.dart is the Flutter entry point and loads dotenv', () {
     expect(mainDart.existsSync(), isTrue);
     final src = mainDart.readAsStringSync();

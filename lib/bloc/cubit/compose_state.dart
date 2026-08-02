@@ -17,7 +17,7 @@ class ComposeSuccess extends ComposeState {
   const ComposeSuccess({this.result});
 
   @override
-  List<Object> get props => [if (result != null) result!];
+  List<Object> get props => [?result];
 }
 
 class ComposeFailure extends ComposeState {
