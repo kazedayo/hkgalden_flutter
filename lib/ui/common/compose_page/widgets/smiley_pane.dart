@@ -73,40 +73,43 @@ class _SmileyPaneState extends State<_SmileyPane> {
       return const SizedBox.shrink();
     }
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final borderColor = isDark ? Colors.white24 : Colors.black12;
-    final surface = Theme.of(context).colorScheme.surface;
+    final borderColor =
+        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12);
+    final surface = Theme.of(context).scaffoldBackgroundColor;
     final pack = _currentPack;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
     final screenHeight = MediaQuery.sizeOf(context).height;
     // Approximate soft-keyboard height without covering the whole compose UI.
     final panelHeight = (screenHeight * 0.32).clamp(220.0, 300.0);
 
     return Material(
       color: surface,
-      child: SafeArea(
-        top: false,
+      // Content (background) extends into the bottom safe area, while the
+      // scrollables below pad by [bottomPadding] to keep items clear of it.
+      child: NotificationListener<ScrollNotification>(
         // Swallow scroll notifications so modal_bottom_sheet does not treat
         // smiley-pane scrolling as a dismiss drag (in addition to primary:false).
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (_) => true,
-          child: Container(
-            height: panelHeight,
-            decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: borderColor)),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Pack list (web: .packs) — first smiley of each pack as icon
-                SizedBox(
-                  width: 56,
-                  child: ListView.builder(
-                    controller: _packsScrollController,
-                    primary: false,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 6,
-                      horizontal: 6,
-                    ),
+        onNotification: (_) => true,
+        child: Container(
+          height: panelHeight + bottomPadding,
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: borderColor)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Pack list (web: .packs) — first smiley of each pack as icon
+              SizedBox(
+                width: 56,
+                child: ListView.builder(
+                  controller: _packsScrollController,
+                  primary: false,
+                  padding: EdgeInsets.fromLTRB(
+                    6,
+                    6,
+                    6,
+                    6 + bottomPadding,
+                  ),
                     itemCount: widget.packs.length,
                     itemBuilder: (context, index) {
                       final p = widget.packs[index];
@@ -122,30 +125,35 @@ class _SmileyPaneState extends State<_SmileyPane> {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2),
                         child: Material(
-                          color: selected
-                              ? AppTheme.primaryColor.withValues(alpha: 0.2)
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(6),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(6),
-                            onTap: () => _onPackTap(p.id),
-                            child: Padding(
-                              padding: const EdgeInsets.all(6),
-                              child: Image.network(
-                                url,
-                                width: 28,
-                                height: 28,
-                                fit: BoxFit.contain,
-                                gaplessPlayback: true,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Icon(
-                                      Icons.emoji_emotions_outlined,
-                                      size: 22,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface
-                                          .withValues(alpha: 0.4),
-                                    ),
+                          color: Colors.transparent,
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              color: selected
+                                  ? AppTheme.primaryColor
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(6),
+                              onTap: () => _onPackTap(p.id),
+                              child: Padding(
+                                padding: const EdgeInsets.all(6),
+                                child: Image.network(
+                                  url,
+                                  width: 28,
+                                  height: 28,
+                                  fit: BoxFit.contain,
+                                  gaplessPlayback: true,
+                                  errorBuilder:
+                                      (context, error, stackTrace) => Icon(
+                                        Icons.emoji_emotions_outlined,
+                                        size: 22,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface
+                                            .withValues(alpha: 0.4),
+                                      ),
+                                ),
                               ),
                             ),
                           ),
@@ -162,7 +170,7 @@ class _SmileyPaneState extends State<_SmileyPane> {
                       : SingleChildScrollView(
                           controller: _smiliesScrollController,
                           primary: false,
-                          padding: const EdgeInsets.all(8),
+                          padding: EdgeInsets.fromLTRB(8, 8, 8, 8 + bottomPadding),
                           child: Wrap(
                             spacing: 4,
                             runSpacing: 4,
@@ -213,7 +221,6 @@ class _SmileyPaneState extends State<_SmileyPane> {
             ),
           ),
         ),
-      ),
     );
   }
 }
