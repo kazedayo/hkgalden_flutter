@@ -1,279 +1,35 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page_scroll_controller.dart';
 
-/// Center-pin / trailing-edge restore settle for thread open.
+/// Center-pin restore for thread open.
 class ThreadRestoreController {
   ThreadRestoreController();
 
-  static const Duration settleDuration = Duration(milliseconds: 1500);
-  static const Duration revealAfter = Duration(milliseconds: 300);
-
-  final ValueNotifier<double> trailingTopPad = ValueNotifier<double>(0);
-  final ValueNotifier<bool> visualReady = ValueNotifier<bool>(true);
-
   bool didPinInitialCenter = false;
-  bool pendingRestoreToTrailingEdge = false;
-  bool trailingEdgeLayoutActive = false;
-  bool settling = false;
 
   int? pendingRestoreFloor;
   int? centerAnchorFloor;
   bool didResolveCenterAnchor = false;
 
-  int _settleGeneration = 0;
-  int _stableFrames = 0;
-  double? _stabilityPad;
-  double? _stabilityPixels;
-  bool _deferredSyncScheduled = false;
-  bool _syncing = false;
-  DateTime? _settleStartedAt;
-
-  void dispose() {
-    cancelSettle();
-    trailingTopPad.dispose();
-    visualReady.dispose();
-  }
-
   void captureArgsFloor(int? floor) {
     pendingRestoreFloor = floor;
-    if (floor != null) {
-      visualReady.value = false;
-    }
   }
 
-  void cancelSettle() {
-    revealContent();
-  }
-
-  void revealContent() {
-    settling = false;
-    trailingEdgeLayoutActive = false;
-    _settleGeneration++;
-    if (visualReady.value) {
-      return;
-    }
-    visualReady.value = true;
-  }
-
-  void notePinApplied(ThreadPageScrollController scrollController) {
-    if (visualReady.value || !scrollController.hasClients) {
-      return;
-    }
-    final position = scrollController.position;
-    if (!position.hasContentDimensions) {
-      return;
-    }
-
-    final pad = trailingTopPad.value;
-    final pixels = position.pixels;
-    final padStable =
-        _stabilityPad != null && (pad - _stabilityPad!).abs() <= 0.5;
-    final pixelsStable = _stabilityPixels != null &&
-        (pixels - _stabilityPixels!).abs() <= 0.5;
-    if (padStable && pixelsStable) {
-      _stableFrames++;
-    } else {
-      _stableFrames = 0;
-    }
-    _stabilityPad = pad;
-    _stabilityPixels = pixels;
-
-    // Ignore the first frames — placeholders look "stable" before media
-    // decodes. Revealing then makes later jumpTo/pad ticks flash.
-    final started = _settleStartedAt;
-    final canRevealEarly = started != null &&
-        DateTime.now().difference(started) >= revealAfter;
-    if (canRevealEarly && _stableFrames >= 2) {
-      revealContent();
-    }
-  }
-
-  void setTrailingTopPad(
-    double nextPad, {
-    required bool mounted,
-  }) {
-    if ((nextPad - trailingTopPad.value).abs() <= 0.5) {
-      return;
-    }
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !trailingEdgeLayoutActive) {
-        return;
-      }
-      if ((nextPad - trailingTopPad.value).abs() <= 0.5) {
-        return;
-      }
-      trailingTopPad.value = nextPad;
-    });
-  }
-
-  void syncTrailingEdgeLayout({
-    required bool mounted,
-    required ThreadPageScrollController scrollController,
-    required double? Function() footerBottomY,
-    required double? Function() viewportTopY,
-    required double safeBottom,
-  }) {
-    if (!trailingEdgeLayoutActive || !pendingRestoreToTrailingEdge) {
-      return;
-    }
-    // jumpTo always dispatches ScrollEnd before applying pixels. The thread
-    // page syncs again from that notification; without this guard we recurse
-    // until StackOverflowError.
-    if (_syncing) {
-      return;
-    }
-    // Scroll metrics / end notifications fire from RenderViewport.performLayout
-    // when media sizes change. Geometry + jumpTo must wait until after layout.
-    if (SchedulerBinding.instance.schedulerPhase ==
-        SchedulerPhase.persistentCallbacks) {
-      if (_deferredSyncScheduled) {
-        return;
-      }
-      _deferredSyncScheduled = true;
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        _deferredSyncScheduled = false;
-        if (!trailingEdgeLayoutActive || !pendingRestoreToTrailingEdge) {
-          return;
-        }
-        syncTrailingEdgeLayout(
-          mounted: mounted,
-          scrollController: scrollController,
-          footerBottomY: footerBottomY,
-          viewportTopY: viewportTopY,
-          safeBottom: safeBottom,
-        );
-      });
-      return;
-    }
-
-    _syncing = true;
-    try {
-      if (!scrollController.hasClients) {
-        return;
-      }
-      final position = scrollController.position;
-      if (!position.hasContentDimensions) {
-        return;
-      }
-
-      final threshold = visualReady.value ? 1.5 : 0.5;
-      final layoutHeight =
-          (position.viewportDimension - safeBottom).clamp(0.0, double.infinity);
-
-      final topY = viewportTopY();
-      final footerBottom = footerBottomY();
-
-      if (topY != null && footerBottom != null) {
-        final layoutBottom = topY + position.viewportDimension - safeBottom;
-        final shortfall = layoutBottom - footerBottom;
-
-        if (shortfall > threshold) {
-          final nextPad =
-              (trailingTopPad.value + shortfall).clamp(0.0, layoutHeight);
-          if ((nextPad - trailingTopPad.value).abs() > threshold) {
-            setTrailingTopPad(nextPad, mounted: mounted);
-            return;
-          }
-        } else if (shortfall < -threshold) {
-          if (trailingTopPad.value > threshold) {
-            final nextPad =
-                (trailingTopPad.value + shortfall).clamp(0.0, layoutHeight);
-            if ((nextPad - trailingTopPad.value).abs() > threshold) {
-              setTrailingTopPad(nextPad, mounted: mounted);
-              return;
-            }
-          }
-        }
-      }
-
-      if (!visualReady.value &&
-          (position.pixels - position.maxScrollExtent).abs() > threshold) {
-        scrollController.jumpTo(position.maxScrollExtent);
-      }
-    } finally {
-      _syncing = false;
-    }
-  }
-
-  void applyPin({
-    required bool trailingEdge,
-    required bool mounted,
-    required ThreadPageScrollController scrollController,
-    required double? Function() footerBottomY,
-    required double? Function() viewportTopY,
-    required double safeBottom,
-  }) {
+  void pinCenterIfNeeded(ThreadPageScrollController scrollController) {
     if (!scrollController.hasClients) {
       return;
     }
     final position = scrollController.position;
-    if (!position.hasContentDimensions) {
+    if (!position.hasContentDimensions || position.pixels == 0) {
       return;
     }
-    if (trailingEdge) {
-      syncTrailingEdgeLayout(
-        mounted: mounted,
-        scrollController: scrollController,
-        footerBottomY: footerBottomY,
-        viewportTopY: viewportTopY,
-        safeBottom: safeBottom,
-      );
-    } else if (!visualReady.value && position.pixels != 0) {
-      scrollController.holdCenterAtZero = true;
-      try {
-        scrollController.jumpTo(0);
-      } finally {
-        scrollController.holdCenterAtZero = false;
-      }
+    scrollController.holdCenterAtZero = true;
+    try {
+      scrollController.jumpTo(0);
+    } finally {
+      scrollController.holdCenterAtZero = false;
     }
-    notePinApplied(scrollController);
-  }
-
-  void startSettle({
-    required bool trailingEdge,
-    required bool mounted,
-    required ThreadPageScrollController scrollController,
-    required double? Function() footerBottomY,
-    required double? Function() viewportTopY,
-    required double Function() safeBottom,
-  }) {
-    settling = true;
-    _settleStartedAt = DateTime.now();
-    _stableFrames = 0;
-    _stabilityPad = null;
-    _stabilityPixels = null;
-    if (trailingEdge) {
-      trailingEdgeLayoutActive = true;
-    }
-    final gen = ++_settleGeneration;
-    final deadline = DateTime.now().add(settleDuration);
-
-    void tick() {
-      if (!mounted || gen != _settleGeneration || !settling) {
-        return;
-      }
-      applyPin(
-        trailingEdge: trailingEdge,
-        mounted: mounted,
-        scrollController: scrollController,
-        footerBottomY: footerBottomY,
-        viewportTopY: viewportTopY,
-        safeBottom: safeBottom(),
-      );
-      if (!settling || gen != _settleGeneration) {
-        return;
-      }
-      if (DateTime.now().isBefore(deadline)) {
-        SchedulerBinding.instance.addPostFrameCallback((_) => tick());
-      } else {
-        revealContent();
-      }
-    }
-
-    SchedulerBinding.instance.addPostFrameCallback((_) => tick());
   }
 
   void resolveCenterAnchorIfNeeded(ThreadLoaded state) {
@@ -288,7 +44,7 @@ class ThreadRestoreController {
     }
     final lastFloor = replies.last.floor;
     if (requested >= lastFloor) {
-      pendingRestoreToTrailingEdge = true;
+      centerAnchorFloor = lastFloor;
       return;
     }
     final idx = replies.indexWhere((r) => r.floor >= requested);
@@ -317,9 +73,6 @@ class ThreadRestoreController {
     final replies = state.thread.replies;
     if (replies.isEmpty) {
       return null;
-    }
-    if (pendingRestoreToTrailingEdge) {
-      return replies.last.floor;
     }
     return centerAnchorFloor ?? replies.first.floor;
   }

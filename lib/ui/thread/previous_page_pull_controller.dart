@@ -118,29 +118,11 @@ class PreviousPagePullController {
   bool onScrollNotification(
     ScrollNotification notification,
     ThreadBloc threadBloc, {
-    required bool restoreSettling,
-    required VoidCallback onUserDragDuringRestore,
-    required VoidCallback onTrailingEdgeScroll,
     required VoidCallback onScrollTick,
     required VoidCallback onScrollEndPersist,
   }) {
     if (notification.depth != 0 || notification.metrics.axis != Axis.vertical) {
       return false;
-    }
-
-    if (restoreSettling) {
-      final isUserDrag = (notification is ScrollStartNotification &&
-              notification.dragDetails != null) ||
-          (notification is ScrollUpdateNotification &&
-              notification.dragDetails != null);
-      if (isUserDrag) {
-        onUserDragDuringRestore();
-      }
-    }
-
-    if (notification is ScrollUpdateNotification ||
-        notification is ScrollEndNotification) {
-      onTrailingEdgeScroll();
     }
 
     final state = threadBloc.state;

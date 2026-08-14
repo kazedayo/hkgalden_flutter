@@ -405,44 +405,42 @@ void main() {
       expect(threadPageScrollController.contains('minScrollExtent'), isTrue);
       expect(threadRestoreController.contains('didPinInitialCenter'), isTrue);
       expect(threadRestoreController.contains('jumpTo(0)'), isTrue);
+      expect(threadRestoreController.contains('centerStartIndex'), isTrue);
       expect(threadPageScrollController.contains('void jumpTo(double value)'),
           isTrue);
-      // Last-reply restore: trailing edge + top pad for short pages.
+      // Last-floor restore uses the same center sliver as mid-list.
       expect(
           threadRestoreController.contains('pendingRestoreToTrailingEdge'),
-          isTrue);
+          isFalse);
       expect(
           threadRestoreController.contains('trailingEdgeLayoutActive'),
-          isTrue);
-      expect(threadRestoreController.contains('trailingTopPad'), isTrue);
-      expect(threadPage.contains('_syncTrailingEdgeLayout'), isTrue);
-      expect(threadPage.contains('_footerMeasureKey'), isTrue);
-      expect(threadRestoreController.contains('maxScrollExtent'), isTrue);
-      // Hide pre-pin frames; reveal after pad/offset stabilize.
-      expect(threadRestoreController.contains('visualReady'), isTrue);
-      expect(threadRestoreController.contains('revealContent'), isTrue);
-      expect(threadRestoreController.contains('notePinApplied'), isTrue);
-      expect(threadRestoreController.contains('revealAfter'), isTrue);
+          isFalse);
+      expect(threadRestoreController.contains('trailingTopPad'), isFalse);
+      expect(threadPage.contains('_syncTrailingEdgeLayout'), isFalse);
+      expect(threadPage.contains('_footerMeasureKey'), isFalse);
+      expect(threadRestoreController.contains('maxScrollExtent'), isFalse);
+      expect(threadRestoreController.contains('visualReady'), isFalse);
+      expect(threadRestoreController.contains('revealContent'), isFalse);
+      expect(threadRestoreController.contains('notePinApplied'), isFalse);
+      expect(threadRestoreController.contains('revealAfter'), isFalse);
       expect(threadRestoreController.contains('revealTimeout'), isFalse);
       // Edge-to-edge viewport; safe area applied as scroll content insets.
       expect(threadModule.contains('SafeArea('), isFalse);
       expect(threadPageLoadedBody.contains('viewPadding'), isTrue);
       expect(threadPageLoadedBody.contains('SliverPadding'), isTrue);
-      // Restore settle loop re-pins while remote images/embeds change extent.
-      expect(threadRestoreController.contains('settling'), isTrue);
-      expect(threadPage.contains('_startRestoreSettle'), isTrue);
-      expect(threadRestoreController.contains('cancelSettle'), isTrue);
-      expect(threadRestoreController.contains('applyPin'), isTrue);
-      expect(threadRestoreController.contains('settleDuration'), isTrue);
-      // Do not read paint geometry / jumpTo from layout-time scroll metrics.
+      expect(threadRestoreController.contains('settling'), isFalse);
+      expect(threadPage.contains('_startRestoreSettle'), isFalse);
+      expect(threadRestoreController.contains('cancelSettle'), isFalse);
+      expect(threadRestoreController.contains('applyPin'), isFalse);
+      expect(threadRestoreController.contains('settleDuration'), isFalse);
       expect(threadPaintGeometry.contains('threadCanReadPaintGeometry'),
           isTrue);
       expect(threadPaintGeometry.contains('persistentCallbacks'), isTrue);
       expect(threadRestoreController.contains('_deferredSyncScheduled'),
-          isTrue);
-      expect(threadRestoreController.contains('_syncing'), isTrue);
-      expect(threadPage.contains('threadCanReadPaintGeometry'), isTrue);
-      expect(threadPage.contains('_restoreGeometryLocked'), isTrue);
+          isFalse);
+      expect(threadRestoreController.contains('_syncing'), isFalse);
+      expect(threadPage.contains('threadCanReadPaintGeometry'), isFalse);
+      expect(threadPage.contains('_restoreGeometryLocked'), isFalse);
       // Dispose must not look up MediaQuery — the route is already gone.
       expect(threadPage.contains('didChangeDependencies'), isTrue);
       expect(threadPage.contains('remeasure: false'), isTrue);

@@ -17,7 +17,7 @@ void handleThreadPageBlocState({
   required bool mounted,
   required ScrollController scrollController,
   required void Function(ThreadLoaded state) onResolveCenterAnchor,
-  required void Function({required bool trailingEdge}) onStartRestoreSettle,
+  required void Function() onPinCenter,
 }) {
   if (state is ThreadLoaded) {
     final onLastPage =
@@ -45,9 +45,12 @@ void handleThreadPageBlocState({
 
     if (!restore.didPinInitialCenter && state.previousPages.replies.isEmpty) {
       restore.didPinInitialCenter = true;
-      onStartRestoreSettle(
-        trailingEdge: restore.pendingRestoreToTrailingEdge,
-      );
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        onPinCenter();
+      });
     }
   } else if (state is ThreadError) {
     previousPull.clear(animate: true);

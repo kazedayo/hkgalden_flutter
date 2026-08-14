@@ -49,7 +49,6 @@ Widget generateThreadPageSliver(
   ThreadReplySuccessCallback onReplySuccess,
   ReplyAnchorRegistry anchorRegistry, {
   required bool isTrailingWindow,
-  GlobalKey? footerMeasureKey,
 }) {
   final reply = replies[index];
   final isPageStart = reply.floor % 50 == 1;
@@ -62,9 +61,7 @@ Widget generateThreadPageSliver(
     onReplySuccess,
     anchorRegistry,
   );
-  final footer = isLast
-      ? ThreadPageFooter(measureKey: footerMeasureKey)
-      : null;
+  final footer = isLast ? const ThreadPageFooter() : null;
 
   final key = ValueKey<Object>(replyListKey(reply));
   if (isPageStart && isLast) {

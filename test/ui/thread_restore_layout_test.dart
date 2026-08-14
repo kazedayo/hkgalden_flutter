@@ -1,235 +1,103 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hkgalden_flutter/ui/thread/reply_position_anchor.dart';
+import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
+import 'package:hkgalden_flutter/models/reply.dart';
+import 'package:hkgalden_flutter/models/thread.dart';
+import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page_scroll_controller.dart';
-import 'package:hkgalden_flutter/ui/thread/thread_reading_position_tracker.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_restore_controller.dart';
 
 void main() {
-  group('trailing-edge restore during layout', () {
-    testWidgets(
-      'viewportTopY returns null while an ancestor is laying out',
-      (tester) async {
-        final scrollController = ThreadPageScrollController();
-        final tracker = ThreadReadingPositionTracker(
-          scrollController: scrollController,
-          anchorRegistry: ReplyAnchorRegistry(),
-        );
-        addTearDown(scrollController.dispose);
-
-        double? duringLayout;
-
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Transform.translate(
-                offset: Offset.zero,
-                child: _LayoutProbe(
-                  onPerformLayout: () {
-                    duringLayout = tracker.viewportTopY();
-                  },
-                  child: CustomScrollView(
-                    controller: scrollController,
-                    slivers: const [
-                      SliverToBoxAdapter(child: SizedBox(height: 400)),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-
-        expect(duringLayout, isNull);
-        expect(tracker.viewportTopY(), isNotNull);
-      },
-    );
-
-    testWidgets(
-      'syncTrailingEdgeLayout does not throw when media grows during layout',
-      (tester) async {
-        final env = _RestoreEnv();
-        addTearDown(env.dispose);
-
-        await tester.pumpWidget(
-          _RestoreScrollHarness(
-            env: env,
-            childHeight: 400,
-          ),
-        );
-
-        await tester.pumpWidget(
-          _RestoreScrollHarness(
-            env: env,
-            childHeight: 2400,
-          ),
-        );
-        await tester.pump();
-
-        expect(tester.takeException(), isNull);
-        expect(env.scrollController.hasClients, isTrue);
-        expect(
-          env.scrollController.position.pixels,
-          closeTo(env.scrollController.position.maxScrollExtent, 1.5),
-        );
-      },
-    );
-
-    test('revealContent stops pinning so later media loads cannot jump', () {
+  group('resolveCenterAnchorIfNeeded + centerStartIndex', () {
+    test('no floor → 0', () {
       final restore = ThreadRestoreController();
-      restore.visualReady.value = false;
-      restore.settling = true;
-      restore.trailingEdgeLayoutActive = true;
-
-      restore.revealContent();
-
-      expect(restore.visualReady.value, isTrue);
-      expect(restore.settling, isFalse);
-      expect(restore.trailingEdgeLayoutActive, isFalse);
+      final state = _loaded(floors: [1, 2, 3, 4, 5]);
+      restore.resolveCenterAnchorIfNeeded(state);
+      expect(restore.centerStartIndex(state.thread.replies), 0);
     });
 
-    testWidgets(
-      'jumpTo from trailing sync does not recurse through ScrollEnd',
+    test('mid-list requested floor → index of first reply with floor >= requested',
+        () {
+      final restore = ThreadRestoreController();
+      restore.captureArgsFloor(3);
+      final state = _loaded(floors: [1, 2, 4, 5]);
+      restore.resolveCenterAnchorIfNeeded(state);
+      expect(restore.centerAnchorFloor, 4);
+      expect(restore.centerStartIndex(state.thread.replies), 2);
+    });
+
+    test('requested >= last floor → index of last reply', () {
+      final restore = ThreadRestoreController();
+      restore.captureArgsFloor(10);
+      final state = _loaded(floors: [1, 2, 3, 4, 5]);
+      restore.resolveCenterAnchorIfNeeded(state);
+      expect(restore.centerAnchorFloor, 5);
+      expect(restore.centerStartIndex(state.thread.replies), 4);
+    });
+
+    test('seedCachedFloor matches resolved floor', () {
+      final mid = ThreadRestoreController();
+      mid.captureArgsFloor(3);
+      final state = _loaded(floors: [1, 2, 3, 4, 5]);
+      mid.resolveCenterAnchorIfNeeded(state);
+      expect(mid.seedCachedFloor(state), 3);
+
+      final last = ThreadRestoreController();
+      last.captureArgsFloor(99);
+      last.resolveCenterAnchorIfNeeded(state);
+      expect(last.seedCachedFloor(state), 5);
+
+      final none = ThreadRestoreController();
+      none.resolveCenterAnchorIfNeeded(state);
+      expect(none.seedCachedFloor(state), 1);
+    });
+  });
+
+  testWidgets('pinCenterIfNeeded does not throw when pixels == 0',
       (tester) async {
-        final env = _RestoreEnv();
-        addTearDown(env.dispose);
+    final scrollController = ThreadPageScrollController();
+    addTearDown(scrollController.dispose);
+    final restore = ThreadRestoreController();
 
-        await tester.pumpWidget(
-          _RestoreScrollHarness(
-            env: env,
-            childHeight: 2400,
-          ),
-        );
-
-        env.scrollController.jumpTo(0);
-        await tester.pump();
-
-        env.restore.syncTrailingEdgeLayout(
-          mounted: true,
-          scrollController: env.scrollController,
-          footerBottomY: () => 800,
-          viewportTopY: env.tracker.viewportTopY,
-          safeBottom: 0,
-        );
-        await tester.pump();
-
-        expect(tester.takeException(), isNull);
-        expect(
-          env.scrollController.position.pixels,
-          closeTo(env.scrollController.position.maxScrollExtent, 1.5),
-        );
-      },
-    );
-  });
-}
-
-class _RestoreEnv {
-  _RestoreEnv() {
-    restore.pendingRestoreToTrailingEdge = true;
-    restore.trailingEdgeLayoutActive = true;
-    restore.visualReady.value = false;
-  }
-
-  final scrollController = ThreadPageScrollController();
-  final restore = ThreadRestoreController();
-  late final tracker = ThreadReadingPositionTracker(
-    scrollController: scrollController,
-    anchorRegistry: ReplyAnchorRegistry(),
-  );
-
-  void sync() {
-    restore.syncTrailingEdgeLayout(
-      mounted: true,
-      scrollController: scrollController,
-      footerBottomY: () => 800,
-      viewportTopY: tracker.viewportTopY,
-      safeBottom: 0,
-    );
-  }
-
-  void dispose() {
-    restore.dispose();
-    scrollController.dispose();
-  }
-}
-
-/// Mirrors production: Transform.translate + metrics/end sync during restore.
-class _RestoreScrollHarness extends StatelessWidget {
-  const _RestoreScrollHarness({
-    required this.env,
-    required this.childHeight,
-  });
-
-  final _RestoreEnv env;
-  final double childHeight;
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: NotificationListener<ScrollMetricsNotification>(
-          onNotification: (_) {
-            env.sync();
-            return false;
-          },
-          child: NotificationListener<ScrollNotification>(
-            onNotification: (notification) {
-              if (notification is ScrollUpdateNotification ||
-                  notification is ScrollEndNotification) {
-                env.sync();
-              }
-              return false;
-            },
-            child: Transform.translate(
-              offset: Offset.zero,
-              child: CustomScrollView(
-                controller: env.scrollController,
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: SizedBox(height: childHeight),
-                  ),
-                ],
-              ),
-            ),
-          ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CustomScrollView(
+          controller: scrollController,
+          slivers: const [
+            SliverToBoxAdapter(child: SizedBox(height: 200)),
+          ],
         ),
       ),
     );
-  }
-}
 
-/// Invokes [onPerformLayout] from [RenderObject.performLayout].
-class _LayoutProbe extends SingleChildRenderObjectWidget {
-  const _LayoutProbe({
-    required this.onPerformLayout,
-    required super.child,
+    expect(scrollController.hasClients, isTrue);
+    expect(scrollController.position.pixels, 0);
+    restore.pinCenterIfNeeded(scrollController);
+    expect(tester.takeException(), isNull);
   });
-
-  final VoidCallback onPerformLayout;
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderLayoutProbe(onPerformLayout);
-  }
-
-  @override
-  void updateRenderObject(
-    BuildContext context,
-    covariant _RenderLayoutProbe renderObject,
-  ) {
-    renderObject.onPerformLayout = onPerformLayout;
-  }
 }
 
-class _RenderLayoutProbe extends RenderProxyBox {
-  _RenderLayoutProbe(this.onPerformLayout);
-
-  VoidCallback onPerformLayout;
-
-  @override
-  void performLayout() {
-    super.performLayout();
-    onPerformLayout();
-  }
+ThreadLoaded _loaded({required List<int> floors}) {
+  const author = User(
+    userId: '1',
+    nickName: 'n',
+    avatar: '',
+    userGroup: [],
+    blockedUsers: [],
+  );
+  final replies = [
+    for (final floor in floors)
+      Reply(
+        floor: floor,
+        author: author,
+        authorNickname: 'n',
+        date: DateTime.utc(2024, 1, 1),
+      ),
+  ];
+  return ThreadLoaded(
+    thread: Thread.initial().copyWith(replies: replies),
+    previousPages: Thread.initial(),
+    currentPage: 1,
+    endPage: 1,
+  );
 }

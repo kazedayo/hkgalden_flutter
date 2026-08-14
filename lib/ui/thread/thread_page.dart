@@ -12,7 +12,6 @@ import 'package:hkgalden_flutter/ui/thread/thread_page_bloc_listener.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page_on_reply_success.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page_scroll_controller.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page_scroll_listener.dart';
-import 'package:hkgalden_flutter/ui/thread/thread_paint_geometry.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_reading_position_tracker.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_restore_controller.dart';
 import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_app_bar.dart';
@@ -39,9 +38,6 @@ class _ThreadPageState extends State<ThreadPage>
   int? _previousImageCacheMaxBytes;
   bool _didCaptureArgs = false;
   double _safeBottom = 0;
-
-  final GlobalKey _footerMeasureKey =
-      GlobalKey(debugLabel: 'threadPageFooter');
 
   final ReplyAnchorRegistry _anchorRegistry = ReplyAnchorRegistry();
 
@@ -90,53 +86,20 @@ class _ThreadPageState extends State<ThreadPage>
       PaintingBinding.instance.imageCache.maximumSizeBytes = previous;
     }
     _previousPull.dispose();
-    _restore.dispose();
     _scrollController.dispose();
     super.dispose();
-  }
-
-  double? _footerBottomY() {
-    if (!threadCanReadPaintGeometry()) {
-      return null;
-    }
-    final box = _footerMeasureKey.currentContext?.findRenderObject();
-    if (box is! RenderBox || !box.hasSize || !box.attached) {
-      return null;
-    }
-    return box.localToGlobal(Offset(0, box.size.height)).dy;
   }
 
   void _persistReadingPosition({bool remeasure = true}) {
     _reading.persist(safeBottom: _safeBottom, remeasure: remeasure);
   }
 
-  bool get _restoreGeometryLocked =>
-      _restore.settling || _restore.trailingEdgeLayoutActive;
-
   void _updateCachedReadingFloor() {
-    // Restore jumpTo emits scroll notifications; measuring every reply then
-    // re-enters trailing sync and can overflow the stack.
-    if (_restoreGeometryLocked) {
-      return;
-    }
     _reading.updateCachedFloor(safeBottom: _safeBottom);
   }
 
   void _persistReadingPositionFromScroll() {
-    if (_restoreGeometryLocked) {
-      return;
-    }
     _persistReadingPosition();
-  }
-
-  void _syncTrailingEdgeLayout() {
-    _restore.syncTrailingEdgeLayout(
-      mounted: mounted,
-      scrollController: _scrollController,
-      footerBottomY: _footerBottomY,
-      viewportTopY: _reading.viewportTopY,
-      safeBottom: _safeBottom,
-    );
   }
 
   void _resolveCenterAnchorIfNeeded(ThreadLoaded state) {
@@ -151,17 +114,6 @@ class _ThreadPageState extends State<ThreadPage>
     }
   }
 
-  void _startRestoreSettle({required bool trailingEdge}) {
-    _restore.startSettle(
-      trailingEdge: trailingEdge,
-      mounted: mounted,
-      scrollController: _scrollController,
-      footerBottomY: _footerBottomY,
-      viewportTopY: _reading.viewportTopY,
-      safeBottom: () => _safeBottom,
-    );
-  }
-
   bool _onThreadScrollNotification(
     ScrollNotification notification,
     ThreadBloc threadBloc,
@@ -169,14 +121,6 @@ class _ThreadPageState extends State<ThreadPage>
     return _previousPull.onScrollNotification(
       notification,
       threadBloc,
-      restoreSettling:
-          _restore.settling || _restore.trailingEdgeLayoutActive,
-      onUserDragDuringRestore: _restore.cancelSettle,
-      onTrailingEdgeScroll: () {
-        if (_restore.trailingEdgeLayoutActive) {
-          _syncTrailingEdgeLayout();
-        }
-      },
       onScrollTick: _updateCachedReadingFloor,
       onScrollEndPersist: _persistReadingPositionFromScroll,
     );
@@ -254,7 +198,7 @@ class _ThreadPageState extends State<ThreadPage>
               mounted: mounted,
               scrollController: _scrollController,
               onResolveCenterAnchor: _resolveCenterAnchorIfNeeded,
-              onStartRestoreSettle: _startRestoreSettle,
+              onPinCenter: () => _restore.pinCenterIfNeeded(_scrollController),
             );
           },
           buildWhen: (prev, state) =>
@@ -274,15 +218,8 @@ class _ThreadPageState extends State<ThreadPage>
                     state: state,
                     scrollController: _scrollController,
                     anchorRegistry: _anchorRegistry,
-                    footerMeasureKey: _footerMeasureKey,
                     previousPullExtent: _previousPull.extent,
-                    trailingTopPad: _restore.trailingTopPad,
-                    restoreVisualReady: _restore.visualReady,
                     previousPullLoading: _previousPull.loading,
-                    trailingEdgeLayoutActive:
-                        _restore.trailingEdgeLayoutActive,
-                    pendingRestoreToTrailingEdge:
-                        _restore.pendingRestoreToTrailingEdge,
                     centerStartIndex:
                         _restore.centerStartIndex(state.thread.replies),
                     onOverscrollIndicator: _previousPull.onOverscrollIndicator,
@@ -291,7 +228,6 @@ class _ThreadPageState extends State<ThreadPage>
                       notification,
                       BlocProvider.of<ThreadBloc>(context),
                     ),
-                    onTrailingMetrics: _syncTrailingEdgeLayout,
                     onReplySuccess: onThreadReplySuccess,
                   );
                 } else if (state is ThreadError) {
