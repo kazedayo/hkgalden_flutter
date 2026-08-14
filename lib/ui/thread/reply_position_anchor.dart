@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_paint_geometry.dart';
 
 /// Tracks reply cell positions for reading-position persistence.
 class ReplyAnchorRegistry {
@@ -17,6 +18,9 @@ class ReplyAnchorRegistry {
   }
 
   int? readingFloor({required double viewportTopY}) {
+    if (!threadCanReadPaintGeometry()) {
+      return null;
+    }
     int? bestFloor;
     var bestTop = double.negativeInfinity;
     int? nearestBelowFloor;
@@ -49,6 +53,9 @@ class ReplyAnchorRegistry {
     required double viewportTopY,
     required double viewportBottomY,
   }) {
+    if (!threadCanReadPaintGeometry()) {
+      return null;
+    }
     int? bestFloor;
     for (final entry in _byFloor.entries) {
       final box = entry.value.findRenderObject();

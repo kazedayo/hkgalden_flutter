@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
 import 'package:hkgalden_flutter/models/thread_reading_position.dart';
 import 'package:hkgalden_flutter/ui/thread/reply_position_anchor.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_paint_geometry.dart';
 import 'package:hkgalden_flutter/utils/thread_reading_position_store.dart';
 
 /// Caches and persists the reading floor from scroll + reply anchors.
@@ -18,7 +19,7 @@ class ThreadReadingPositionTracker {
   ThreadBloc? threadBloc;
 
   double? viewportTopY() {
-    if (!scrollController.hasClients) {
+    if (!threadCanReadPaintGeometry() || !scrollController.hasClients) {
       return null;
     }
     final notificationContext =
@@ -76,7 +77,7 @@ class ThreadReadingPositionTracker {
     }
   }
 
-  void persist({required double safeBottom}) {
+  void persist({required double safeBottom, bool remeasure = true}) {
     final bloc = threadBloc;
     if (bloc == null) {
       return;
@@ -85,7 +86,7 @@ class ThreadReadingPositionTracker {
     if (state is! ThreadLoaded) {
       return;
     }
-    if (anchorRegistry.hasEntries) {
+    if (remeasure && anchorRegistry.hasEntries) {
       updateCachedFloor(safeBottom: safeBottom);
     } else if (isAtScrollTrailingEdge() && state.thread.replies.isNotEmpty) {
       final lastLoaded = state.thread.replies.last.floor;

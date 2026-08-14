@@ -80,6 +80,7 @@ void main() {
     late String replyPositionAnchor;
     late String previousPullIndicator;
     late String readingPositionTracker;
+    late String threadPaintGeometry;
     late String threadPageBlocListener;
 
     /// Combined sources for symbols split across the thread page module.
@@ -129,6 +130,8 @@ void main() {
           'lib/ui/thread/widgets/thread_page_previous_pull_indicator.dart');
       readingPositionTracker =
           read('lib/ui/thread/thread_reading_position_tracker.dart');
+      threadPaintGeometry =
+          read('lib/ui/thread/thread_paint_geometry.dart');
       threadPageBlocListener =
           read('lib/ui/thread/thread_page_bloc_listener.dart');
       threadModule = [
@@ -143,6 +146,7 @@ void main() {
         threadPageSliver,
         previousSliver,
         readingPositionTracker,
+        threadPaintGeometry,
         threadPageBlocListener,
         appBar,
         threadPageFooter,
@@ -418,7 +422,8 @@ void main() {
       expect(threadRestoreController.contains('visualReady'), isTrue);
       expect(threadRestoreController.contains('revealContent'), isTrue);
       expect(threadRestoreController.contains('notePinApplied'), isTrue);
-      expect(threadRestoreController.contains('revealTimeout'), isTrue);
+      expect(threadRestoreController.contains('revealAfter'), isTrue);
+      expect(threadRestoreController.contains('revealTimeout'), isFalse);
       // Edge-to-edge viewport; safe area applied as scroll content insets.
       expect(threadModule.contains('SafeArea('), isFalse);
       expect(threadPageLoadedBody.contains('viewPadding'), isTrue);
@@ -429,6 +434,18 @@ void main() {
       expect(threadRestoreController.contains('cancelSettle'), isTrue);
       expect(threadRestoreController.contains('applyPin'), isTrue);
       expect(threadRestoreController.contains('settleDuration'), isTrue);
+      // Do not read paint geometry / jumpTo from layout-time scroll metrics.
+      expect(threadPaintGeometry.contains('threadCanReadPaintGeometry'),
+          isTrue);
+      expect(threadPaintGeometry.contains('persistentCallbacks'), isTrue);
+      expect(threadRestoreController.contains('_deferredSyncScheduled'),
+          isTrue);
+      expect(threadRestoreController.contains('_syncing'), isTrue);
+      expect(threadPage.contains('threadCanReadPaintGeometry'), isTrue);
+      expect(threadPage.contains('_restoreGeometryLocked'), isTrue);
+      // Dispose must not look up MediaQuery — the route is already gone.
+      expect(threadPage.contains('didChangeDependencies'), isTrue);
+      expect(threadPage.contains('remeasure: false'), isTrue);
       // Module split: orchestration stays thin; helpers are libraries.
       expect(threadPage.contains('PreviousPagePullController'), isTrue);
       expect(threadPage.contains('ThreadRestoreController'), isTrue);

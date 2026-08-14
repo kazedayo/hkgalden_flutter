@@ -12,6 +12,7 @@ import 'package:hkgalden_flutter/ui/thread/thread_page_bloc_listener.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page_on_reply_success.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page_scroll_controller.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page_scroll_listener.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_paint_geometry.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_reading_position_tracker.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_restore_controller.dart';
 import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_app_bar.dart';
@@ -37,6 +38,7 @@ class _ThreadPageState extends State<ThreadPage>
 
   int? _previousImageCacheMaxBytes;
   bool _didCaptureArgs = false;
+  double _safeBottom = 0;
 
   final GlobalKey _footerMeasureKey =
       GlobalKey(debugLabel: 'threadPageFooter');
@@ -65,6 +67,12 @@ class _ThreadPageState extends State<ThreadPage>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _safeBottom = MediaQuery.viewPaddingOf(context).bottom;
+  }
+
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused ||
@@ -76,7 +84,7 @@ class _ThreadPageState extends State<ThreadPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _persistReadingPosition();
+    _persistReadingPosition(remeasure: false);
     final previous = _previousImageCacheMaxBytes;
     if (previous != null) {
       PaintingBinding.instance.imageCache.maximumSizeBytes = previous;
@@ -88,6 +96,9 @@ class _ThreadPageState extends State<ThreadPage>
   }
 
   double? _footerBottomY() {
+    if (!threadCanReadPaintGeometry()) {
+      return null;
+    }
     final box = _footerMeasureKey.currentContext?.findRenderObject();
     if (box is! RenderBox || !box.hasSize || !box.attached) {
       return null;
@@ -95,14 +106,27 @@ class _ThreadPageState extends State<ThreadPage>
     return box.localToGlobal(Offset(0, box.size.height)).dy;
   }
 
-  double get _safeBottom => MediaQuery.viewPaddingOf(context).bottom;
-
-  void _persistReadingPosition() {
-    _reading.persist(safeBottom: _safeBottom);
+  void _persistReadingPosition({bool remeasure = true}) {
+    _reading.persist(safeBottom: _safeBottom, remeasure: remeasure);
   }
 
+  bool get _restoreGeometryLocked =>
+      _restore.settling || _restore.trailingEdgeLayoutActive;
+
   void _updateCachedReadingFloor() {
+    // Restore jumpTo emits scroll notifications; measuring every reply then
+    // re-enters trailing sync and can overflow the stack.
+    if (_restoreGeometryLocked) {
+      return;
+    }
     _reading.updateCachedFloor(safeBottom: _safeBottom);
+  }
+
+  void _persistReadingPositionFromScroll() {
+    if (_restoreGeometryLocked) {
+      return;
+    }
+    _persistReadingPosition();
   }
 
   void _syncTrailingEdgeLayout() {
@@ -154,7 +178,7 @@ class _ThreadPageState extends State<ThreadPage>
         }
       },
       onScrollTick: _updateCachedReadingFloor,
-      onScrollEndPersist: _persistReadingPosition,
+      onScrollEndPersist: _persistReadingPositionFromScroll,
     );
   }
 
