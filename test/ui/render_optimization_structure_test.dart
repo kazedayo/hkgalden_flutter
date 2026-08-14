@@ -461,6 +461,26 @@ void main() {
           .readAsStringSync();
       expect(loadingSkeleton.contains('primary: false'), isTrue);
     });
+
+    test('reading floor is remesured on persist, not every scroll tick', () {
+      expect(threadPageScrollListener.contains('onScrollTick'), isFalse);
+      expect(threadPageScrollListener.contains('updateCachedFloor'), isFalse);
+      expect(threadPage.contains('onScrollTick'), isFalse);
+      expect(threadPage.contains('_updateCachedReadingFloor'), isFalse);
+      expect(threadPage.contains('attachThreadPageScrollListener('), isTrue);
+      expect(threadPage.contains('onScrollEndPersist:'), isTrue);
+      expect(previousPagePullController.contains('onScrollTick'), isFalse);
+      expect(previousPagePullController.contains('onScrollEndPersist'), isTrue);
+      expect(
+        previousPagePullController.contains(
+          'ScrollEndNotification && state is ThreadLoaded',
+        ),
+        isTrue,
+      );
+      expect(readingPositionTracker.contains('void persist('), isTrue);
+      expect(readingPositionTracker.contains('updateCachedFloor'), isTrue);
+      expect(readingPositionTracker.contains('isAtScrollTrailingEdge'), isTrue);
+    });
   });
 }
 

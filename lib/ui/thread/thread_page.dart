@@ -94,10 +94,6 @@ class _ThreadPageState extends State<ThreadPage>
     _reading.persist(safeBottom: _safeBottom, remeasure: remeasure);
   }
 
-  void _updateCachedReadingFloor() {
-    _reading.updateCachedFloor(safeBottom: _safeBottom);
-  }
-
   void _persistReadingPositionFromScroll() {
     _persistReadingPosition();
   }
@@ -121,7 +117,6 @@ class _ThreadPageState extends State<ThreadPage>
     return _previousPull.onScrollNotification(
       notification,
       threadBloc,
-      onScrollTick: _updateCachedReadingFloor,
       onScrollEndPersist: _persistReadingPositionFromScroll,
     );
   }
@@ -170,7 +165,6 @@ class _ThreadPageState extends State<ThreadPage>
             threadBloc: threadBloc,
             scrollController: _scrollController,
             cubit: _threadPageCubit,
-            onScrollTick: _updateCachedReadingFloor,
           );
           return threadBloc;
         }),

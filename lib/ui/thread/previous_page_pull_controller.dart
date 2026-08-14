@@ -118,7 +118,6 @@ class PreviousPagePullController {
   bool onScrollNotification(
     ScrollNotification notification,
     ThreadBloc threadBloc, {
-    required VoidCallback onScrollTick,
     required VoidCallback onScrollEndPersist,
   }) {
     if (notification.depth != 0 || notification.metrics.axis != Axis.vertical) {
@@ -127,14 +126,8 @@ class PreviousPagePullController {
 
     final state = threadBloc.state;
 
-    if (state is ThreadLoaded || state is ThreadAppending) {
-      if (notification is ScrollUpdateNotification ||
-          notification is ScrollEndNotification) {
-        onScrollTick();
-      }
-      if (notification is ScrollEndNotification && state is ThreadLoaded) {
-        onScrollEndPersist();
-      }
+    if (notification is ScrollEndNotification && state is ThreadLoaded) {
+      onScrollEndPersist();
     }
 
     if (state is ThreadAppending) {

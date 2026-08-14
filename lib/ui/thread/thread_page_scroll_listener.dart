@@ -9,7 +9,6 @@ void attachThreadPageScrollListener({
   required ThreadBloc threadBloc,
   required ScrollController scrollController,
   required ThreadPageCubit cubit,
-  required void Function() onScrollTick,
 }) {
   double? lastPixels;
 
@@ -25,8 +24,6 @@ void attachThreadPageScrollListener({
 
     final hasDelta = previousPixels != null;
     final scrollingDown = hasDelta && pixels > previousPixels + 0.5;
-
-    onScrollTick();
 
     final state = threadBloc.state;
     if (state is ThreadLoaded) {
