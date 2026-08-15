@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/cubit/full_screen_photo_view_cubit.dart';
@@ -47,15 +48,44 @@ class FullScreenPhotoView extends StatefulWidget {
   State<FullScreenPhotoView> createState() => _FullScreenPhotoViewState();
 }
 
-class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
+class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
+    with TickerProviderStateMixin {
+  static const _minScale = 1.0;
+  static const _maxScale = 3.0;
+  static const _midScale = 2.0;
+  static const _dismissDistance = 140.0;
+  static const _dismissVelocity = 700.0;
+
   Size? _naturalSize;
 
   ImageStream? _sizeStream;
   ImageStreamListener? _sizeListener;
 
+  final TransformationController _transformationController =
+      TransformationController();
+  late final AnimationController _zoomController;
+  late final AnimationController _dismissController;
+  Animation<Matrix4>? _zoomAnimation;
+  Animation<double>? _dismissAnimation;
+
+  Offset? _doubleTapPosition;
+  double _scale = 1.0;
+  double _dismissOffset = 0;
+  int _activePointers = 0;
+  Offset? _dismissPointerStart;
+  VelocityTracker? _dismissVelocityTracker;
+
   @override
   void initState() {
     super.initState();
+    _zoomController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    )..addListener(_applyZoomAnimation);
+    _dismissController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 180),
+    )..addListener(_applyDismissAnimation);
     _naturalSize = _sizeFromAttrsOrCache();
     if (_naturalSize == null) {
       _listenForNaturalSize();
@@ -64,8 +94,170 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
 
   @override
   void dispose() {
+    _zoomController.dispose();
+    _dismissController.dispose();
+    _transformationController.dispose();
     _stopSizeListener();
     super.dispose();
+  }
+
+  bool get _isZoomed => _scale > 1.05;
+
+  void _applyZoomAnimation() {
+    final animation = _zoomAnimation;
+    if (animation == null) {
+      return;
+    }
+    _transformationController.value = animation.value;
+  }
+
+  void _applyDismissAnimation() {
+    final animation = _dismissAnimation;
+    if (animation == null || !mounted) {
+      return;
+    }
+    setState(() => _dismissOffset = animation.value);
+  }
+
+  void _onDoubleTapDown(TapDownDetails details) {
+    _doubleTapPosition = details.localPosition;
+  }
+
+  double _nextDoubleTapScale() {
+    if (_scale + 0.1 < _midScale) {
+      return _midScale;
+    }
+    if (_scale + 0.1 < _maxScale) {
+      return _maxScale;
+    }
+    return _minScale;
+  }
+
+  Matrix4 _matrixForScale(double scale, Offset tap) {
+    if (scale <= _minScale + 0.01) {
+      return Matrix4.identity();
+    }
+    return Matrix4.identity()
+      ..translate(-tap.dx * (scale - 1), -tap.dy * (scale - 1))
+      ..scale(scale);
+  }
+
+  void _toggleZoom() {
+    final tap = _doubleTapPosition;
+    if (tap == null) {
+      return;
+    }
+
+    final end = _matrixForScale(_nextDoubleTapScale(), tap);
+
+    _zoomAnimation =
+        Matrix4Tween(begin: _transformationController.value, end: end).animate(
+          CurvedAnimation(parent: _zoomController, curve: Curves.easeOutCubic),
+        );
+    _zoomController.forward(from: 0).whenComplete(() {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _scale = _transformationController.value.getMaxScaleOnAxis();
+      });
+    });
+  }
+
+  void _syncScaleFromTransform() {
+    final next = _transformationController.value.getMaxScaleOnAxis();
+    if ((next - _scale).abs() < 0.001) {
+      return;
+    }
+    setState(() => _scale = next);
+  }
+
+  void _onInteractionStart(ScaleStartDetails details) {
+    _zoomController.stop();
+  }
+
+  void _onInteractionEnd(ScaleEndDetails details) {
+    _syncScaleFromTransform();
+  }
+
+  bool _canSwipeDismiss(BuildContext context) {
+    return Theme.of(context).platform == TargetPlatform.iOS && !_isZoomed;
+  }
+
+  void _onPointerDown(PointerDownEvent event) {
+    _activePointers++;
+    if (_activePointers > 1) {
+      _dismissPointerStart = null;
+      _dismissVelocityTracker = null;
+      if (_dismissOffset != 0) {
+        _snapDismissBack();
+      }
+      return;
+    }
+    if (!_canSwipeDismiss(context)) {
+      return;
+    }
+    _dismissController.stop();
+    _dismissPointerStart = event.position;
+    _dismissVelocityTracker = VelocityTracker.withKind(event.kind)
+      ..addPosition(event.timeStamp, event.position);
+  }
+
+  void _onPointerMove(PointerMoveEvent event) {
+    final start = _dismissPointerStart;
+    final tracker = _dismissVelocityTracker;
+    if (start == null || tracker == null || _activePointers != 1) {
+      return;
+    }
+    if (!_canSwipeDismiss(context)) {
+      return;
+    }
+    tracker.addPosition(event.timeStamp, event.position);
+    setState(() {
+      _dismissOffset = math.max(0, event.position.dy - start.dy);
+    });
+  }
+
+  void _onPointerUp(PointerUpEvent event) {
+    _activePointers = math.max(0, _activePointers - 1);
+    if (_activePointers != 0) {
+      return;
+    }
+    _finishDismissGesture();
+  }
+
+  void _onPointerCancel(PointerCancelEvent event) {
+    _activePointers = math.max(0, _activePointers - 1);
+    if (_activePointers == 0) {
+      _finishDismissGesture();
+    }
+  }
+
+  void _finishDismissGesture() {
+    _dismissPointerStart = null;
+    final velocity =
+        _dismissVelocityTracker?.getVelocity().pixelsPerSecond.dy ?? 0;
+    _dismissVelocityTracker = null;
+    if (_dismissOffset == 0) {
+      return;
+    }
+    if (_dismissOffset >= _dismissDistance || velocity >= _dismissVelocity) {
+      Navigator.of(context).pop();
+      return;
+    }
+    _snapDismissBack();
+  }
+
+  void _snapDismissBack() {
+    _dismissPointerStart = null;
+    _dismissVelocityTracker = null;
+    if (_dismissOffset == 0) {
+      return;
+    }
+    _dismissAnimation = Tween<double>(begin: _dismissOffset, end: 0).animate(
+      CurvedAnimation(parent: _dismissController, curve: Curves.easeOut),
+    );
+    _dismissController.forward(from: 0);
   }
 
   Size? _sizeFromAttrsOrCache() {
@@ -84,7 +276,8 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
     final ratio = ImageAspectRatioStore.instance.aspectRatio(url);
 
     if (sx != null && sx > 0) {
-      final r = ratio ??
+      final r =
+          ratio ??
           (sy != null && sy > 0 ? sy / sx : null) ??
           ImageAspectRatioStore.fallbackAspectRatio;
       return Size(sx.toDouble(), sx * r);
@@ -120,11 +313,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
         final h = info.image.height.toDouble();
         final ratio = ImageAspectRatioStore.aspectRatioFromSize(w, h);
         if (ratio != null) {
-          ImageAspectRatioStore.instance.save(
-            url,
-            ratio,
-            naturalWidth: w,
-          );
+          ImageAspectRatioStore.instance.save(url, ratio, naturalWidth: w);
         }
         if (!mounted) {
           return;
@@ -167,8 +356,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
 
   int _decodeWidth(BuildContext context) {
     final dpr = MediaQuery.devicePixelRatioOf(context);
-    final screenCap =
-        math.max(1, (displayWidth(context) * dpr).round());
+    final screenCap = math.max(1, (displayWidth(context) * dpr).round());
     final natural = _naturalSize;
     if (natural == null) {
       return screenCap;
@@ -183,10 +371,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
     if (natural == null) {
       return network;
     }
-    return ResizeImage(
-      network,
-      width: _decodeWidth(context),
-    );
+    return ResizeImage(network, width: _decodeWidth(context));
   }
 
   static Rect? _shareOrigin(BuildContext context) {
@@ -226,10 +411,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
             height: display.height,
           )
         : ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: maxW,
-              maxHeight: maxH,
-            ),
+            constraints: BoxConstraints(maxWidth: maxW, maxHeight: maxH),
             child: Image(
               image: _imageProvider(context),
               gaplessPlayback: true,
@@ -237,10 +419,14 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
             ),
           );
 
+    final dismissProgress = (_dismissOffset / _dismissDistance).clamp(0.0, 1.0);
+
     return BlocProvider(
       create: (context) => FullScreenPhotoViewCubit(),
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.black.withValues(
+          alpha: 1 - dismissProgress * 0.7,
+        ),
         extendBody: true,
         body: Stack(
           children: [
@@ -248,20 +434,38 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
               constraints: BoxConstraints.expand(
                 height: displayHeight(context),
               ),
-              child: InteractiveViewer(
-                maxScale: 3.0,
-                minScale: 1.0,
-                child: Center(
-                  child: tag == null
-                      ? image
-                      : Hero(
-                          tag: tag,
-                          placeholderBuilder: _heroPlaceholder,
-                          child: Material(
-                            type: MaterialType.transparency,
-                            child: image,
-                          ),
-                        ),
+              child: Listener(
+                onPointerDown: _onPointerDown,
+                onPointerMove: _onPointerMove,
+                onPointerUp: _onPointerUp,
+                onPointerCancel: _onPointerCancel,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onDoubleTapDown: _onDoubleTapDown,
+                  onDoubleTap: _toggleZoom,
+                  child: Transform.translate(
+                    offset: Offset(0, _dismissOffset),
+                    child: InteractiveViewer(
+                      transformationController: _transformationController,
+                      maxScale: _maxScale,
+                      minScale: _minScale,
+                      panEnabled: _isZoomed,
+                      onInteractionStart: _onInteractionStart,
+                      onInteractionEnd: _onInteractionEnd,
+                      child: Center(
+                        child: tag == null
+                            ? image
+                            : Hero(
+                                tag: tag,
+                                placeholderBuilder: _heroPlaceholder,
+                                child: Material(
+                                  type: MaterialType.transparency,
+                                  child: image,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -269,53 +473,60 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
               top: 0,
               left: 0,
               right: 0,
-              child: SafeArea(
-                child: BlocConsumer<FullScreenPhotoViewCubit,
-                    FullScreenPhotoViewState>(
-                  listenWhen: (previous, current) =>
-                      previous.shareFailed != current.shareFailed &&
-                      current.shareFailed == true,
-                  listener: (context, state) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('無法分享圖片')),
-                    );
-                  },
-                  builder: (context, state) {
-                    final shareIcon =
-                        Theme.of(context).platform == TargetPlatform.iOS
-                            ? Icons.ios_share
-                            : Icons.share;
-                    return Row(
-                      children: [
-                        _PhotoViewerButton(
-                          icon: shareIcon,
-                          onPressed: state.isSharingImage
-                              ? null
-                              : (buttonContext) => context
-                                  .read<FullScreenPhotoViewCubit>()
-                                  .shareImage(
-                                    imageUrl,
-                                    sharePositionOrigin:
-                                        _shareOrigin(buttonContext),
+              child: Opacity(
+                opacity: 1 - dismissProgress,
+                child: SafeArea(
+                  child:
+                      BlocConsumer<
+                        FullScreenPhotoViewCubit,
+                        FullScreenPhotoViewState
+                      >(
+                        listenWhen: (previous, current) =>
+                            previous.shareFailed != current.shareFailed &&
+                            current.shareFailed == true,
+                        listener: (context, state) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('無法分享圖片')),
+                          );
+                        },
+                        builder: (context, state) {
+                          final shareIcon =
+                              Theme.of(context).platform == TargetPlatform.iOS
+                              ? Icons.ios_share
+                              : Icons.share;
+                          return Row(
+                            children: [
+                              _PhotoViewerButton(
+                                icon: shareIcon,
+                                onPressed: state.isSharingImage
+                                    ? null
+                                    : (buttonContext) => context
+                                          .read<FullScreenPhotoViewCubit>()
+                                          .shareImage(
+                                            imageUrl,
+                                            sharePositionOrigin: _shareOrigin(
+                                              buttonContext,
+                                            ),
+                                          ),
+                              ),
+                              if (state.isSharingImage)
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 4),
+                                  child: SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: ProgressSpinner(),
                                   ),
-                        ),
-                        if (state.isSharingImage)
-                          const Padding(
-                            padding: EdgeInsets.only(left: 4),
-                            child: SizedBox(
-                              width: 22,
-                              height: 22,
-                              child: ProgressSpinner(),
-                            ),
-                          ),
-                        const Spacer(),
-                        _PhotoViewerButton(
-                          icon: Icons.close,
-                          onPressed: (_) => Navigator.of(context).pop(),
-                        ),
-                      ],
-                    );
-                  },
+                                ),
+                              const Spacer(),
+                              _PhotoViewerButton(
+                                icon: Icons.close,
+                                onPressed: (_) => Navigator.of(context).pop(),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
                 ),
               ),
             ),
@@ -338,9 +549,7 @@ class _PhotoViewerButton extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       child: Material(
         color: const Color(0x99000000),
-        shape: const CircleBorder(
-          side: BorderSide(color: Color(0x40FFFFFF)),
-        ),
+        shape: const CircleBorder(side: BorderSide(color: Color(0x40FFFFFF))),
         clipBehavior: Clip.antiAlias,
         child: IconButton(
           onPressed: onPressed == null ? null : () => onPressed!(context),
