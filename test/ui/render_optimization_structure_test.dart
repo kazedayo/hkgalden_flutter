@@ -61,29 +61,19 @@ void main() {
     late String frontLayer;
     late String startup;
     late String styledHtml;
-    late String commentCell;
-    late String previousSliver;
     late String appBar;
     late String threadPageState;
     late String richTextEditor;
     late String richTextToolbar;
     late String composePage;
     late String homeDrawer;
-    late String threadPageFooter;
-    late String threadPageSliver;
-    late String threadPageScrollListener;
     late String threadPage;
-    late String threadPageLoadedBody;
-    late String threadPageScrollController;
     late String previousPagePullController;
-    late String threadRestoreController;
-    late String replyPositionAnchor;
     late String previousPullIndicator;
-    late String readingPositionTracker;
-    late String threadPaintGeometry;
     late String threadPageBlocListener;
-
-    /// Combined sources for symbols split across the thread page module.
+    late String threadWebView;
+    late String threadWebViewJs;
+    late String threadWebViewMessages;
     late String threadModule;
 
     setUpAll(() {
@@ -97,9 +87,6 @@ void main() {
       frontLayer = read('lib/ui/home/widgets/home_page_front_layer.dart');
       startup = read('lib/ui/startup_screen.dart');
       styledHtml = read('lib/ui/common/styled_html_view.dart');
-      commentCell = read('lib/ui/thread/comment_cell/comment_cell.dart');
-      previousSliver =
-          read('lib/ui/thread/widgets/thread_page_previous_sliver.dart');
       appBar = read('lib/ui/thread/widgets/thread_page_app_bar.dart');
       threadPageState =
           read('lib/models/ui_state_models/thread_page_state.dart');
@@ -109,47 +96,26 @@ void main() {
           read('lib/ui/common/compose_page/widgets/rich_text_toolbar.dart');
       composePage = read('lib/ui/common/compose_page/compose_page.dart');
       homeDrawer = read('lib/ui/home/drawer/home_drawer.dart');
-      threadPageFooter =
-          read('lib/ui/thread/widgets/thread_page_footer.dart');
-      threadPageSliver =
-          read('lib/ui/thread/widgets/thread_page_sliver.dart');
-      threadPageScrollListener =
-          read('lib/ui/thread/thread_page_scroll_listener.dart');
       threadPage = read('lib/ui/thread/thread_page.dart');
-      threadPageLoadedBody =
-          read('lib/ui/thread/widgets/thread_page_loaded_body.dart');
-      threadPageScrollController =
-          read('lib/ui/thread/thread_page_scroll_controller.dart');
       previousPagePullController =
           read('lib/ui/thread/previous_page_pull_controller.dart');
-      threadRestoreController =
-          read('lib/ui/thread/thread_restore_controller.dart');
-      replyPositionAnchor =
-          read('lib/ui/thread/reply_position_anchor.dart');
       previousPullIndicator = read(
           'lib/ui/thread/widgets/thread_page_previous_pull_indicator.dart');
-      readingPositionTracker =
-          read('lib/ui/thread/thread_reading_position_tracker.dart');
-      threadPaintGeometry =
-          read('lib/ui/thread/thread_paint_geometry.dart');
       threadPageBlocListener =
           read('lib/ui/thread/thread_page_bloc_listener.dart');
+      threadWebView = read('lib/ui/thread/webview/thread_webview.dart');
+      threadWebViewJs = read('lib/ui/thread/webview/thread_webview_js.dart');
+      threadWebViewMessages =
+          read('lib/ui/thread/webview/thread_webview_messages.dart');
       threadModule = [
         threadPage,
-        threadPageLoadedBody,
-        threadPageScrollController,
         previousPagePullController,
-        threadRestoreController,
-        replyPositionAnchor,
         previousPullIndicator,
-        threadPageScrollListener,
-        threadPageSliver,
-        previousSliver,
-        readingPositionTracker,
-        threadPaintGeometry,
         threadPageBlocListener,
+        threadWebView,
+        threadWebViewJs,
+        threadWebViewMessages,
         appBar,
-        threadPageFooter,
       ].join('\n');
     });
 
@@ -246,11 +212,13 @@ void main() {
       expect(styledHtml.contains('clearSelection()'), isTrue);
     });
 
-    test('R2: CommentCell keeps alive; keeps RepaintBoundary', () {
-      // Keep-alive avoids wrong reuse / out-of-order replies after LRU budgeting.
-      expect(commentCell.contains('AutomaticKeepAliveClientMixin'), isTrue);
-      expect(commentCell.contains('wantKeepAlive => true'), isTrue);
-      expect(commentCell.contains('RepaintBoundary'), isTrue);
+    test('R2: thread page uses a single WebView keyed by thread id', () {
+      expect(threadPage.contains('ThreadWebView('), isTrue);
+      expect(threadPage.contains('ValueKey<int>(arguments.threadId)'), isTrue);
+      expect(threadPage.contains('StyledHtmlView('), isFalse);
+      expect(threadWebView.contains('loadFlutterAsset'), isTrue);
+      expect(threadWebView.contains("addJavaScriptChannel(\n        'Galden'"),
+          isTrue);
     });
 
     test('R3: toolbar setState only when selection flags change', () {
@@ -269,21 +237,11 @@ void main() {
       expect(frontLayer.contains('return Material('), isTrue);
     });
 
-    test('R5: footer reads onLastPage from ThreadPageCubit', () {
-      expect(threadPageFooter.contains('onLastPage'), isTrue);
-      expect(
-          threadPageFooter.contains(
-              'BlocBuilder<ThreadPageCubit, ThreadPageState>'),
-          isTrue);
-      expect(
-          threadPageFooter
-              .contains('prev.onLastPage != next.onLastPage'),
-          isTrue);
-      expect(threadPageFooter.contains('BlocBuilder<ThreadBloc'), isTrue);
-      // Footer does not wrap SafeArea; list is edge-to-edge.
-      expect(threadPageFooter.contains('SafeArea('), isFalse);
-      expect(threadPageSliver.contains('ThreadPageFooter('), isTrue);
-      expect(threadPageSliver.contains('onLastPage:'), isFalse);
+    test('R5: footer flags come from ThreadPageCubit via JS setFlags', () {
+      expect(threadWebView.contains('onLastPage'), isTrue);
+      expect(threadWebView.contains("send('setFlags'"), isTrue);
+      expect(threadWebView.contains('pageState.onLastPage'), isTrue);
+      expect(threadModule.contains('SafeArea('), isFalse);
     });
 
     test('R6: load-more footer only when ThreadListAppending', () {
@@ -302,31 +260,21 @@ void main() {
       expect(frontLayer.contains('ListLoadingSkeletonCell'), isFalse);
     });
 
-    test('M8: CommentCell reactively filters blocked authors', () {
-      expect(commentCell.contains('BlocBuilder<SessionUserBloc'), isTrue);
-      expect(commentCell.contains('_isAuthorBlocked'), isTrue);
+    test('M8: WebView applies blocked authors without rebuilding the shell', () {
+      expect(threadWebView.contains('setBlockedUsers'), isTrue);
+      expect(threadWebView.contains('BlocListener<SessionUserBloc'), isTrue);
     });
 
     test('canReply is live from ThreadPageCubit, not constructor snapshot', () {
-      expect(commentCell.contains('BlocBuilder<ThreadPageCubit'), isTrue);
-      expect(commentCell.contains('required this.canReply'), isFalse);
+      expect(threadWebView.contains('pageState.canReply'), isTrue);
       expect(composePage.contains('buildWhen'), isTrue);
-      final threadPage =
-          File('lib/ui/thread/thread_page.dart').readAsStringSync();
       final scaffoldCount = 'Scaffold('.allMatches(threadPage).length;
       expect(scaffoldCount, 1);
     });
 
-    test('M1: previous sliver keys with ValueKey for findChildIndexCallback',
-        () {
-      expect(previousSliver.contains('ValueKey<Object>(replyListKey(reply))'),
-          isTrue);
-      expect(previousSliver.contains('KeyedSubtree'), isTrue);
-      expect(threadPageLoadedBody.contains('previousKeyToBuilderIndex'), isTrue);
-      expect(
-          threadPageLoadedBody.contains(
-              'state.previousPages.replies.length - i - 1'),
-          isTrue);
+    test('M1: previous replies are prepended incrementally', () {
+      expect(threadWebView.contains("send('prependReplies'"), isTrue);
+      expect(threadWebView.contains("send('appendReplies'"), isTrue);
       expect(threadPage.contains('BlocListener<SessionUserBloc'), isTrue);
     });
 
@@ -355,105 +303,36 @@ void main() {
       expect(composePage.contains('_cachedQuoteHtml'), isTrue);
     });
 
-    test('previous page uses RefreshIndicator-style pull, not in-list skeleton',
+    test('previous page uses JS pull + Flutter overlay, not in-list skeleton',
         () {
       expect(previousPagePullController.contains('armExtent'), isTrue);
-      expect(threadPageScrollListener.contains('endPage + 1'), isTrue);
-      expect(threadPageScrollListener.contains('currentPage - 1'), isFalse);
-      expect(threadPage.contains('_onThreadScrollNotification'), isTrue);
+      expect(previousPagePullController.contains('handleJsPull'), isTrue);
       expect(previousPagePullController.contains('armed'), isTrue);
       expect(
           previousPagePullController.contains('HapticFeedback.mediumImpact'),
           isTrue);
-      expect(threadPageLoadedBody.contains('ThreadScrollPhysics'), isTrue);
-      expect(threadPageLoadedBody.contains('clampLeading'), isTrue);
-      expect(threadPageLoadedBody.contains('currentPage > 1'), isTrue);
-      expect(
-          threadPageLoadedBody.contains('threadScrollBounceEnabled'), isTrue);
-      expect(threadPageLoadedBody.contains('Transform.translate'), isTrue);
-      expect(previousPagePullController.contains('animateExtentTo'), isTrue);
+      expect(threadPage.contains('Transform.translate'), isTrue);
       expect(threadModule.contains('ThreadPagePreviousPullIndicator'), isTrue);
-      expect(
-          previousPagePullController.contains('OverscrollNotification'),
-          isTrue);
-      expect(previousPagePullController.contains('extentBefore'), isTrue);
-      expect(
-          previousPagePullController.contains('ScrollEndNotification'),
-          isTrue);
-      expect(threadModule.contains('ScrollDirection.idle'), isFalse);
-      expect(
-          threadPageLoadedBody
-              .contains('NotificationListener<ScrollNotification>'),
-          isTrue);
-      expect(previousSliver.contains('ThreadPageLoadingSkeletonCell'), isFalse);
       expect(
           previousPullIndicator.contains('ThreadPageLoadingSkeletonCell'),
           isTrue);
       expect(
           previousPullIndicator.contains('scaffoldBackgroundColor'), isTrue);
-      final scrollPhysics =
-          File('lib/ui/thread/thread_scroll_physics.dart').readAsStringSync();
-      expect(scrollPhysics.contains('class ThreadScrollPhysics'), isTrue);
+      expect(threadWebView.contains('endPage + 1'), isTrue);
+      expect(threadWebView.contains('currentPage - 1'), isFalse);
     });
 
-    test('thread page pins center and does not restore scroll offset', () {
-      expect(threadPage.contains('keepScrollOffset: false'), isTrue);
-      expect(
-          threadPageScrollController.contains('class ThreadPageScrollController'),
-          isTrue);
-      expect(threadPageScrollController.contains('holdCenterAtZero'), isTrue);
-      expect(threadPageScrollController.contains('minScrollExtent'), isTrue);
-      expect(threadRestoreController.contains('didPinInitialCenter'), isTrue);
-      expect(threadRestoreController.contains('jumpTo(0)'), isTrue);
-      expect(threadRestoreController.contains('centerStartIndex'), isTrue);
-      expect(threadPageScrollController.contains('void jumpTo(double value)'),
-          isTrue);
-      // Last-floor restore uses the same center sliver as mid-list.
-      expect(
-          threadRestoreController.contains('pendingRestoreToTrailingEdge'),
-          isFalse);
-      expect(
-          threadRestoreController.contains('trailingEdgeLayoutActive'),
-          isFalse);
-      expect(threadRestoreController.contains('trailingTopPad'), isFalse);
-      expect(threadPage.contains('_syncTrailingEdgeLayout'), isFalse);
-      expect(threadPage.contains('_footerMeasureKey'), isFalse);
-      expect(threadRestoreController.contains('maxScrollExtent'), isFalse);
-      expect(threadRestoreController.contains('visualReady'), isFalse);
-      expect(threadRestoreController.contains('revealContent'), isFalse);
-      expect(threadRestoreController.contains('notePinApplied'), isFalse);
-      expect(threadRestoreController.contains('revealAfter'), isFalse);
-      expect(threadRestoreController.contains('revealTimeout'), isFalse);
-      // Edge-to-edge viewport; safe area applied as scroll content insets.
-      expect(threadModule.contains('SafeArea('), isFalse);
-      expect(threadPageLoadedBody.contains('viewPadding'), isTrue);
-      expect(threadPageLoadedBody.contains('SliverPadding'), isTrue);
-      expect(threadRestoreController.contains('settling'), isFalse);
-      expect(threadPage.contains('_startRestoreSettle'), isFalse);
-      expect(threadRestoreController.contains('cancelSettle'), isFalse);
-      expect(threadRestoreController.contains('applyPin'), isFalse);
-      expect(threadRestoreController.contains('settleDuration'), isFalse);
-      expect(threadPaintGeometry.contains('threadCanReadPaintGeometry'),
-          isTrue);
-      expect(threadPaintGeometry.contains('persistentCallbacks'), isTrue);
-      expect(threadRestoreController.contains('_deferredSyncScheduled'),
-          isFalse);
-      expect(threadRestoreController.contains('_syncing'), isFalse);
-      expect(threadPage.contains('threadCanReadPaintGeometry'), isFalse);
-      expect(threadPage.contains('_restoreGeometryLocked'), isFalse);
-      // Dispose must not look up MediaQuery — the route is already gone.
+    test('thread page restores via scrollToFloor, not sliver center pin', () {
+      expect(threadPage.contains('restoreFloor'), isTrue);
+      expect(threadWebView.contains('scrollToFloor'), isTrue);
+      expect(threadPage.contains('ThreadRestoreController'), isFalse);
+      expect(threadPage.contains('ReplyAnchorRegistry'), isFalse);
+      expect(threadPage.contains('buildLoadedThreadBody'), isFalse);
+      expect(threadPage.contains('part '), isFalse);
       expect(threadPage.contains('didChangeDependencies'), isTrue);
       expect(threadPage.contains('remeasure: false'), isTrue);
-      // Module split: orchestration stays thin; helpers are libraries.
       expect(threadPage.contains('PreviousPagePullController'), isTrue);
-      expect(threadPage.contains('ThreadRestoreController'), isTrue);
-      expect(threadPage.contains('ReplyAnchorRegistry'), isTrue);
-      expect(threadPage.contains('ThreadReadingPositionTracker'), isTrue);
       expect(threadPage.contains('handleThreadPageBlocState'), isTrue);
-      expect(threadPage.contains('buildLoadedThreadBody'), isTrue);
-      expect(threadPage.contains('part '), isFalse);
-      expect(readingPositionTracker.contains('class ThreadReadingPositionTracker'),
-          isTrue);
       expect(threadPageBlocListener.contains('handleThreadPageBlocState'),
           isTrue);
       final loadingSkeleton = File(
@@ -462,24 +341,13 @@ void main() {
       expect(loadingSkeleton.contains('primary: false'), isTrue);
     });
 
-    test('reading floor is remesured on persist, not every scroll tick', () {
-      expect(threadPageScrollListener.contains('onScrollTick'), isFalse);
-      expect(threadPageScrollListener.contains('updateCachedFloor'), isFalse);
+    test('reading floor persists from settled JS scroll, not every tick', () {
       expect(threadPage.contains('onScrollTick'), isFalse);
       expect(threadPage.contains('_updateCachedReadingFloor'), isFalse);
-      expect(threadPage.contains('attachThreadPageScrollListener('), isTrue);
-      expect(threadPage.contains('onScrollEndPersist:'), isTrue);
+      expect(threadWebView.contains("flag('settled')"), isTrue);
+      expect(threadWebView.contains('void persist('), isTrue);
+      expect(threadWebView.contains('ThreadReadingPositionStore'), isTrue);
       expect(previousPagePullController.contains('onScrollTick'), isFalse);
-      expect(previousPagePullController.contains('onScrollEndPersist'), isTrue);
-      expect(
-        previousPagePullController.contains(
-          'ScrollEndNotification && state is ThreadLoaded',
-        ),
-        isTrue,
-      );
-      expect(readingPositionTracker.contains('void persist('), isTrue);
-      expect(readingPositionTracker.contains('updateCachedFloor'), isTrue);
-      expect(readingPositionTracker.contains('isAtScrollTrailingEdge'), isTrue);
     });
   });
 }

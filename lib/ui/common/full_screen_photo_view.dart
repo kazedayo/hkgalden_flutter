@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/cubit/full_screen_photo_view_cubit.dart';
 import 'package:hkgalden_flutter/models/ui_state_models/full_screen_photo_view_state.dart';
-import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
+import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
 
@@ -22,6 +22,26 @@ class FullScreenPhotoView extends StatefulWidget {
     this.intrinsicWidth,
     this.intrinsicHeight,
   });
+
+  static Future<void> open(
+    BuildContext context, {
+    required String url,
+    String? heroTag,
+    int? intrinsicWidth,
+    int? intrinsicHeight,
+  }) {
+    return Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (context) => FullScreenPhotoView(
+          url: url,
+          heroTag: heroTag,
+          intrinsicWidth: intrinsicWidth,
+          intrinsicHeight: intrinsicHeight,
+        ),
+      ),
+    );
+  }
 
   @override
   State<FullScreenPhotoView> createState() => _FullScreenPhotoViewState();
@@ -169,6 +189,14 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
     );
   }
 
+  static Rect? _shareOrigin(BuildContext context) {
+    final box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) {
+      return null;
+    }
+    return box.localToGlobal(Offset.zero) & box.size;
+  }
+
   static Widget _heroPlaceholder(
     BuildContext context,
     Size heroSize,
@@ -220,80 +248,103 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView> {
               constraints: BoxConstraints.expand(
                 height: displayHeight(context),
               ),
-              child: Dismissible(
-                key: ValueKey(imageUrl),
-                direction: DismissDirection.vertical,
-                resizeDuration: null,
-                onDismissed: (direction) {
-                  Navigator.of(context).pop();
-                },
-                child: InteractiveViewer(
-                  maxScale: 3.0,
-                  minScale: 1.0,
-                  child: Center(
-                    child: tag == null
-                        ? image
-                        : Hero(
-                            tag: tag,
-                            placeholderBuilder: _heroPlaceholder,
-                            child: Material(
-                              type: MaterialType.transparency,
-                              child: image,
-                            ),
+              child: InteractiveViewer(
+                maxScale: 3.0,
+                minScale: 1.0,
+                child: Center(
+                  child: tag == null
+                      ? image
+                      : Hero(
+                          tag: tag,
+                          placeholderBuilder: _heroPlaceholder,
+                          child: Material(
+                            type: MaterialType.transparency,
+                            child: image,
                           ),
-                  ),
+                        ),
                 ),
               ),
             ),
             Positioned(
-              bottom: 0,
+              top: 0,
               left: 0,
               right: 0,
               child: SafeArea(
                 child: BlocConsumer<FullScreenPhotoViewCubit,
                     FullScreenPhotoViewState>(
                   listenWhen: (previous, current) =>
-                      previous.downloadSuccess != current.downloadSuccess &&
-                      current.downloadSuccess != null,
+                      previous.shareFailed != current.shareFailed &&
+                      current.shareFailed == true,
                   listener: (context, state) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(state.downloadSuccess == true
-                            ? '圖片下載成功!'
-                            : '圖片下載失敗!')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('無法分享圖片')),
+                    );
                   },
-                  builder: (context, state) => Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      ActionBarSpinner(isVisible: state.isDownloadingImage),
-                      Builder(
-                        builder: (context) => TextButton(
-                          clipBehavior: Clip.hardEdge,
-                          onPressed: state.isDownloadingImage
+                  builder: (context, state) {
+                    final shareIcon =
+                        Theme.of(context).platform == TargetPlatform.iOS
+                            ? Icons.ios_share
+                            : Icons.share;
+                    return Row(
+                      children: [
+                        _PhotoViewerButton(
+                          icon: shareIcon,
+                          onPressed: state.isSharingImage
                               ? null
-                              : () => context
+                              : (buttonContext) => context
                                   .read<FullScreenPhotoViewCubit>()
-                                  .saveImage(imageUrl),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text.rich(
-                              TextSpan(children: [
-                                TextSpan(
-                                    text: String.fromCharCode(0xF0125),
-                                    style: const TextStyle(
-                                        fontSize: 25,
-                                        shadows: [Shadow(blurRadius: 5)],
-                                        fontFamily: 'MaterialIcons'))
-                              ]),
+                                  .shareImage(
+                                    imageUrl,
+                                    sharePositionOrigin:
+                                        _shareOrigin(buttonContext),
+                                  ),
+                        ),
+                        if (state.isSharingImage)
+                          const Padding(
+                            padding: EdgeInsets.only(left: 4),
+                            child: SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: ProgressSpinner(),
                             ),
                           ),
+                        const Spacer(),
+                        _PhotoViewerButton(
+                          icon: Icons.close,
+                          onPressed: (_) => Navigator.of(context).pop(),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PhotoViewerButton extends StatelessWidget {
+  final IconData icon;
+  final ValueChanged<BuildContext>? onPressed;
+
+  const _PhotoViewerButton({required this.icon, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Material(
+        color: const Color(0x99000000),
+        shape: const CircleBorder(
+          side: BorderSide(color: Color(0x40FFFFFF)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: IconButton(
+          onPressed: onPressed == null ? null : () => onPressed!(context),
+          icon: Icon(icon, color: Colors.white, size: 22),
         ),
       ),
     );

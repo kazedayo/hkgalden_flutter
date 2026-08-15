@@ -218,6 +218,51 @@ class PreviousPagePullController {
     }
   }
 
+  void finishLoading() {
+    if (!loading && extent.value <= 0) {
+      return;
+    }
+    loading = false;
+    armed = false;
+    fingerDown = false;
+    stopSnapAnimation();
+    if (extent.value != 0) {
+      extent.value = 0;
+    }
+  }
+
+  void handleJsPull({
+    required String phase,
+    required double extent,
+    required ThreadBloc threadBloc,
+  }) {
+    final state = threadBloc.state;
+    if (state is ThreadAppending) {
+      return;
+    }
+    if (state is! ThreadLoaded || state.currentPage <= 1) {
+      if (this.extent.value > 0 || armed) {
+        clear();
+      }
+      return;
+    }
+    if (loading) {
+      return;
+    }
+    switch (phase) {
+      case 'start':
+        fingerDown = true;
+        stopSnapAnimation();
+      case 'move':
+        fingerDown = true;
+        stopSnapAnimation();
+        setExtent(extent);
+      case 'end':
+        fingerDown = false;
+        handleRelease(threadBloc, state);
+    }
+  }
+
   /// Call when a previous-page request finishes (success path).
   void onThreadLoaded({
     required bool mounted,

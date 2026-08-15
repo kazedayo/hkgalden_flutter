@@ -55,6 +55,8 @@ dependencies:
   flutter_dotenv:
   image_picker: ^1.2.1
   flutter_displaymode: ^0.7.0
+  webview_flutter: ^4.14.1
+  share_plus: ^13.3.0
 
 dev_dependencies:
   bloc_test:
@@ -113,6 +115,7 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
   assets:
     - assets/
+    - assets/thread_webview/
     - .env
   fonts:
     - family: CustomIcons

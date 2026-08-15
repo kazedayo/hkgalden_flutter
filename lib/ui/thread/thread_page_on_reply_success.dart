@@ -3,10 +3,18 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
+import 'package:hkgalden_flutter/ui/thread/webview/thread_webview.dart';
+
+typedef ThreadReplySuccessCallback = void Function(
+  BuildContext context,
+  ThreadWebViewController webView,
+  Reply reply,
+  bool onLastPage,
+);
 
 void onThreadReplySuccess(
   BuildContext context,
-  ScrollController scrollController,
+  ThreadWebViewController webView,
   Reply reply,
   bool onLastPage,
 ) {
@@ -16,11 +24,7 @@ void onThreadReplySuccess(
     BlocProvider.of<ThreadBloc>(context)
         .add(AppendReplyToThreadEvent(reply: reply));
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      scrollController.animateTo(
-        scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeOut,
-      );
+      webView.scrollToBottom();
     });
   }
 }

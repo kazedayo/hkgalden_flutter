@@ -1,24 +1,24 @@
 import 'package:equatable/equatable.dart';
 
 class FullScreenPhotoViewState extends Equatable {
-  final bool isDownloadingImage;
-  final bool? downloadSuccess;
+  final bool isSharingImage;
+  final bool? shareFailed;
 
   const FullScreenPhotoViewState({
-    required this.isDownloadingImage,
-    this.downloadSuccess,
+    required this.isSharingImage,
+    this.shareFailed,
   });
 
   FullScreenPhotoViewState copyWith({
-    bool? isDownloadingImage,
-    bool? downloadSuccess,
+    bool? isSharingImage,
+    bool? shareFailed,
   }) {
     return FullScreenPhotoViewState(
-      isDownloadingImage: isDownloadingImage ?? this.isDownloadingImage,
-      downloadSuccess: downloadSuccess,
+      isSharingImage: isSharingImage ?? this.isSharingImage,
+      shareFailed: shareFailed,
     );
   }
 
   @override
-  List<Object?> get props => [isDownloadingImage, downloadSuccess];
+  List<Object?> get props => [isSharingImage, shareFailed];
 }

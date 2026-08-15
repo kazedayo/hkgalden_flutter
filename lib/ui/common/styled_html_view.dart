@@ -7,7 +7,6 @@ import 'package:hkgalden_flutter/ui/common/image_loading_error.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/common/x_link_preview.dart';
 import 'package:hkgalden_flutter/ui/common/youtube_link_preview.dart';
-import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
 import 'package:hkgalden_flutter/utils/html_styles.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
@@ -251,15 +250,12 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
     int? intrinsicWidth,
     int? intrinsicHeight,
   }) {
-    Navigator.of(context).push(
-      FadeRoute(
-        page: FullScreenPhotoView(
-          heroTag: heroTag,
-          url: url,
-          intrinsicWidth: intrinsicWidth,
-          intrinsicHeight: intrinsicHeight,
-        ),
-      ),
+    FullScreenPhotoView.open(
+      context,
+      url: url,
+      heroTag: heroTag,
+      intrinsicWidth: intrinsicWidth,
+      intrinsicHeight: intrinsicHeight,
     );
   }
 }

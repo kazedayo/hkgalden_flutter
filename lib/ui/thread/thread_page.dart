@@ -6,17 +6,13 @@ import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
 import 'package:hkgalden_flutter/repository/thread_repository.dart';
 import 'package:hkgalden_flutter/ui/common/error_page.dart';
 import 'package:hkgalden_flutter/ui/thread/previous_page_pull_controller.dart';
-import 'package:hkgalden_flutter/ui/thread/reply_position_anchor.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page_bloc_listener.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page_on_reply_success.dart';
-import 'package:hkgalden_flutter/ui/thread/thread_page_scroll_controller.dart';
-import 'package:hkgalden_flutter/ui/thread/thread_page_scroll_listener.dart';
-import 'package:hkgalden_flutter/ui/thread/thread_reading_position_tracker.dart';
-import 'package:hkgalden_flutter/ui/thread/thread_restore_controller.dart';
+import 'package:hkgalden_flutter/ui/thread/webview/thread_webview.dart';
 import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_app_bar.dart';
 import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_fab.dart';
-import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_loaded_body.dart';
+import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_previous_pull_indicator.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 
 class ThreadPage extends StatefulWidget {
@@ -29,36 +25,22 @@ class ThreadPage extends StatefulWidget {
 
 class _ThreadPageState extends State<ThreadPage>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
-  late final ThreadPageScrollController _scrollController;
   late final ThreadPageCubit _threadPageCubit;
   late final PreviousPagePullController _previousPull;
-  late final ThreadRestoreController _restore;
-  late final ThreadReadingPositionTracker _reading;
+  late final ThreadWebViewController _webView;
 
-  int? _previousImageCacheMaxBytes;
   bool _didCaptureArgs = false;
   double _safeBottom = 0;
-
-  final ReplyAnchorRegistry _anchorRegistry = ReplyAnchorRegistry();
-
-  static const int _kThreadImageCacheMaxBytes = 96 << 20; // 96 MiB
+  int? _restoreFloor;
+  int? _threadId;
+  final GlobalKey _skeletonKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ThreadPageScrollController(keepScrollOffset: false);
     _threadPageCubit = ThreadPageCubit();
     _previousPull = PreviousPagePullController(vsync: this);
-    _restore = ThreadRestoreController();
-    _reading = ThreadReadingPositionTracker(
-      scrollController: _scrollController,
-      anchorRegistry: _anchorRegistry,
-    );
-    final imageCache = PaintingBinding.instance.imageCache;
-    _previousImageCacheMaxBytes = imageCache.maximumSizeBytes;
-    if (imageCache.maximumSizeBytes > _kThreadImageCacheMaxBytes) {
-      imageCache.maximumSizeBytes = _kThreadImageCacheMaxBytes;
-    }
+    _webView = ThreadWebViewController();
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -81,44 +63,14 @@ class _ThreadPageState extends State<ThreadPage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _persistReadingPosition(remeasure: false);
-    final previous = _previousImageCacheMaxBytes;
-    if (previous != null) {
-      PaintingBinding.instance.imageCache.maximumSizeBytes = previous;
-    }
     _previousPull.dispose();
-    _scrollController.dispose();
+    _webView.dispose();
     super.dispose();
   }
 
   void _persistReadingPosition({bool remeasure = true}) {
-    _reading.persist(safeBottom: _safeBottom, remeasure: remeasure);
-  }
-
-  void _persistReadingPositionFromScroll() {
-    _persistReadingPosition();
-  }
-
-  void _resolveCenterAnchorIfNeeded(ThreadLoaded state) {
-    if (_restore.didResolveCenterAnchor) {
-      return;
-    }
-    final hadRestoreRequest = _restore.pendingRestoreFloor != null &&
-        _restore.pendingRestoreFloor! >= 1;
-    _restore.resolveCenterAnchorIfNeeded(state);
-    if (hadRestoreRequest) {
-      _reading.cachedLastFloor ??= _restore.seedCachedFloor(state);
-    }
-  }
-
-  bool _onThreadScrollNotification(
-    ScrollNotification notification,
-    ThreadBloc threadBloc,
-  ) {
-    return _previousPull.onScrollNotification(
-      notification,
-      threadBloc,
-      onScrollEndPersist: _persistReadingPositionFromScroll,
-    );
+    _webView.threadId ??= _threadId;
+    _webView.persist(safeBottom: _safeBottom, remeasure: remeasure);
   }
 
   @override
@@ -129,8 +81,10 @@ class _ThreadPageState extends State<ThreadPage>
 
     if (!_didCaptureArgs) {
       _didCaptureArgs = true;
-      _restore.captureArgsFloor(arguments.floor);
-      _reading.cachedLastFloor = arguments.floor;
+      _restoreFloor = arguments.floor;
+      _threadId = arguments.threadId;
+      _webView.threadId = arguments.threadId;
+      _webView.cachedLastFloor = arguments.floor;
     }
 
     return MultiBlocProvider(
@@ -138,7 +92,6 @@ class _ThreadPageState extends State<ThreadPage>
         BlocProvider(create: (context) {
           final ThreadBloc threadBloc = ThreadBloc(
               repository: RepositoryProvider.of<ThreadRepository>(context));
-          _reading.threadBloc = threadBloc;
 
           if (route != null &&
               route.animation != null &&
@@ -161,11 +114,6 @@ class _ThreadPageState extends State<ThreadPage>
                 isInitialLoad: true));
           }
 
-          attachThreadPageScrollListener(
-            threadBloc: threadBloc,
-            scrollController: _scrollController,
-            cubit: _threadPageCubit,
-          );
           return threadBloc;
         }),
         BlocProvider(create: (context) {
@@ -188,64 +136,73 @@ class _ThreadPageState extends State<ThreadPage>
               pageCubit: _threadPageCubit,
               sessionState: BlocProvider.of<SessionUserBloc>(context).state,
               previousPull: _previousPull,
-              restore: _restore,
-              mounted: mounted,
-              scrollController: _scrollController,
-              onResolveCenterAnchor: _resolveCenterAnchorIfNeeded,
-              onPinCenter: () => _restore.pinCenterIfNeeded(_scrollController),
             );
           },
           buildWhen: (prev, state) =>
               state is! ThreadAppending && prev != state,
-          builder: (context, state) => PrimaryScrollController(
-            controller: _scrollController,
-            child: Scaffold(
-              resizeToAvoidBottomInset: false,
-              appBar: buildThreadPageAppBar(context, arguments),
-              body: () {
-                if (state is ThreadLoading) {
-                  return ThreadPageLoadingSkeleton();
-                } else if (state is ThreadLoaded) {
-                  _resolveCenterAnchorIfNeeded(state);
-                  return buildLoadedThreadBody(
-                    context: context,
-                    state: state,
-                    scrollController: _scrollController,
-                    anchorRegistry: _anchorRegistry,
-                    previousPullExtent: _previousPull.extent,
-                    previousPullLoading: _previousPull.loading,
-                    centerStartIndex:
-                        _restore.centerStartIndex(state.thread.replies),
-                    onOverscrollIndicator: _previousPull.onOverscrollIndicator,
-                    onScrollNotification: (notification) =>
-                        _onThreadScrollNotification(
-                      notification,
-                      BlocProvider.of<ThreadBloc>(context),
-                    ),
-                    onReplySuccess: onThreadReplySuccess,
+          builder: (context, state) => Scaffold(
+            resizeToAvoidBottomInset: false,
+            appBar: buildThreadPageAppBar(context, arguments),
+            body: () {
+              if (state is ThreadError) {
+                return ErrorPage(
+                  message: '無法載入主題',
+                  onRetry: () => BlocProvider.of<ThreadBloc>(context).add(
+                    RequestThreadEvent(
+                        threadId: arguments.threadId,
+                        page: arguments.page,
+                        isInitialLoad: true),
+                  ),
+                );
+              }
+              return ListenableBuilder(
+                listenable: _webView.contentReady,
+                builder: (context, _) {
+                  return ListenableBuilder(
+                    listenable: _previousPull.extent,
+                    builder: (context, _) {
+                      final loaded = state is ThreadLoaded;
+                      return Stack(
+                        children: [
+                          if (loaded)
+                            Transform.translate(
+                              offset: Offset(0, _previousPull.extent.value),
+                              child: ThreadWebView(
+                                key: ValueKey<int>(arguments.threadId),
+                                controller: _webView,
+                                restoreFloor: _restoreFloor,
+                                previousPull: _previousPull,
+                              ),
+                            ),
+                          if (!_webView.contentReady.value)
+                            Positioned.fill(
+                              key: _skeletonKey,
+                              child: ColoredBox(
+                                color: Theme.of(context)
+                                    .scaffoldBackgroundColor,
+                                child: const ThreadPageLoadingSkeleton(),
+                              ),
+                            ),
+                          if (loaded)
+                            ThreadPagePreviousPullIndicator(
+                              extent: _previousPull.extent.value,
+                              loading: _previousPull.loading,
+                            ),
+                        ],
+                      );
+                    },
                   );
-                } else if (state is ThreadError) {
-                  return ErrorPage(
-                    message: '無法載入主題',
-                    onRetry: () => BlocProvider.of<ThreadBloc>(context).add(
-                      RequestThreadEvent(
-                          threadId: arguments.threadId,
-                          page: arguments.page,
-                          isInitialLoad: true),
-                    ),
-                  );
-                }
-                return null;
-              }(),
-              floatingActionButton: arguments.locked
-                  ? null
-                  : buildThreadPageFab(
-                      context,
-                      _scrollController,
-                      arguments,
-                      onThreadReplySuccess,
-                    ),
-            ),
+                },
+              );
+            }(),
+            floatingActionButton: arguments.locked
+                ? null
+                : buildThreadPageFab(
+                    context,
+                    _webView,
+                    arguments,
+                    onThreadReplySuccess,
+                  ),
           ),
         ),
       ),
