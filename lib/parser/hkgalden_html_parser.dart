@@ -15,6 +15,10 @@ class HKGaldenHtmlParser {
     ..allowNavigation(_AllowAllUriPolicy())
     ..allowCustomElement('p', attributes: ['hex', GaldenNodeTypes.dataNodetype])
     ..allowCustomElement('icon', attributes: ['src'])
+    ..allowCustomElement('img', attributes: [
+      GaldenNodeTypes.dataSx,
+      GaldenNodeTypes.dataSy,
+    ])
     ..allowCustomElement('span', attributes: [
       GaldenNodeTypes.dataNodetype,
       GaldenNodeTypes.dataId,

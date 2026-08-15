@@ -190,6 +190,30 @@ void main() {
       parser = HKGaldenHtmlParser();
     });
 
+    test('quoted images keep data-sx and data-sy', () {
+      final parent = _reply(
+        floor: 1,
+        authorId: 'p1',
+        nickname: 'ParentNick',
+        content:
+            '<img src="https://example.com/photo.png" data-sx="800" data-sy="200">',
+      );
+      final reply = _reply(
+        floor: 2,
+        authorId: 'r1',
+        nickname: 'ReplyNick',
+        content: '<p>reply body</p>',
+        parent: parent,
+      );
+
+      final result = parser.commentWithQuotes(reply, SessionUserUndefined());
+
+      expect(result, contains('<blockquote>'));
+      expect(result, contains('src="https://example.com/photo.png"'));
+      expect(result, contains('data-sx="800"'));
+      expect(result, contains('data-sy="200"'));
+    });
+
     test('single-level quote includes quoteName and blockquote', () {
       final parent = _reply(
         floor: 1,

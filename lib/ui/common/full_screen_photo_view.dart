@@ -32,8 +32,7 @@ class FullScreenPhotoView extends StatefulWidget {
     int? intrinsicHeight,
   }) {
     return Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
-        fullscreenDialog: true,
+      _PhotoViewRoute(
         builder: (context) => FullScreenPhotoView(
           url: url,
           heroTag: heroTag,
@@ -242,10 +241,29 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
       return;
     }
     if (_dismissOffset >= _dismissDistance || velocity >= _dismissVelocity) {
-      Navigator.of(context).pop();
+      _commitDismiss();
       return;
     }
     _snapDismissBack();
+  }
+
+  void _commitDismiss() {
+    _dismissPointerStart = null;
+    _dismissVelocityTracker = null;
+    _dismissController.stop();
+    final end = MediaQuery.sizeOf(context).height;
+    if (end - _dismissOffset < 1) {
+      Navigator.of(context).pop();
+      return;
+    }
+    _dismissAnimation = Tween<double>(begin: _dismissOffset, end: end).animate(
+      CurvedAnimation(parent: _dismissController, curve: Curves.easeOut),
+    );
+    _dismissController.forward(from: 0).whenComplete(() {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    });
   }
 
   void _snapDismissBack() {
@@ -420,13 +438,12 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
           );
 
     final dismissProgress = (_dismissOffset / _dismissDistance).clamp(0.0, 1.0);
+    final scrimProgress = (_dismissOffset / maxH).clamp(0.0, 1.0);
 
     return BlocProvider(
       create: (context) => FullScreenPhotoViewCubit(),
       child: Scaffold(
-        backgroundColor: Colors.black.withValues(
-          alpha: 1 - dismissProgress * 0.7,
-        ),
+        backgroundColor: Colors.black.withValues(alpha: 1 - scrimProgress),
         extendBody: true,
         body: Stack(
           children: [
@@ -535,6 +552,27 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
       ),
     );
   }
+}
+
+class _PhotoViewRoute extends PageRouteBuilder<void> {
+  _PhotoViewRoute({required WidgetBuilder builder})
+      : super(
+          opaque: false,
+          fullscreenDialog: true,
+          transitionDuration: const Duration(milliseconds: 250),
+          reverseTransitionDuration: const Duration(milliseconds: 200),
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              builder(context),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOut,
+              ),
+              child: child,
+            );
+          },
+        );
 }
 
 class _PhotoViewerButton extends StatelessWidget {

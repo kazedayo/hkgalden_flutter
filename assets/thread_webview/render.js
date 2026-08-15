@@ -21,10 +21,105 @@
   var pulling = false;
   var pullStartY = 0;
   var pullExtent = 0;
+  var pullArmed = false;
+  var pullLoading = false;
 
   var previousRoot = document.getElementById('previous');
   var mainRoot = document.getElementById('main');
   var footerRoot = document.getElementById('footer');
+  var pullRoot = document.getElementById('previous-pull');
+
+  function pullMax() {
+    return flags.pullMaxExtent || 200;
+  }
+
+  function setPullingClass(on) {
+    document.documentElement.classList.toggle('pulling-previous', !!on);
+  }
+
+  function applyPullShift(px) {
+    var shift = px > 0 ? 'translateY(' + px + 'px)' : '';
+    if (previousRoot) {
+      previousRoot.style.transform = shift;
+    }
+    if (mainRoot) {
+      mainRoot.style.transform = shift;
+    }
+    if (footerRoot) {
+      footerRoot.style.transform = shift;
+    }
+  }
+
+  function setPullTransitions(on) {
+    var value = on ? 'transform 280ms cubic-bezier(0.22, 1, 0.36, 1)' : '';
+    if (previousRoot) {
+      previousRoot.style.transition = value;
+    }
+    if (mainRoot) {
+      mainRoot.style.transition = value;
+    }
+    if (footerRoot) {
+      footerRoot.style.transition = value;
+    }
+    if (pullRoot) {
+      pullRoot.style.transition = on ? 'height 280ms cubic-bezier(0.22, 1, 0.36, 1)' : '';
+    }
+  }
+
+  function setPullExtent(px) {
+    pullExtent = Math.max(0, Math.min(px, pullMax()));
+    if (pullRoot) {
+      pullRoot.style.height = pullExtent + 'px';
+    }
+    applyPullShift(pullExtent);
+    var max = pullMax();
+    if (pullExtent >= max * 0.80) {
+      if (!pullArmed) {
+        pullArmed = true;
+        post('pullPrevious', { phase: 'arm' });
+      }
+    } else if (pullExtent < max * 0.70) {
+      pullArmed = false;
+    }
+  }
+
+  function resetPull() {
+    pullArmed = false;
+    pullLoading = false;
+    pulling = false;
+    pullExtent = 0;
+    setPullingClass(false);
+    setPullTransitions(false);
+    if (pullRoot) {
+      pullRoot.style.height = '0px';
+    }
+    applyPullShift(0);
+  }
+
+  function animatePullToZero() {
+    if (pullExtent <= 0) {
+      resetPull();
+      return;
+    }
+    pullArmed = false;
+    pulling = false;
+    setPullingClass(false);
+    setPullTransitions(true);
+    if (pullRoot) {
+      pullRoot.style.height = '0px';
+    }
+    applyPullShift(0);
+    pullExtent = 0;
+    var done = function () {
+      if (pullRoot) {
+        pullRoot.removeEventListener('transitionend', done);
+      }
+      setPullTransitions(false);
+    };
+    if (pullRoot) {
+      pullRoot.addEventListener('transitionend', done);
+    }
+  }
 
   function pageLabel(floor) {
     if (floor === 1) {
@@ -105,6 +200,8 @@
       (function (img) {
         img.addEventListener('load', function () {
           if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+            img.style.aspectRatio = img.naturalWidth + ' / ' + img.naturalHeight;
+            img.style.width = 'min(100%,' + img.naturalWidth + 'px)';
             post('imageMetrics', {
               url: img.getAttribute('src') || '',
               width: img.naturalWidth,
@@ -236,6 +333,15 @@
     }
     document.body.classList.toggle('locked', !!flags.locked);
     document.body.classList.toggle('no-reply', !flags.canReply);
+    if (typeof flags.pullMaxExtent === 'number' && pullRoot) {
+      document.documentElement.style.setProperty(
+        '--pull-max',
+        flags.pullMaxExtent + 'px'
+      );
+    }
+    if (!flags.canPullPrevious && !pullLoading) {
+      resetPull();
+    }
     renderFooter();
   }
 
@@ -272,6 +378,7 @@
   }
 
   function renderThread(payload) {
+    resetPull();
     clearRoot(previousRoot);
     clearRoot(mainRoot);
     appendReplyNodes(previousRoot, payload.previous || [], false);
@@ -287,10 +394,12 @@
     if (!replies || !replies.length) {
       return;
     }
+    var header = pullLoading ? pullExtent : 0;
     var before = document.documentElement.scrollHeight;
     appendReplyNodes(previousRoot, replies, true);
     var delta = document.documentElement.scrollHeight - before;
-    window.scrollTo(0, window.scrollY + delta);
+    resetPull();
+    window.scrollTo(0, Math.max(0, window.scrollY + delta - header));
   }
 
   function appendReplies(replies) {
@@ -481,7 +590,8 @@
   }, { passive: true });
 
   document.addEventListener('touchstart', function (event) {
-    if (!flags.canPullPrevious) {
+    if (pullLoading || !flags.canPullPrevious) {
+      pulling = false;
       return;
     }
     if ((window.scrollY || 0) > 0.5) {
@@ -490,31 +600,54 @@
     }
     pulling = true;
     pullStartY = event.touches[0].clientY;
-    pullExtent = 0;
-    post('pullPrevious', { phase: 'start', extent: 0 });
+    setPullTransitions(false);
   }, { passive: true });
 
   document.addEventListener('touchmove', function (event) {
-    if (!pulling || !flags.canPullPrevious) {
+    if (!pulling || pullLoading || !flags.canPullPrevious) {
       return;
     }
     var dy = event.touches[0].clientY - pullStartY;
-    if ((window.scrollY || 0) <= 0.5 && dy > 0) {
-      pullExtent = Math.min(dy * 0.85, flags.pullMaxExtent || 200);
-      post('pullPrevious', { phase: 'move', extent: pullExtent });
-    } else if (dy <= 0) {
+    var atTop = (window.scrollY || 0) <= 0.5;
+    if (atTop && (dy > 0 || pullExtent > 0)) {
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+      setPullingClass(true);
+      setPullExtent(dy * 0.85);
+      if (pullExtent <= 0 && dy <= 0) {
+        setPullingClass(false);
+        pulling = false;
+      }
+    } else if (dy <= 0 && pullExtent <= 0) {
+      setPullingClass(false);
       pulling = false;
     }
-  }, { passive: true });
+  }, { passive: false });
 
-  document.addEventListener('touchend', function () {
-    if (!pulling) {
+  function endPullGesture() {
+    if (pullLoading) {
+      pulling = false;
+      setPullingClass(false);
+      return;
+    }
+    if (!pulling && pullExtent <= 0) {
       return;
     }
     pulling = false;
-    post('pullPrevious', { phase: 'end', extent: pullExtent });
-    pullExtent = 0;
-  });
+    setPullingClass(false);
+    if (pullArmed && flags.canPullPrevious) {
+      pullLoading = true;
+      setPullTransitions(false);
+      setPullExtent(pullMax());
+      post('pullPrevious', { phase: 'load' });
+      return;
+    }
+    animatePullToZero();
+  }
+
+  document.addEventListener('touchend', endPullGesture);
+  document.addEventListener('touchcancel', endPullGesture);
 
   window.GaldenRender = {
     handle: function (command) {
@@ -553,6 +686,9 @@
           break;
         case 'scrollToBottom':
           scrollToBottom();
+          break;
+        case 'resetPull':
+          resetPull();
           break;
         default:
           break;

@@ -30,6 +30,17 @@ void main() {
     expect(html, isNot(contains('<icon')));
   });
 
+  test('quoted images reserve the same box as top-level images', () {
+    final html = document.rewriteContentHtml(
+      '<blockquote><div class="quoteName">Nick 說:</div>'
+      '<img src="https://example.com/a.png" data-sx="800" data-sy="200">'
+      '</blockquote>',
+    );
+    expect(html, contains('content-img'));
+    expect(html, contains('aspect-ratio:800 / 200'));
+    expect(html, contains('min(100%,800px)'));
+  });
+
   test('reserves image box from data-sx/sy', () {
     final html = document.rewriteContentHtml(
       '<img src="https://example.com/a.png" data-sx="100" data-sy="50">',

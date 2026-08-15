@@ -303,6 +303,9 @@ class _ThreadWebViewState extends State<ThreadWebView> {
       _renderedPreviousCount = previous.length;
       widget.previousPull.finishLoading();
       _hydratePreviews(added);
+    } else if (widget.previousPull.loading) {
+      widget.previousPull.finishLoading();
+      _js.send('resetPull');
     }
 
     if (state.endPage > (_renderedEndPage ?? state.endPage) ||
@@ -430,11 +433,14 @@ class _ThreadWebViewState extends State<ThreadWebView> {
       case 'scroll':
         _onScroll(message);
       case 'pullPrevious':
+        final phase = message.string('phase') ?? '';
         widget.previousPull.handleJsPull(
-          phase: message.string('phase') ?? '',
-          extent: message.decimal('extent') ?? 0,
+          phase: phase,
           threadBloc: context.read<ThreadBloc>(),
         );
+        if (phase == 'load' && !widget.previousPull.loading) {
+          _js.send('resetPull');
+        }
       case 'refreshLastPage':
         final state = context.read<ThreadBloc>().state;
         if (state is ThreadLoaded) {

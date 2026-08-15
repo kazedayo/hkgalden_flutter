@@ -69,11 +69,13 @@ void main() {
     late String homeDrawer;
     late String threadPage;
     late String previousPagePullController;
-    late String previousPullIndicator;
     late String threadPageBlocListener;
     late String threadWebView;
     late String threadWebViewJs;
     late String threadWebViewMessages;
+    late String threadWebViewHtml;
+    late String threadWebViewCss;
+    late String threadWebViewRenderJs;
     late String threadModule;
 
     setUpAll(() {
@@ -99,18 +101,18 @@ void main() {
       threadPage = read('lib/ui/thread/thread_page.dart');
       previousPagePullController =
           read('lib/ui/thread/previous_page_pull_controller.dart');
-      previousPullIndicator = read(
-          'lib/ui/thread/widgets/thread_page_previous_pull_indicator.dart');
       threadPageBlocListener =
           read('lib/ui/thread/thread_page_bloc_listener.dart');
       threadWebView = read('lib/ui/thread/webview/thread_webview.dart');
       threadWebViewJs = read('lib/ui/thread/webview/thread_webview_js.dart');
       threadWebViewMessages =
           read('lib/ui/thread/webview/thread_webview_messages.dart');
+      threadWebViewHtml = read('assets/thread_webview/index.html');
+      threadWebViewCss = read('assets/thread_webview/thread.css');
+      threadWebViewRenderJs = read('assets/thread_webview/render.js');
       threadModule = [
         threadPage,
         previousPagePullController,
-        previousPullIndicator,
         threadPageBlocListener,
         threadWebView,
         threadWebViewJs,
@@ -305,21 +307,22 @@ void main() {
       expect(composePage.contains('_cachedQuoteHtml'), isTrue);
     });
 
-    test('previous page uses JS pull + Flutter overlay, not in-list skeleton',
-        () {
-      expect(previousPagePullController.contains('armExtent'), isTrue);
+    test('previous page pull lives in the WebView, not a Flutter overlay', () {
       expect(previousPagePullController.contains('handleJsPull'), isTrue);
-      expect(previousPagePullController.contains('armed'), isTrue);
       expect(
           previousPagePullController.contains('HapticFeedback.mediumImpact'),
           isTrue);
-      expect(threadPage.contains('Transform.translate'), isTrue);
-      expect(threadModule.contains('ThreadPagePreviousPullIndicator'), isTrue);
-      expect(
-          previousPullIndicator.contains('ThreadPageLoadingSkeletonCell'),
-          isTrue);
-      expect(
-          previousPullIndicator.contains('scaffoldBackgroundColor'), isTrue);
+      expect(threadPage.contains('Transform.translate'), isFalse);
+      expect(threadPage.contains('ThreadPagePreviousPullIndicator'), isFalse);
+      expect(threadWebView.contains('setOverScrollMode'), isFalse);
+      expect(threadWebView.contains('canPullPrevious'), isTrue);
+      expect(threadWebView.contains('resetPull'), isTrue);
+      expect(threadWebViewHtml.contains('id="previous-pull"'), isTrue);
+      expect(threadWebViewCss.contains('#previous-pull'), isTrue);
+      expect(threadWebViewCss.contains('html.pulling-previous'), isTrue);
+      expect(threadWebViewRenderJs.contains("phase: 'load'"), isTrue);
+      expect(threadWebViewRenderJs.contains('preventDefault'), isTrue);
+      expect(threadWebViewRenderJs.contains('translateY'), isTrue);
       expect(threadWebView.contains('endPage + 1'), isTrue);
       expect(threadWebView.contains('currentPage - 1'), isFalse);
     });

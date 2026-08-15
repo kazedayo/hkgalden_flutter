@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hkgalden_flutter/ui/thread/webview/thread_webview_shell.dart';
 
@@ -40,5 +42,11 @@ void main() {
     );
     expect(out, contains('<style>\nx\n</style>'));
     expect(out, isNot(contains('?v=')));
+  });
+
+  test('real shell html includes the previous-page pull header', () {
+    final html = File('assets/thread_webview/index.html').readAsStringSync();
+    expect(html, contains('id="previous-pull"'));
+    expect(html, contains('href="thread.css"'));
   });
 }

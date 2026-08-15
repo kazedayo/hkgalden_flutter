@@ -12,7 +12,6 @@ import 'package:hkgalden_flutter/ui/thread/thread_page_on_reply_success.dart';
 import 'package:hkgalden_flutter/ui/thread/webview/thread_webview.dart';
 import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_app_bar.dart';
 import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_fab.dart';
-import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_previous_pull_indicator.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 
 class ThreadPage extends StatefulWidget {
@@ -23,8 +22,7 @@ class ThreadPage extends StatefulWidget {
   _ThreadPageState createState() => _ThreadPageState();
 }
 
-class _ThreadPageState extends State<ThreadPage>
-    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+class _ThreadPageState extends State<ThreadPage> with WidgetsBindingObserver {
   late final ThreadPageCubit _threadPageCubit;
   late final PreviousPagePullController _previousPull;
   late final ThreadWebViewController _webView;
@@ -39,7 +37,7 @@ class _ThreadPageState extends State<ThreadPage>
   void initState() {
     super.initState();
     _threadPageCubit = ThreadPageCubit();
-    _previousPull = PreviousPagePullController(vsync: this);
+    _previousPull = PreviousPagePullController();
     _webView = ThreadWebViewController();
     WidgetsBinding.instance.addObserver(this);
   }
@@ -158,39 +156,25 @@ class _ThreadPageState extends State<ThreadPage>
               return ListenableBuilder(
                 listenable: _webView.contentReady,
                 builder: (context, _) {
-                  return ListenableBuilder(
-                    listenable: _previousPull.extent,
-                    builder: (context, _) {
-                      final loaded = state is ThreadLoaded;
-                      return Stack(
-                        children: [
-                          if (loaded)
-                            Transform.translate(
-                              offset: Offset(0, _previousPull.extent.value),
-                              child: ThreadWebView(
-                                key: ValueKey<int>(arguments.threadId),
-                                controller: _webView,
-                                restoreFloor: _restoreFloor,
-                                previousPull: _previousPull,
-                              ),
-                            ),
-                          if (!_webView.contentReady.value)
-                            Positioned.fill(
-                              key: _skeletonKey,
-                              child: ColoredBox(
-                                color: Theme.of(context)
-                                    .scaffoldBackgroundColor,
-                                child: const ThreadPageLoadingSkeleton(),
-                              ),
-                            ),
-                          if (loaded)
-                            ThreadPagePreviousPullIndicator(
-                              extent: _previousPull.extent.value,
-                              loading: _previousPull.loading,
-                            ),
-                        ],
-                      );
-                    },
+                  final loaded = state is ThreadLoaded;
+                  return Stack(
+                    children: [
+                      if (loaded)
+                        ThreadWebView(
+                          key: ValueKey<int>(arguments.threadId),
+                          controller: _webView,
+                          restoreFloor: _restoreFloor,
+                          previousPull: _previousPull,
+                        ),
+                      if (!_webView.contentReady.value)
+                        Positioned.fill(
+                          key: _skeletonKey,
+                          child: ColoredBox(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            child: const ThreadPageLoadingSkeleton(),
+                          ),
+                        ),
+                    ],
                   );
                 },
               );

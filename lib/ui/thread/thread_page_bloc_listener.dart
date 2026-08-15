@@ -24,6 +24,6 @@ void handleThreadPageBlocState({
       sessionState,
     );
   } else if (state is ThreadError) {
-    previousPull.clear(animate: true);
+    previousPull.clear();
   }
 }

@@ -65,6 +65,31 @@ void main() {
     expect(imageScale(tester), closeTo(1.0, 0.05));
   });
 
+  testWidgets('swipe down fades the scrim instead of sliding an opaque page',
+      (tester) async {
+    await openViewer(tester, platform: TargetPlatform.iOS);
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(InteractiveViewer)),
+    );
+    await gesture.moveBy(const Offset(0, 160));
+    await tester.pump();
+
+    final route = ModalRoute.of(
+      tester.element(find.byType(FullScreenPhotoView)),
+    );
+    expect(route!.opaque, isFalse);
+
+    final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+    expect(scaffold.backgroundColor, isNotNull);
+    expect(scaffold.backgroundColor!.a, lessThan(0.85));
+    expect(scaffold.backgroundColor!.a, greaterThan(0));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.byType(FullScreenPhotoView), findsNothing);
+  });
+
   testWidgets('swipe down dismisses on iOS', (tester) async {
     await openViewer(tester, platform: TargetPlatform.iOS);
 
