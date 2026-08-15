@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/ui/common/avatar_widget.dart';
+import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_page.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 import 'package:octo_image/octo_image.dart';
@@ -11,8 +14,33 @@ class UserPage extends StatelessWidget {
 
   const UserPage({super.key, required this.user});
 
+  bool _isOwnProfile(SessionUserState session) {
+    return session is SessionUserLoaded &&
+        session.sessionUser.userId == user.userId;
+  }
+
+  void _blockUser(BuildContext context) {
+    final session = context.read<SessionUserBloc>();
+    if (session.state is! SessionUserLoaded) {
+      showCustomAlert(
+        context: context,
+        title: '未登入',
+        content: '請先登入',
+      );
+      return;
+    }
+    final messenger = ScaffoldMessenger.of(context);
+    session.add(AppendUserToBlockListEvent(userId: user.userId));
+    Navigator.of(context).pop();
+    messenger.showSnackBar(
+      SnackBar(content: Text('已封鎖會員 ${user.nickName}')),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) => Stack(
+  Widget build(BuildContext context) {
+    final session = context.watch<SessionUserBloc>().state;
+    return Stack(
         children: [
           Card(
             clipBehavior: Clip.hardEdge,
@@ -24,7 +52,7 @@ class UserPage extends StatelessWidget {
             elevation: 6,
             margin: const EdgeInsets.only(top: 40),
             child: Padding(
-              padding: const EdgeInsets.only(top: 30),
+              padding: const EdgeInsets.only(top: 56),
               child: UserThreadListPage(
                 userId: user.userId,
               ),
@@ -33,6 +61,7 @@ class UserPage extends StatelessWidget {
           Positioned(
             left: 16,
             top: 16,
+            right: _isOwnProfile(session) ? 16 : 96,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -86,6 +115,45 @@ class UserPage extends StatelessWidget {
               ],
             ),
           ),
+          if (!_isOwnProfile(session))
+            Positioned(
+              right: 16,
+              top: 52,
+              child: Material(
+                color: const Color(0x26FF5252),
+                shape: const StadiumBorder(
+                  side: BorderSide(color: Color(0x59FF5252)),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () => _blockUser(context),
+                  child: const Padding(
+                    padding: EdgeInsets.fromLTRB(10, 6, 12, 6),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.block_outlined,
+                          size: 16,
+                          color: Colors.redAccent,
+                        ),
+                        SizedBox(width: 5),
+                        Text(
+                          '封鎖',
+                          style: TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            height: 1.1,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       );
+  }
 }

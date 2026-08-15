@@ -13,6 +13,7 @@ import 'package:hkgalden_flutter/ui/thread/previous_page_pull_controller.dart';
 import 'package:hkgalden_flutter/ui/thread/webview/thread_webview_document.dart';
 import 'package:hkgalden_flutter/ui/thread/webview/thread_webview_js.dart';
 import 'package:hkgalden_flutter/ui/thread/webview/thread_webview_messages.dart';
+import 'package:hkgalden_flutter/ui/thread/webview/thread_webview_shell.dart';
 import 'package:hkgalden_flutter/ui/thread/webview/thread_webview_theme.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 import 'package:hkgalden_flutter/models/thread_reading_position.dart';
@@ -135,9 +136,21 @@ class _ThreadWebViewState extends State<ThreadWebView> {
             _onInbound(inbound);
           }
         },
-      )
-      ..loadFlutterAsset('assets/thread_webview/index.html');
+      );
     _js.attach(_webViewController);
+    _loadShell();
+  }
+
+  Future<void> _loadShell() async {
+    final html = await loadThreadWebViewShell();
+    if (!mounted) {
+      return;
+    }
+    await _webViewController.clearCache();
+    if (!mounted) {
+      return;
+    }
+    await _webViewController.loadHtmlString(html);
   }
 
   @override
@@ -414,8 +427,6 @@ class _ThreadWebViewState extends State<ThreadWebView> {
         _quote(message);
       case 'openUser':
         _openUser(message.string('userId'));
-      case 'blockUser':
-        _blockUser(message.string('userId'));
       case 'scroll':
         _onScroll(message);
       case 'pullPrevious':
@@ -582,26 +593,6 @@ class _ThreadWebViewState extends State<ThreadWebView> {
       context: context,
       enableDrag: false,
       builder: (context) => UserPage(user: user),
-    );
-  }
-
-  void _blockUser(String? userId) {
-    if (userId == null) {
-      return;
-    }
-    final session = context.read<SessionUserBloc>();
-    if (session.state is! SessionUserLoaded) {
-      showCustomAlert(
-        context: context,
-        title: '未登入',
-        content: '請先登入',
-      );
-      return;
-    }
-    session.add(AppendUserToBlockListEvent(userId: userId));
-    final author = _authors[userId];
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('已封鎖會員 ${author?.nickName ?? userId}')),
     );
   }
 

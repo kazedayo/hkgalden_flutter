@@ -216,7 +216,9 @@ void main() {
       expect(threadPage.contains('ThreadWebView('), isTrue);
       expect(threadPage.contains('ValueKey<int>(arguments.threadId)'), isTrue);
       expect(threadPage.contains('StyledHtmlView('), isFalse);
-      expect(threadWebView.contains('loadFlutterAsset'), isTrue);
+      expect(threadWebView.contains('loadHtmlString'), isTrue);
+      expect(threadWebView.contains('loadThreadWebViewShell'), isTrue);
+      expect(threadWebView.contains('loadFlutterAsset'), isFalse);
       expect(threadWebView.contains("addJavaScriptChannel(\n        'Galden'"),
           isTrue);
     });

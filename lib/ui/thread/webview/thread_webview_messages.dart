@@ -7,8 +7,6 @@ const Set<String> kThreadWebViewInboundTypes = {
   'openImage',
   'quote',
   'openUser',
-  'blockUser',
-  'showUserMenu',
   'scroll',
   'pullPrevious',
   'refreshLastPage',

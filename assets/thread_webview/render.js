@@ -21,13 +21,10 @@
   var pulling = false;
   var pullStartY = 0;
   var pullExtent = 0;
-  var menuUserId = null;
 
   var previousRoot = document.getElementById('previous');
   var mainRoot = document.getElementById('main');
   var footerRoot = document.getElementById('footer');
-  var userMenu = document.getElementById('user-menu');
-  var menuBackdrop = document.getElementById('menu-backdrop');
 
   function pageLabel(floor) {
     if (floor === 1) {
@@ -130,7 +127,6 @@
   function renderReply(reply) {
     var article = document.createElement('article');
     article.className = 'comment';
-    article.style.paddingTop = '52px';
     article.setAttribute('data-floor', String(reply.floor));
     if (reply.replyId) {
       article.setAttribute('data-reply-id', reply.replyId);
@@ -439,25 +435,13 @@
     lastScrollY = y;
   }
 
-  function hideMenu() {
-    userMenu.hidden = true;
-    menuBackdrop.hidden = true;
-    menuUserId = null;
-  }
-
-  function showMenu(btn, userId) {
-    menuUserId = userId;
-    var rect = btn.getBoundingClientRect();
-    userMenu.style.left = Math.max(8, rect.left) + 'px';
-    userMenu.style.top = (rect.bottom + 6) + 'px';
-    userMenu.hidden = false;
-    menuBackdrop.hidden = false;
-  }
-
   document.addEventListener('click', function (event) {
     var avatar = event.target.closest('.avatar-btn');
     if (avatar) {
-      showMenu(avatar, avatar.getAttribute('data-user-id'));
+      var userId = avatar.getAttribute('data-user-id');
+      if (userId) {
+        post('openUser', { userId: userId });
+      }
       return;
     }
     var quote = event.target.closest('.quote-btn');
@@ -476,18 +460,6 @@
       post('refreshLastPage', {});
     }
   });
-
-  userMenu.addEventListener('click', function (event) {
-    var action = event.target.closest('button');
-    if (!action || !menuUserId) {
-      return;
-    }
-    var type = action.getAttribute('data-action') === 'block' ? 'blockUser' : 'openUser';
-    post(type, { userId: menuUserId });
-    hideMenu();
-  });
-
-  menuBackdrop.addEventListener('click', hideMenu);
 
   document.addEventListener('copy', function () {
     requestAnimationFrame(function () {
