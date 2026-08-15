@@ -36,7 +36,7 @@ The code lives under `lib/` and is organized by responsibility:
 
 ## Getting Started
 
-Requires Flutter (stable channel; managed through [FVM](https://fvm.app) via `.fvmrc`).
+Requires Flutter 3.47 (Dart 3.13; managed through [FVM](https://fvm.app) via `.fvmrc`).
 
 1. Install dependencies:
 

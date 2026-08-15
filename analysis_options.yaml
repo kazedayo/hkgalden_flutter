@@ -3,6 +3,13 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   exclude:
     - "test/**/*.mocks.dart"
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 linter:
   rules:
     avoid_positional_boolean_parameters: false
@@ -10,3 +17,6 @@ linter:
     avoid_bool_literals_in_conditional_expressions: false
     implementation_imports: false
     require_trailing_commas: false
+    # Named `repository:` constructors assign to `_repository`; renaming
+    # the parameter would break every call site for a style-only lint.
+    prefer_initializing_formals: false
