@@ -65,6 +65,9 @@ class ImageAspectRatioStore {
       return;
     }
     final existing = _box.get(url);
+    if (_unchanged(existing, aspectRatio, naturalWidth)) {
+      return;
+    }
     double? width = naturalWidth;
     if (width == null && existing is Map) {
       final w = (existing['w'] as num?)?.toDouble();
@@ -81,6 +84,29 @@ class ImageAspectRatioStore {
     }
     await _box.put(url, map);
     await _evictOldestIfNeeded();
+  }
+
+  static bool _unchanged(
+    dynamic existing,
+    double aspectRatio,
+    double? naturalWidth,
+  ) {
+    if (existing is! Map) {
+      return false;
+    }
+    final existingRatio = (existing['r'] as num?)?.toDouble();
+    if (existingRatio == null ||
+        !isValidAspectRatio(existingRatio) ||
+        existingRatio != aspectRatio) {
+      return false;
+    }
+    if (naturalWidth == null || !isValidNaturalWidth(naturalWidth)) {
+      return true;
+    }
+    final existingWidth = (existing['w'] as num?)?.toDouble();
+    return existingWidth != null &&
+        isValidNaturalWidth(existingWidth) &&
+        existingWidth == naturalWidth;
   }
 
   Future<void> _evictOldestIfNeeded() async {

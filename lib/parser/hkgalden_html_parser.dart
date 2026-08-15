@@ -9,29 +9,6 @@ String? parseReplyWithQuotes(Map<String, dynamic> args) =>
         args['reply'] as Reply, args['state'] as SessionUserState);
 
 class HKGaldenHtmlParser {
-  static final NodeValidator validator = NodeValidatorBuilder.common()
-    ..allowInlineStyles()
-    ..allowImages(_AllowAllUriPolicy())
-    ..allowNavigation(_AllowAllUriPolicy())
-    ..allowCustomElement('p', attributes: ['hex', GaldenNodeTypes.dataNodetype])
-    ..allowCustomElement('icon', attributes: ['src'])
-    ..allowCustomElement('img', attributes: [
-      GaldenNodeTypes.dataSx,
-      GaldenNodeTypes.dataSy,
-    ])
-    ..allowCustomElement('span', attributes: [
-      GaldenNodeTypes.dataNodetype,
-      GaldenNodeTypes.dataId,
-      GaldenNodeTypes.dataSrc,
-      GaldenNodeTypes.dataValue,
-      GaldenNodeTypes.dataHref,
-      GaldenNodeTypes.dataPackId,
-      GaldenNodeTypes.dataSx,
-      GaldenNodeTypes.dataSy,
-      GaldenNodeTypes.dataAlt,
-      'hex'
-    ]);
-
   String? parse(String htmlString) {
     try {
       final htmlDocument = parseHtmlDocument(htmlString);
@@ -191,25 +168,26 @@ class HKGaldenHtmlParser {
     }
   }
 
+  String _escapeHtml(String text) {
+    return text
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+  }
+
   String? _buildQuoteChain(
     Reply reply, {
     required bool includeStartAsQuote,
     bool Function(String userId)? isBlocked,
     int maxDepth = 3,
   }) {
-    final String baseHtml =
-        includeStartAsQuote ? '' : (reply.content ?? '');
-    final htmlDoc = parseHtmlDocument(baseHtml);
-    final body = htmlDoc.body;
-    if (body == null) {
-      return includeStartAsQuote ? '' : (reply.content ?? '');
-    }
-
     final List<Reply> chain = <Reply>[];
 
     if (includeStartAsQuote) {
       if (isBlocked != null && isBlocked(reply.author.userId)) {
-        return body.innerHtml;
+        return '';
       }
       chain.add(reply);
     }
@@ -224,7 +202,7 @@ class HKGaldenHtmlParser {
     }
 
     if (chain.isEmpty) {
-      return body.innerHtml;
+      return includeStartAsQuote ? '' : (reply.content ?? '');
     }
 
     final List<Reply> deepestFirst = chain.reversed.toList();
@@ -234,20 +212,17 @@ class HKGaldenHtmlParser {
     }
     for (final quoted in deepestFirst) {
       buffer
-        ..write('<div class="quoteName">${quoted.authorNickname} 說:</div>')
+        ..write(
+          '<div class="quoteName">${_escapeHtml(quoted.authorNickname)} 說:</div>',
+        )
         ..write(quoted.content ?? '')
         ..write('</blockquote>');
     }
 
-    if (includeStartAsQuote) {
-      body.setInnerHtml(buffer.toString(), validator: validator);
-    } else {
-      body.setInnerHtml(
-        '${buffer.toString()}${body.innerHtml}',
-        validator: validator,
-      );
+    if (!includeStartAsQuote) {
+      buffer.write(reply.content ?? '');
     }
-    return body.innerHtml;
+    return buffer.toString();
   }
 
   String? commentWithQuotes(Reply reply, SessionUserState state) {
@@ -265,8 +240,7 @@ class HKGaldenHtmlParser {
         includeStartAsQuote: false,
       );
     }
-    final htmlDoc = parseHtmlDocument(reply.content ?? '');
-    return htmlDoc.body?.innerHtml ?? reply.content ?? '';
+    return reply.content ?? '';
   }
 
   String? replyWithQuotes(Reply reply, SessionUserLoaded state) {
@@ -275,12 +249,5 @@ class HKGaldenHtmlParser {
       includeStartAsQuote: true,
       isBlocked: (userId) => state.sessionUser.blockedUsers.contains(userId),
     );
-  }
-}
-
-class _AllowAllUriPolicy implements UriPolicy {
-  @override
-  bool allowsUri(String uri) {
-    return true;
   }
 }

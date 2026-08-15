@@ -27,17 +27,20 @@ class Thread extends Equatable {
       required this.tagName,
       required this.tagColor});
 
-  factory Thread.fromJson(Map<String, dynamic> json) => Thread(
-        threadId: json['id'] as int,
-        title: json['title'] as String,
-        status: json['status'] as String,
-        replies: (json['replies'] as List<dynamic>)
-            .map((reply) => Reply.fromJson(reply))
-            .toList(),
-        totalReplies: json['totalReplies'] as int,
-        tagName: json['tags'][0]['name'] as String,
-        tagColor: Color(int.parse('FF${json['tags'][0]['color']}', radix: 16)),
-      );
+  factory Thread.fromJson(Map<String, dynamic> json) {
+    final intern = <String, String>{};
+    return Thread(
+      threadId: json['id'] as int,
+      title: json['title'] as String,
+      status: json['status'] as String,
+      replies: (json['replies'] as List<dynamic>)
+          .map((reply) => Reply.fromJson(reply, intern))
+          .toList(),
+      totalReplies: json['totalReplies'] as int,
+      tagName: json['tags'][0]['name'] as String,
+      tagColor: Color(int.parse('FF${json['tags'][0]['color']}', radix: 16)),
+    );
+  }
 
   factory Thread.initial() => const Thread(
         threadId: 0,

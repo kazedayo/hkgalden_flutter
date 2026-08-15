@@ -268,6 +268,29 @@ void main() {
       expect(result, contains('reply body'));
     });
 
+    test('nickname containing < and & is escaped in quoteName', () {
+      final parent = _reply(
+        floor: 1,
+        authorId: 'p1',
+        nickname: 'A<B&C',
+        content: '<p>parent body</p>',
+      );
+      final reply = _reply(
+        floor: 2,
+        authorId: 'r1',
+        nickname: 'ReplyNick',
+        content: '<p>reply body</p>',
+        parent: parent,
+      );
+
+      final result = parser.commentWithQuotes(reply, SessionUserUndefined());
+
+      expect(result, isNotNull);
+      expect(result, contains('class="quoteName"'));
+      expect(result, contains('A&lt;B&amp;C 說:'));
+      expect(result, isNot(contains('A<B&C')));
+    });
+
     test('depth limit: chain of 4 parents only includes 3 blockquotes max', () {
       final p4 = _reply(
         floor: 1,

@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:hive/hive.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
 import 'package:test/test.dart';
 
@@ -59,6 +62,68 @@ void main() {
       expect(ImageAspectRatioStore.isValidNaturalWidth(double.nan), isFalse);
       expect(
           ImageAspectRatioStore.isValidNaturalWidth(double.infinity), isFalse);
+    });
+  });
+
+  group('ImageAspectRatioStore.save', () {
+    late Directory tempDir;
+
+    setUp(() async {
+      tempDir = await Directory.systemTemp.createTemp('image_aspect_ratio_');
+      Hive.init(tempDir.path);
+      await Hive.openBox(ImageAspectRatioStore.boxName);
+    });
+
+    tearDown(() async {
+      if (Hive.isBoxOpen(ImageAspectRatioStore.boxName)) {
+        await Hive.box(ImageAspectRatioStore.boxName).close();
+      }
+      await Hive.deleteBoxFromDisk(ImageAspectRatioStore.boxName);
+      if (tempDir.existsSync()) {
+        tempDir.deleteSync(recursive: true);
+      }
+    });
+
+    test('skips rewrite when ratio and width are unchanged', () async {
+      const url = 'https://example.com/a.png';
+      final store = ImageAspectRatioStore.instance;
+      await store.save(url, 0.75, naturalWidth: 400);
+      final first = Map<String, dynamic>.from(
+        Hive.box(ImageAspectRatioStore.boxName).get(url) as Map,
+      );
+
+      await store.save(url, 0.75, naturalWidth: 400);
+      final second = Map<String, dynamic>.from(
+        Hive.box(ImageAspectRatioStore.boxName).get(url) as Map,
+      );
+
+      expect(second['t'], first['t']);
+      expect(second['r'], first['r']);
+      expect(second['w'], first['w']);
+    });
+
+    test('skips rewrite when only ratio is sent and already matches', () async {
+      const url = 'https://example.com/b.png';
+      final store = ImageAspectRatioStore.instance;
+      await store.save(url, 0.5, naturalWidth: 200);
+      final firstT =
+          (Hive.box(ImageAspectRatioStore.boxName).get(url) as Map)['t'];
+
+      await store.save(url, 0.5);
+      final raw = Hive.box(ImageAspectRatioStore.boxName).get(url) as Map;
+      expect(raw['t'], firstT);
+      expect(raw['w'], 200);
+    });
+
+    test('writes when width is new for the same ratio', () async {
+      const url = 'https://example.com/c.png';
+      final store = ImageAspectRatioStore.instance;
+      await store.save(url, 0.75);
+      expect(store.naturalWidth(url), isNull);
+
+      await store.save(url, 0.75, naturalWidth: 320);
+      expect(store.naturalWidth(url), 320);
+      expect(store.aspectRatio(url), 0.75);
     });
   });
 }

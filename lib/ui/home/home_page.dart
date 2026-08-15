@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:backdrop/backdrop.dart';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
@@ -48,16 +50,19 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   late ScrollController _scrollController;
+  bool _loadMoreInFlight = false;
+  StreamSubscription<ThreadListState>? _threadListSubscription;
 
   @override
   void initState() {
     _scrollController = ScrollController();
-    _initListener(context, _scrollController);
+    _initListener();
     super.initState();
   }
 
   @override
   void dispose() {
+    _threadListSubscription?.cancel();
     _scrollController.dispose();
     super.dispose();
   }

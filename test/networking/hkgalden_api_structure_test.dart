@@ -17,6 +17,7 @@ void main() {
     expect('fragment CommentsRecursive on Reply'.allMatches(apiSource).length, 1);
     expect(apiSource.contains('_GqlFragments.commentFields'), isTrue);
     expect(apiSource.contains('_GqlFragments.commentsRecursive'), isTrue);
+    expect('parent {'.allMatches(apiSource).length, 3);
     expect(apiSource.contains('getThreadQuery'), isTrue);
     expect(apiSource.contains('sendReply'), isTrue);
   });
@@ -53,7 +54,7 @@ void main() {
   test('getInstalledPacksQuery requests installedPacks with smiley fields', () {
     expect(apiSource.contains('getInstalledPacksQuery'), isTrue);
     expect(apiSource.contains('installedPacks'), isTrue);
-    final start = apiSource.indexOf('getInstalledPacksQuery');
+    final start = apiSource.indexOf('query GetInstalledPacks');
     expect(start, greaterThanOrEqualTo(0));
     final body = apiSource.substring(start);
     expect(body.contains('id'), isTrue);

@@ -10,6 +10,18 @@ import 'package:universal_html/parsing.dart';
 
 final RegExp _hexColor = RegExp(r'^#?[0-9a-fA-F]{3,8}$');
 
+class RewrittenContentHtml {
+  final String html;
+  final List<String> youtubeIds;
+  final List<String> xIds;
+
+  const RewrittenContentHtml({
+    required this.html,
+    this.youtubeIds = const [],
+    this.xIds = const [],
+  });
+}
+
 class ThreadWebViewReplyDto {
   final String? replyId;
   final int floor;
@@ -21,6 +33,8 @@ class ThreadWebViewReplyDto {
   final String avatar;
   final String? gender;
   final String? groupId;
+  final List<String> youtubeIds;
+  final List<String> xIds;
 
   const ThreadWebViewReplyDto({
     required this.replyId,
@@ -33,6 +47,8 @@ class ThreadWebViewReplyDto {
     required this.avatar,
     required this.gender,
     required this.groupId,
+    this.youtubeIds = const [],
+    this.xIds = const [],
   });
 
   Map<String, dynamic> toJson() => {
@@ -70,10 +86,11 @@ class ThreadWebViewDocument {
     SessionUserState sessionState,
   ) {
     final raw = ParsedCommentHtmlCache.instance.getOrParse(reply, sessionState);
+    final rewritten = rewriteContentHtml(raw);
     return ThreadWebViewReplyDto(
       replyId: reply.replyId,
       floor: reply.floor,
-      html: rewriteContentHtml(raw),
+      html: rewritten.html,
       dateText: DateTimeFormat.format(
         reply.date.toLocal(),
         format: 'd/m/y H:i',
@@ -86,26 +103,34 @@ class ThreadWebViewDocument {
       groupId: reply.author.userGroup.isEmpty
           ? null
           : reply.author.userGroup.first.groupId,
+      youtubeIds: rewritten.youtubeIds,
+      xIds: rewritten.xIds,
     );
   }
 
-  String rewriteContentHtml(String html) {
+  RewrittenContentHtml rewriteContentHtml(String html) {
     if (html.isEmpty) {
-      return html;
+      return RewrittenContentHtml(html: html);
     }
     try {
       final document = parseHtmlDocument('<div id="__root">$html</div>');
       final root = document.getElementById('__root');
       if (root == null) {
-        return html;
+        return RewrittenContentHtml(html: html);
       }
       _applyColors(root);
       _convertIcons(root);
       _applyImageBoxes(root);
-      _wrapLinkPreviews(root);
-      return root.innerHtml ?? html;
+      final youtubeIds = <String>[];
+      final xIds = <String>[];
+      _wrapLinkPreviews(root, youtubeIds: youtubeIds, xIds: xIds);
+      return RewrittenContentHtml(
+        html: root.innerHtml ?? html,
+        youtubeIds: youtubeIds,
+        xIds: xIds,
+      );
     } catch (_) {
-      return html;
+      return RewrittenContentHtml(html: html);
     }
   }
 
@@ -172,7 +197,11 @@ class ThreadWebViewDocument {
     }
   }
 
-  void _wrapLinkPreviews(Element root) {
+  void _wrapLinkPreviews(
+    Element root, {
+    required List<String> youtubeIds,
+    required List<String> xIds,
+  }) {
     for (final anchor in List<Element>.from(root.querySelectorAll('a'))) {
       if (_closestClass(anchor, 'link-preview') != null) {
         continue;
@@ -183,6 +212,7 @@ class ThreadWebViewDocument {
       }
       final videoId = YoutubeUrl.tryParseVideoId(href);
       if (videoId != null) {
+        youtubeIds.add(videoId);
         _wrapPreview(
           anchor,
           kind: 'youtube',
@@ -195,6 +225,7 @@ class ThreadWebViewDocument {
       }
       final statusId = XUrl.tryParseStatusId(href);
       if (statusId != null) {
+        xIds.add(statusId);
         _wrapPreview(
           anchor,
           kind: 'x',

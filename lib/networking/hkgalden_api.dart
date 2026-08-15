@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:gql/ast.dart';
 import 'package:graphql/client.dart';
 import 'package:hkgalden_flutter/models/channel.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
@@ -40,9 +41,6 @@ class _GqlFragments {
           ...CommentFields
           parent {
             ...CommentFields
-            parent {
-              ...CommentFields
-            }
           }
         }
       }
@@ -73,6 +71,133 @@ class _GqlFragments {
       color
     }
   ''';
+
+  static final DocumentNode getChannels = gql('''
+      query GetChannels {
+        channels {
+          id
+          name
+          tags {
+            name
+            color
+          }
+        }
+      }
+    ''');
+
+  static final DocumentNode getSessionUser = gql('''
+      query GetSessionUser {
+        sessionUser {
+          id
+          nickname
+          avatar
+          gender
+          groups {
+            id
+            name
+          }
+          blockedUserIds
+        }
+      }
+    ''');
+
+  static final DocumentNode getThread = gql(r'''
+      query GetThreadContent($id: Int!, $page: Int!) {
+        thread(id: $id,sorting: date_asc,page: $page) {
+          id
+          title
+          status
+          totalReplies
+          replies {
+            ...CommentsRecursive
+          }
+          tags {
+            name
+            color
+          }
+        }
+      }
+    '''
+      '${_GqlFragments.commentsRecursive}'
+      '${_GqlFragments.commentFields}');
+
+  static final DocumentNode getThreadList = gql(r'''
+      query GetThreadListQuery($channelId: String!, $page: Int!) {
+        threadsByChannel(channelId: $channelId, page: $page) {
+    '''
+      '${_GqlFragments.threadListFields}'
+      r'''
+        }
+      }
+    ''');
+
+  static final DocumentNode getBlockedUser = gql('''
+      query GetBlockedUser {
+        blockedUsers {
+          id
+          nickname
+          gender
+          avatar
+          groups {
+            id
+            name
+          }
+        }
+      }
+    ''');
+
+  static final DocumentNode getUserThreadList = gql(r'''
+      query GetUserThreadList($userId: String!, $page: Int!) {
+        threadsByUser(userId: $userId, page: $page) {
+    '''
+      '${_GqlFragments.threadListFields}'
+      r'''
+        }
+      }
+    ''');
+
+  static final DocumentNode sendReply = gql(r'''
+      mutation SendReply($threadId: Int!, $parentId: String, $html: String!) {
+        replyThread(threadId: $threadId, parentId: $parentId, html: $html) {
+          ...CommentsRecursive
+        }
+      }
+    '''
+      '${_GqlFragments.commentsRecursive}'
+      '${_GqlFragments.commentFields}');
+
+  static final DocumentNode createThread = gql(r'''
+      mutation CreateThread($title: String!, $tags: [String!]!, $html: String!) {
+        createThread(title: $title, tags: $tags, html: $html)
+      }
+    ''');
+
+  static final DocumentNode unblockUser = gql(r'''
+      mutation UnblockUser($userId: String!) {
+        unblockUser(id: $userId)
+      }
+    ''');
+
+  static final DocumentNode blockUser = gql(r'''
+      mutation BlockUser($userId: String!) {
+        blockUser(id: $userId)
+      }
+    ''');
+
+  static final DocumentNode getInstalledPacks = gql('''
+      query GetInstalledPacks {
+        installedPacks {
+          id
+          title
+          smilies {
+            id
+            alt
+            width
+            height
+          }
+        }
+      }
+    ''');
 }
 
 class HKGaldenApi {
@@ -100,13 +225,13 @@ class HKGaldenApi {
 
   /// Returns null on failure. Prefer networkOnly — cache is keyed by thread id.
   Future<T?> _query<T>(
-    String document, {
+    DocumentNode document, {
     Map<String, dynamic>? variables,
     FetchPolicy? fetchPolicy,
     required FutureOr<T> Function(Map<String, dynamic> data) parse,
   }) async {
     final QueryResult result = await _client.query(QueryOptions(
-      document: gql(document),
+      document: document,
       variables: variables ?? const {},
       fetchPolicy: fetchPolicy,
     ));
@@ -118,12 +243,12 @@ class HKGaldenApi {
 
   /// Returns null on failure.
   Future<T?> _mutate<T>(
-    String document, {
+    DocumentNode document, {
     Map<String, dynamic>? variables,
     required FutureOr<T> Function(Map<String, dynamic> data) parse,
   }) async {
     final QueryResult result = await _client.mutate(MutationOptions(
-      document: gql(document),
+      document: document,
       variables: variables ?? const {},
     ));
     if (result.hasException || result.data == null) {
@@ -133,21 +258,8 @@ class HKGaldenApi {
   }
 
   Future<List<Channel>?> getChannelsQuery() {
-    const String query = '''
-      query GetChannels {
-        channels {
-          id
-          name
-          tags {
-            name
-            color
-          }
-        }
-      }
-    ''';
-
     return _query(
-      query,
+      _GqlFragments.getChannels,
       parse: (data) async {
         final List<dynamic> result = data['channels'] as List<dynamic>;
         return compute(channelFromJson, result);
@@ -156,24 +268,8 @@ class HKGaldenApi {
   }
 
   Future<User?> getSessionUserQuery() {
-    const String query = '''
-      query GetSessionUser {
-        sessionUser {
-          id
-          nickname
-          avatar
-          gender
-          groups {
-            id
-            name
-          }
-          blockedUserIds
-        }
-      }
-    ''';
-
     return _query(
-      query,
+      _GqlFragments.getSessionUser,
       parse: (data) async {
         final Map<String, dynamic> result =
             data['sessionUser'] as Map<String, dynamic>;
@@ -183,28 +279,8 @@ class HKGaldenApi {
   }
 
   Future<Thread?> getThreadQuery(int threadId, int page) {
-    const String query = r'''
-      query GetThreadContent($id: Int!, $page: Int!) {
-        thread(id: $id,sorting: date_asc,page: $page) {
-          id
-          title
-          status
-          totalReplies
-          replies {
-            ...CommentsRecursive
-          }
-          tags {
-            name
-            color
-          }
-        }
-      }
-    '''
-        '${_GqlFragments.commentsRecursive}'
-        '${_GqlFragments.commentFields}';
-
     return _query(
-      query,
+      _GqlFragments.getThread,
       variables: <String, dynamic>{
         'id': threadId,
         'page': page,
@@ -219,18 +295,8 @@ class HKGaldenApi {
   }
 
   Future<List<Thread>?> getThreadListQuery(String channelId, int page) {
-    const String query = r'''
-      query GetThreadListQuery($channelId: String!, $page: Int!) {
-        threadsByChannel(channelId: $channelId, page: $page) {
-    '''
-        '${_GqlFragments.threadListFields}'
-        r'''
-        }
-      }
-    ''';
-
     return _query(
-      query,
+      _GqlFragments.getThreadList,
       variables: <String, dynamic>{
         'channelId': channelId,
         'page': page,
@@ -245,23 +311,8 @@ class HKGaldenApi {
   }
 
   Future<List<User>?> getBlockedUser() {
-    const String query = '''
-      query GetBlockedUser {
-        blockedUsers {
-          id
-          nickname
-          gender
-          avatar
-          groups {
-            id
-            name
-          }
-        }
-      }
-    ''';
-
     return _query(
-      query,
+      _GqlFragments.getBlockedUser,
       parse: (data) async {
         final List<dynamic> result = data['blockedUsers'] as List<dynamic>;
         return compute(userListFromJson, result);
@@ -270,18 +321,8 @@ class HKGaldenApi {
   }
 
   Future<List<Thread>?> getUserThreadList(String userId, int page) {
-    const String query = r'''
-      query GetUserThreadList($userId: String!, $page: Int!) {
-        threadsByUser(userId: $userId, page: $page) {
-    '''
-        '${_GqlFragments.threadListFields}'
-        r'''
-        }
-      }
-    ''';
-
     return _query(
-      query,
+      _GqlFragments.getUserThreadList,
       variables: <String, dynamic>{
         'userId': userId,
         'page': page,
@@ -295,18 +336,8 @@ class HKGaldenApi {
   }
 
   Future<Reply?> sendReply(int threadId, String html, {String? parentId}) {
-    const String mutation = r'''
-      mutation SendReply($threadId: Int!, $parentId: String, $html: String!) {
-        replyThread(threadId: $threadId, parentId: $parentId, html: $html) {
-          ...CommentsRecursive
-        }
-      }
-    '''
-        '${_GqlFragments.commentsRecursive}'
-        '${_GqlFragments.commentFields}';
-
     return _mutate(
-      mutation,
+      _GqlFragments.sendReply,
       variables: <String, dynamic>{
         'threadId': threadId,
         'parentId': parentId,
@@ -320,14 +351,8 @@ class HKGaldenApi {
   }
 
   Future<int?> createThread(String title, List<String> tags, String html) {
-    const String mutation = r'''
-      mutation CreateThread($title: String!, $tags: [String!]!, $html: String!) {
-        createThread(title: $title, tags: $tags, html: $html)
-      }
-    ''';
-
     return _mutate(
-      mutation,
+      _GqlFragments.createThread,
       variables: <String, dynamic>{
         'title': title,
         'tags': tags,
@@ -338,28 +363,16 @@ class HKGaldenApi {
   }
 
   Future<bool?> unblockUser(String userId) {
-    const String mutation = r'''
-      mutation UnblockUser($userId: String!) {
-        unblockUser(id: $userId)
-      }
-    ''';
-
     return _mutate(
-      mutation,
+      _GqlFragments.unblockUser,
       variables: <String, dynamic>{'userId': userId},
       parse: (data) => data['unblockUser'] as bool,
     );
   }
 
   Future<bool?> blockUser(String userId) {
-    const String mutation = r'''
-      mutation BlockUser($userId: String!) {
-        blockUser(id: $userId)
-      }
-    ''';
-
     return _mutate(
-      mutation,
+      _GqlFragments.blockUser,
       variables: <String, dynamic>{'userId': userId},
       parse: (data) => data['blockUser'] as bool,
     );
@@ -367,23 +380,8 @@ class HKGaldenApi {
 
   /// Returns installed smiley packs (empty list when unauthenticated).
   Future<List<SmileyPack>?> getInstalledPacksQuery() {
-    const String query = '''
-      query GetInstalledPacks {
-        installedPacks {
-          id
-          title
-          smilies {
-            id
-            alt
-            width
-            height
-          }
-        }
-      }
-    ''';
-
     return _query(
-      query,
+      _GqlFragments.getInstalledPacks,
       parse: (data) {
         final List<dynamic> result =
             data['installedPacks'] as List<dynamic>? ?? const [];

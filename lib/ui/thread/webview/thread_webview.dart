@@ -146,10 +146,6 @@ class _ThreadWebViewState extends State<ThreadWebView> {
     if (!mounted) {
       return;
     }
-    await _webViewController.clearCache();
-    if (!mounted) {
-      return;
-    }
     await _webViewController.loadHtmlString(html);
   }
 
@@ -200,14 +196,11 @@ class _ThreadWebViewState extends State<ThreadWebView> {
     }
   }
 
-  List<Map<String, dynamic>> _dtoList(
+  List<ThreadWebViewReplyDto> _dtoList(
     Iterable<Reply> replies,
     SessionUserState session,
   ) {
-    return [
-      for (final dto in _document.serializeReplies(replies, session))
-        dto.toJson(),
-    ];
+    return _document.serializeReplies(replies, session);
   }
 
   void _pushThemeAndChrome(ThreadLoaded state, SessionUserState session) {
@@ -252,9 +245,11 @@ class _ThreadWebViewState extends State<ThreadWebView> {
     _indexReplies(state.previousPages.replies);
     _indexReplies(state.thread.replies);
     _pushThemeAndChrome(state, session);
+    final previous = _dtoList(state.previousPages.replies, session);
+    final replies = _dtoList(state.thread.replies, session);
     await _js.send('renderThread', {
-      'previous': _dtoList(state.previousPages.replies, session),
-      'replies': _dtoList(state.thread.replies, session),
+      'previous': [for (final dto in previous) dto.toJson()],
+      'replies': [for (final dto in replies) dto.toJson()],
       if (widget.restoreFloor != null && widget.restoreFloor! >= 1)
         'scrollToFloor': widget.restoreFloor,
     });
@@ -267,10 +262,7 @@ class _ThreadWebViewState extends State<ThreadWebView> {
     if (!mounted) {
       return;
     }
-    _hydratePreviews([
-      ...state.previousPages.replies,
-      ...state.thread.replies,
-    ]);
+    _hydratePreviews([...previous, ...replies]);
     _loadMoreSent = false;
   }
 
@@ -299,10 +291,13 @@ class _ThreadWebViewState extends State<ThreadWebView> {
         previous.length - _renderedPreviousCount,
       );
       _indexReplies(added);
-      _js.send('prependReplies', {'replies': _dtoList(added, session)});
+      final dtos = _dtoList(added, session);
+      _js.send('prependReplies', {
+        'replies': [for (final dto in dtos) dto.toJson()],
+      });
       _renderedPreviousCount = previous.length;
       widget.previousPull.finishLoading();
-      _hydratePreviews(added);
+      _hydratePreviews(dtos);
     } else if (widget.previousPull.loading) {
       widget.previousPull.finishLoading();
       _js.send('resetPull');
@@ -318,8 +313,11 @@ class _ThreadWebViewState extends State<ThreadWebView> {
         final added = state.thread.replies.sublist(_renderedMainCount);
         if (added.isNotEmpty) {
           _indexReplies(added);
-          _js.send('appendReplies', {'replies': _dtoList(added, session)});
-          _hydratePreviews(added);
+          final dtos = _dtoList(added, session);
+          _js.send('appendReplies', {
+            'replies': [for (final dto in dtos) dto.toJson()],
+          });
+          _hydratePreviews(dtos);
         } else if (state.currentPage == state.endPage &&
             state.thread.replies.length != _renderedMainCount) {
           _replaceMain(state, session);
@@ -341,25 +339,19 @@ class _ThreadWebViewState extends State<ThreadWebView> {
 
   void _replaceMain(ThreadLoaded state, SessionUserState session) {
     _indexReplies(state.thread.replies);
+    final dtos = _dtoList(state.thread.replies, session);
     _js.send('replaceLastPage', {
-      'replies': _dtoList(state.thread.replies, session),
+      'replies': [for (final dto in dtos) dto.toJson()],
     });
-    _hydratePreviews(state.thread.replies);
+    _hydratePreviews(dtos);
   }
 
-  void _hydratePreviews(Iterable<Reply> replies) {
-    final session = context.read<SessionUserBloc>().state;
+  void _hydratePreviews(Iterable<ThreadWebViewReplyDto> dtos) {
     final youtubeIds = <String>{};
     final xIds = <String>{};
-    final youtube = RegExp(r'data-preview="youtube" data-id="([^"]+)"');
-    final x = RegExp(r'data-preview="x" data-id="([^"]+)"');
-    for (final dto in _document.serializeReplies(replies, session)) {
-      for (final match in youtube.allMatches(dto.html)) {
-        youtubeIds.add(match.group(1)!);
-      }
-      for (final match in x.allMatches(dto.html)) {
-        xIds.add(match.group(1)!);
-      }
+    for (final dto in dtos) {
+      youtubeIds.addAll(dto.youtubeIds);
+      xIds.addAll(dto.xIds);
     }
     for (final id in youtubeIds) {
       YoutubeOEmbedCache.instance.fetch(id).then((info) {
@@ -527,6 +519,9 @@ class _ThreadWebViewState extends State<ThreadWebView> {
       page: ThreadReadingPosition.pageForFloor(resolved),
       floor: resolved,
     );
+    if (!remeasure) {
+      ThreadReadingPositionStore.instance.flush();
+    }
   }
 
   void _openImage(ThreadWebViewInbound message) {

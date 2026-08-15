@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:hive/hive.dart';
 import 'package:hkgalden_flutter/models/thread_reading_position.dart';
+import 'package:hkgalden_flutter/utils/thread_reading_position_store.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -100,6 +104,80 @@ void main() {
         ),
         isNull,
       );
+    });
+  });
+
+  group('ThreadReadingPositionStore.save', () {
+    late Directory tempDir;
+    late Duration originalDebounce;
+
+    Future<void> flushHive() =>
+        Future<void>.delayed(const Duration(milliseconds: 20));
+
+    setUp(() async {
+      originalDebounce = ThreadReadingPositionStore.persistDebounce;
+      ThreadReadingPositionStore.persistDebounce = Duration.zero;
+      ThreadReadingPositionStore.instance.resetForTest();
+      tempDir = await Directory.systemTemp.createTemp('thread_reading_pos_');
+      Hive.init(tempDir.path);
+      await Hive.openBox(ThreadReadingPositionStore.boxName);
+    });
+
+    tearDown(() async {
+      ThreadReadingPositionStore.instance.resetForTest();
+      ThreadReadingPositionStore.persistDebounce = originalDebounce;
+      if (Hive.isBoxOpen(ThreadReadingPositionStore.boxName)) {
+        await Hive.box(ThreadReadingPositionStore.boxName).close();
+      }
+      await Hive.deleteBoxFromDisk(ThreadReadingPositionStore.boxName);
+      if (tempDir.existsSync()) {
+        tempDir.deleteSync(recursive: true);
+      }
+    });
+
+    test('get returns latest in-memory value before Hive write', () async {
+      final store = ThreadReadingPositionStore.instance;
+      ThreadReadingPositionStore.persistDebounce = const Duration(seconds: 1);
+
+      await store.save(42, page: 2, floor: 60);
+      expect(store.get(42)?.page, 2);
+      expect(store.get(42)?.floor, 60);
+      expect(Hive.box(ThreadReadingPositionStore.boxName).get('42'), isNull);
+    });
+
+    test('skips Hive rewrite when page and floor are unchanged', () async {
+      final store = ThreadReadingPositionStore.instance;
+      await store.save(7, page: 1, floor: 12);
+      await flushHive();
+      final first = Map<String, dynamic>.from(
+        Hive.box(ThreadReadingPositionStore.boxName).get('7') as Map,
+      );
+
+      await store.save(7, page: 1, floor: 12);
+      await flushHive();
+      final second = Map<String, dynamic>.from(
+        Hive.box(ThreadReadingPositionStore.boxName).get('7') as Map,
+      );
+
+      expect(second['updatedAtMs'], first['updatedAtMs']);
+      expect(second['page'], 1);
+      expect(second['floor'], 12);
+    });
+
+    test('last write wins when floor changes before debounce', () async {
+      final store = ThreadReadingPositionStore.instance;
+      ThreadReadingPositionStore.persistDebounce =
+          const Duration(milliseconds: 30);
+
+      await store.save(9, page: 1, floor: 3);
+      await store.save(9, page: 1, floor: 8);
+      expect(store.get(9)?.floor, 8);
+      expect(Hive.box(ThreadReadingPositionStore.boxName).get('9'), isNull);
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      final raw = Hive.box(ThreadReadingPositionStore.boxName).get('9') as Map;
+      expect(raw['floor'], 8);
+      expect(raw['page'], 1);
     });
   });
 }

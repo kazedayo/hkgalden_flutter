@@ -17,7 +17,9 @@
 
   var blocked = {};
   var scrollEndTimer = null;
+  var scrollRaf = null;
   var lastScrollY = 0;
+  var visibleArticles = null;
   var pulling = false;
   var pullStartY = 0;
   var pullExtent = 0;
@@ -202,11 +204,15 @@
           if (img.naturalWidth > 0 && img.naturalHeight > 0) {
             img.style.aspectRatio = img.naturalWidth + ' / ' + img.naturalHeight;
             img.style.width = 'min(100%,' + img.naturalWidth + 'px)';
-            post('imageMetrics', {
-              url: img.getAttribute('src') || '',
-              width: img.naturalWidth,
-              height: img.naturalHeight,
-            });
+            var sx = parseInt(img.getAttribute('data-sx'), 10);
+            var sy = parseInt(img.getAttribute('data-sy'), 10);
+            if (!(sx > 0 && sy > 0)) {
+              post('imageMetrics', {
+                url: img.getAttribute('src') || '',
+                width: img.naturalWidth,
+                height: img.naturalHeight,
+              });
+            }
           }
         });
         img.addEventListener('error', function () {
@@ -356,6 +362,7 @@
     for (var j = 0; j < articles.length; j++) {
       applyBlocked(articles[j]);
     }
+    invalidateArticles();
   }
 
   function setSafeInsets(insets) {
@@ -384,6 +391,7 @@
     appendReplyNodes(previousRoot, payload.previous || [], false);
     appendReplyNodes(mainRoot, payload.replies || [], false);
     renderFooter();
+    invalidateArticles();
     if (payload.scrollToFloor) {
       scrollToFloor(payload.scrollToFloor);
     }
@@ -398,6 +406,7 @@
     var before = document.documentElement.scrollHeight;
     appendReplyNodes(previousRoot, replies, true);
     var delta = document.documentElement.scrollHeight - before;
+    invalidateArticles();
     resetPull();
     window.scrollTo(0, Math.max(0, window.scrollY + delta - header));
   }
@@ -407,11 +416,13 @@
       return;
     }
     appendReplyNodes(mainRoot, replies, false);
+    invalidateArticles();
   }
 
   function replaceLastPage(replies) {
     clearRoot(mainRoot);
     appendReplyNodes(mainRoot, replies || [], false);
+    invalidateArticles();
   }
 
   function hydratePreviews(items) {
@@ -488,8 +499,19 @@
     });
   }
 
+  function invalidateArticles() {
+    visibleArticles = null;
+  }
+
+  function getVisibleArticles() {
+    if (!visibleArticles) {
+      visibleArticles = document.querySelectorAll('article.comment:not([hidden])');
+    }
+    return visibleArticles;
+  }
+
   function floorAtViewport(y) {
-    var articles = document.querySelectorAll('article.comment:not([hidden])');
+    var articles = getVisibleArticles();
     var bestFloor = null;
     var bestTop = -Infinity;
     var nearest = null;
@@ -514,7 +536,7 @@
   }
 
   function lastVisibleFloor(top, bottom) {
-    var articles = document.querySelectorAll('article.comment:not([hidden])');
+    var articles = getVisibleArticles();
     var best = null;
     for (var i = 0; i < articles.length; i++) {
       var rect = articles[i].getBoundingClientRect();
@@ -536,10 +558,12 @@
       maxY: maxY,
       atStart: y <= 0.5,
       atEnd: y >= maxY - 1,
-      viewportTopFloor: floorAtViewport(0),
-      lastVisibleFloor: lastVisibleFloor(0, window.innerHeight),
       settled: !!settled,
     };
+    if (settled) {
+      payload.viewportTopFloor = floorAtViewport(0);
+      payload.lastVisibleFloor = lastVisibleFloor(0, window.innerHeight);
+    }
     post('scroll', payload);
     lastScrollY = y;
   }
@@ -580,11 +604,20 @@
   });
 
   window.addEventListener('scroll', function () {
-    emitScroll(false);
+    if (!scrollRaf) {
+      scrollRaf = requestAnimationFrame(function () {
+        scrollRaf = null;
+        emitScroll(false);
+      });
+    }
     if (scrollEndTimer) {
       clearTimeout(scrollEndTimer);
     }
     scrollEndTimer = setTimeout(function () {
+      if (scrollRaf) {
+        cancelAnimationFrame(scrollRaf);
+        scrollRaf = null;
+      }
       emitScroll(true);
     }, 160);
   }, { passive: true });

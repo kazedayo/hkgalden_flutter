@@ -32,8 +32,10 @@ Widget _buildFrontLayer(
                 channelId: channelState.selectedChannelId,
                 page: 1,
                 isRefresh: true));
-            return threadListBloc.stream
-                .firstWhere((element) => element is! ThreadListLoading);
+            return threadListBloc.stream.firstWhere((element) =>
+                element is ThreadListError ||
+                (element is ThreadListLoaded &&
+                    element is! ThreadListAppending));
           },
           child: BlocBuilder<SessionUserBloc, SessionUserState>(
             buildWhen: (prev, next) =>
