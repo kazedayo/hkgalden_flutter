@@ -65,7 +65,7 @@ body {
   position: absolute;
   left: 24px;
   right: 24px;
-  top: 8px;
+  top: 10px;
   height: 50px;
   display: flex;
   align-items: center;
@@ -81,6 +81,16 @@ body {
   flex-shrink: 0;
   width: 50px;
   height: 50px;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.avatar-btn:active,
+.avatar-btn:focus {
+  outline: none;
+  background: transparent;
 }
 
 .avatar-ring {
@@ -124,7 +134,8 @@ body {
 .avatar.placeholder {
   width: 25px;
   height: 25px;
-  background: transparent;
+  color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
 .author-col {
@@ -251,6 +262,17 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.quote-btn:active,
+.quote-btn:focus {
+  outline: none;
+  background: transparent;
+  color: var(--on-surface);
 }
 
 body.locked .quote-btn {

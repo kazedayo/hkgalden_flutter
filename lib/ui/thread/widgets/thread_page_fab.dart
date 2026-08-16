@@ -9,8 +9,6 @@ import 'package:hkgalden_flutter/ui/thread/webview/thread_webview.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-const Object kThreadPageFabHeroTag = 'hkgalden_fab';
-
 FloatingActionButton buildThreadPageFab(
   BuildContext context,
   ThreadWebViewController webView,
@@ -18,7 +16,7 @@ FloatingActionButton buildThreadPageFab(
   ThreadReplySuccessCallback onReplySuccess,
 ) {
   return FloatingActionButton(
-    heroTag: kThreadPageFabHeroTag,
+    heroTag: 'hkgalden_fab_thread_${arguments.threadId}',
     onPressed: () => !BlocProvider.of<ThreadPageCubit>(context).state.canReply
         ? showCustomAlert(
             context: context,

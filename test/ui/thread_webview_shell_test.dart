@@ -49,4 +49,35 @@ void main() {
     expect(html, contains('id="previous-pull"'));
     expect(html, contains('href="thread.css"'));
   });
+
+  test('empty avatar uses the native hkgalden placeholder svg', () {
+    final js = File('assets/thread_webview/render.js').readAsStringSync();
+    final css = File('assets/thread_webview/thread.css').readAsStringSync();
+    expect(js, contains('class="avatar placeholder"'));
+    expect(js, contains('viewBox="0 0 512 512"'));
+    expect(js, contains('M150.9,370.2'));
+    expect(js, contains('M319.3,399.6'));
+    expect(js, isNot(contains('<span class="avatar placeholder"></span>')));
+    expect(css, contains('.avatar.placeholder'));
+    expect(
+      css,
+      contains(RegExp(r'\.avatar\.placeholder\s*\{[^}]*color:\s*var\(--text-secondary\)')),
+    );
+  });
+
+  test('chrome buttons drop tap highlight; links and embeds keep it', () {
+    final css = File('assets/thread_webview/thread.css').readAsStringSync();
+    final avatarRule =
+        RegExp(r'\.avatar-btn\s*\{[^}]*-webkit-tap-highlight-color:\s*transparent');
+    final quoteRule =
+        RegExp(r'\.quote-btn\s*\{[^}]*-webkit-tap-highlight-color:\s*transparent');
+    final previewRule = RegExp(
+        r'\.preview-chip\s*\{[^}]*-webkit-tap-highlight-color:\s*transparent');
+    final linkRule = RegExp(
+        r'\.comment-html a\s*\{[^}]*-webkit-tap-highlight-color:\s*transparent');
+    expect(css, contains(avatarRule));
+    expect(css, contains(quoteRule));
+    expect(css, isNot(contains(previewRule)));
+    expect(css, isNot(contains(linkRule)));
+  });
 }

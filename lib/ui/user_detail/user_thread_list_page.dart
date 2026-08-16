@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/user_thread_list/user_thread_list_bloc.dart';
+import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/repository/user_thread_list_repository.dart';
 import 'package:hkgalden_flutter/ui/common/error_page.dart';
@@ -8,6 +9,9 @@ import 'package:hkgalden_flutter/ui/common/list_divider.dart';
 import 'package:hkgalden_flutter/ui/common/thread_tag_chip.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/utils/device_properties.dart';
+import 'package:hkgalden_flutter/utils/keys.dart';
+import 'package:hkgalden_flutter/utils/route_arguments.dart';
+import 'package:hkgalden_flutter/utils/thread_reading_position_store.dart';
 
 class UserThreadListPage extends StatelessWidget {
   final String userId;
@@ -58,6 +62,8 @@ class UserThreadListPage extends StatelessWidget {
                   key: ValueKey(loaded.userThreadList[index].threadId),
                   children: <Widget>[
                     ListTile(
+                      onTap: () =>
+                          _openUserThread(loaded.userThreadList[index]),
                       title: Text(
                         loaded.userThreadList[index].title,
                         style: const TextStyle(color: Colors.white),
@@ -78,4 +84,50 @@ class UserThreadListPage extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Closes the user sheet, then pushes `/Thread`.
+/// Tapping the thread already on screen only dismisses the sheet.
+void _openUserThread(Thread thread) {
+  final nav = navigatorKey.currentState;
+  if (nav == null) {
+    return;
+  }
+
+  var alreadyViewing = false;
+  nav.popUntil((route) {
+    if (route.settings.name == '/Thread') {
+      final args = route.settings.arguments;
+      if (args is ThreadPageArguments && args.threadId == thread.threadId) {
+        alreadyViewing = true;
+      }
+      return true;
+    }
+    return route.isFirst;
+  });
+
+  if (alreadyViewing) {
+    return;
+  }
+
+  final saved = ThreadReadingPositionStore.instance.get(thread.threadId);
+  final maxPage =
+      (thread.totalReplies.toDouble() / 50.0).ceil().clamp(1, 0x7fffffff);
+  var page = saved?.page ?? 1;
+  var floor = saved?.floor;
+  if (page > maxPage) {
+    page = maxPage;
+    floor = null;
+  }
+
+  nav.pushNamed(
+    '/Thread',
+    arguments: ThreadPageArguments(
+      threadId: thread.threadId,
+      title: thread.title,
+      page: page,
+      locked: thread.status == 'locked',
+      floor: floor,
+    ),
+  );
 }
