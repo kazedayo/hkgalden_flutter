@@ -114,44 +114,11 @@ Widget _frontLayerBody(
     final visibleThreads =
         _filterVisibleThreads(state.threads, blockedUserIds);
 
-    final threadIdToIndex = <int, int>{
-      for (var i = 0; i < visibleThreads.length; i++)
-        visibleThreads[i].threadId: i,
-    };
-
-    return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 80),
-      controller: scrollController,
-      // ignore: deprecated_member_use — ScrollCacheExtent is not exported via material.dart
-      cacheExtent: 900,
-      itemCount: visibleThreads.length + 1,
-      findChildIndexCallback: (Key key) {
-        if (key is ValueKey<int>) {
-          return threadIdToIndex[key.value];
-        }
-        return null;
-      },
-      itemBuilder: (context, index) {
-        if (index == visibleThreads.length) {
-          return BlocBuilder<ThreadListBloc, ThreadListState>(
-            buildWhen: (prev, next) =>
-                (prev is ThreadListAppending) != (next is ThreadListAppending),
-            builder: (context, listState) {
-              if (listState is ThreadListAppending) {
-                return const _ThreadListLoadMoreFooter();
-              }
-              return const SizedBox.shrink();
-            },
-          );
-        }
-        final thread = visibleThreads[index];
-        return ThreadCell(
-          key: ValueKey(thread.threadId),
-          thread: thread,
-          onTap: () => loadThread(context, thread),
-          onLongPress: () => jumpToPage(context, thread),
-        );
-      },
+    return _ThreadListView(
+      threads: visibleThreads,
+      scrollController: scrollController,
+      loadThread: loadThread,
+      jumpToPage: jumpToPage,
     );
   }
   if (state is ThreadListError) {
@@ -173,6 +140,110 @@ Widget _frontLayerBody(
     );
   }
   return const SizedBox();
+}
+
+class _ThreadListView extends StatefulWidget {
+  final List<Thread> threads;
+  final ScrollController scrollController;
+  final void Function(BuildContext, Thread) loadThread;
+  final void Function(BuildContext, Thread) jumpToPage;
+
+  const _ThreadListView({
+    required this.threads,
+    required this.scrollController,
+    required this.loadThread,
+    required this.jumpToPage,
+  });
+
+  @override
+  State<_ThreadListView> createState() => _ThreadListViewState();
+}
+
+class _ThreadListViewState extends State<_ThreadListView> {
+  static const double _loadMoreFooterHeight = 54;
+  final Map<int, double> _heights = <int, double>{};
+  double? _measuredWidth;
+  TextScaler? _measuredScaler;
+
+  void _measureMissing(BuildContext context, List<Thread> threads) {
+    final width = MediaQuery.sizeOf(context).width;
+    final scaler = MediaQuery.textScalerOf(context);
+    if (_measuredWidth != width || _measuredScaler != scaler) {
+      _heights.clear();
+      _measuredWidth = width;
+      _measuredScaler = scaler;
+    }
+    if (threads.every((thread) => _heights.containsKey(thread.threadId))) {
+      return;
+    }
+    for (final thread in threads) {
+      if (_heights.containsKey(thread.threadId)) {
+        continue;
+      }
+      _heights[thread.threadId] = ThreadCell.measureHeight(
+        context: context,
+        thread: thread,
+        maxWidth: width,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final threads = widget.threads;
+    _measureMissing(context, threads);
+    final threadIdToIndex = <int, int>{
+      for (var i = 0; i < threads.length; i++) threads[i].threadId: i,
+    };
+    final threadListBloc = BlocProvider.of<ThreadListBloc>(context);
+
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 80),
+      controller: widget.scrollController,
+      // ignore: deprecated_member_use — ScrollCacheExtent is not exported via material.dart
+      cacheExtent: 250,
+      addAutomaticKeepAlives: false,
+      itemCount: threads.length + 1,
+      itemExtentBuilder: (index, _) {
+        if (index == threads.length) {
+          return threadListBloc.state is ThreadListAppending
+              ? _loadMoreFooterHeight
+              : 0;
+        }
+        if (index < 0 || index >= threads.length) {
+          return null;
+        }
+        return _heights[threads[index].threadId];
+      },
+      findChildIndexCallback: (Key key) {
+        if (key is ValueKey<int>) {
+          return threadIdToIndex[key.value];
+        }
+        return null;
+      },
+      itemBuilder: (context, index) {
+        if (index == threads.length) {
+          return BlocBuilder<ThreadListBloc, ThreadListState>(
+            buildWhen: (prev, next) =>
+                (prev is ThreadListAppending) != (next is ThreadListAppending),
+            builder: (context, listState) {
+              if (listState is ThreadListAppending) {
+                return const _ThreadListLoadMoreFooter();
+              }
+              return const SizedBox.shrink();
+            },
+          );
+        }
+        final thread = threads[index];
+        return ThreadCell(
+          key: ValueKey(thread.threadId),
+          thread: thread,
+          onTap: () => widget.loadThread(context, thread),
+          onLongPress: () => widget.jumpToPage(context, thread),
+        );
+      },
+    );
+  }
 }
 
 class _ThreadListLoadMoreFooter extends StatelessWidget {

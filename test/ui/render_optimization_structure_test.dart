@@ -241,6 +241,11 @@ void main() {
       expect(frontLayer.contains('return Material('), isTrue);
     });
 
+    test('R4b: concealed backdrop drawer is not kept in the tree', () {
+      expect(homePage.contains('maintainBackLayerState: false'), isTrue);
+      expect(homePage.contains('RepaintBoundary('), isTrue);
+    });
+
     test('R5: footer flags come from ThreadPageCubit via JS setFlags', () {
       expect(threadWebView.contains('onLastPage'), isTrue);
       expect(threadWebView.contains("send('setFlags'"), isTrue);

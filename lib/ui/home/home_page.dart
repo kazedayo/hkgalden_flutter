@@ -80,17 +80,20 @@ class HomePageState extends State<HomePage>
           frontLayer: Theme(
             data: Theme.of(context)
                 .copyWith(highlightColor: const Color(0xff373d3c)),
-            child: _buildFrontLayer(
-              context,
-              threadListBloc,
-              _scrollController,
-              _loadThread,
-              _jumpToPage,
+            child: RepaintBoundary(
+              child: _buildFrontLayer(
+                context,
+                threadListBloc,
+                _scrollController,
+                _loadThread,
+                _jumpToPage,
+              ),
             ),
           ),
           frontLayerScrim: Colors.black.withAlpha(177),
           stickyFrontLayer: true,
-          backLayer: const HomeDrawer(),
+          maintainBackLayerState: false,
+          backLayer: const RepaintBoundary(child: HomeDrawer()),
           backLayerBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
           floatingActionButton: _buildFab(context, threadListBloc),
         ),
