@@ -227,6 +227,9 @@ class _ThreadWebViewState extends State<ThreadWebView> {
       'currentPage': state.currentPage,
       'canPullPrevious': state.currentPage > 1,
       'pullMaxExtent': PreviousPagePullController.maxExtent,
+      'platform': Theme.of(context).platform == TargetPlatform.iOS
+          ? 'ios'
+          : 'android',
     };
   }
 

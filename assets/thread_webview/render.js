@@ -13,6 +13,7 @@
     currentPage: 1,
     canPullPrevious: false,
     pullMaxExtent: 200,
+    platform: 'android',
   };
 
   var blocked = {};
@@ -309,12 +310,20 @@
     }
   }
 
+  function spinnerHtml() {
+    if (flags.platform === 'ios') {
+      return '<span class="spinner spinner-ios" aria-hidden="true">' +
+        '<i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>';
+    }
+    return '<span class="spinner spinner-android" aria-hidden="true"></span>';
+  }
+
   function renderFooter() {
     var skeletonHidden = flags.onLastPage ? 'hidden' : '';
     var refreshHidden = flags.onLastPage ? '' : 'hidden';
     var label = flags.appending ? '撈緊...' : '重新整理';
     var icon = flags.appending
-      ? '<span class="spinner"></span>'
+      ? spinnerHtml()
       : '<span style="font-size:20px;line-height:1">↻</span>';
     footerRoot.innerHTML =
       '<div class="footer-skeleton" ' + skeletonHidden + '><span></span></div>' +

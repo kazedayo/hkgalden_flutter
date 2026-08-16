@@ -248,6 +248,15 @@ void main() {
       expect(threadModule.contains('SafeArea('), isFalse);
     });
 
+    test('R5b: footer spinner follows Theme.platform', () {
+      expect(threadWebView.contains("'platform'"), isTrue);
+      expect(threadWebView.contains('TargetPlatform.iOS'), isTrue);
+      expect(threadWebViewRenderJs.contains('spinner-ios'), isTrue);
+      expect(threadWebViewRenderJs.contains('spinner-android'), isTrue);
+      expect(threadWebViewCss.contains('spinner-ios'), isTrue);
+      expect(threadWebViewCss.contains('steps(8)'), isTrue);
+    });
+
     test('R6: load-more footer only when ThreadListAppending', () {
       // Outer list skips rebuilds while appending; footer listens independently.
       expect(frontLayer.contains('if (state is ThreadListAppending)'), isTrue);
