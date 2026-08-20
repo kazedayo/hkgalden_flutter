@@ -1,16 +1,16 @@
 part of '../home_page.dart';
 
-/// List body under [ThreadListBloc] (chrome stays outside).
+/// List body under [ThreadListCubit] (chrome stays outside).
 Widget _buildFrontLayer(
   BuildContext context,
-  ThreadListBloc threadListBloc,
+  ThreadListCubit threadListBloc,
   ScrollController scrollController,
   Function(BuildContext, Thread) loadThread,
   Function(BuildContext, Thread) jumpToPage,
 ) {
   return Material(
     color: Theme.of(context).primaryColor,
-    child: BlocBuilder<ThreadListBloc, ThreadListState>(
+    child: BlocBuilder<ThreadListCubit, ThreadListState>(
       buildWhen: (prev, state) {
         if (state is ThreadListAppending) {
           return false;
@@ -28,10 +28,10 @@ Widget _buildFrontLayer(
             if (channelState is! ChannelLoaded) {
               return Future<void>.value();
             }
-            threadListBloc.add(RequestThreadListEvent(
+            threadListBloc.load(
                 channelId: channelState.selectedChannelId,
                 page: 1,
-                isRefresh: true));
+                isRefresh: true);
             return threadListBloc.stream.firstWhere((element) =>
                 element is ThreadListError ||
                 (element is ThreadListLoaded &&
@@ -129,12 +129,9 @@ Widget _frontLayerBody(
         if (channelState is! ChannelLoaded) {
           return;
         }
-        BlocProvider.of<ThreadListBloc>(context).add(
-          RequestThreadListEvent(
-            channelId: channelState.selectedChannelId,
-            page: 1,
-            isRefresh: false,
-          ),
+        BlocProvider.of<ThreadListCubit>(context).load(
+          channelId: channelState.selectedChannelId,
+          page: 1,
         );
       },
     );
@@ -195,7 +192,7 @@ class _ThreadListViewState extends State<_ThreadListView> {
     final threadIdToIndex = <int, int>{
       for (var i = 0; i < threads.length; i++) threads[i].threadId: i,
     };
-    final threadListBloc = BlocProvider.of<ThreadListBloc>(context);
+    final threadListBloc = BlocProvider.of<ThreadListCubit>(context);
 
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 80),
@@ -223,7 +220,7 @@ class _ThreadListViewState extends State<_ThreadListView> {
       },
       itemBuilder: (context, index) {
         if (index == threads.length) {
-          return BlocBuilder<ThreadListBloc, ThreadListState>(
+          return BlocBuilder<ThreadListCubit, ThreadListState>(
             buildWhen: (prev, next) =>
                 (prev is ThreadListAppending) != (next is ThreadListAppending),
             builder: (context, listState) {

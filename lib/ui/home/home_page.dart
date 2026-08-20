@@ -10,7 +10,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
-import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
+import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page/compose_page.dart';
@@ -68,8 +68,8 @@ class HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    final ThreadListBloc threadListBloc =
-        BlocProvider.of<ThreadListBloc>(context);
+    final ThreadListCubit threadListBloc =
+        BlocProvider.of<ThreadListCubit>(context);
     return PrimaryScrollController(
       controller: _scrollController,
       child: Scaffold(

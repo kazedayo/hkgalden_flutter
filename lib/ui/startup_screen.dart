@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
-import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
+import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
 import 'package:hkgalden_flutter/nested_navigator.dart';
 import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
@@ -61,12 +61,11 @@ class StartupScreenState extends State<StartupScreen>
       return;
     }
 
-    final threadListBloc = BlocProvider.of<ThreadListBloc>(context);
+    final threadListBloc = BlocProvider.of<ThreadListCubit>(context);
     final channelBloc = BlocProvider.of<ChannelBloc>(context);
     final sessionUserBloc = BlocProvider.of<SessionUserBloc>(context);
 
-    threadListBloc.add(const RequestThreadListEvent(
-        channelId: 'bw', page: 1, isRefresh: false));
+    threadListBloc.load(channelId: 'bw', page: 1);
     channelBloc.add(RequestChannelsEvent());
     if (token.isNotEmpty) {
       sessionUserBloc.add(RequestSessionUserEvent());
@@ -83,7 +82,7 @@ class StartupScreenState extends State<StartupScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocListener<ThreadListBloc, ThreadListState>(
+      body: BlocListener<ThreadListCubit, ThreadListState>(
         listener: (context, state) {
           if (state is ThreadListLoaded) {
             final SizeRoute route = SizeRoute(page: NestedNavigator());

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hkgalden_flutter/bloc/blocked_users/blocked_users_bloc.dart';
+import 'package:hkgalden_flutter/bloc/blocked_users/blocked_users_cubit.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/ui/common/blocked_user_cell.dart';
 import 'package:hkgalden_flutter/ui/common/error_page.dart';
@@ -11,14 +11,14 @@ class BlockListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<BlockedUsersBloc>(
+    return BlocProvider<BlockedUsersCubit>(
         create: (context) {
-          final BlockedUsersBloc blockedUsersBloc = BlockedUsersBloc(
+          final cubit = BlockedUsersCubit(
               api: RepositoryProvider.of<HKGaldenApi>(context));
-          blockedUsersBloc.add(RequestBlockedUsersEvent());
-          return blockedUsersBloc;
+          cubit.load();
+          return cubit;
         },
-        child: BlocBuilder<BlockedUsersBloc, BlockedUsersState>(
+        child: BlocBuilder<BlockedUsersCubit, BlockedUsersState>(
           builder: (context, state) => Card(
             margin: EdgeInsets.zero,
             clipBehavior: Clip.hardEdge,
@@ -39,8 +39,8 @@ class BlockListPage extends StatelessWidget {
                 if (state is BlockedUsersError) {
                   return ErrorPage(
                     message: '無法載入封鎖名單',
-                    onRetry: () => BlocProvider.of<BlockedUsersBloc>(context)
-                        .add(RequestBlockedUsersEvent()),
+                    onRetry: () =>
+                        BlocProvider.of<BlockedUsersCubit>(context).load(),
                   );
                 }
                 final loaded = state as BlockedUsersLoaded;

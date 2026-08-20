@@ -44,12 +44,12 @@ Requires Flutter 3.47 (Dart 3.13; managed through [FVM](https://fvm.app) via `.f
    flutter pub get
    ```
 
-2. Create a `.env` file from the template (`flutter_dotenv`) with any required API configuration.
+2. Create a `.env` file with `HKGALDEN_CLIENT_ID=...`.
 
 3. Run the app:
 
    ```sh
-   flutter run
+   flutter run --dart-define-from-file=.env
    ```
 
 ## Testing

@@ -1,24 +1,18 @@
-import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 
-part 'blocked_users_event.dart';
 part 'blocked_users_state.dart';
 
-class BlockedUsersBloc extends Bloc<BlockedUsersEvent, BlockedUsersState> {
-  BlockedUsersBloc({required HKGaldenApi api})
+class BlockedUsersCubit extends Cubit<BlockedUsersState> {
+  BlockedUsersCubit({required HKGaldenApi api})
       : _api = api,
-        super(BlockedUsersLoading()) {
-    on<RequestBlockedUsersEvent>(_onRequestBlockedUsersEvent);
-  }
+        super(BlockedUsersLoading());
 
   final HKGaldenApi _api;
 
-  FutureOr<void> _onRequestBlockedUsersEvent(
-      RequestBlockedUsersEvent event, Emitter<BlockedUsersState> emit) async {
+  Future<void> load() async {
     emit(BlockedUsersLoading());
     final List<User>? blockedUsers = await _api.getBlockedUser();
     if (blockedUsers != null) {

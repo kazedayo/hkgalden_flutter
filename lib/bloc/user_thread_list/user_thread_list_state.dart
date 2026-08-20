@@ -1,4 +1,4 @@
-part of 'user_thread_list_bloc.dart';
+part of 'user_thread_list_cubit.dart';
 
 abstract class UserThreadListState extends Equatable {
   const UserThreadListState();

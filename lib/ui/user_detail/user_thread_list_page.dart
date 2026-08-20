@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hkgalden_flutter/bloc/user_thread_list/user_thread_list_bloc.dart';
+import 'package:hkgalden_flutter/bloc/user_thread_list/user_thread_list_cubit.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/ui/common/error_page.dart';
@@ -16,18 +16,17 @@ class UserThreadListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<UserThreadListBloc>(
+    return BlocProvider<UserThreadListCubit>(
         create: (context) {
-          final UserThreadListBloc userThreadListBloc = UserThreadListBloc(
+          final cubit = UserThreadListCubit(
               api: RepositoryProvider.of<HKGaldenApi>(context));
-          userThreadListBloc
-              .add(RequestUserThreadListEvent(userId: userId, page: 1));
-          return userThreadListBloc;
+          cubit.load(userId: userId, page: 1);
+          return cubit;
         },
         child: ConstrainedBox(
           constraints: BoxConstraints(
               maxHeight: MediaQuery.sizeOf(context).height / 2),
-          child: BlocBuilder<UserThreadListBloc, UserThreadListState>(
+          child: BlocBuilder<UserThreadListCubit, UserThreadListState>(
             builder: (context, state) {
               if (state is UserThreadListLoading) {
                 return UserThreadListLoadingSkeleton();
@@ -35,8 +34,8 @@ class UserThreadListPage extends StatelessWidget {
               if (state is UserThreadListError) {
                 return ErrorPage(
                   message: '無法載入主題列表',
-                  onRetry: () => BlocProvider.of<UserThreadListBloc>(context)
-                      .add(RequestUserThreadListEvent(userId: userId, page: 1)),
+                  onRetry: () => BlocProvider.of<UserThreadListCubit>(context)
+                      .load(userId: userId, page: 1),
                 );
               }
               final loaded = state as UserThreadListLoaded;

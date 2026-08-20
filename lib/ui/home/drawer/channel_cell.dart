@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
-import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
+import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
 import 'package:hkgalden_flutter/models/channel.dart';
 
 class ChannelCell extends StatelessWidget {
@@ -13,8 +13,8 @@ class ChannelCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThreadListBloc threadListBloc =
-        BlocProvider.of<ThreadListBloc>(context);
+    final ThreadListCubit threadListBloc =
+        BlocProvider.of<ThreadListCubit>(context);
     return BlocBuilder<ChannelBloc, ChannelState>(
       builder: (context, state) => Container(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -41,11 +41,9 @@ class ChannelCell extends StatelessWidget {
                     HapticFeedback.mediumImpact();
                     BlocProvider.of<ChannelBloc>(context).add(
                         SetSelectedChannelEvent(channelId: channel.channelId));
-                    threadListBloc.add(
-                      RequestThreadListEvent(
-                          channelId: channel.channelId,
-                          page: 1,
-                          isRefresh: false),
+                    threadListBloc.load(
+                      channelId: channel.channelId,
+                      page: 1,
                     );
                     Backdrop.of(context).concealBackLayer();
                   },

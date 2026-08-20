@@ -4,7 +4,7 @@ const double _kThreadListLoadMoreThreshold = 480;
 
 extension on HomePageState {
   void _initListener() {
-    final threadListBloc = BlocProvider.of<ThreadListBloc>(context);
+    final threadListBloc = BlocProvider.of<ThreadListCubit>(context);
     _threadListSubscription = threadListBloc.stream.listen((state) {
       if (!_loadMoreInFlight) {
         return;
@@ -34,11 +34,9 @@ extension on HomePageState {
           return;
         }
         _loadMoreInFlight = true;
-        threadListBloc.add(
-          RequestThreadListEvent(
-              channelId: state.currentChannelId,
-              page: state.currentPage + 1,
-              isRefresh: false),
+        threadListBloc.load(
+          channelId: state.currentChannelId,
+          page: state.currentPage + 1,
         );
       },
     );

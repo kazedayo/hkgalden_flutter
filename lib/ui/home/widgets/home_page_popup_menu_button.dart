@@ -95,13 +95,11 @@ class _PopupMenuButton extends StatelessWidget {
             context.read<SmileyPackRepository>().clearCache();
             BlocProvider.of<SessionUserBloc>(context)
                 .add(RemoveSessionUserEvent());
-            BlocProvider.of<ThreadListBloc>(context).add(
-              RequestThreadListEvent(
-                  channelId: (BlocProvider.of<ChannelBloc>(context).state
-                          as ChannelLoaded)
-                      .selectedChannelId,
-                  page: 1,
-                  isRefresh: false),
+            BlocProvider.of<ThreadListCubit>(context).load(
+              channelId: (BlocProvider.of<ChannelBloc>(context).state
+                      as ChannelLoaded)
+                  .selectedChannelId,
+              page: 1,
             );
         }
       },

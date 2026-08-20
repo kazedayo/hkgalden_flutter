@@ -1,4 +1,4 @@
-part of 'blocked_users_bloc.dart';
+part of 'blocked_users_cubit.dart';
 
 abstract class BlockedUsersState extends Equatable {
   const BlockedUsersState();

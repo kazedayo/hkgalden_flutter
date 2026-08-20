@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:gql/ast.dart';
 import 'package:graphql/client.dart';
 import 'package:hkgalden_flutter/models/channel.dart';
@@ -201,7 +200,8 @@ class _GqlFragments {
 }
 
 class HKGaldenApi {
-  static final String clientId = dotenv.get('HKGALDEN_CLIENT_ID');
+  static const String clientId =
+      String.fromEnvironment('HKGALDEN_CLIENT_ID');
   static final HttpLink _api = HttpLink('https://hkgalden.org/_');
 
   static final AuthLink _bearerToken = AuthLink(getToken: () async {

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
-import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
+import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
 import 'package:hkgalden_flutter/ui/startup_screen.dart';
@@ -30,7 +29,6 @@ Future main() async {
   await Hive.openBox('token');
   await Hive.openBox(ThreadReadingPositionStore.boxName);
   await Hive.openBox(ImageAspectRatioStore.boxName);
-  await dotenv.load();
   runApp(MyApp());
 }
 
@@ -55,7 +53,7 @@ class MyApp extends StatelessWidget {
               create: (context) => SessionUserBloc(
                   api: RepositoryProvider.of<HKGaldenApi>(context))),
           BlocProvider(
-              create: (context) => ThreadListBloc(
+              create: (context) => ThreadListCubit(
                   api: RepositoryProvider.of<HKGaldenApi>(context)))
         ],
         child: MaterialApp(

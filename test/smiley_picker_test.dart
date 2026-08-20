@@ -346,7 +346,7 @@ void main() {
         ];
 
         // Drive the same insert path the pane uses (SmileyEmbed.insertInto).
-        // Full ComposePage pump needs app providers/dotenv; this focused test
+        // Full ComposePage pump needs app providers; this focused test
         // exercises the real shipped insert + payload shape used by the pane.
         await tester.pumpWidget(
           MaterialApp(

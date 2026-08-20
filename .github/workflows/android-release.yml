@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # .env is a Flutter asset (flutter_dotenv) and is gitignored; materialize from secrets for CI.
+      # .env is compile-time input for --dart-define-from-file; gitignored.
       - name: Create .env
         env:
           HKGALDEN_CLIENT_ID: ${{ secrets.HKGALDEN_CLIENT_ID }}
@@ -68,7 +68,7 @@ jobs:
           } > android/key.properties
 
       - name: Build release APK
-        run: flutter build apk --release
+        run: flutter build apk --release --dart-define-from-file=.env
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

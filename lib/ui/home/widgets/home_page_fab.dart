@@ -1,6 +1,6 @@
 part of '../home_page.dart';
 
-Widget _buildFab(BuildContext context, ThreadListBloc threadListBloc) {
+Widget _buildFab(BuildContext context, ThreadListCubit threadListBloc) {
   return galdenFabHero(
     child: FloatingActionButton(
       heroTag: null,
@@ -12,10 +12,8 @@ Widget _buildFab(BuildContext context, ThreadListBloc threadListBloc) {
                   context: context,
                   builder: (context) => ComposePage(
                     composeMode: ComposeMode.newPost,
-                    onCreateThread: (channelId) => threadListBloc.add(
-                      RequestThreadListEvent(
-                          channelId: channelId, page: 1, isRefresh: false),
-                    ),
+                    onCreateThread: (channelId) =>
+                        threadListBloc.load(channelId: channelId, page: 1),
                   ),
                 )
               : showCustomAlert(

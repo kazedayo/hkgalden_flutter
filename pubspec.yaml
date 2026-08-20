@@ -43,7 +43,6 @@ dependencies:
   shimmer: 
   universal_html: 
   url_launcher: 
-  flutter_dotenv:
   image_picker: ^1.2.1
   flutter_displaymode: ^0.7.0
   webview_flutter: ^4.14.1
@@ -66,7 +65,6 @@ flutter:
   assets:
     - assets/
     - assets/thread_webview/
-    - .env
   fonts:
     - family: CustomIcons
       fonts:

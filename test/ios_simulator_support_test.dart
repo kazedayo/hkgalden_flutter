@@ -56,17 +56,18 @@ void main() {
     }
   });
 
-  test('.env is present and listed as a Flutter asset (startup dotenv.load)', () {
-    expect(env.existsSync(), isTrue, reason: '.env required by dotenv.load()');
+  test('.env exists for --dart-define-from-file and is not a Flutter asset', () {
+    expect(env.existsSync(), isTrue,
+        reason: '.env required by --dart-define-from-file=.env');
     final pub = pubspec.readAsStringSync();
-    expect(pub.contains('.env'), isTrue, reason: 'pubspec must list .env asset');
+    expect(pub.contains('.env'), isFalse,
+        reason: 'client id is compile-time; do not bundle .env');
   });
 
-
-  test('lib/main.dart is the Flutter entry point and loads dotenv', () {
+  test('lib/main.dart is the Flutter entry point', () {
     expect(mainDart.existsSync(), isTrue);
     final src = mainDart.readAsStringSync();
-    expect(src.contains('dotenv.load'), isTrue);
+    expect(src.contains('dotenv'), isFalse);
     expect(src.contains('runApp'), isTrue);
   });
 }

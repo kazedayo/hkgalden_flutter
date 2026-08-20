@@ -1,5 +1,5 @@
 import 'package:bloc_test/bloc_test.dart';
-import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
+import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:test/fake.dart';
@@ -23,32 +23,31 @@ class _FakeApi extends Fake implements HKGaldenApi {
 }
 
 void main() {
-  group('ThreadListBloc', () {
+  group('ThreadListCubit', () {
     late _FakeApi api;
-    late ThreadListBloc threadListBloc;
+    late ThreadListCubit cubit;
 
     setUp(() {
       api = _FakeApi();
-      threadListBloc = ThreadListBloc(api: api);
+      cubit = ThreadListCubit(api: api);
     });
 
     test('initial state should be ThreadListInit', () {
-      expect(threadListBloc.state, ThreadListInit());
+      expect(cubit.state, ThreadListInit());
     });
 
-    blocTest('emits ThreadListLoaded state when RequestThreadListEvent added',
-        build: () => threadListBloc,
-        act: (ThreadListBloc bloc) => bloc.add(const RequestThreadListEvent(
-            channelId: 'bw', page: 1, isRefresh: false)),
+    blocTest('emits ThreadListLoaded when load page 1',
+        build: () => cubit,
+        act: (ThreadListCubit c) => c.load(channelId: 'bw', page: 1),
         expect: () => [isA<ThreadListLoading>(), isA<ThreadListLoaded>()]);
 
-    blocTest('emits new state when RequestThreadListEvent w/ page > 1 added',
-        build: () => threadListBloc,
-        act: (ThreadListBloc bloc) => bloc
-          ..add(const RequestThreadListEvent(
-              channelId: 'bw', page: 1, isRefresh: false))
-          ..add(const RequestThreadListEvent(
-              channelId: 'bw', page: 2, isRefresh: false)),
+    blocTest('emits new state when load page > 1',
+        build: () => cubit,
+        act: (ThreadListCubit c) async {
+          c.load(channelId: 'bw', page: 1);
+          await Future<void>.delayed(Duration.zero);
+          c.load(channelId: 'bw', page: 2);
+        },
         expect: () => [
               isA<ThreadListLoading>(),
               const ThreadListLoaded(
@@ -56,16 +55,15 @@ void main() {
               isA<ThreadListAppending>(),
               const ThreadListLoaded(
                   threads: [], currentChannelId: 'bw', currentPage: 2)
-            ]);
+            ],
+        wait: const Duration(milliseconds: 50));
 
     blocTest('does not emit ThreadListLoading when refresh while loaded',
-        build: () => threadListBloc,
-        act: (ThreadListBloc bloc) async {
-          bloc.add(const RequestThreadListEvent(
-              channelId: 'bw', page: 1, isRefresh: false));
+        build: () => cubit,
+        act: (ThreadListCubit c) async {
+          c.load(channelId: 'bw', page: 1);
           await Future<void>.delayed(Duration.zero);
-          bloc.add(const RequestThreadListEvent(
-              channelId: 'bw', page: 1, isRefresh: true));
+          c.load(channelId: 'bw', page: 1, isRefresh: true);
         },
         expect: () => [
               isA<ThreadListLoading>(),
@@ -82,16 +80,13 @@ void main() {
     blocTest('ignores page > 1 while already appending',
         build: () {
           api.page2Delay = const Duration(milliseconds: 20);
-          return threadListBloc;
+          return cubit;
         },
-        act: (ThreadListBloc bloc) async {
-          bloc.add(const RequestThreadListEvent(
-              channelId: 'bw', page: 1, isRefresh: false));
+        act: (ThreadListCubit c) async {
+          c.load(channelId: 'bw', page: 1);
           await Future<void>.delayed(Duration.zero);
-          bloc.add(const RequestThreadListEvent(
-              channelId: 'bw', page: 2, isRefresh: false));
-          bloc.add(const RequestThreadListEvent(
-              channelId: 'bw', page: 2, isRefresh: false));
+          c.load(channelId: 'bw', page: 2);
+          c.load(channelId: 'bw', page: 2);
         },
         expect: () => [
               isA<ThreadListLoading>(),

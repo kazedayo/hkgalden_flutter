@@ -1,8 +1,8 @@
 import 'package:bloc_test/bloc_test.dart';
-import 'package:hkgalden_flutter/bloc/blocked_users/blocked_users_bloc.dart';
+import 'package:hkgalden_flutter/bloc/blocked_users/blocked_users_cubit.dart';
 import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
-import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
-import 'package:hkgalden_flutter/bloc/user_thread_list/user_thread_list_bloc.dart';
+import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
+import 'package:hkgalden_flutter/bloc/user_thread_list/user_thread_list_cubit.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
@@ -44,8 +44,8 @@ class _FakeThreadApi extends Fake implements HKGaldenApi {
 }
 
 void main() {
-  group('ThreadListBloc append failure', () {
-    blocTest<ThreadListBloc, ThreadListState>(
+  group('ThreadListCubit append failure', () {
+    blocTest<ThreadListCubit, ThreadListState>(
       'restores previous loaded state instead of re-dispatching forever',
       build: () {
         var page2Calls = 0;
@@ -59,14 +59,12 @@ void main() {
           }
           return null;
         });
-        return ThreadListBloc(api: api);
+        return ThreadListCubit(api: api);
       },
-      act: (bloc) async {
-        bloc.add(const RequestThreadListEvent(
-            channelId: 'bw', page: 1, isRefresh: false));
+      act: (cubit) async {
+        cubit.load(channelId: 'bw', page: 1);
         await Future<void>.delayed(Duration.zero);
-        bloc.add(const RequestThreadListEvent(
-            channelId: 'bw', page: 2, isRefresh: false));
+        cubit.load(channelId: 'bw', page: 2);
       },
       expect: () => [
         isA<ThreadListLoading>(),
@@ -80,21 +78,21 @@ void main() {
     );
   });
 
-  group('BlockedUsersBloc error path', () {
-    blocTest<BlockedUsersBloc, BlockedUsersState>(
+  group('BlockedUsersCubit error path', () {
+    blocTest<BlockedUsersCubit, BlockedUsersState>(
       'emits BlockedUsersError when API returns null',
-      build: () => BlockedUsersBloc(api: _FakeBlockedUsersApi(null)),
-      act: (bloc) => bloc.add(RequestBlockedUsersEvent()),
+      build: () => BlockedUsersCubit(api: _FakeBlockedUsersApi(null)),
+      act: (cubit) => cubit.load(),
       expect: () => [
         isA<BlockedUsersLoading>(),
         isA<BlockedUsersError>(),
       ],
     );
 
-    blocTest<BlockedUsersBloc, BlockedUsersState>(
+    blocTest<BlockedUsersCubit, BlockedUsersState>(
       'emits BlockedUsersLoaded when API returns list',
-      build: () => BlockedUsersBloc(api: _FakeBlockedUsersApi(const [])),
-      act: (bloc) => bloc.add(RequestBlockedUsersEvent()),
+      build: () => BlockedUsersCubit(api: _FakeBlockedUsersApi(const [])),
+      act: (cubit) => cubit.load(),
       expect: () => [
         isA<BlockedUsersLoading>(),
         const BlockedUsersLoaded(blockedUsers: []),
@@ -102,23 +100,21 @@ void main() {
     );
   });
 
-  group('UserThreadListBloc error path', () {
-    blocTest<UserThreadListBloc, UserThreadListState>(
+  group('UserThreadListCubit error path', () {
+    blocTest<UserThreadListCubit, UserThreadListState>(
       'emits UserThreadListError when API returns null',
-      build: () => UserThreadListBloc(api: _FakeUserThreadListApi(null)),
-      act: (bloc) =>
-          bloc.add(const RequestUserThreadListEvent(userId: 'u1', page: 1)),
+      build: () => UserThreadListCubit(api: _FakeUserThreadListApi(null)),
+      act: (cubit) => cubit.load(userId: 'u1', page: 1),
       expect: () => [
         isA<UserThreadListLoading>(),
         isA<UserThreadListError>(),
       ],
     );
 
-    blocTest<UserThreadListBloc, UserThreadListState>(
+    blocTest<UserThreadListCubit, UserThreadListState>(
       'emits UserThreadListLoaded when API returns list',
-      build: () => UserThreadListBloc(api: _FakeUserThreadListApi(const [])),
-      act: (bloc) =>
-          bloc.add(const RequestUserThreadListEvent(userId: 'u1', page: 1)),
+      build: () => UserThreadListCubit(api: _FakeUserThreadListApi(const [])),
+      act: (cubit) => cubit.load(userId: 'u1', page: 1),
       expect: () => [
         isA<UserThreadListLoading>(),
         const UserThreadListLoaded(page: 1, userThreadList: []),

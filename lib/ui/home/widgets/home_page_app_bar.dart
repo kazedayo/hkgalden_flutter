@@ -68,11 +68,9 @@ PreferredSize _buildAppBar() {
                 final channelState =
                     BlocProvider.of<ChannelBloc>(context).state;
                 if (channelState is ChannelLoaded) {
-                  BlocProvider.of<ThreadListBloc>(context).add(
-                    RequestThreadListEvent(
-                        channelId: channelState.selectedChannelId,
-                        page: 1,
-                        isRefresh: false),
+                  BlocProvider.of<ThreadListCubit>(context).load(
+                    channelId: channelState.selectedChannelId,
+                    page: 1,
                   );
                 }
               },
