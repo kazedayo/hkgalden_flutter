@@ -21,14 +21,8 @@ environment:
   sdk: ">=3.13.0 <3.14.0"
 
 dependencies:
-  adaptive_platform_ui: ^0.1.107
-  animations:
-  auto_size_text:
   backdrop: 
   bloc:
-  cupertino_icons: 
-  date_time_format: 
-  dio:
   equatable: 
   flutter:
     sdk: flutter
@@ -40,15 +34,12 @@ dependencies:
   flutter_svg: 
   flutter_web_auth_2: 
   http:
-  gal:
   graphql: 
   hive:
   hive_flutter:
   modal_bottom_sheet: 
-  octo_image: 
   package_info_plus: 
   path_provider:
-  popover: 
   shimmer: 
   universal_html: 
   url_launcher: 
@@ -60,12 +51,10 @@ dependencies:
 
 dev_dependencies:
   bloc_test:
-  build_runner: 
   flutter_launcher_icons:
   flutter_test:
     sdk: flutter
   flutter_lints:
-  mockito:
   test:
 
 # For information on the generic Dart part of this file, see the
@@ -73,46 +62,7 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
-
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
-
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
-
-  # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/assets-and-images/#resolution-aware.
-
-  # For details regarding adding assets from package dependencies, see
-  # https://flutter.dev/assets-and-images/#from-packages
-
-  # To add custom fonts to your application, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
-  # "family" key with the font family name, and a "fonts" key with a
-  # list giving the asset and other descriptors for the font. For
-  # example:
-  # fonts:
-  #   - family: NotoSansTC
-  #     fonts:
-  #       - asset: fonts/NotoSansTC-Thin.otf
-  #         weight: 100
-  #       - asset: fonts/NotoSansTC-Light.otf
-  #         weight: 300
-  #       - asset: fonts/NotoSansTC-Regular.otf
-  #         weight: 400
-  #       - asset: fonts/NotoSansTC-Medium.otf
-  #         weight: 500
-  #       - asset: fonts/NotoSansTC-Bold.otf
-  #         weight: 700
-  #       - asset: fonts/NotoSansTC-Black.otf
-  #         weight: 900
-  #
-  # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/custom-fonts/#from-packages
   assets:
     - assets/
     - assets/thread_webview/

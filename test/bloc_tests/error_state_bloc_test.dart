@@ -5,34 +5,29 @@ import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
 import 'package:hkgalden_flutter/bloc/user_thread_list/user_thread_list_bloc.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';
-import 'package:hkgalden_flutter/repository/blocked_users_repository.dart';
-import 'package:hkgalden_flutter/repository/thread_list_repository.dart';
-import 'package:hkgalden_flutter/repository/thread_repository.dart';
-import 'package:hkgalden_flutter/repository/user_thread_list_repository.dart';
+import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
+import 'package:test/fake.dart';
 import 'package:test/test.dart';
 
-class _FakeThreadListRepository extends ThreadListRepository {
-  _FakeThreadListRepository(this._handler);
+class _FakeThreadListApi extends Fake implements HKGaldenApi {
+  _FakeThreadListApi(this._handler);
   final Future<List<Thread>?> Function(String id, int page) _handler;
 
   @override
-  Future<List<Thread>?> getThreadList(String id, int page) => _handler(id, page);
+  Future<List<Thread>?> getThreadListQuery(String id, int page) =>
+      _handler(id, page);
 }
 
-class _FakeBlockedUsersRepository extends BlockedUsersRepository {
-  _FakeBlockedUsersRepository(this.result);
+class _FakeBlockedUsersApi extends Fake implements HKGaldenApi {
+  _FakeBlockedUsersApi(this.result);
   final List<User>? result;
-  int calls = 0;
 
   @override
-  Future<List<User>?> getBlockedUsers() async {
-    calls++;
-    return result;
-  }
+  Future<List<User>?> getBlockedUser() async => result;
 }
 
-class _FakeUserThreadListRepository extends UserThreadListRepository {
-  _FakeUserThreadListRepository(this.result);
+class _FakeUserThreadListApi extends Fake implements HKGaldenApi {
+  _FakeUserThreadListApi(this.result);
   final List<Thread>? result;
 
   @override
@@ -40,12 +35,12 @@ class _FakeUserThreadListRepository extends UserThreadListRepository {
       result;
 }
 
-class _FakeThreadRepository extends ThreadRepository {
-  _FakeThreadRepository(this._handler);
+class _FakeThreadApi extends Fake implements HKGaldenApi {
+  _FakeThreadApi(this._handler);
   final Future<Thread?> Function(int id, int page) _handler;
 
   @override
-  Future<Thread?> getThread(int id, int page) => _handler(id, page);
+  Future<Thread?> getThreadQuery(int id, int page) => _handler(id, page);
 }
 
 void main() {
@@ -54,7 +49,7 @@ void main() {
       'restores previous loaded state instead of re-dispatching forever',
       build: () {
         var page2Calls = 0;
-        final repo = _FakeThreadListRepository((id, page) async {
+        final api = _FakeThreadListApi((id, page) async {
           if (page == 1) {
             return [];
           }
@@ -64,7 +59,7 @@ void main() {
           }
           return null;
         });
-        return ThreadListBloc(repository: repo);
+        return ThreadListBloc(api: api);
       },
       act: (bloc) async {
         bloc.add(const RequestThreadListEvent(
@@ -87,9 +82,8 @@ void main() {
 
   group('BlockedUsersBloc error path', () {
     blocTest<BlockedUsersBloc, BlockedUsersState>(
-      'emits BlockedUsersError when repository returns null',
-      build: () => BlockedUsersBloc(
-          repository: _FakeBlockedUsersRepository(null)),
+      'emits BlockedUsersError when API returns null',
+      build: () => BlockedUsersBloc(api: _FakeBlockedUsersApi(null)),
       act: (bloc) => bloc.add(RequestBlockedUsersEvent()),
       expect: () => [
         isA<BlockedUsersLoading>(),
@@ -98,9 +92,8 @@ void main() {
     );
 
     blocTest<BlockedUsersBloc, BlockedUsersState>(
-      'emits BlockedUsersLoaded when repository returns list',
-      build: () => BlockedUsersBloc(
-          repository: _FakeBlockedUsersRepository(const [])),
+      'emits BlockedUsersLoaded when API returns list',
+      build: () => BlockedUsersBloc(api: _FakeBlockedUsersApi(const [])),
       act: (bloc) => bloc.add(RequestBlockedUsersEvent()),
       expect: () => [
         isA<BlockedUsersLoading>(),
@@ -111,9 +104,8 @@ void main() {
 
   group('UserThreadListBloc error path', () {
     blocTest<UserThreadListBloc, UserThreadListState>(
-      'emits UserThreadListError when repository returns null',
-      build: () => UserThreadListBloc(
-          repository: _FakeUserThreadListRepository(null)),
+      'emits UserThreadListError when API returns null',
+      build: () => UserThreadListBloc(api: _FakeUserThreadListApi(null)),
       act: (bloc) =>
           bloc.add(const RequestUserThreadListEvent(userId: 'u1', page: 1)),
       expect: () => [
@@ -123,9 +115,8 @@ void main() {
     );
 
     blocTest<UserThreadListBloc, UserThreadListState>(
-      'emits UserThreadListLoaded when repository returns list',
-      build: () => UserThreadListBloc(
-          repository: _FakeUserThreadListRepository(const [])),
+      'emits UserThreadListLoaded when API returns list',
+      build: () => UserThreadListBloc(api: _FakeUserThreadListApi(const [])),
       act: (bloc) =>
           bloc.add(const RequestUserThreadListEvent(userId: 'u1', page: 1)),
       expect: () => [
@@ -139,13 +130,13 @@ void main() {
     blocTest<ThreadBloc, ThreadState>(
       'restores previous ThreadLoaded instead of full-page ThreadError',
       build: () {
-        final repo = _FakeThreadRepository((id, page) async {
+        final api = _FakeThreadApi((id, page) async {
           if (page == 1) {
             return Thread.initial();
           }
           return null;
         });
-        return ThreadBloc(repository: repo);
+        return ThreadBloc(api: api);
       },
       act: (bloc) async {
         bloc.add(const RequestThreadEvent(

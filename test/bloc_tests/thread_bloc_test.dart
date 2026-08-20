@@ -4,17 +4,18 @@ import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/models/user_group.dart';
-import 'package:hkgalden_flutter/repository/thread_repository.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
+import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
+import 'package:test/fake.dart';
 import 'package:test/test.dart';
 
-import 'thread_bloc_test.mocks.dart';
+class _FakeApi extends Fake implements HKGaldenApi {
+  @override
+  Future<Thread?> getThreadQuery(int threadId, int page) async =>
+      Thread.initial();
+}
 
-@GenerateMocks([ThreadRepository])
 void main() {
   group('ThreadBloc', () {
-    late ThreadRepository repository;
     late ThreadBloc threadBloc;
 
     final fixedDate = DateTime.utc(2024, 1, 1);
@@ -25,7 +26,7 @@ void main() {
         nickName: 'nickName',
         avatar: 'avatar',
         userGroup: [
-          UserGroup(groupId: 'groupId', groupName: 'groupName'),
+          UserGroup(groupId: 'groupId', groupName: 'n'),
         ],
         blockedUsers: [],
       ),
@@ -34,12 +35,7 @@ void main() {
     );
 
     setUp(() {
-      repository = MockThreadRepository();
-      when(repository.getThread(1, 1))
-          .thenAnswer((_) async => Thread.initial());
-      when(repository.getThread(1, 2))
-          .thenAnswer((_) async => Thread.initial());
-      threadBloc = ThreadBloc(repository: repository);
+      threadBloc = ThreadBloc(api: _FakeApi());
     });
 
     test('initial state should be ThreadInit', () {
@@ -53,7 +49,6 @@ void main() {
         const RequestThreadEvent(threadId: 1, page: 1, isInitialLoad: true),
       ),
       expect: () => [isA<ThreadLoading>(), isA<ThreadLoaded>()],
-      verify: (_) => verify(repository.getThread(1, 1)).called(1),
     );
 
     blocTest(

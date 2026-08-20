@@ -12,11 +12,7 @@ import 'package:hkgalden_flutter/utils/html_styles.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
 import 'package:hkgalden_flutter/utils/x_url.dart';
 import 'package:hkgalden_flutter/utils/youtube_url.dart';
-import 'package:octo_image/octo_image.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-const Duration _kImageFadeIn = Duration(milliseconds: 150);
-const Duration _kImageFadeOut = Duration(milliseconds: 100);
 
 class StyledHtmlView extends StatefulWidget {
   final String htmlString;
@@ -172,16 +168,15 @@ class _StyledHtmlViewState extends State<StyledHtmlView> {
               final cachePx = (48 * dpr).round();
               return Padding(
                 padding: const EdgeInsets.all(3.0),
-                child: OctoImage(
+                child: Image(
                   image: ResizeImage(
                     NetworkImage(src),
                     width: cachePx,
                     height: cachePx,
                   ),
                   gaplessPlayback: true,
-                  fadeInDuration: _kImageFadeIn,
-                  fadeOutDuration: _kImageFadeOut,
-                  placeholderBuilder: (context) => const SizedBox(),
+                  loadingBuilder: (context, child, loading) =>
+                      loading == null ? child : const SizedBox(),
                 ),
               );
             },
@@ -482,15 +477,14 @@ class _HtmlNetworkImageState extends State<_HtmlNetworkImage> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    OctoImage(
+                    Image(
                       image: _imageProvider,
                       gaplessPlayback: true,
-                      fadeInDuration: _kImageFadeIn,
-                      fadeOutDuration: _kImageFadeOut,
                       fit: BoxFit.contain,
                       width: displayWidth,
                       height: displayHeight,
-                      placeholderBuilder: (context) {
+                      loadingBuilder: (context, child, loading) {
+                        if (loading == null) return child;
                         return SizedBox(
                           width: displayWidth,
                           height: displayHeight,

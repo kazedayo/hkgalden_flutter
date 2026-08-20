@@ -2,8 +2,8 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
-import 'package:dio/dio.dart';
 import 'package:hkgalden_flutter/models/ui_state_models/full_screen_photo_view_state.dart';
+import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -19,7 +19,11 @@ class FullScreenPhotoViewCubit extends Cubit<FullScreenPhotoViewState> {
       final fileName = _fileNameFor(url);
       filePath = '${tempDir.path}/$fileName';
 
-      await Dio().download(url, filePath);
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode != 200) {
+        throw Exception('download failed');
+      }
+      await File(filePath).writeAsBytes(response.bodyBytes);
       if (isClosed) {
         return;
       }

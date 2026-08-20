@@ -1,4 +1,0 @@
-enum UserProfile {
-  sessionUser,
-  otherUser,
-}

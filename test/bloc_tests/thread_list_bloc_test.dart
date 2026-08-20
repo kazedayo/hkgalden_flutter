@@ -1,23 +1,35 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
-import 'package:hkgalden_flutter/repository/thread_list_repository.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
+import 'package:hkgalden_flutter/models/thread.dart';
+import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
+import 'package:test/fake.dart';
 import 'package:test/test.dart';
 
-import 'thread_list_bloc_test.mocks.dart';
+class _FakeApi extends Fake implements HKGaldenApi {
+  Duration? page2Delay;
+  int page2Calls = 0;
 
-@GenerateMocks([ThreadListRepository])
+  @override
+  Future<List<Thread>?> getThreadListQuery(String channelId, int page) async {
+    if (page == 2) {
+      page2Calls++;
+      final delay = page2Delay;
+      if (delay != null) {
+        await Future<void>.delayed(delay);
+      }
+    }
+    return [];
+  }
+}
+
 void main() {
   group('ThreadListBloc', () {
-    late ThreadListRepository repository;
+    late _FakeApi api;
     late ThreadListBloc threadListBloc;
 
     setUp(() {
-      repository = MockThreadListRepository();
-      when(repository.getThreadList('bw', 1)).thenAnswer((_) async => []);
-      when(repository.getThreadList('bw', 2)).thenAnswer((_) async => []);
-      threadListBloc = ThreadListBloc(repository: repository);
+      api = _FakeApi();
+      threadListBloc = ThreadListBloc(api: api);
     });
 
     test('initial state should be ThreadListInit', () {
@@ -69,10 +81,7 @@ void main() {
 
     blocTest('ignores page > 1 while already appending',
         build: () {
-          when(repository.getThreadList('bw', 2)).thenAnswer((_) async {
-            await Future<void>.delayed(const Duration(milliseconds: 20));
-            return [];
-          });
+          api.page2Delay = const Duration(milliseconds: 20);
           return threadListBloc;
         },
         act: (ThreadListBloc bloc) async {
@@ -94,7 +103,7 @@ void main() {
             ],
         wait: const Duration(milliseconds: 50),
         verify: (_) {
-          verify(repository.getThreadList('bw', 2)).called(1);
+          expect(api.page2Calls, 1);
         });
   });
 }

@@ -8,11 +8,7 @@ import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
-import 'package:hkgalden_flutter/repository/channel_repository.dart';
-import 'package:hkgalden_flutter/repository/session_user_repository.dart';
 import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
-import 'package:hkgalden_flutter/repository/thread_list_repository.dart';
-import 'package:hkgalden_flutter/repository/thread_repository.dart';
 import 'package:hkgalden_flutter/ui/startup_screen.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
@@ -47,18 +43,6 @@ class MyApp extends StatelessWidget {
       providers: [
         RepositoryProvider(create: (context) => HKGaldenApi()),
         RepositoryProvider(
-            create: (context) => ChannelRepository(
-                api: RepositoryProvider.of<HKGaldenApi>(context))),
-        RepositoryProvider(
-            create: (context) => SessionUserRepository(
-                api: RepositoryProvider.of<HKGaldenApi>(context))),
-        RepositoryProvider(
-            create: (context) => ThreadListRepository(
-                api: RepositoryProvider.of<HKGaldenApi>(context))),
-        RepositoryProvider(
-            create: (context) => ThreadRepository(
-                api: RepositoryProvider.of<HKGaldenApi>(context))),
-        RepositoryProvider(
             create: (context) => SmileyPackRepository(
                 api: RepositoryProvider.of<HKGaldenApi>(context))),
       ],
@@ -66,16 +50,13 @@ class MyApp extends StatelessWidget {
         providers: [
           BlocProvider(
               create: (context) => ChannelBloc(
-                  repository:
-                      RepositoryProvider.of<ChannelRepository>(context))),
+                  api: RepositoryProvider.of<HKGaldenApi>(context))),
           BlocProvider(
               create: (context) => SessionUserBloc(
-                  repository:
-                      RepositoryProvider.of<SessionUserRepository>(context))),
+                  api: RepositoryProvider.of<HKGaldenApi>(context))),
           BlocProvider(
               create: (context) => ThreadListBloc(
-                  repository:
-                      RepositoryProvider.of<ThreadListRepository>(context)))
+                  api: RepositoryProvider.of<HKGaldenApi>(context)))
         ],
         child: MaterialApp(
           home: StartupScreen(),

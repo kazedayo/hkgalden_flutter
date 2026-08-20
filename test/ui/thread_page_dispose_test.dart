@@ -6,8 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';
-import 'package:hkgalden_flutter/repository/session_user_repository.dart';
-import 'package:hkgalden_flutter/repository/thread_repository.dart';
+import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 
@@ -19,13 +18,13 @@ void main() {
     await tester.pumpWidget(
       MultiRepositoryProvider(
         providers: [
-          RepositoryProvider<ThreadRepository>.value(
-            value: _HangingThreadRepository(),
+          RepositoryProvider<HKGaldenApi>.value(
+            value: _HangingApi(),
           ),
         ],
         child: BlocProvider(
           create: (_) => SessionUserBloc(
-            repository: _FakeSessionUserRepository(),
+            api: _FakeSessionUserApi(),
           ),
           child: MaterialApp(
             navigatorKey: navigator,
@@ -61,12 +60,12 @@ void main() {
   });
 }
 
-class _HangingThreadRepository extends ThreadRepository {
+class _HangingApi extends Fake implements HKGaldenApi {
   @override
-  Future<Thread?> getThread(int id, int page) => Completer<Thread?>().future;
+  Future<Thread?> getThreadQuery(int id, int page) => Completer<Thread?>().future;
 }
 
-class _FakeSessionUserRepository extends SessionUserRepository {
+class _FakeSessionUserApi extends Fake implements HKGaldenApi {
   @override
-  Future<User?> getSessionUser() async => null;
+  Future<User?> getSessionUserQuery() async => null;
 }

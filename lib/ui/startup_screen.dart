@@ -10,7 +10,7 @@ import 'package:hkgalden_flutter/nested_navigator.dart';
 import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
-import 'package:hkgalden_flutter/utils/token_store.dart';
+import 'package:hive/hive.dart';
 
 class StartupScreen extends StatefulWidget {
   const StartupScreen({super.key});
@@ -42,10 +42,11 @@ class StartupScreenState extends State<StartupScreen>
     }
     _kickoffStarted = true;
 
-    final String? readToken = await TokenStore().readToken();
+    final box = Hive.box('token');
+    final String? readToken = box.get('token') as String?;
     final String token;
     if (readToken == null) {
-      await TokenStore().writeToken('');
+      await box.put('token', '');
       token = '';
     } else {
       token = readToken;

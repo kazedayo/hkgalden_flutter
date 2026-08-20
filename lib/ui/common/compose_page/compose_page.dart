@@ -13,27 +13,23 @@ import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/tag.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
-import 'package:hkgalden_flutter/ui/common/action_bar_spinner.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/ui/common/thread_tag_chip.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
-import 'package:hkgalden_flutter/utils/device_properties.dart';
 
 import 'package:hkgalden_flutter/bloc/cubit/compose_cubit.dart';
 import 'package:hkgalden_flutter/bloc/cubit/compose_state.dart';
-import 'package:hkgalden_flutter/bloc/cubit/url_validation_cubit.dart';
 import 'package:hkgalden_flutter/models/smiley.dart';
 import 'package:hkgalden_flutter/models/smiley_pack.dart';
+import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
-import 'package:hkgalden_flutter/repository/thread_repository.dart';
 import 'package:hkgalden_flutter/utils/smiley_cdn.dart';
 import 'package:hkgalden_flutter/utils/smiley_embed.dart';
 import 'package:hkgalden_flutter/utils/smiley_pack_selection.dart';
 
 part 'widgets/compose_page_tag_select_dialog.dart';
-part 'widgets/quill_editor.dart';
 part 'widgets/toolbar_button.dart';
 part 'widgets/link_dialog.dart';
 part 'widgets/image_insert_dialog.dart';
@@ -111,7 +107,7 @@ class ComposePageState extends State<ComposePage> {
     final sessionUserBloc = BlocProvider.of<SessionUserBloc>(context);
     return BlocProvider(
       create: (context) => ComposeCubit(
-        threadRepository: RepositoryProvider.of<ThreadRepository>(context),
+        api: RepositoryProvider.of<HKGaldenApi>(context),
       ),
       child: BlocConsumer<ComposeCubit, ComposeState>(
         listenWhen: (prev, next) =>
@@ -155,7 +151,13 @@ class ComposePageState extends State<ComposePage> {
               ),
               automaticallyImplyLeading: false,
               actions: <Widget>[
-                ActionBarSpinner(isVisible: isSending),
+                Visibility(
+                  visible: isSending,
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: ProgressSpinner(),
+                  ),
+                ),
                 Builder(
                   builder: (context) => IconButton(
                     icon: const Icon(Icons.send_rounded),
@@ -206,7 +208,7 @@ class ComposePageState extends State<ComposePage> {
                             itemBuilder: (context) => [
                               PopupMenuItem(
                                   child: SizedBox(
-                                height: displayHeight(context) / 3,
+                                height: MediaQuery.sizeOf(context).height / 3,
                                 child: _TagSelectDialog(
                                   onTagSelect: (tag, channelId) {
                                     Navigator.of(context).pop();
@@ -255,7 +257,8 @@ class ComposePageState extends State<ComposePage> {
                 if (widget.composeMode == ComposeMode.quotedReply)
                   ConstrainedBox(
                     constraints:
-                        BoxConstraints(maxHeight: displayHeight(context) / 4),
+                        BoxConstraints(
+                            maxHeight: MediaQuery.sizeOf(context).height / 4),
                     child: SingleChildScrollView(
                       reverse: true,
                       padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -269,12 +272,12 @@ class ComposePageState extends State<ComposePage> {
                   const SizedBox(),
                 Expanded(
                   child: Builder(builder: (builderContext) {
-                    return _buildQuillEditor(
-                      builderContext,
-                      _controller,
-                      _focusNode,
-                      (file) => _onImagePickCallback(builderContext, file),
-                      _smileyPacks,
+                    return _RichTextEditor(
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      imagePickCallback: (file) =>
+                          _onImagePickCallback(builderContext, file),
+                      smileyPacks: _smileyPacks,
                     );
                   }),
                 )

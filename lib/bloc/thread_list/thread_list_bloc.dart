@@ -3,19 +3,19 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
-import 'package:hkgalden_flutter/repository/thread_list_repository.dart';
+import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 
 part 'thread_list_event.dart';
 part 'thread_list_state.dart';
 
 class ThreadListBloc extends Bloc<ThreadListEvent, ThreadListState> {
-  ThreadListBloc({required ThreadListRepository repository})
-      : _repository = repository,
+  ThreadListBloc({required HKGaldenApi api})
+      : _api = api,
         super(ThreadListInit()) {
     on<RequestThreadListEvent>(_onRequestThreadListEvent);
   }
 
-  final ThreadListRepository _repository;
+  final HKGaldenApi _api;
 
   FutureOr<void> _onRequestThreadListEvent(
       RequestThreadListEvent event, Emitter<ThreadListState> emit) async {
@@ -27,7 +27,7 @@ class ThreadListBloc extends Bloc<ThreadListEvent, ThreadListState> {
         emit(ThreadListLoading());
       }
       final List<Thread>? threads =
-          await _repository.getThreadList(event.channelId, event.page);
+          await _api.getThreadListQuery(event.channelId, event.page);
       if (threads != null) {
         emit(ThreadListLoaded(
             threads: threads,
@@ -48,7 +48,7 @@ class ThreadListBloc extends Bloc<ThreadListEvent, ThreadListState> {
           currentPage: previousState.currentPage,
           generation: previousState.generation));
       final List<Thread>? threads =
-          await _repository.getThreadList(event.channelId, event.page);
+          await _api.getThreadListQuery(event.channelId, event.page);
       if (threads != null) {
         emit(ThreadListLoaded(
             threads: previousState.threads.toList()..addAll(threads),

@@ -1,22 +1,28 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
-import 'package:hkgalden_flutter/repository/channel_repository.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
+import 'package:hkgalden_flutter/models/channel.dart';
+import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
+import 'package:test/fake.dart';
 import 'package:test/test.dart';
 
-import 'channel_bloc_test.mocks.dart';
+class _FakeApi extends Fake implements HKGaldenApi {
+  int getChannelsCalls = 0;
 
-@GenerateMocks([ChannelRepository])
+  @override
+  Future<List<Channel>?> getChannelsQuery() async {
+    getChannelsCalls++;
+    return [];
+  }
+}
+
 void main() {
   group('ChannelBloc', () {
-    late ChannelRepository repository;
+    late _FakeApi api;
     late ChannelBloc channelBloc;
 
     setUp(() {
-      repository = MockChannelRepository();
-      when(repository.getChannels()).thenAnswer((_) async => []);
-      channelBloc = ChannelBloc(repository: repository);
+      api = _FakeApi();
+      channelBloc = ChannelBloc(api: api);
     });
 
     test('initial state should be ChannelLoading', () {
@@ -27,7 +33,7 @@ void main() {
         build: () => channelBloc,
         act: (ChannelBloc bloc) => bloc.add(RequestChannelsEvent()),
         expect: () => [isA<ChannelLoaded>()],
-        verify: (_) => verify(repository.getChannels()).called(1));
+        verify: (_) => expect(api.getChannelsCalls, 1));
 
     blocTest(
         'state should remain unchanged when SetSelectedChannelEvent add on state ChannelLoading',

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/ui/common/app_shimmer.dart';
 import 'package:hkgalden_flutter/ui/common/skeleton_block.dart';
-import 'package:hkgalden_flutter/utils/device_properties.dart';
-
 class ThreadPageLoadingSkeletonCell extends StatelessWidget {
   const ThreadPageLoadingSkeletonCell({super.key});
 
@@ -23,7 +21,7 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
             builder: (context, constraints) {
               final width = constraints.maxWidth.isFinite
                   ? constraints.maxWidth
-                  : displayWidth(context);
+                  : MediaQuery.sizeOf(context).width;
               return SizedBox(
                 width: width,
                 height: _contentHeight,

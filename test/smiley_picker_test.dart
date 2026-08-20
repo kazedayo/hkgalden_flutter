@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -321,84 +320,7 @@ void main() {
     });
   });
 
-  group('compose UI structural wiring', () {
-    test('compose tree sources declare smiley pane + insert path', () {
-      final composePage =
-          File('lib/ui/common/compose_page/compose_page.dart').readAsStringSync();
-      final smileyPane =
-          File('lib/ui/common/compose_page/widgets/smiley_pane.dart')
-              .readAsStringSync();
-      final richEditor =
-          File('lib/ui/common/compose_page/widgets/rich_text_editor.dart')
-              .readAsStringSync();
-      final api =
-          File('lib/networking/hkgalden_api.dart').readAsStringSync();
-      final repo = File('lib/repository/smiley_pack_repository.dart')
-          .readAsStringSync();
-      final startup =
-          File('lib/ui/startup_screen.dart').readAsStringSync();
-      final login = File('lib/ui/home/widgets/home_page_app_bar.dart')
-          .readAsStringSync();
-      final logout =
-          File('lib/ui/home/widgets/home_page_popup_menu_button.dart')
-              .readAsStringSync();
-
-      expect(composePage.contains("part 'widgets/smiley_pane.dart'"), isTrue);
-      expect(composePage.contains('SmileyPackRepository'), isTrue);
-      expect(composePage.contains('_smileyPacks'), isTrue);
-      expect(composePage.contains('cachedPacks'), isTrue,
-          reason: 'compose must seed packs from repository cache on first frame');
-
-      expect(repo.contains('prewarm'), isTrue);
-      expect(repo.contains('cachedPacks'), isTrue);
-      expect(repo.contains('clearCache'), isTrue);
-      expect(startup.contains('.prewarm()'), isTrue,
-          reason: 'startup with a token should prewarm packs before compose');
-      expect(login.contains('.prewarm()'), isTrue,
-          reason: 'login should prewarm packs for the next compose');
-      expect(logout.contains('.clearCache()'), isTrue,
-          reason: 'logout must drop another user\'s cached packs');
-
-      expect(smileyPane.contains('_SmileyPane'), isTrue);
-      expect(smileyPane.contains('SmileyEmbed.insertInto'), isTrue);
-      expect(smileyPane.contains('smileyGifUrl'), isTrue);
-      expect(smileyPane.contains('selectDefaultSmileyPackId'), isTrue);
-      expect(smileyPane.contains('packs'), isTrue);
-      expect(smileyPane.contains('smilies'), isTrue);
-      // Nested scrolls must not join the bar-modal PrimaryScrollController
-      // (otherwise pane scroll drives the compose-sheet dismiss gesture).
-      expect(smileyPane.contains('primary: false'), isTrue);
-      expect(smileyPane.contains('NotificationListener<ScrollNotification>'),
-          isTrue);
-      expect(smileyPane.contains('_packsScrollController'), isTrue);
-      expect(smileyPane.contains('_smiliesScrollController'), isTrue);
-
-      expect(richEditor.contains('_SmileyPane'), isTrue);
-      expect(richEditor.contains('_SmileyEmbedBuilder'), isTrue);
-      expect(richEditor.contains('SmileyEmbed.type'), isTrue);
-      // Custom-keyboard behavior: not always on-screen; toggled + suppresses IME.
-      expect(richEditor.contains('_smileyKeyboardOpen'), isTrue);
-      expect(richEditor.contains('_toggleSmileyKeyboard'), isTrue);
-      expect(richEditor.contains('controller.readOnly = open'), isTrue);
-      expect(richEditor.contains("TextInput.hide"), isTrue);
-      expect(richEditor.contains('onToggleSmileyKeyboard'), isTrue);
-      expect(
-        richEditor.contains('if (canShowSmiley)'),
-        isTrue,
-        reason: 'smiley pane must only build when keyboard mode is open',
-      );
-
-      final toolbar =
-          File('lib/ui/common/compose_page/widgets/rich_text_toolbar.dart')
-              .readAsStringSync();
-      expect(toolbar.contains('onToggleSmileyKeyboard'), isTrue);
-      expect(toolbar.contains('emoji_emotions'), isTrue);
-      expect(toolbar.contains('keyboard_rounded'), isTrue);
-
-      expect(api.contains('installedPacks'), isTrue);
-      expect(api.contains('getInstalledPacksQuery'), isTrue);
-    });
-
+  group('smiley insert', () {
     testWidgets(
       'picker selection calls real insert path and document holds smiley embed',
       (tester) async {

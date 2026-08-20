@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/cubit/thread_page_cubit.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
-import 'package:hkgalden_flutter/repository/thread_repository.dart';
+import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/ui/common/error_page.dart';
 import 'package:hkgalden_flutter/ui/thread/previous_page_pull_controller.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton.dart';
@@ -89,7 +89,7 @@ class _ThreadPageState extends State<ThreadPage> with WidgetsBindingObserver {
       providers: [
         BlocProvider(create: (context) {
           final ThreadBloc threadBloc = ThreadBloc(
-              repository: RepositoryProvider.of<ThreadRepository>(context));
+              api: RepositoryProvider.of<HKGaldenApi>(context));
 
           if (route != null &&
               route.animation != null &&

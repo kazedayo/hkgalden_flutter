@@ -9,7 +9,7 @@ import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/smiley_pack.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';
-import 'package:hkgalden_flutter/utils/token_store.dart';
+import 'package:hive/hive.dart';
 
 class _GqlFragments {
   static const commentFields = r'''
@@ -205,8 +205,7 @@ class HKGaldenApi {
   static final HttpLink _api = HttpLink('https://hkgalden.org/_');
 
   static final AuthLink _bearerToken = AuthLink(getToken: () async {
-    final String? tokenString =
-        await TokenStore().tokenBox.get('token') as String?;
+    final String? tokenString = Hive.box('token').get('token') as String?;
     return 'Bearer $tokenString';
   });
 

@@ -3,26 +3,26 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hkgalden_flutter/models/user.dart';
-import 'package:hkgalden_flutter/repository/session_user_repository.dart';
+import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 
 part 'session_user_event.dart';
 part 'session_user_state.dart';
 
 class SessionUserBloc extends Bloc<SessionUserEvent, SessionUserState> {
-  SessionUserBloc({required SessionUserRepository repository})
-      : _repository = repository,
+  SessionUserBloc({required HKGaldenApi api})
+      : _api = api,
         super(SessionUserUndefined()) {
     on<RequestSessionUserEvent>(_onRequestSessionUserEvent);
     on<AppendUserToBlockListEvent>(_onAppendUserToBlockListEvent);
     on<RemoveSessionUserEvent>((event, emit) => emit(SessionUserUndefined()));
   }
 
-  final SessionUserRepository _repository;
+  final HKGaldenApi _api;
 
   FutureOr<void> _onRequestSessionUserEvent(
       RequestSessionUserEvent event, Emitter<SessionUserState> emit) async {
     emit(SessionUserLoading());
-    final User? sessionUser = await _repository.getSessionUser();
+    final User? sessionUser = await _api.getSessionUserQuery();
     if (sessionUser != null) {
       emit(SessionUserLoaded(sessionUser: sessionUser));
     }
@@ -31,7 +31,7 @@ class SessionUserBloc extends Bloc<SessionUserEvent, SessionUserState> {
   FutureOr<void> _onAppendUserToBlockListEvent(
       AppendUserToBlockListEvent event, Emitter<SessionUserState> emit) async {
     if (state is SessionUserLoaded) {
-      final isSuccess = await _repository.blockUser(event.userId);
+      final isSuccess = await _api.blockUser(event.userId);
       if (isSuccess == true) {
         final List<String> blockedUsers =
             (state as SessionUserLoaded).sessionUser.blockedUsers.toList();

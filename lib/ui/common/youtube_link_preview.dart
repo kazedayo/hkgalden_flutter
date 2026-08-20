@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
 import 'package:hkgalden_flutter/utils/youtube_oembed_cache.dart';
 import 'package:hkgalden_flutter/utils/youtube_url.dart';
-import 'package:octo_image/octo_image.dart';
 
 /// Compact preview under a YouTube link (link text stays above).
 class YoutubeLinkPreview extends StatefulWidget {
@@ -79,15 +78,13 @@ class _YoutubeLinkPreviewState extends State<YoutubeLinkPreview> {
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            OctoImage(
+                            Image(
                               image: NetworkImage(thumb),
                               fit: BoxFit.cover,
-                              fadeInDuration: const Duration(milliseconds: 150),
-                              fadeOutDuration:
-                                  const Duration(milliseconds: 100),
-                              placeholderBuilder: (_) => ColoredBox(
-                                color: theme.dividerColor,
-                              ),
+                              loadingBuilder: (context, child, loading) =>
+                                  loading == null
+                                      ? child
+                                      : ColoredBox(color: theme.dividerColor),
                               errorBuilder: (context, error, stackTrace) =>
                                   ColoredBox(
                                 color: theme.dividerColor,

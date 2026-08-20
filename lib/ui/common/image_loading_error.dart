@@ -1,4 +1,3 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 
 class ImageLoadingError extends StatelessWidget {
@@ -19,7 +18,7 @@ class ImageLoadingError extends StatelessWidget {
           width: 10,
         ),
         Expanded(
-          child: AutoSizeText(
+          child: Text(
             '圖片載入錯誤: $error',
             style: Theme.of(context).textTheme.bodySmall,
             maxLines: 3,

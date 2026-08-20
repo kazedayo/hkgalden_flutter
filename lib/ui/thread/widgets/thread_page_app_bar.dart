@@ -1,4 +1,3 @@
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/cubit/thread_page_cubit.dart';
@@ -29,12 +28,12 @@ PreferredSizeWidget buildThreadPageAppBar(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Flexible(
-                child: AutoSizeText(
+                child: Text(
                   arguments.title,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 19),
                   maxLines: 2,
-                  minFontSize: 14,
-                  maxFontSize: 19,
+                  overflow: TextOverflow.ellipsis,
                 ),
               )
             ],

@@ -18,7 +18,7 @@ class ProgressSpinner extends StatelessWidget {
                 valueColor: const AlwaysStoppedAnimation<Color>(Colors.grey),
               );
 
-    // UnconstrainedBox: resist non-square tight constraints (e.g. OctoImage).
+    // UnconstrainedBox: resist non-square tight constraints.
     return UnconstrainedBox(
       child: SizedBox.square(
         dimension: size,

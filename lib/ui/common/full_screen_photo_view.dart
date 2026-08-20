@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/cubit/full_screen_photo_view_cubit.dart';
 import 'package:hkgalden_flutter/models/ui_state_models/full_screen_photo_view_state.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
-import 'package:hkgalden_flutter/utils/device_properties.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
 
 class FullScreenPhotoView extends StatefulWidget {
@@ -357,8 +356,8 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
       return null;
     }
 
-    final maxW = displayWidth(context);
-    final maxH = displayHeight(context);
+    final maxW = MediaQuery.sizeOf(context).width;
+    final maxH = MediaQuery.sizeOf(context).height;
     var w = natural.width;
     var h = natural.height;
     if (w > maxW) {
@@ -374,7 +373,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
 
   int _decodeWidth(BuildContext context) {
     final dpr = MediaQuery.devicePixelRatioOf(context);
-    final screenCap = math.max(1, (displayWidth(context) * dpr).round());
+    final screenCap = math.max(1, (MediaQuery.sizeOf(context).width * dpr).round());
     final natural = _naturalSize;
     if (natural == null) {
       return screenCap;
@@ -417,8 +416,8 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
     final imageUrl = widget.url!;
     final tag = widget.heroTag;
     final display = _displaySize(context);
-    final maxW = displayWidth(context);
-    final maxH = displayHeight(context);
+    final maxW = MediaQuery.sizeOf(context).width;
+    final maxH = MediaQuery.sizeOf(context).height;
 
     final image = display != null
         ? Image(
@@ -449,7 +448,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
           children: [
             Container(
               constraints: BoxConstraints.expand(
-                height: displayHeight(context),
+                height: MediaQuery.sizeOf(context).height,
               ),
               child: Listener(
                 onPointerDown: _onPointerDown,

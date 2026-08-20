@@ -12,6 +12,8 @@ class _ImageInsertDialog extends StatefulWidget {
 class _ImageInsertDialogState extends State<_ImageInsertDialog> {
   final TextEditingController _urlController = TextEditingController();
   bool _isUploading = false;
+  bool _isValidUrl = false;
+  bool _isUrlDirty = false;
 
   @override
   void dispose() {
@@ -19,8 +21,16 @@ class _ImageInsertDialogState extends State<_ImageInsertDialog> {
     super.dispose();
   }
 
-  void _submitUrl(BuildContext context, UrlValidationState state) {
-    if (!state.isValidUrl) return;
+  void _onUrlChanged(String text) {
+    final trimmed = text.trim();
+    setState(() {
+      _isUrlDirty = trimmed.isNotEmpty;
+      _isValidUrl = Uri.tryParse(trimmed)?.hasAbsolutePath ?? false;
+    });
+  }
+
+  void _submitUrl() {
+    if (!_isValidUrl) return;
     final url = _urlController.text.trim();
     if (url.isEmpty) return;
     Navigator.of(context).pop(url);
@@ -58,78 +68,68 @@ class _ImageInsertDialogState extends State<_ImageInsertDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => UrlValidationCubit(),
-      child: BlocBuilder<UrlValidationCubit, UrlValidationState>(
-          builder: (context, state) {
-        return AlertDialog(
-          title: const Text('插入圖片'),
-          content: SizedBox(
-            width: MediaQuery.sizeOf(context).width,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: _urlController,
-                  autofocus: true,
-                  keyboardType: TextInputType.url,
-                  textInputAction: TextInputAction.done,
-                  onChanged: (text) =>
-                      context.read<UrlValidationCubit>().validateUrl(text),
-                  onSubmitted: (_) => _submitUrl(context, state),
-                  decoration: InputDecoration(
-                    hintText: 'https://',
-                    labelText: '圖片 URL',
-                    errorText: (!state.isValidUrl && state.isUrlDirty)
-                        ? '請輸入有效的圖片連結 (例如: https://...)'
-                        : null,
-                  ),
-                  enabled: !_isUploading,
-                ),
-                if (widget.imagePickCallback != null) ...[
-                  const SizedBox(height: 16),
-                  const Text('或'),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.selectionColor,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: _isUploading ? null : _pickAndUploadImage,
-                      icon: _isUploading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.upload_file),
-                      label: Text(_isUploading ? '上載中...' : '從裝置上載'),
+    return AlertDialog(
+      title: const Text('插入圖片'),
+      content: SizedBox(
+        width: MediaQuery.sizeOf(context).width,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _urlController,
+              autofocus: true,
+              keyboardType: TextInputType.url,
+              textInputAction: TextInputAction.done,
+              onChanged: _onUrlChanged,
+              onSubmitted: (_) => _submitUrl(),
+              decoration: InputDecoration(
+                hintText: 'https://',
+                labelText: '圖片 URL',
+                errorText: (!_isValidUrl && _isUrlDirty)
+                    ? '請輸入有效的圖片連結 (例如: https://...)'
+                    : null,
+              ),
+              enabled: !_isUploading,
+            ),
+            if (widget.imagePickCallback != null) ...[
+              const SizedBox(height: 16),
+              const Text('或'),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.selectionColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                ],
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed:
-                  _isUploading ? null : () => Navigator.of(context).pop(null),
-              child: const Text('取消'),
-            ),
-            TextButton(
-              onPressed: (_isUploading || !state.isValidUrl)
-                  ? null
-                  : () => _submitUrl(context, state),
-              child: const Text('確定'),
-            ),
+                  onPressed: _isUploading ? null : _pickAndUploadImage,
+                  icon: _isUploading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.upload_file),
+                  label: Text(_isUploading ? '上載中...' : '從裝置上載'),
+                ),
+              ),
+            ],
           ],
-        );
-      }),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isUploading ? null : () => Navigator.of(context).pop(null),
+          child: const Text('取消'),
+        ),
+        TextButton(
+          onPressed: (_isUploading || !_isValidUrl) ? null : _submitUrl,
+          child: const Text('確定'),
+        ),
+      ],
     );
   }
 }

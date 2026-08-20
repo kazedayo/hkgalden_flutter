@@ -2,25 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/blocked_users/blocked_users_bloc.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
-import 'package:hkgalden_flutter/repository/blocked_users_repository.dart';
 import 'package:hkgalden_flutter/ui/common/blocked_user_cell.dart';
 import 'package:hkgalden_flutter/ui/common/error_page.dart';
 import 'package:hkgalden_flutter/ui/user_detail/blocked_users_loading_skeleton.dart';
-import 'package:hkgalden_flutter/utils/device_properties.dart';
 
 class BlockListPage extends StatelessWidget {
   const BlockListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider<BlockedUsersRepository>(
-      create: (context) => BlockedUsersRepository(
-          api: RepositoryProvider.of<HKGaldenApi>(context)),
-      child: BlocProvider<BlockedUsersBloc>(
+    return BlocProvider<BlockedUsersBloc>(
         create: (context) {
           final BlockedUsersBloc blockedUsersBloc = BlockedUsersBloc(
-              repository:
-                  RepositoryProvider.of<BlockedUsersRepository>(context));
+              api: RepositoryProvider.of<HKGaldenApi>(context));
           blockedUsersBloc.add(RequestBlockedUsersEvent());
           return blockedUsersBloc;
         },
@@ -37,7 +31,7 @@ class BlockListPage extends StatelessWidget {
             ),
             elevation: 6,
             child: SizedBox(
-              height: displayHeight(context) / 2,
+              height: MediaQuery.sizeOf(context).height / 2,
               child: () {
                 if (state is BlockedUsersLoading) {
                   return BlockedUsersLoadingSkeleton();
@@ -74,7 +68,6 @@ class BlockListPage extends StatelessWidget {
             ),
           ),
         ),
-      ),
     );
   }
 }

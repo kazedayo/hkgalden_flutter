@@ -1,4 +1,3 @@
-import 'package:date_time_format/date_time_format.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
@@ -9,6 +8,12 @@ import 'package:universal_html/html.dart';
 import 'package:universal_html/parsing.dart';
 
 final RegExp _hexColor = RegExp(r'^#?[0-9a-fA-F]{3,8}$');
+
+String _formatReplyDate(DateTime date) {
+  final local = date.toLocal();
+  String two(int n) => n.toString().padLeft(2, '0');
+  return '${local.day}/${local.month}/${local.year} ${two(local.hour)}:${two(local.minute)}';
+}
 
 class RewrittenContentHtml {
   final String html;
@@ -91,10 +96,7 @@ class ThreadWebViewDocument {
       replyId: reply.replyId,
       floor: reply.floor,
       html: rewritten.html,
-      dateText: DateTimeFormat.format(
-        reply.date.toLocal(),
-        format: 'd/m/y H:i',
-      ),
+      dateText: _formatReplyDate(reply.date),
       isPageStart: reply.floor % 50 == 1,
       authorUserId: reply.author.userId,
       nickname: reply.authorNickname,

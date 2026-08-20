@@ -60,7 +60,7 @@ PreferredSize _buildAppBar() {
                     callbackUrlScheme: "http.hkgalden.app");
 
                 final token = Uri.parse(result).queryParameters['token'];
-                await TokenStore().writeToken(token!);
+                await Hive.box('token').put('token', token!);
                 if (!context.mounted) return;
                 BlocProvider.of<SessionUserBloc>(context)
                     .add(RequestSessionUserEvent());
@@ -81,4 +81,15 @@ PreferredSize _buildAppBar() {
       ),
     ),
   );
+}
+
+class _LeadingButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => IconButton(
+        icon: AnimatedIcon(
+          icon: AnimatedIcons.close_menu,
+          progress: Backdrop.of(context).animationController.view,
+        ),
+        onPressed: () => Backdrop.of(context).fling(),
+      );
 }

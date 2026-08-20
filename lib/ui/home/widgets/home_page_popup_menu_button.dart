@@ -90,7 +90,7 @@ class _PopupMenuButton extends StatelessWidget {
             );
             break;
           case _MenuItem.logout:
-            await TokenStore().writeToken('');
+            await Hive.box('token').put('token', '');
             if (!context.mounted) return;
             context.read<SmileyPackRepository>().clearCache();
             BlocProvider.of<SessionUserBloc>(context)

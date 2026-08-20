@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
 import 'package:hkgalden_flutter/utils/x_status_cache.dart';
-import 'package:octo_image/octo_image.dart';
 
 /// Compact preview under an X (Twitter) status link (link text stays above).
 class XLinkPreview extends StatefulWidget {
@@ -89,16 +88,13 @@ class _XLinkPreviewState extends State<XLinkPreview> {
                             SizedBox(
                               width: thumbWidth,
                               height: thumbHeight,
-                              child: OctoImage(
+                              child: Image(
                                 image: NetworkImage(imageUrl),
                                 fit: BoxFit.cover,
-                                fadeInDuration:
-                                    const Duration(milliseconds: 150),
-                                fadeOutDuration:
-                                    const Duration(milliseconds: 100),
-                                placeholderBuilder: (_) => ColoredBox(
-                                  color: theme.dividerColor,
-                                ),
+                                loadingBuilder: (context, child, loading) =>
+                                    loading == null
+                                        ? child
+                                        : ColoredBox(color: theme.dividerColor),
                                 errorBuilder: (context, error, stackTrace) =>
                                     ColoredBox(
                                   color: theme.dividerColor,

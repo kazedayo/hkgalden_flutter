@@ -26,18 +26,15 @@ import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
-import 'package:hkgalden_flutter/utils/thread_reading_position_store.dart';
-import 'package:hkgalden_flutter/utils/token_store.dart';
+import 'package:hive/hive.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 part 'functions/home_page_jump_to_page.dart';
-part 'functions/home_page_load_thread.dart';
 part 'functions/home_page_scroll_controller_listener.dart';
 part 'widgets/home_page_app_bar.dart';
 part 'widgets/home_page_fab.dart';
 part 'widgets/home_page_front_layer.dart';
-part 'widgets/home_page_leading_button.dart';
 part 'widgets/home_page_popup_menu_button.dart';
 
 class HomePage extends StatefulWidget {
@@ -94,7 +91,9 @@ class HomePageState extends State<HomePage>
           ),
           frontLayerScrim: Colors.black.withAlpha(177),
           stickyFrontLayer: true,
-          maintainBackLayerState: false,
+          // Package unmounts backLayer on AnimationStatus.forward when false,
+          // so the channel list would empty at the start of the collapse.
+          maintainBackLayerState: true,
           backLayer: const RepaintBoundary(child: HomeDrawer()),
           backLayerBackgroundColor: Theme.of(context).scaffoldBackgroundColor,
           floatingActionButton: _buildFab(context, threadListBloc),
@@ -102,4 +101,11 @@ class HomePageState extends State<HomePage>
       ),
     );
   }
+}
+
+void _loadThread(BuildContext context, Thread thread) {
+  Navigator.of(context).pushNamed(
+    '/Thread',
+    arguments: ThreadPageArguments.fromThread(thread),
+  );
 }
