@@ -7,6 +7,7 @@ import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_bloc.dart';
 import 'package:hkgalden_flutter/nested_navigator.dart';
+import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hkgalden_flutter/utils/token_store.dart';
@@ -68,6 +69,7 @@ class StartupScreenState extends State<StartupScreen>
     channelBloc.add(RequestChannelsEvent());
     if (token.isNotEmpty) {
       sessionUserBloc.add(RequestSessionUserEvent());
+      context.read<SmileyPackRepository>().prewarm();
     }
   }
 

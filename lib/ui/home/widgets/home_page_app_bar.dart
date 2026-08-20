@@ -64,6 +64,7 @@ PreferredSize _buildAppBar() {
                 if (!context.mounted) return;
                 BlocProvider.of<SessionUserBloc>(context)
                     .add(RequestSessionUserEvent());
+                context.read<SmileyPackRepository>().prewarm();
                 final channelState =
                     BlocProvider.of<ChannelBloc>(context).state;
                 if (channelState is ChannelLoaded) {

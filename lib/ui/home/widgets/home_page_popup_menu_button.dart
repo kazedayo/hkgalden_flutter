@@ -92,6 +92,7 @@ class _PopupMenuButton extends StatelessWidget {
           case _MenuItem.logout:
             await TokenStore().writeToken('');
             if (!context.mounted) return;
+            context.read<SmileyPackRepository>().clearCache();
             BlocProvider.of<SessionUserBloc>(context)
                 .add(RemoveSessionUserEvent());
             BlocProvider.of<ThreadListBloc>(context).add(

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -7,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hkgalden_flutter/models/smiley.dart';
 import 'package:hkgalden_flutter/models/smiley_pack.dart';
 import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
+import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
 import 'package:hkgalden_flutter/utils/smiley_cdn.dart';
 import 'package:hkgalden_flutter/utils/smiley_embed.dart';
 import 'package:hkgalden_flutter/utils/smiley_pack_selection.dart';
@@ -20,6 +22,27 @@ const _kSosad = Smiley(
 );
 
 const _kPackId = 'hkg';
+
+final _kPacks = [
+  SmileyPack(
+    id: _kPackId,
+    title: 'HKG',
+    smilies: const [_kSosad],
+  ),
+];
+
+class _FakeSmileyPackRepository extends SmileyPackRepository {
+  _FakeSmileyPackRepository(this._handler);
+
+  final Future<List<SmileyPack>?> Function() _handler;
+  int fetchCount = 0;
+
+  @override
+  Future<List<SmileyPack>?> fetchInstalledPacks() {
+    fetchCount++;
+    return _handler();
+  }
+}
 
 void main() {
   group('smileyGifUrl (shipped CDN helper)', () {
@@ -218,6 +241,86 @@ void main() {
     );
   });
 
+  group('SmileyPackRepository cache / prewarm', () {
+    test('first fetch is cached for later getInstalledPacks / cachedPacks',
+        () async {
+      final repo = _FakeSmileyPackRepository(() async => _kPacks);
+
+      final first = await repo.getInstalledPacks();
+      final second = await repo.getInstalledPacks();
+
+      expect(first, _kPacks);
+      expect(identical(first, second), isTrue);
+      expect(identical(repo.cachedPacks, _kPacks), isTrue);
+      expect(repo.fetchCount, 1);
+    });
+
+    test('concurrent getInstalledPacks share one in-flight fetch', () async {
+      final completer = Completer<List<SmileyPack>?>();
+      final repo = _FakeSmileyPackRepository(() => completer.future);
+
+      final first = repo.getInstalledPacks();
+      final second = repo.getInstalledPacks();
+      expect(repo.fetchCount, 1);
+
+      completer.complete(_kPacks);
+      expect(await first, _kPacks);
+      expect(await second, _kPacks);
+      expect(repo.fetchCount, 1);
+    });
+
+    test('prewarm populates cachedPacks without awaiting', () async {
+      final repo = _FakeSmileyPackRepository(() async => _kPacks);
+      expect(repo.cachedPacks, isEmpty);
+
+      repo.prewarm();
+      expect(repo.fetchCount, 1);
+      expect(repo.cachedPacks, isEmpty);
+
+      await repo.getInstalledPacks();
+      expect(repo.cachedPacks, _kPacks);
+      expect(repo.fetchCount, 1);
+    });
+
+    test('null fetch is not cached so a later call retries', () async {
+      var calls = 0;
+      final repo = _FakeSmileyPackRepository(() async {
+        calls++;
+        if (calls == 1) return null;
+        return _kPacks;
+      });
+
+      expect(await repo.getInstalledPacks(), isNull);
+      expect(repo.cachedPacks, isEmpty);
+      expect(await repo.getInstalledPacks(), _kPacks);
+      expect(repo.cachedPacks, _kPacks);
+      expect(repo.fetchCount, 2);
+    });
+
+    test('clearCache drops cached packs so the next call refetches', () async {
+      final repo = _FakeSmileyPackRepository(() async => _kPacks);
+      await repo.getInstalledPacks();
+      repo.clearCache();
+      expect(repo.cachedPacks, isEmpty);
+
+      await repo.getInstalledPacks();
+      expect(repo.fetchCount, 2);
+      expect(repo.cachedPacks, _kPacks);
+    });
+
+    test('clearCache ignores an in-flight completion', () async {
+      final completer = Completer<List<SmileyPack>?>();
+      final repo = _FakeSmileyPackRepository(() => completer.future);
+
+      final pending = repo.getInstalledPacks();
+      repo.clearCache();
+      completer.complete(_kPacks);
+      await pending;
+
+      expect(repo.cachedPacks, isEmpty);
+    });
+  });
+
   group('compose UI structural wiring', () {
     test('compose tree sources declare smiley pane + insert path', () {
       final composePage =
@@ -230,10 +333,31 @@ void main() {
               .readAsStringSync();
       final api =
           File('lib/networking/hkgalden_api.dart').readAsStringSync();
+      final repo = File('lib/repository/smiley_pack_repository.dart')
+          .readAsStringSync();
+      final startup =
+          File('lib/ui/startup_screen.dart').readAsStringSync();
+      final login = File('lib/ui/home/widgets/home_page_app_bar.dart')
+          .readAsStringSync();
+      final logout =
+          File('lib/ui/home/widgets/home_page_popup_menu_button.dart')
+              .readAsStringSync();
 
       expect(composePage.contains("part 'widgets/smiley_pane.dart'"), isTrue);
       expect(composePage.contains('SmileyPackRepository'), isTrue);
       expect(composePage.contains('_smileyPacks'), isTrue);
+      expect(composePage.contains('cachedPacks'), isTrue,
+          reason: 'compose must seed packs from repository cache on first frame');
+
+      expect(repo.contains('prewarm'), isTrue);
+      expect(repo.contains('cachedPacks'), isTrue);
+      expect(repo.contains('clearCache'), isTrue);
+      expect(startup.contains('.prewarm()'), isTrue,
+          reason: 'startup with a token should prewarm packs before compose');
+      expect(login.contains('.prewarm()'), isTrue,
+          reason: 'login should prewarm packs for the next compose');
+      expect(logout.contains('.clearCache()'), isTrue,
+          reason: 'logout must drop another user\'s cached packs');
 
       expect(smileyPane.contains('_SmileyPane'), isTrue);
       expect(smileyPane.contains('SmileyEmbed.insertInto'), isTrue);

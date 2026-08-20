@@ -80,14 +80,17 @@ class ComposePageState extends State<ComposePage> {
     _focusNode = FocusNode();
     _titleFocusNode = FocusNode();
     super.initState();
-    _loadSmileyPacks();
+    final repo = context.read<SmileyPackRepository>();
+    _smileyPacks = repo.cachedPacks;
+    _loadSmileyPacks(repo);
   }
 
-  Future<void> _loadSmileyPacks() async {
+  Future<void> _loadSmileyPacks(SmileyPackRepository repo) async {
     try {
-      final packs =
-          await context.read<SmileyPackRepository>().getInstalledPacks();
-      if (!mounted || packs == null) return;
+      final packs = await repo.getInstalledPacks();
+      if (!mounted || packs == null || identical(packs, _smileyPacks)) {
+        return;
+      }
       setState(() => _smileyPacks = packs);
     } catch (_) {
       // Unauthenticated / missing provider: empty packs, picker stays hidden.

@@ -23,6 +23,7 @@ import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
 import 'package:hkgalden_flutter/ui/user_detail/block_list_page.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 
+import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 import 'package:hkgalden_flutter/utils/thread_reading_position_store.dart';
