@@ -19,7 +19,6 @@ import 'package:hkgalden_flutter/ui/common/error_page.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/home_drawer.dart';
 import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/ui/home/thread_cell.dart';
-import 'package:hkgalden_flutter/ui/user_detail/block_list_page.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 
 import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
@@ -66,8 +65,9 @@ class HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    final ThreadListCubit threadListBloc =
-        BlocProvider.of<ThreadListCubit>(context);
+    final ThreadListCubit threadListBloc = BlocProvider.of<ThreadListCubit>(
+      context,
+    );
     return PrimaryScrollController(
       controller: _scrollController,
       child: Scaffold(
@@ -102,8 +102,6 @@ class HomePageState extends State<HomePage>
 }
 
 void _loadThread(BuildContext context, Thread thread) {
-  Navigator.of(context).pushNamed(
-    '/Thread',
-    arguments: ThreadPageArguments.fromThread(thread),
-  );
+  Navigator.of(context)
+      .pushNamed('/Thread', arguments: ThreadPageArguments.fromThread(thread));
 }

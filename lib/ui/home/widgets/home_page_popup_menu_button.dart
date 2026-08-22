@@ -15,14 +15,6 @@ class _PopupMenuButton extends StatelessWidget {
           ),
         ),
         const PopupMenuItem(
-          value: _MenuItem.blocklist,
-          child: ListTile(
-            dense: true,
-            leading: Icon(Icons.block_rounded),
-            title: Text('封鎖名單'),
-          ),
-        ),
-        const PopupMenuItem(
           value: _MenuItem.licences,
           child: ListTile(
             dense: true,
@@ -51,19 +43,11 @@ class _PopupMenuButton extends StatelessWidget {
               barrierColor: AppTheme.barrierColor,
               context: context,
               builder: (context) => UserPage(
-                user: (BlocProvider.of<SessionUserCubit>(context).state
-                        as SessionUserLoaded)
-                    .sessionUser,
+                user:
+                    (BlocProvider.of<SessionUserCubit>(context).state
+                            as SessionUserLoaded)
+                        .sessionUser,
               ),
-            );
-            break;
-          case _MenuItem.blocklist:
-            showModalBottomSheet(
-              enableDrag: false,
-              backgroundColor: Colors.transparent,
-              barrierColor: AppTheme.barrierColor,
-              context: context,
-              builder: (context) => BlockListPage(),
             );
             break;
           case _MenuItem.licences:
@@ -72,12 +56,15 @@ class _PopupMenuButton extends StatelessWidget {
             showLicensePage(
               context: context,
               applicationName: 'hkGalden',
-              applicationIcon: SvgPicture.asset('assets/icon-hkgalden.svg',
-                  width: 50,
-                  height: 50,
-                  colorFilter: ColorFilter.mode(
-                      Theme.of(context).colorScheme.secondary,
-                      BlendMode.srcIn)),
+              applicationIcon: SvgPicture.asset(
+                'assets/icon-hkgalden.svg',
+                width: 50,
+                height: 50,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(context).colorScheme.secondary,
+                  BlendMode.srcIn,
+                ),
+              ),
               applicationVersion: '${info.version}+${info.buildNumber}',
               applicationLegalese: '© hkGalden & 1080',
             );
@@ -88,9 +75,10 @@ class _PopupMenuButton extends StatelessWidget {
             context.read<SmileyPackRepository>().clearCache();
             BlocProvider.of<SessionUserCubit>(context).clearSessionUser();
             BlocProvider.of<ThreadListCubit>(context).load(
-              channelId: (BlocProvider.of<ChannelCubit>(context).state
-                      as ChannelLoaded)
-                  .selectedChannelId,
+              channelId:
+                  (BlocProvider.of<ChannelCubit>(context).state
+                          as ChannelLoaded)
+                      .selectedChannelId,
               page: 1,
             );
         }
@@ -100,4 +88,4 @@ class _PopupMenuButton extends StatelessWidget {
   }
 }
 
-enum _MenuItem { account, blocklist, licences, logout }
+enum _MenuItem { account, licences, logout }

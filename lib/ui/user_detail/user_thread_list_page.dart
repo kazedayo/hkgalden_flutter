@@ -54,49 +54,45 @@ class _UserThreadListPageState extends State<UserThreadListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-          maxHeight: MediaQuery.sizeOf(context).height / 2),
-      child: () {
-        if (_loading) {
-          return const ListLoadingSkeleton();
-        }
-        if (_error) {
-          return ErrorPage(
-            message: '無法載入主題列表',
-            onRetry: _load,
+    if (_loading) {
+      return const ListLoadingSkeleton();
+    }
+    if (_error) {
+      return ErrorPage(message: '無法載入主題列表', onRetry: _load);
+    }
+    return ListView.builder(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+      itemCount: _userThreadList.length,
+      findChildIndexCallback: (Key key) {
+        if (key is ValueKey<int>) {
+          return _userThreadList.indexWhere(
+            (thread) => thread.threadId == key.value,
           );
         }
-        return ListView.builder(
-          padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).padding.bottom),
-          itemCount: _userThreadList.length,
-          findChildIndexCallback: (Key key) {
-            if (key is ValueKey<int>) {
-              return _userThreadList
-                  .indexWhere((thread) => thread.threadId == key.value);
-            }
-            return null;
-          },
-          itemBuilder: (context, index) => Column(
-            key: ValueKey(_userThreadList[index].threadId),
-            children: <Widget>[
-              ListTile(
-                onTap: () => _openUserThread(_userThreadList[index]),
-                title: Text(
-                  _userThreadList[index].title,
-                  style: const TextStyle(color: Colors.white),
-                ),
-                trailing: ThreadTagChip(
-                  label: _userThreadList[index].tagName,
-                  backgroundColor: _userThreadList[index].tagColor,
-                ),
-              ),
-              const Divider(height: 1, thickness: 1, indent: 8),
-            ],
+        return null;
+      },
+      itemBuilder: (context, index) => Column(
+        key: ValueKey(_userThreadList[index].threadId),
+        children: <Widget>[
+          ListTile(
+            onTap: () => _openUserThread(_userThreadList[index]),
+            title: Text(
+              _userThreadList[index].title,
+              style: const TextStyle(color: Colors.white),
+            ),
+            trailing: ThreadTagChip(
+              label: _userThreadList[index].tagName,
+              backgroundColor: _userThreadList[index].tagColor,
+            ),
           ),
-        );
-      }(),
+          Divider(
+            height: 1,
+            thickness: 1,
+            indent: 8,
+            color: Theme.of(context).dividerColor,
+          ),
+        ],
+      ),
     );
   }
 }

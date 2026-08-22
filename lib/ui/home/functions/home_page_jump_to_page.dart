@@ -14,23 +14,22 @@ void _jumpToPage(BuildContext context, Thread thread) {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 16.0,
+            ),
             child: Text(
               thread.title,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge!
+              style: Theme.of(context).textTheme.titleLarge!
                   .copyWith(fontWeight: FontWeight.bold),
             ),
           ),
-          ConstrainedBox(
-            constraints: BoxConstraints(
-                maxHeight: MediaQuery.sizeOf(context).height / 2),
+          Flexible(
             child: ListView.builder(
               shrinkWrap: true,
-              padding:
-                  EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.paddingOf(context).bottom,
+              ),
               itemCount: (thread.replies.last.floor.toDouble() / 50.0).ceil(),
               itemBuilder: (context, index) => Card(
                 color: Colors.transparent,
@@ -47,10 +46,11 @@ void _jumpToPage(BuildContext context, Thread thread) {
                     navigatorKey.currentState!.pushNamed(
                       '/Thread',
                       arguments: ThreadPageArguments(
-                          threadId: thread.threadId,
-                          title: thread.title,
-                          page: index + 1,
-                          locked: thread.status == 'locked'),
+                        threadId: thread.threadId,
+                        title: thread.title,
+                        page: index + 1,
+                        locked: thread.status == 'locked',
+                      ),
                     );
                   },
                   child: Text(
@@ -60,7 +60,7 @@ void _jumpToPage(BuildContext context, Thread thread) {
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
     ),
