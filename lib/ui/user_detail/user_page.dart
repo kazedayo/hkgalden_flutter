@@ -21,6 +21,7 @@ class UserPage extends StatefulWidget {
 class _UserPageState extends State<UserPage> {
   final PageController _pageController = PageController();
   int _page = 0;
+  bool _blocking = false;
 
   @override
   void dispose() {
@@ -44,17 +45,31 @@ class _UserPageState extends State<UserPage> {
     }
   }
 
-  void _blockUser(BuildContext context) {
+  Future<void> _blockUser() async {
     final session = context.read<SessionUserCubit>();
     if (session.state is! SessionUserLoaded) {
       showCustomAlert(context: context, title: '未登入', content: '請先登入');
       return;
     }
+    if (_blocking) {
+      return;
+    }
+    setState(() => _blocking = true);
     final messenger = ScaffoldMessenger.of(context);
-    session.appendUserToBlockList(widget.user.userId);
-    Navigator.of(context).pop();
+    final ok = await session.appendUserToBlockList(widget.user.userId);
+    if (!mounted) {
+      return;
+    }
+    if (ok) {
+      Navigator.of(context).pop();
+      messenger.showSnackBar(
+        SnackBar(content: Text('已封鎖會員 ${widget.user.nickName}')),
+      );
+      return;
+    }
+    setState(() => _blocking = false);
     messenger.showSnackBar(
-      SnackBar(content: Text('已封鎖會員 ${widget.user.nickName}')),
+      const SnackBar(content: Text('封鎖失敗')),
     );
   }
 
@@ -202,7 +217,7 @@ class _UserPageState extends State<UserPage> {
                     shape: const StadiumBorder(),
                     clipBehavior: Clip.antiAlias,
                     child: InkWell(
-                      onTap: () => _blockUser(context),
+                      onTap: _blocking ? null : _blockUser,
                       child: const Padding(
                         padding: EdgeInsets.fromLTRB(10, 6, 12, 6),
                         child: Row(

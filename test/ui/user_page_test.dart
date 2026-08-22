@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -148,38 +150,107 @@ void main() {
     final divider = tester.widget<Divider>(find.byType(Divider));
     expect(divider.color, AppTheme.dividerColor);
   });
+
+  testWidgets('block success pops the sheet and toasts', (tester) async {
+    final api = _FakeApi(sessionUser: _user);
+    final cubit = SessionUserCubit(api: api);
+    await cubit.requestSessionUser();
+
+    await tester.pumpWidget(_app(user: _other, api: api, cubit: cubit));
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('封鎖'));
+    await tester.pumpAndSettle();
+
+    expect(api.blockCalls, ['2']);
+    expect(find.byType(UserPage), findsNothing);
+    expect(find.text('已封鎖會員 other'), findsOneWidget);
+  });
+
+  testWidgets('block failure stays on the sheet and toasts', (tester) async {
+    final api = _FakeApi(sessionUser: _user, blockResult: null);
+    final cubit = SessionUserCubit(api: api);
+    await cubit.requestSessionUser();
+
+    await tester.pumpWidget(_app(user: _other, api: api, cubit: cubit));
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('封鎖'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(UserPage), findsOneWidget);
+    expect(find.text('封鎖失敗'), findsOneWidget);
+  });
+
+  testWidgets('block button ignores a second tap while in flight', (
+    tester,
+  ) async {
+    final pending = Completer<bool?>();
+    final api = _FakeApi(sessionUser: _user, blockResult: pending.future);
+    final cubit = SessionUserCubit(api: api);
+    await cubit.requestSessionUser();
+
+    await tester.pumpWidget(_app(user: _other, api: api, cubit: cubit));
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('封鎖'));
+    await tester.pump();
+    await tester.tap(find.text('封鎖'));
+    await tester.pump();
+
+    expect(api.blockCalls, ['2']);
+    pending.complete(true);
+    await tester.pumpAndSettle();
+    expect(find.byType(UserPage), findsNothing);
+  });
 }
 
-Widget _app({required User user}) {
-  final api = _FakeApi();
-  return MultiRepositoryProvider(
-    providers: [RepositoryProvider<HKGaldenApi>.value(value: api)],
-    child: BlocProvider(
-      create: (_) => SessionUserCubit(api: api),
-      child: MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: TextButton(
-              onPressed: () => showModalBottomSheet(
-                backgroundColor: Colors.transparent,
-                enableDrag: false,
-                context: context,
-                builder: (_) => UserPage(user: user),
-              ),
-              child: const Text('open'),
-            ),
+Widget _app({
+  required User user,
+  HKGaldenApi? api,
+  SessionUserCubit? cubit,
+}) {
+  final resolvedApi = api ?? _FakeApi();
+  final app = MaterialApp(
+    home: Builder(
+      builder: (context) => Scaffold(
+        body: TextButton(
+          onPressed: () => showModalBottomSheet(
+            backgroundColor: Colors.transparent,
+            enableDrag: false,
+            context: context,
+            builder: (_) => UserPage(user: user),
           ),
+          child: const Text('open'),
         ),
       ),
     ),
   );
+  return MultiRepositoryProvider(
+    providers: [RepositoryProvider<HKGaldenApi>.value(value: resolvedApi)],
+    child: cubit != null
+        ? BlocProvider<SessionUserCubit>.value(value: cubit, child: app)
+        : BlocProvider(
+            create: (_) => SessionUserCubit(api: resolvedApi),
+            child: app,
+          ),
+  );
 }
 
 class _FakeApi extends Fake implements HKGaldenApi {
-  _FakeApi({this.threads = const [], this.sessionUser});
+  _FakeApi({
+    this.threads = const [],
+    this.sessionUser,
+    this.blockResult = true,
+  });
 
   final List<Thread> threads;
   final User? sessionUser;
+  final Object? blockResult;
+  final List<String> blockCalls = [];
 
   @override
   Future<List<Thread>?> getUserThreadList(String userId, int page) async =>
@@ -190,4 +261,14 @@ class _FakeApi extends Fake implements HKGaldenApi {
 
   @override
   Future<User?> getSessionUserQuery() async => sessionUser;
+
+  @override
+  Future<bool?> blockUser(String userId) async {
+    blockCalls.add(userId);
+    final result = blockResult;
+    if (result is Future<bool?>) {
+      return result;
+    }
+    return result as bool?;
+  }
 }

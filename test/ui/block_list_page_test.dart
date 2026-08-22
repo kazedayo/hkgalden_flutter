@@ -63,6 +63,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('BlockedNick'), findsOneWidget);
+    expect(find.text('解除封鎖失敗'), findsOneWidget);
     expect(
       (cubit.state as SessionUserLoaded).sessionUser.blockedUsers,
       ['blocked'],

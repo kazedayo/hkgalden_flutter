@@ -32,9 +32,17 @@ class BlockedUserCell extends StatelessWidget {
           ),
         ),
       ),
-      confirmDismiss: (_) => context
-          .read<SessionUserCubit>()
-          .removeUserFromBlockList(user.userId),
+      confirmDismiss: (_) async {
+        final ok = await context
+            .read<SessionUserCubit>()
+            .removeUserFromBlockList(user.userId);
+        if (!ok && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('解除封鎖失敗')),
+          );
+        }
+        return ok;
+      },
       onDismissed: (_) => onUnblocked?.call(),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
