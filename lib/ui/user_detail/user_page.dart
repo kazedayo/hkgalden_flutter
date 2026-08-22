@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/user_avatar_image.dart';
@@ -18,7 +18,7 @@ class UserPage extends StatelessWidget {
   }
 
   void _blockUser(BuildContext context) {
-    final session = context.read<SessionUserBloc>();
+    final session = context.read<SessionUserCubit>();
     if (session.state is! SessionUserLoaded) {
       showCustomAlert(
         context: context,
@@ -28,7 +28,7 @@ class UserPage extends StatelessWidget {
       return;
     }
     final messenger = ScaffoldMessenger.of(context);
-    session.add(AppendUserToBlockListEvent(userId: user.userId));
+    session.appendUserToBlockList(user.userId);
     Navigator.of(context).pop();
     messenger.showSnackBar(
       SnackBar(content: Text('已封鎖會員 ${user.nickName}')),
@@ -37,7 +37,7 @@ class UserPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final session = context.watch<SessionUserBloc>().state;
+    final session = context.watch<SessionUserCubit>().state;
     final theme = Theme.of(context);
     final ownProfile = _isOwnProfile(session);
 

@@ -3,10 +3,10 @@ part of '../home_page.dart';
 PreferredSize _buildAppBar() {
   return PreferredSize(
     preferredSize: const Size.fromHeight(kToolbarHeight),
-    child: BlocBuilder<SessionUserBloc, SessionUserState>(
+    child: BlocBuilder<SessionUserCubit, SessionUserState>(
       builder: (context, state) => AppBar(
         leading: _LeadingButton(),
-        title: BlocBuilder<ChannelBloc, ChannelState>(
+        title: BlocBuilder<ChannelCubit, ChannelState>(
           builder: (context, channelState) {
             if (channelState is! ChannelLoaded) {
               return const SizedBox.shrink();
@@ -62,11 +62,10 @@ PreferredSize _buildAppBar() {
                 final token = Uri.parse(result).queryParameters['token'];
                 await Hive.box('token').put('token', token!);
                 if (!context.mounted) return;
-                BlocProvider.of<SessionUserBloc>(context)
-                    .add(RequestSessionUserEvent());
+                BlocProvider.of<SessionUserCubit>(context).requestSessionUser();
                 context.read<SmileyPackRepository>().prewarm();
                 final channelState =
-                    BlocProvider.of<ChannelBloc>(context).state;
+                    BlocProvider.of<ChannelCubit>(context).state;
                 if (channelState is ChannelLoaded) {
                   BlocProvider.of<ThreadListCubit>(context).load(
                     channelId: channelState.selectedChannelId,

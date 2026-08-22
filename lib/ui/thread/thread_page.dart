@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hkgalden_flutter/bloc/cubit/thread_page_cubit.dart';
-import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
-import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
+import 'package:hkgalden_flutter/bloc/thread/thread_cubit.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/ui/common/error_page.dart';
 import 'package:hkgalden_flutter/ui/thread/previous_page_pull_controller.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton.dart';
-import 'package:hkgalden_flutter/ui/thread/thread_page_bloc_listener.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_page_cubit_listener.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page_on_reply_success.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_page_ui.dart';
 import 'package:hkgalden_flutter/ui/thread/webview/thread_webview.dart';
 import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_app_bar.dart';
 import 'package:hkgalden_flutter/ui/thread/widgets/thread_page_fab.dart';
@@ -23,7 +23,7 @@ class ThreadPage extends StatefulWidget {
 }
 
 class _ThreadPageState extends State<ThreadPage> with WidgetsBindingObserver {
-  late final ThreadPageCubit _threadPageCubit;
+  late final ThreadPageUi _pageUi;
   late final PreviousPagePullController _previousPull;
   late final ThreadWebViewController _webView;
 
@@ -36,7 +36,7 @@ class _ThreadPageState extends State<ThreadPage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    _threadPageCubit = ThreadPageCubit();
+    _pageUi = ThreadPageUi();
     _previousPull = PreviousPagePullController();
     _webView = ThreadWebViewController();
     WidgetsBinding.instance.addObserver(this);
@@ -46,6 +46,8 @@ class _ThreadPageState extends State<ThreadPage> with WidgetsBindingObserver {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _safeBottom = MediaQuery.viewPaddingOf(context).bottom;
+    _pageUi.canReply.value =
+        BlocProvider.of<SessionUserCubit>(context).state is SessionUserLoaded;
   }
 
   @override
@@ -61,7 +63,7 @@ class _ThreadPageState extends State<ThreadPage> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _persistReadingPosition(remeasure: false);
-    _previousPull.dispose();
+    _pageUi.dispose();
     _webView.dispose();
     super.dispose();
   }
@@ -85,54 +87,46 @@ class _ThreadPageState extends State<ThreadPage> with WidgetsBindingObserver {
       _webView.cachedLastFloor = arguments.floor;
     }
 
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (context) {
-          final ThreadBloc threadBloc = ThreadBloc(
-              api: RepositoryProvider.of<HKGaldenApi>(context));
+    return BlocProvider(
+      create: (context) {
+        final ThreadCubit threadCubit = ThreadCubit(
+            api: RepositoryProvider.of<HKGaldenApi>(context));
 
-          if (route != null &&
-              route.animation != null &&
-              route.animation!.status != AnimationStatus.completed) {
-            void handler(AnimationStatus status) {
-              if (status == AnimationStatus.completed) {
-                route.animation!.removeStatusListener(handler);
-                threadBloc.add(RequestThreadEvent(
-                    threadId: arguments.threadId,
-                    page: arguments.page,
-                    isInitialLoad: true));
-              }
+        if (route != null &&
+            route.animation != null &&
+            route.animation!.status != AnimationStatus.completed) {
+          void handler(AnimationStatus status) {
+            if (status == AnimationStatus.completed) {
+              route.animation!.removeStatusListener(handler);
+              threadCubit.request(
+                  threadId: arguments.threadId,
+                  page: arguments.page,
+                  isInitialLoad: true);
             }
-
-            route.animation!.addStatusListener(handler);
-          } else {
-            threadBloc.add(RequestThreadEvent(
-                threadId: arguments.threadId,
-                page: arguments.page,
-                isInitialLoad: true));
           }
 
-          return threadBloc;
-        }),
-        BlocProvider(create: (context) {
-          _threadPageCubit.setCanReply(
-              BlocProvider.of<SessionUserBloc>(context).state
-                  is SessionUserLoaded);
-          return _threadPageCubit;
-        })
-      ],
-      child: BlocListener<SessionUserBloc, SessionUserState>(
+          route.animation!.addStatusListener(handler);
+        } else {
+          threadCubit.request(
+              threadId: arguments.threadId,
+              page: arguments.page,
+              isInitialLoad: true);
+        }
+
+        return threadCubit;
+      },
+      child: BlocListener<SessionUserCubit, SessionUserState>(
         listenWhen: (prev, next) =>
             (prev is SessionUserLoaded) != (next is SessionUserLoaded),
         listener: (context, state) {
-          _threadPageCubit.setCanReply(state is SessionUserLoaded);
+          _pageUi.canReply.value = state is SessionUserLoaded;
         },
-        child: BlocConsumer<ThreadBloc, ThreadState>(
+        child: BlocConsumer<ThreadCubit, ThreadState>(
           listener: (context, state) {
-            handleThreadPageBlocState(
+            handleThreadPageCubitState(
               state: state,
-              pageCubit: _threadPageCubit,
-              sessionState: BlocProvider.of<SessionUserBloc>(context).state,
+              pageUi: _pageUi,
+              sessionState: BlocProvider.of<SessionUserCubit>(context).state,
               previousPull: _previousPull,
             );
           },
@@ -140,17 +134,15 @@ class _ThreadPageState extends State<ThreadPage> with WidgetsBindingObserver {
               state is! ThreadAppending && prev != state,
           builder: (context, state) => Scaffold(
             resizeToAvoidBottomInset: false,
-            appBar: buildThreadPageAppBar(context, arguments),
+            appBar: buildThreadPageAppBar(context, arguments, _pageUi),
             body: () {
               if (state is ThreadError) {
                 return ErrorPage(
                   message: '無法載入主題',
-                  onRetry: () => BlocProvider.of<ThreadBloc>(context).add(
-                    RequestThreadEvent(
-                        threadId: arguments.threadId,
-                        page: arguments.page,
-                        isInitialLoad: true),
-                  ),
+                  onRetry: () => BlocProvider.of<ThreadCubit>(context).request(
+                      threadId: arguments.threadId,
+                      page: arguments.page,
+                      isInitialLoad: true),
                 );
               }
               return ListenableBuilder(
@@ -165,6 +157,7 @@ class _ThreadPageState extends State<ThreadPage> with WidgetsBindingObserver {
                           controller: _webView,
                           restoreFloor: _restoreFloor,
                           previousPull: _previousPull,
+                          pageUi: _pageUi,
                         ),
                       if (!_webView.contentReady.value)
                         Positioned.fill(
@@ -186,6 +179,7 @@ class _ThreadPageState extends State<ThreadPage> with WidgetsBindingObserver {
                     _webView,
                     arguments,
                     onThreadReplySuccess,
+                    _pageUi,
                   ),
           ),
         ),

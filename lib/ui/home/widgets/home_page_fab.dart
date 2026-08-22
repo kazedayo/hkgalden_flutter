@@ -5,10 +5,8 @@ Widget _buildFab(BuildContext context, ThreadListCubit threadListBloc) {
     child: FloatingActionButton(
       heroTag: null,
       onPressed: () =>
-          BlocProvider.of<SessionUserBloc>(context).state is SessionUserLoaded
-              ? showBarModalBottomSheet(
-                  duration: const Duration(milliseconds: 300),
-                  animationCurve: Curves.easeOut,
+          BlocProvider.of<SessionUserCubit>(context).state is SessionUserLoaded
+              ? showComposeSheet(
                   context: context,
                   builder: (context) => ComposePage(
                     composeMode: ComposeMode.newPost,

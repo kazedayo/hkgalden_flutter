@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hkgalden_flutter/bloc/cubit/thread_page_cubit.dart';
-import 'package:hkgalden_flutter/models/ui_state_models/thread_page_state.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_page_ui.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 
 PreferredSizeWidget buildThreadPageAppBar(
   BuildContext context,
   ThreadPageArguments arguments,
+  ThreadPageUi pageUi,
 ) {
   return PreferredSize(
     preferredSize: const Size.fromHeight(kToolbarHeight),
-    child: BlocBuilder<ThreadPageCubit, ThreadPageState>(
-      buildWhen: (prev, next) => prev.elevation != next.elevation,
-      builder: (context, state) => AppBar(
-        elevation: state.elevation,
+    child: ValueListenableBuilder<double>(
+      valueListenable: pageUi.elevation,
+      builder: (context, elevation, _) => AppBar(
+        elevation: elevation,
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: Icon(Theme.of(context).platform == TargetPlatform.iOS

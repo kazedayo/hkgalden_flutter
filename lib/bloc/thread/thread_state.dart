@@ -1,4 +1,4 @@
-part of 'thread_bloc.dart';
+part of 'thread_cubit.dart';
 
 abstract class ThreadState extends Equatable {
   const ThreadState();
@@ -6,8 +6,6 @@ abstract class ThreadState extends Equatable {
   @override
   List<Object> get props => [];
 }
-
-class ThreadInit extends ThreadState {}
 
 class ThreadLoading extends ThreadState {}
 

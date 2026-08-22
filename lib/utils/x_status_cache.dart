@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:hkgalden_flutter/utils/inflight_cache.dart';
 
 class XStatusInfo {
   final String authorName;
@@ -25,24 +26,14 @@ class XStatusCache {
   static final XStatusCache instance = XStatusCache._();
 
   final http.Client _client;
-  final Map<String, Future<XStatusInfo?>> _inflight = {};
-  final Map<String, XStatusInfo?> _resolved = {};
+  final InflightCache<String, XStatusInfo?> _cache = InflightCache();
 
   factory XStatusCache.forTesting(http.Client client) {
     return XStatusCache._(client: client);
   }
 
   Future<XStatusInfo?> fetch(String statusId) {
-    final cached = _resolved[statusId];
-    if (_resolved.containsKey(statusId)) {
-      return Future.value(cached);
-    }
-    return _inflight.putIfAbsent(statusId, () async {
-      final info = await _load(statusId);
-      _resolved[statusId] = info;
-      _inflight.remove(statusId);
-      return info;
-    });
+    return _cache.get(statusId, () => _load(statusId));
   }
 
   Future<XStatusInfo?> _load(String statusId) async {
@@ -177,7 +168,6 @@ class XStatusCache {
   }
 
   void clear() {
-    _inflight.clear();
-    _resolved.clear();
+    _cache.clear();
   }
 }

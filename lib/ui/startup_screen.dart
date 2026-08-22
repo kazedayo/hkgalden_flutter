@@ -3,8 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
-import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
+import 'package:hkgalden_flutter/bloc/channel/channel_cubit.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
 import 'package:hkgalden_flutter/nested_navigator.dart';
 import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
@@ -62,13 +62,13 @@ class StartupScreenState extends State<StartupScreen>
     }
 
     final threadListBloc = BlocProvider.of<ThreadListCubit>(context);
-    final channelBloc = BlocProvider.of<ChannelBloc>(context);
-    final sessionUserBloc = BlocProvider.of<SessionUserBloc>(context);
+    final channelCubit = BlocProvider.of<ChannelCubit>(context);
+    final sessionUserCubit = BlocProvider.of<SessionUserCubit>(context);
 
     threadListBloc.load(channelId: 'bw', page: 1);
-    channelBloc.add(RequestChannelsEvent());
+    channelCubit.requestChannels();
     if (token.isNotEmpty) {
-      sessionUserBloc.add(RequestSessionUserEvent());
+      sessionUserCubit.requestSessionUser();
       context.read<SmileyPackRepository>().prewarm();
     }
   }

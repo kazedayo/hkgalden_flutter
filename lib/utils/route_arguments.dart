@@ -1,5 +1,3 @@
-import 'package:hkgalden_flutter/enums/compose_mode.dart';
-import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/utils/thread_reading_position_store.dart';
 
@@ -36,19 +34,4 @@ class ThreadPageArguments {
       floor: floor,
     );
   }
-}
-
-class ComposePageArguments {
-  final ComposeMode composeMode;
-  final int? threadId;
-  final Reply? parentReply;
-  final Function(Reply)? onSent;
-  final Function(String)? onCreateThread;
-
-  ComposePageArguments(
-      {required this.composeMode,
-      this.threadId,
-      this.parentReply,
-      this.onSent,
-      this.onCreateThread});
 }

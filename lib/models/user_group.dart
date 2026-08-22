@@ -1,9 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
-UserGroup userGroupFromJson(Map<String, dynamic> json) =>
-    UserGroup.fromJson(json);
-
 @immutable
 class UserGroup extends Equatable {
   final String groupId;

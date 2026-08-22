@@ -126,7 +126,7 @@ class _ThreadCellState extends State<ThreadCell> {
     final metaColor = bodySmallStyle?.color;
     final titleStyle = ThreadCell.titleStyleFor(textTheme, locked: isLocked);
 
-    final timeText = LastReplyTimer.formatRelativeTime(
+    final timeText = formatRelativeTime(
       thread.latestReply.date.toLocal(),
     );
     final authorNickname = thread.originalPost.authorNickname;

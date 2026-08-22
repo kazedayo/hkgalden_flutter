@@ -2,10 +2,8 @@ part of '../home_page.dart';
 
 void _jumpToPage(BuildContext context, Thread thread) {
   HapticFeedback.mediumImpact();
-  showMaterialModalBottomSheet(
+  showModalBottomSheet(
     useRootNavigator: true,
-    duration: const Duration(milliseconds: 200),
-    animationCurve: Curves.easeOut,
     enableDrag: false,
     barrierColor: Colors.black.withValues(alpha: 0.5),
     context: context,

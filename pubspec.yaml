@@ -37,7 +37,6 @@ dependencies:
   graphql: 
   hive:
   hive_flutter:
-  modal_bottom_sheet: 
   package_info_plus: 
   path_provider:
   shimmer: 
@@ -65,11 +64,6 @@ flutter:
   assets:
     - assets/
     - assets/thread_webview/
-  fonts:
-    - family: CustomIcons
-      fonts:
-        - asset: assets/fonts/CustomIcons.ttf
-
 flutter_icons:
   ios: true
   image_path: "assets/app-icon.png"

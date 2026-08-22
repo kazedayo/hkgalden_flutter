@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
+import 'package:hkgalden_flutter/bloc/thread/thread_cubit.dart';
 import 'package:hkgalden_flutter/ui/thread/skeletons/thread_page_loading_skeleton_cell.dart';
 
 /// Dart side of the WebView previous-page pull: haptic + load request.
@@ -8,8 +8,6 @@ class PreviousPagePullController {
   static const double maxExtent = ThreadPageLoadingSkeletonCell.totalHeight;
 
   bool loading = false;
-
-  void dispose() {}
 
   void clear() {
     loading = false;
@@ -21,9 +19,9 @@ class PreviousPagePullController {
 
   void handleJsPull({
     required String phase,
-    required ThreadBloc threadBloc,
+    required ThreadCubit threadCubit,
   }) {
-    final state = threadBloc.state;
+    final state = threadCubit.state;
     if (phase == 'arm') {
       if (state is ThreadLoaded && state.currentPage > 1 && !loading) {
         HapticFeedback.mediumImpact();
@@ -39,10 +37,10 @@ class PreviousPagePullController {
       return;
     }
     loading = true;
-    threadBloc.add(RequestThreadEvent(
+    threadCubit.request(
       threadId: state.thread.threadId,
       page: state.currentPage - 1,
       isInitialLoad: false,
-    ));
+    );
   }
 }

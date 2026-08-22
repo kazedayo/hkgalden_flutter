@@ -1,12 +1,13 @@
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hkgalden_flutter/bloc/cubit/full_screen_photo_view_cubit.dart';
-import 'package:hkgalden_flutter/models/ui_state_models/full_screen_photo_view_state.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class FullScreenPhotoView extends StatefulWidget {
   final String? url;
@@ -72,6 +73,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
   int _activePointers = 0;
   Offset? _dismissPointerStart;
   VelocityTracker? _dismissVelocityTracker;
+  bool _sharing = false;
 
   @override
   void initState() {
@@ -399,6 +401,73 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
     return box.localToGlobal(Offset.zero) & box.size;
   }
 
+  Future<void> _shareImage(String url, {Rect? sharePositionOrigin}) async {
+    setState(() => _sharing = true);
+    String? filePath;
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final fileName = _fileNameFor(url);
+      filePath = '${tempDir.path}/$fileName';
+
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode != 200) {
+        throw Exception('download failed');
+      }
+      await File(filePath).writeAsBytes(response.bodyBytes);
+      if (!mounted) {
+        return;
+      }
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(filePath, mimeType: _mimeTypeFor(fileName))],
+          sharePositionOrigin: sharePositionOrigin,
+        ),
+      );
+
+      if (mounted) {
+        setState(() => _sharing = false);
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _sharing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('無法分享圖片')),
+        );
+      }
+    } finally {
+      final path = filePath;
+      if (path != null) {
+        try {
+          await File(path).delete();
+        } catch (_) {}
+      }
+    }
+  }
+
+  static String _fileNameFor(String url) {
+    final uri = Uri.tryParse(url);
+    var name = (uri != null && uri.pathSegments.isNotEmpty)
+        ? uri.pathSegments.last
+        : url.split('/').last;
+    name = name.split('?').first;
+    if (name.isEmpty || !name.contains('.')) {
+      return 'image.jpg';
+    }
+    return name;
+  }
+
+  static String _mimeTypeFor(String fileName) {
+    final ext = fileName.split('.').last.toLowerCase();
+    return switch (ext) {
+      'png' => 'image/png',
+      'gif' => 'image/gif',
+      'webp' => 'image/webp',
+      'heic' => 'image/heic',
+      _ => 'image/jpeg',
+    };
+  }
+
   static Widget _heroPlaceholder(
     BuildContext context,
     Size heroSize,
@@ -438,116 +507,94 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
 
     final dismissProgress = (_dismissOffset / _dismissDistance).clamp(0.0, 1.0);
     final scrimProgress = (_dismissOffset / maxH).clamp(0.0, 1.0);
+    final shareIcon = Theme.of(context).platform == TargetPlatform.iOS
+        ? Icons.ios_share
+        : Icons.share;
 
-    return BlocProvider(
-      create: (context) => FullScreenPhotoViewCubit(),
-      child: Scaffold(
-        backgroundColor: Colors.black.withValues(alpha: 1 - scrimProgress),
-        extendBody: true,
-        body: Stack(
-          children: [
-            Container(
-              constraints: BoxConstraints.expand(
-                height: MediaQuery.sizeOf(context).height,
-              ),
-              child: Listener(
-                onPointerDown: _onPointerDown,
-                onPointerMove: _onPointerMove,
-                onPointerUp: _onPointerUp,
-                onPointerCancel: _onPointerCancel,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onDoubleTapDown: _onDoubleTapDown,
-                  onDoubleTap: _toggleZoom,
-                  child: Transform.translate(
-                    offset: Offset(0, _dismissOffset),
-                    child: InteractiveViewer(
-                      transformationController: _transformationController,
-                      maxScale: _maxScale,
-                      minScale: _minScale,
-                      panEnabled: _isZoomed,
-                      onInteractionStart: _onInteractionStart,
-                      onInteractionEnd: _onInteractionEnd,
-                      child: Center(
-                        child: tag == null
-                            ? image
-                            : Hero(
-                                tag: tag,
-                                placeholderBuilder: _heroPlaceholder,
-                                child: Material(
-                                  type: MaterialType.transparency,
-                                  child: image,
-                                ),
+    return Scaffold(
+      backgroundColor: Colors.black.withValues(alpha: 1 - scrimProgress),
+      extendBody: true,
+      body: Stack(
+        children: [
+          Container(
+            constraints: BoxConstraints.expand(
+              height: MediaQuery.sizeOf(context).height,
+            ),
+            child: Listener(
+              onPointerDown: _onPointerDown,
+              onPointerMove: _onPointerMove,
+              onPointerUp: _onPointerUp,
+              onPointerCancel: _onPointerCancel,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onDoubleTapDown: _onDoubleTapDown,
+                onDoubleTap: _toggleZoom,
+                child: Transform.translate(
+                  offset: Offset(0, _dismissOffset),
+                  child: InteractiveViewer(
+                    transformationController: _transformationController,
+                    maxScale: _maxScale,
+                    minScale: _minScale,
+                    panEnabled: _isZoomed,
+                    onInteractionStart: _onInteractionStart,
+                    onInteractionEnd: _onInteractionEnd,
+                    child: Center(
+                      child: tag == null
+                          ? image
+                          : Hero(
+                              tag: tag,
+                              placeholderBuilder: _heroPlaceholder,
+                              child: Material(
+                                type: MaterialType.transparency,
+                                child: image,
                               ),
-                      ),
+                            ),
                     ),
                   ),
                 ),
               ),
             ),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Opacity(
-                opacity: 1 - dismissProgress,
-                child: SafeArea(
-                  child:
-                      BlocConsumer<
-                        FullScreenPhotoViewCubit,
-                        FullScreenPhotoViewState
-                      >(
-                        listenWhen: (previous, current) =>
-                            previous.shareFailed != current.shareFailed &&
-                            current.shareFailed == true,
-                        listener: (context, state) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('無法分享圖片')),
-                          );
-                        },
-                        builder: (context, state) {
-                          final shareIcon =
-                              Theme.of(context).platform == TargetPlatform.iOS
-                              ? Icons.ios_share
-                              : Icons.share;
-                          return Row(
-                            children: [
-                              _PhotoViewerButton(
-                                icon: shareIcon,
-                                onPressed: state.isSharingImage
-                                    ? null
-                                    : (buttonContext) => context
-                                          .read<FullScreenPhotoViewCubit>()
-                                          .shareImage(
-                                            imageUrl,
-                                            sharePositionOrigin: _shareOrigin(
-                                              buttonContext,
-                                            ),
-                                          ),
-                              ),
-                              if (state.isSharingImage)
-                                const Padding(
-                                  padding: EdgeInsets.only(left: 4),
-                                  child: SizedBox(
-                                    width: 22,
-                                    height: 22,
-                                    child: ProgressSpinner(),
-                                  ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Opacity(
+              opacity: 1 - dismissProgress,
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    _PhotoViewerButton(
+                      icon: shareIcon,
+                      onPressed: _sharing
+                          ? null
+                          : (buttonContext) => _shareImage(
+                                imageUrl,
+                                sharePositionOrigin: _shareOrigin(
+                                  buttonContext,
                                 ),
-                              const Spacer(),
-                              _PhotoViewerButton(
-                                icon: Icons.close,
-                                onPressed: (_) => Navigator.of(context).pop(),
                               ),
-                            ],
-                          );
-                        },
+                    ),
+                    if (_sharing)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 4),
+                        child: SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: ProgressSpinner(),
+                        ),
                       ),
+                    const Spacer(),
+                    _PhotoViewerButton(
+                      icon: Icons.close,
+                      onPressed: (_) => Navigator.of(context).pop(),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

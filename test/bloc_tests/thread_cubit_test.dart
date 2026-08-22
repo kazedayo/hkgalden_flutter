@@ -1,5 +1,5 @@
 import 'package:bloc_test/bloc_test.dart';
-import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
+import 'package:hkgalden_flutter/bloc/thread/thread_cubit.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';
@@ -15,8 +15,8 @@ class _FakeApi extends Fake implements HKGaldenApi {
 }
 
 void main() {
-  group('ThreadBloc', () {
-    late ThreadBloc threadBloc;
+  group('ThreadCubit', () {
+    late ThreadCubit threadCubit;
 
     final fixedDate = DateTime.utc(2024, 1, 1);
     final sampleReply = Reply(
@@ -35,32 +35,31 @@ void main() {
     );
 
     setUp(() {
-      threadBloc = ThreadBloc(api: _FakeApi());
+      threadCubit = ThreadCubit(api: _FakeApi());
     });
 
-    test('initial state should be ThreadInit', () {
-      expect(threadBloc.state, ThreadInit());
+    test('initial state should be ThreadLoading', () {
+      expect(threadCubit.state, ThreadLoading());
     });
 
     blocTest(
-      'emits ThreadLoaded state when RequestThreadEvent added',
-      build: () => threadBloc,
-      act: (ThreadBloc bloc) => bloc.add(
-        const RequestThreadEvent(threadId: 1, page: 1, isInitialLoad: true),
+      'emits ThreadLoaded state when request is initial load',
+      build: () => threadCubit,
+      act: (ThreadCubit bloc) => bloc.request(
+        threadId: 1,
+        page: 1,
+        isInitialLoad: true,
       ),
       expect: () => [isA<ThreadLoading>(), isA<ThreadLoaded>()],
     );
 
     blocTest(
-      'emits new state when RequestThreadEvent w/ isInitialLoad = false added',
-      build: () => threadBloc,
-      act: (ThreadBloc bloc) => bloc
-        ..add(
-          const RequestThreadEvent(threadId: 1, page: 1, isInitialLoad: true),
-        )
-        ..add(
-          const RequestThreadEvent(threadId: 1, page: 2, isInitialLoad: false),
-        ),
+      'emits new state when request w/ isInitialLoad = false',
+      build: () => threadCubit,
+      act: (ThreadCubit bloc) async {
+        await bloc.request(threadId: 1, page: 1, isInitialLoad: true);
+        await bloc.request(threadId: 1, page: 2, isInitialLoad: false);
+      },
       expect: () => [
         ThreadLoading(),
         ThreadLoaded(
@@ -80,13 +79,12 @@ void main() {
     );
 
     blocTest(
-      'emits new state when AppendReplyToThreadEvent added',
-      build: () => threadBloc,
-      act: (ThreadBloc bloc) => bloc
-        ..add(
-          const RequestThreadEvent(threadId: 1, page: 1, isInitialLoad: true),
-        )
-        ..add(AppendReplyToThreadEvent(reply: sampleReply)),
+      'emits new state when appendReply is called',
+      build: () => threadCubit,
+      act: (ThreadCubit bloc) async {
+        await bloc.request(threadId: 1, page: 1, isInitialLoad: true);
+        bloc.appendReply(sampleReply);
+      },
       expect: () => [
         ThreadLoading(),
         ThreadLoaded(

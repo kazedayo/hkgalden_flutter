@@ -77,30 +77,6 @@ void main() {
         isNull,
       );
     });
-
-    test('canonicalStatusUrl', () {
-      expect(
-        XUrl.canonicalStatusUrl('463440424141459456'),
-        'https://x.com/i/status/463440424141459456',
-      );
-      expect(
-        XUrl.canonicalStatusUrl('1', user: 'foo'),
-        'https://x.com/foo/status/1',
-      );
-    });
-
-    test('tryParseUsername', () {
-      expect(
-        XUrl.tryParseUsername(
-          'https://x.com/Interior/status/463440424141459456',
-        ),
-        'Interior',
-      );
-      expect(
-        XUrl.tryParseUsername('https://x.com/i/web/status/123'),
-        isNull,
-      );
-    });
   });
 
   group('XStatusCache helpers', () {

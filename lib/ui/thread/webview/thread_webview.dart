@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hkgalden_flutter/bloc/cubit/thread_page_cubit.dart';
-import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
-import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
+import 'package:hkgalden_flutter/bloc/thread/thread_cubit.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/user.dart';
@@ -10,6 +9,7 @@ import 'package:hkgalden_flutter/ui/common/compose_page/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/thread/previous_page_pull_controller.dart';
+import 'package:hkgalden_flutter/ui/thread/thread_page_ui.dart';
 import 'package:hkgalden_flutter/ui/thread/webview/thread_webview_document.dart';
 import 'package:hkgalden_flutter/ui/thread/webview/thread_webview_js.dart';
 import 'package:hkgalden_flutter/ui/thread/webview/thread_webview_messages.dart';
@@ -17,14 +17,12 @@ import 'package:hkgalden_flutter/ui/thread/webview/thread_webview_shell.dart';
 import 'package:hkgalden_flutter/ui/thread/webview/thread_webview_theme.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 import 'package:hkgalden_flutter/models/thread_reading_position.dart';
-import 'package:hkgalden_flutter/models/ui_state_models/thread_page_state.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page_on_reply_success.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
 import 'package:hkgalden_flutter/utils/thread_reading_position_store.dart';
 import 'package:hkgalden_flutter/utils/x_status_cache.dart';
 import 'package:hkgalden_flutter/utils/youtube_oembed_cache.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -85,11 +83,13 @@ class ThreadWebView extends StatefulWidget {
   final ThreadWebViewController controller;
   final int? restoreFloor;
   final PreviousPagePullController previousPull;
+  final ThreadPageUi pageUi;
 
   const ThreadWebView({
     super.key,
     required this.controller,
     required this.previousPull,
+    required this.pageUi,
     this.restoreFloor,
   });
 
@@ -113,6 +113,7 @@ class _ThreadWebViewState extends State<ThreadWebView> {
   int? _renderedEndPage;
   bool _loadMoreSent = false;
   double _lastScrollY = 0;
+  late final Listenable _pageUiFlags;
 
   @override
   void initState() {
@@ -122,6 +123,11 @@ class _ThreadWebViewState extends State<ThreadWebView> {
     widget.controller.cachedLastFloor = cachedLastFloor;
     _document = const ThreadWebViewDocument();
     _js = ThreadWebViewJs();
+    _pageUiFlags = Listenable.merge([
+      widget.pageUi.canReply,
+      widget.pageUi.onLastPage,
+    ]);
+    _pageUiFlags.addListener(_onPageUiFlagsChanged);
     _webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(AppTheme.backgroundColor)
@@ -173,8 +179,19 @@ class _ThreadWebViewState extends State<ThreadWebView> {
 
   @override
   void dispose() {
+    _pageUiFlags.removeListener(_onPageUiFlagsChanged);
     widget.controller._detach(this);
     super.dispose();
+  }
+
+  void _onPageUiFlagsChanged() {
+    if (!mounted) {
+      return;
+    }
+    final state = context.read<ThreadCubit>().state;
+    if (state is ThreadLoaded && _js.isReady) {
+      _js.send('setFlags', _flags(state));
+    }
   }
 
   NavigationDecision _onNavigation(NavigationRequest request) {
@@ -218,11 +235,11 @@ class _ThreadWebViewState extends State<ThreadWebView> {
   }
 
   Map<String, dynamic> _flags(ThreadLoaded state) {
-    final pageState = context.read<ThreadPageCubit>().state;
+    final pageUi = widget.pageUi;
     return {
-      'canReply': pageState.canReply,
+      'canReply': pageUi.canReply.value,
       'locked': state.thread.status == 'locked',
-      'onLastPage': pageState.onLastPage,
+      'onLastPage': pageUi.onLastPage.value,
       'appending': false,
       'currentPage': state.currentPage,
       'canPullPrevious': state.currentPage > 1,
@@ -279,7 +296,7 @@ class _ThreadWebViewState extends State<ThreadWebView> {
     if (!_js.isReady) {
       return;
     }
-    final session = context.read<SessionUserBloc>().state;
+    final session = context.read<SessionUserCubit>().state;
     if (!_didInitialRender) {
       _renderInitial(state, session);
       return;
@@ -402,9 +419,9 @@ class _ThreadWebViewState extends State<ThreadWebView> {
     if (!mounted) {
       return;
     }
-    final state = context.read<ThreadBloc>().state;
+    final state = context.read<ThreadCubit>().state;
     if (state is ThreadLoaded) {
-      await _renderInitial(state, context.read<SessionUserBloc>().state);
+      await _renderInitial(state, context.read<SessionUserCubit>().state);
     }
   }
 
@@ -431,19 +448,19 @@ class _ThreadWebViewState extends State<ThreadWebView> {
         final phase = message.string('phase') ?? '';
         widget.previousPull.handleJsPull(
           phase: phase,
-          threadBloc: context.read<ThreadBloc>(),
+          threadCubit: context.read<ThreadCubit>(),
         );
         if (phase == 'load' && !widget.previousPull.loading) {
           _js.send('resetPull');
         }
       case 'refreshLastPage':
-        final state = context.read<ThreadBloc>().state;
+        final state = context.read<ThreadCubit>().state;
         if (state is ThreadLoaded) {
-          context.read<ThreadBloc>().add(RequestThreadEvent(
+          context.read<ThreadCubit>().request(
                 threadId: state.thread.threadId,
                 page: state.endPage,
                 isInitialLoad: false,
-              ));
+              );
         }
       case 'imageMetrics':
         _saveImageMetrics(message);
@@ -460,28 +477,28 @@ class _ThreadWebViewState extends State<ThreadWebView> {
     final topFloor = message.integer('viewportTopFloor');
     final lastVisible = message.integer('lastVisibleFloor');
 
-    final cubit = context.read<ThreadPageCubit>();
+    final pageUi = widget.pageUi;
     final elevation = y > 0 ? 4.0 : 0.0;
-    if (elevation != cubit.state.elevation) {
-      cubit.setElevation(elevation);
+    if (elevation != pageUi.elevation.value) {
+      pageUi.elevation.value = elevation;
     }
 
     final scrollingDown = y > _lastScrollY + 0.5;
     _lastScrollY = y;
 
-    final bloc = context.read<ThreadBloc>();
-    final state = bloc.state;
+    final cubit = context.read<ThreadCubit>();
+    final state = cubit.state;
     if (state is ThreadLoaded &&
         scrollingDown &&
-        !cubit.state.onLastPage &&
+        !pageUi.onLastPage.value &&
         !_loadMoreSent &&
         y >= maxY - kThreadPageLoadMoreThreshold) {
       _loadMoreSent = true;
-      bloc.add(RequestThreadEvent(
+      cubit.request(
         threadId: state.thread.threadId,
         page: state.endPage + 1,
         isInitialLoad: false,
-      ));
+      );
     }
 
     final lastLoaded = state is ThreadLoaded && state.thread.replies.isNotEmpty
@@ -504,7 +521,7 @@ class _ThreadWebViewState extends State<ThreadWebView> {
   }
 
   void persist({required double safeBottom, bool remeasure = true}) {
-    final state = context.read<ThreadBloc>().state;
+    final state = context.read<ThreadCubit>().state;
     if (state is! ThreadLoaded) {
       return;
     }
@@ -541,8 +558,7 @@ class _ThreadWebViewState extends State<ThreadWebView> {
   }
 
   void _quote(ThreadWebViewInbound message) {
-    final pageState = context.read<ThreadPageCubit>().state;
-    if (!pageState.canReply) {
+    if (!widget.pageUi.canReply.value) {
       showCustomAlert(
         context: context,
         title: '未登入',
@@ -557,13 +573,11 @@ class _ThreadWebViewState extends State<ThreadWebView> {
     if (reply == null) {
       return;
     }
-    final state = context.read<ThreadBloc>().state;
+    final state = context.read<ThreadCubit>().state;
     if (state is! ThreadLoaded) {
       return;
     }
-    showBarModalBottomSheet(
-      duration: const Duration(milliseconds: 300),
-      animationCurve: Curves.easeOut,
+    showComposeSheet(
       context: context,
       builder: (context) => ComposePage(
         composeMode: ComposeMode.quotedReply,
@@ -574,7 +588,7 @@ class _ThreadWebViewState extends State<ThreadWebView> {
             this.context,
             widget.controller,
             sent,
-            pageState.onLastPage,
+            widget.pageUi.onLastPage.value,
           );
         },
       ),
@@ -589,9 +603,7 @@ class _ThreadWebViewState extends State<ThreadWebView> {
     if (user == null) {
       return;
     }
-    showMaterialModalBottomSheet(
-      duration: const Duration(milliseconds: 200),
-      animationCurve: Curves.easeOut,
+    showModalBottomSheet(
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black87,
       context: context,
@@ -628,7 +640,7 @@ class _ThreadWebViewState extends State<ThreadWebView> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        BlocListener<ThreadBloc, ThreadState>(
+        BlocListener<ThreadCubit, ThreadState>(
           listener: (context, state) {
             if (state is ThreadAppending) {
               _js.send('setFlags', {'appending': true});
@@ -637,18 +649,7 @@ class _ThreadWebViewState extends State<ThreadWebView> {
             }
           },
         ),
-        BlocListener<ThreadPageCubit, ThreadPageState>(
-          listenWhen: (prev, next) =>
-              prev.canReply != next.canReply ||
-              prev.onLastPage != next.onLastPage,
-          listener: (context, _) {
-            final state = context.read<ThreadBloc>().state;
-            if (state is ThreadLoaded && _js.isReady) {
-              _js.send('setFlags', _flags(state));
-            }
-          },
-        ),
-        BlocListener<SessionUserBloc, SessionUserState>(
+        BlocListener<SessionUserCubit, SessionUserState>(
           listener: (context, session) {
             if (_js.isReady) {
               _js.send('setBlockedUsers', {'ids': _blockedIds(session)});

@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
-import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
+import 'package:hkgalden_flutter/bloc/channel/channel_cubit.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
@@ -47,10 +47,10 @@ class MyApp extends StatelessWidget {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
-              create: (context) => ChannelBloc(
+              create: (context) => ChannelCubit(
                   api: RepositoryProvider.of<HKGaldenApi>(context))),
           BlocProvider(
-              create: (context) => SessionUserBloc(
+              create: (context) => SessionUserCubit(
                   api: RepositoryProvider.of<HKGaldenApi>(context))),
           BlocProvider(
               create: (context) => ThreadListCubit(

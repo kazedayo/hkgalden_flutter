@@ -1,13 +1,8 @@
 part of 'thread_list_cubit.dart';
 
-abstract class ThreadListState extends Equatable {
+abstract class ThreadListState {
   const ThreadListState();
-
-  @override
-  List<Object> get props => [];
 }
-
-class ThreadListInit extends ThreadListState {}
 
 class ThreadListLoading extends ThreadListState {}
 
@@ -17,24 +12,16 @@ class ThreadListAppending extends ThreadListLoaded {
   const ThreadListAppending(
       {required super.threads,
       required super.currentChannelId,
-      required super.currentPage,
-      super.generation});
+      required super.currentPage});
 }
 
 class ThreadListLoaded extends ThreadListState {
   final List<Thread> threads;
   final String currentChannelId;
   final int currentPage;
-  // Bumps on refresh so an unchanged list still emits (Equatable would skip).
-  final int generation;
 
   const ThreadListLoaded(
       {required this.threads,
       required this.currentChannelId,
-      required this.currentPage,
-      this.generation = 0});
-
-  @override
-  List<Object> get props =>
-      [threads, currentChannelId, currentPage, generation];
+      required this.currentPage});
 }

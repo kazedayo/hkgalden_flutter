@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:hkgalden_flutter/utils/inflight_cache.dart';
 import 'package:hkgalden_flutter/utils/youtube_url.dart';
 
 class YoutubeOEmbedInfo {
@@ -22,24 +23,14 @@ class YoutubeOEmbedCache {
   static final YoutubeOEmbedCache instance = YoutubeOEmbedCache._();
 
   final http.Client _client;
-  final Map<String, Future<YoutubeOEmbedInfo?>> _inflight = {};
-  final Map<String, YoutubeOEmbedInfo?> _resolved = {};
+  final InflightCache<String, YoutubeOEmbedInfo?> _cache = InflightCache();
 
   factory YoutubeOEmbedCache.forTesting(http.Client client) {
     return YoutubeOEmbedCache._(client: client);
   }
 
   Future<YoutubeOEmbedInfo?> fetch(String videoId) {
-    final cached = _resolved[videoId];
-    if (_resolved.containsKey(videoId)) {
-      return Future.value(cached);
-    }
-    return _inflight.putIfAbsent(videoId, () async {
-      final info = await _load(videoId);
-      _resolved[videoId] = info;
-      _inflight.remove(videoId);
-      return info;
-    });
+    return _cache.get(videoId, () => _load(videoId));
   }
 
   Future<YoutubeOEmbedInfo?> _load(String videoId) async {
@@ -75,7 +66,6 @@ class YoutubeOEmbedCache {
   }
 
   void clear() {
-    _inflight.clear();
-    _resolved.clear();
+    _cache.clear();
   }
 }

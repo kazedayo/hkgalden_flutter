@@ -7,8 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
-import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
+import 'package:hkgalden_flutter/bloc/channel/channel_cubit.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/tag.dart';
@@ -36,6 +36,18 @@ part 'widgets/image_insert_dialog.dart';
 part 'widgets/rich_text_toolbar.dart';
 part 'widgets/rich_text_editor.dart';
 part 'widgets/smiley_pane.dart';
+
+Future<T?> showComposeSheet<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+}) {
+  return showModalBottomSheet<T>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: builder,
+  );
+}
 
 class ComposePage extends StatefulWidget {
   final ComposeMode composeMode;
@@ -104,7 +116,7 @@ class ComposePageState extends State<ComposePage> {
 
   @override
   Widget build(BuildContext context) {
-    final sessionUserBloc = BlocProvider.of<SessionUserBloc>(context);
+    final sessionUserCubit = BlocProvider.of<SessionUserCubit>(context);
     return BlocProvider(
       create: (context) => ComposeCubit(
         api: RepositoryProvider.of<HKGaldenApi>(context),
@@ -263,7 +275,7 @@ class ComposePageState extends State<ComposePage> {
                       reverse: true,
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       child: StyledHtmlView(
-                        htmlString: _quoteHtml(sessionUserBloc),
+                        htmlString: _quoteHtml(sessionUserCubit),
                         floor: widget.parentReply!.floor,
                       ),
                     ),
@@ -289,9 +301,9 @@ class ComposePageState extends State<ComposePage> {
     );
   }
 
-  String _quoteHtml(SessionUserBloc sessionUserBloc) {
+  String _quoteHtml(SessionUserCubit sessionUserCubit) {
     return _cachedQuoteHtml ??= HKGaldenHtmlParser().replyWithQuotes(
-        widget.parentReply!, sessionUserBloc.state as SessionUserLoaded)!;
+        widget.parentReply!, sessionUserCubit.state as SessionUserLoaded)!;
   }
 
   String _getZefyrEditorContent() {

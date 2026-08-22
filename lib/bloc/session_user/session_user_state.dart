@@ -1,4 +1,4 @@
-part of 'session_user_bloc.dart';
+part of 'session_user_cubit.dart';
 
 abstract class SessionUserState extends Equatable {
   const SessionUserState();
@@ -6,8 +6,6 @@ abstract class SessionUserState extends Equatable {
   @override
   List<Object> get props => [];
 }
-
-class SessionUserLoading extends SessionUserState {}
 
 class SessionUserUndefined extends SessionUserState {}
 

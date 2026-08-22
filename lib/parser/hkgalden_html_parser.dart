@@ -1,12 +1,8 @@
-import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/parser/galden_node_types.dart';
 import 'package:universal_html/html.dart';
 import 'package:universal_html/parsing.dart';
-
-String? parseReplyWithQuotes(Map<String, dynamic> args) =>
-    HKGaldenHtmlParser().commentWithQuotes(
-        args['reply'] as Reply, args['state'] as SessionUserState);
 
 class HKGaldenHtmlParser {
   String? parse(String htmlString) {

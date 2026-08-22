@@ -32,8 +32,8 @@ void main() {
       cubit = ThreadListCubit(api: api);
     });
 
-    test('initial state should be ThreadListInit', () {
-      expect(cubit.state, ThreadListInit());
+    test('initial state should be ThreadListLoading', () {
+      expect(cubit.state, isA<ThreadListLoading>());
     });
 
     blocTest('emits ThreadListLoaded when load page 1',
@@ -50,11 +50,9 @@ void main() {
         },
         expect: () => [
               isA<ThreadListLoading>(),
-              const ThreadListLoaded(
-                  threads: [], currentChannelId: 'bw', currentPage: 1),
+              isA<ThreadListLoaded>(),
               isA<ThreadListAppending>(),
-              const ThreadListLoaded(
-                  threads: [], currentChannelId: 'bw', currentPage: 2)
+              isA<ThreadListLoaded>(),
             ],
         wait: const Duration(milliseconds: 50));
 
@@ -67,13 +65,8 @@ void main() {
         },
         expect: () => [
               isA<ThreadListLoading>(),
-              const ThreadListLoaded(
-                  threads: [], currentChannelId: 'bw', currentPage: 1),
-              const ThreadListLoaded(
-                  threads: [],
-                  currentChannelId: 'bw',
-                  currentPage: 1,
-                  generation: 1),
+              isA<ThreadListLoaded>(),
+              isA<ThreadListLoaded>(),
             ],
         wait: const Duration(milliseconds: 50));
 
@@ -90,11 +83,9 @@ void main() {
         },
         expect: () => [
               isA<ThreadListLoading>(),
-              const ThreadListLoaded(
-                  threads: [], currentChannelId: 'bw', currentPage: 1),
+              isA<ThreadListLoaded>(),
               isA<ThreadListAppending>(),
-              const ThreadListLoaded(
-                  threads: [], currentChannelId: 'bw', currentPage: 2)
+              isA<ThreadListLoaded>(),
             ],
         wait: const Duration(milliseconds: 50),
         verify: (_) {

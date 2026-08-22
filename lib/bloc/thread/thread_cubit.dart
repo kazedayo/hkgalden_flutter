@@ -1,37 +1,32 @@
-import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 
-part 'thread_event.dart';
 part 'thread_state.dart';
 
-class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
-  ThreadBloc({required HKGaldenApi api})
+class ThreadCubit extends Cubit<ThreadState> {
+  ThreadCubit({required HKGaldenApi api})
       : _api = api,
-        super(ThreadInit()) {
-    on<RequestThreadEvent>(_onRequestThreadEvent);
-    on<AppendReplyToThreadEvent>(_onAppendReplyToThreadEvent);
-    on<ClearThreadStateEvent>((event, emit) => emit(ThreadInit()));
-  }
+        super(ThreadLoading());
 
   final HKGaldenApi _api;
 
-  FutureOr<void> _onRequestThreadEvent(
-      RequestThreadEvent event, Emitter<ThreadState> emit) async {
-    if (event.isInitialLoad) {
+  Future<void> request({
+    required int threadId,
+    required int page,
+    required bool isInitialLoad,
+  }) async {
+    if (isInitialLoad) {
       emit(ThreadLoading());
-      final Thread? thread =
-          await _api.getThreadQuery(event.threadId, event.page);
+      final Thread? thread = await _api.getThreadQuery(threadId, page);
       if (thread != null) {
         emit(ThreadLoaded(
             thread: thread,
             previousPages: Thread.initial(),
-            currentPage: event.page,
-            endPage: event.page));
+            currentPage: page,
+            endPage: page));
       } else {
         emit(ThreadError());
       }
@@ -42,27 +37,26 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
       }
       final ThreadLoaded previousState = current;
       emit(ThreadAppending());
-      final Thread? thread =
-          await _api.getThreadQuery(event.threadId, event.page);
+      final Thread? thread = await _api.getThreadQuery(threadId, page);
       if (thread != null) {
-        if (event.page < previousState.currentPage) {
+        if (page < previousState.currentPage) {
           emit(ThreadLoaded(
               thread: previousState.thread,
               previousPages: thread.copyWith(
                   replies: thread.replies.toList()
                     ..addAll(previousState.previousPages.replies),
                   totalReplies: thread.totalReplies),
-              currentPage: event.page,
+              currentPage: page,
               endPage: previousState.endPage));
-        } else if (event.page > previousState.endPage) {
+        } else if (page > previousState.endPage) {
           emit(ThreadLoaded(
               thread: previousState.thread.copyWith(
                   replies: previousState.thread.replies.toList()
                     ..addAll(thread.replies)),
               previousPages: previousState.previousPages,
               currentPage: previousState.currentPage,
-              endPage: event.page));
-        } else if (event.page == previousState.endPage &&
+              endPage: page));
+        } else if (page == previousState.endPage &&
             previousState.currentPage == previousState.endPage) {
           emit(ThreadLoaded(
               thread: previousState.thread.copyWith(replies: thread.replies),
@@ -78,13 +72,12 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
     }
   }
 
-  FutureOr<void> _onAppendReplyToThreadEvent(
-      AppendReplyToThreadEvent event, Emitter<ThreadState> emit) async {
+  void appendReply(Reply reply) {
     if (state is ThreadLoaded) {
       final ThreadLoaded previousState = state as ThreadLoaded;
       emit(ThreadAppending());
       final List<Reply> replies = previousState.thread.replies.toList();
-      replies.add(event.reply);
+      replies.add(reply);
       emit(ThreadLoaded(
           thread: previousState.thread.copyWith(replies: replies),
           previousPages: previousState.previousPages,

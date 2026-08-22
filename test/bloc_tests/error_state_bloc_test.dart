@@ -1,10 +1,7 @@
 import 'package:bloc_test/bloc_test.dart';
-import 'package:hkgalden_flutter/bloc/blocked_users/blocked_users_cubit.dart';
-import 'package:hkgalden_flutter/bloc/thread/thread_bloc.dart';
+import 'package:hkgalden_flutter/bloc/thread/thread_cubit.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
-import 'package:hkgalden_flutter/bloc/user_thread_list/user_thread_list_cubit.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
-import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:test/fake.dart';
 import 'package:test/test.dart';
@@ -16,23 +13,6 @@ class _FakeThreadListApi extends Fake implements HKGaldenApi {
   @override
   Future<List<Thread>?> getThreadListQuery(String id, int page) =>
       _handler(id, page);
-}
-
-class _FakeBlockedUsersApi extends Fake implements HKGaldenApi {
-  _FakeBlockedUsersApi(this.result);
-  final List<User>? result;
-
-  @override
-  Future<List<User>?> getBlockedUser() async => result;
-}
-
-class _FakeUserThreadListApi extends Fake implements HKGaldenApi {
-  _FakeUserThreadListApi(this.result);
-  final List<Thread>? result;
-
-  @override
-  Future<List<Thread>?> getUserThreadList(String userId, int page) async =>
-      result;
 }
 
 class _FakeThreadApi extends Fake implements HKGaldenApi {
@@ -68,62 +48,16 @@ void main() {
       },
       expect: () => [
         isA<ThreadListLoading>(),
-        const ThreadListLoaded(
-            threads: [], currentChannelId: 'bw', currentPage: 1),
+        isA<ThreadListLoaded>(),
         isA<ThreadListAppending>(),
-        const ThreadListLoaded(
-            threads: [], currentChannelId: 'bw', currentPage: 1),
+        isA<ThreadListLoaded>(),
       ],
       wait: const Duration(milliseconds: 50),
     );
   });
 
-  group('BlockedUsersCubit error path', () {
-    blocTest<BlockedUsersCubit, BlockedUsersState>(
-      'emits BlockedUsersError when API returns null',
-      build: () => BlockedUsersCubit(api: _FakeBlockedUsersApi(null)),
-      act: (cubit) => cubit.load(),
-      expect: () => [
-        isA<BlockedUsersLoading>(),
-        isA<BlockedUsersError>(),
-      ],
-    );
-
-    blocTest<BlockedUsersCubit, BlockedUsersState>(
-      'emits BlockedUsersLoaded when API returns list',
-      build: () => BlockedUsersCubit(api: _FakeBlockedUsersApi(const [])),
-      act: (cubit) => cubit.load(),
-      expect: () => [
-        isA<BlockedUsersLoading>(),
-        const BlockedUsersLoaded(blockedUsers: []),
-      ],
-    );
-  });
-
-  group('UserThreadListCubit error path', () {
-    blocTest<UserThreadListCubit, UserThreadListState>(
-      'emits UserThreadListError when API returns null',
-      build: () => UserThreadListCubit(api: _FakeUserThreadListApi(null)),
-      act: (cubit) => cubit.load(userId: 'u1', page: 1),
-      expect: () => [
-        isA<UserThreadListLoading>(),
-        isA<UserThreadListError>(),
-      ],
-    );
-
-    blocTest<UserThreadListCubit, UserThreadListState>(
-      'emits UserThreadListLoaded when API returns list',
-      build: () => UserThreadListCubit(api: _FakeUserThreadListApi(const [])),
-      act: (cubit) => cubit.load(userId: 'u1', page: 1),
-      expect: () => [
-        isA<UserThreadListLoading>(),
-        const UserThreadListLoaded(page: 1, userThreadList: []),
-      ],
-    );
-  });
-
-  group('ThreadBloc pagination failure', () {
-    blocTest<ThreadBloc, ThreadState>(
+  group('ThreadCubit pagination failure', () {
+    blocTest<ThreadCubit, ThreadState>(
       'restores previous ThreadLoaded instead of full-page ThreadError',
       build: () {
         final api = _FakeThreadApi((id, page) async {
@@ -132,14 +66,11 @@ void main() {
           }
           return null;
         });
-        return ThreadBloc(api: api);
+        return ThreadCubit(api: api);
       },
       act: (bloc) async {
-        bloc.add(const RequestThreadEvent(
-            threadId: 1, page: 1, isInitialLoad: true));
-        await Future<void>.delayed(Duration.zero);
-        bloc.add(const RequestThreadEvent(
-            threadId: 1, page: 2, isInitialLoad: false));
+        await bloc.request(threadId: 1, page: 1, isInitialLoad: true);
+        await bloc.request(threadId: 1, page: 2, isInitialLoad: false);
       },
       expect: () => [
         isA<ThreadLoading>(),

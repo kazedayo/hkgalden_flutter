@@ -5,8 +5,8 @@ part of '../compose_page.dart';
 /// Shown only when invoked from the toolbar; sized like a soft keyboard.
 ///
 /// Scroll views use dedicated controllers with [primary] false so they do **not**
-/// attach to the bar-modal [PrimaryScrollController] from
-/// `showBarModalBottomSheet`. That attachment made scrolling the pane drive the
+/// attach to the modal [PrimaryScrollController] from
+/// [showModalBottomSheet]. That attachment made scrolling the pane drive the
 /// sheet dismiss gesture.
 class _SmileyPane extends StatefulWidget {
   final QuillController controller;
@@ -87,7 +87,7 @@ class _SmileyPaneState extends State<_SmileyPane> {
       // Content (background) extends into the bottom safe area, while the
       // scrollables below pad by [bottomPadding] to keep items clear of it.
       child: NotificationListener<ScrollNotification>(
-        // Swallow scroll notifications so modal_bottom_sheet does not treat
+        // Swallow scroll notifications so the modal sheet does not treat
         // smiley-pane scrolling as a dismiss drag (in addition to primary:false).
         onNotification: (_) => true,
         child: Container(

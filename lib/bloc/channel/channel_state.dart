@@ -1,4 +1,4 @@
-part of 'channel_bloc.dart';
+part of 'channel_cubit.dart';
 
 abstract class ChannelState extends Equatable {
   const ChannelState();

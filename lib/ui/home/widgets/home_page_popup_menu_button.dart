@@ -48,24 +48,20 @@ class _PopupMenuButton extends StatelessWidget {
       onSelected: (value) async {
         switch (value) {
           case _MenuItem.account:
-            showMaterialModalBottomSheet(
-              duration: const Duration(milliseconds: 200),
-              animationCurve: Curves.easeOut,
+            showModalBottomSheet(
               enableDrag: false,
               backgroundColor: Colors.transparent,
               barrierColor: AppTheme.barrierColor,
               context: context,
               builder: (context) => UserPage(
-                user: (BlocProvider.of<SessionUserBloc>(context).state
+                user: (BlocProvider.of<SessionUserCubit>(context).state
                         as SessionUserLoaded)
                     .sessionUser,
               ),
             );
             break;
           case _MenuItem.blocklist:
-            showMaterialModalBottomSheet(
-              duration: const Duration(milliseconds: 200),
-              animationCurve: Curves.easeOut,
+            showModalBottomSheet(
               enableDrag: false,
               backgroundColor: Colors.transparent,
               barrierColor: AppTheme.barrierColor,
@@ -93,10 +89,9 @@ class _PopupMenuButton extends StatelessWidget {
             await Hive.box('token').put('token', '');
             if (!context.mounted) return;
             context.read<SmileyPackRepository>().clearCache();
-            BlocProvider.of<SessionUserBloc>(context)
-                .add(RemoveSessionUserEvent());
+            BlocProvider.of<SessionUserCubit>(context).clearSessionUser();
             BlocProvider.of<ThreadListCubit>(context).load(
-              channelId: (BlocProvider.of<ChannelBloc>(context).state
+              channelId: (BlocProvider.of<ChannelCubit>(context).state
                       as ChannelLoaded)
                   .selectedChannelId,
               page: 1,

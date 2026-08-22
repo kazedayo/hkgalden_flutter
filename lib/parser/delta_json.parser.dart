@@ -1,21 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/parser/galden_node_types.dart';
 
 String _escapeHtmlText(String text) {
-  return text
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;');
+  return const HtmlEscape(HtmlEscapeMode.element).convert(text);
 }
 
 String _escapeHtmlAttr(String value) {
-  return value
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;')
-      .replaceAll('"', '&quot;');
+  return const HtmlEscape(HtmlEscapeMode.attribute).convert(value);
 }
 
 typedef ImageSizeResolver = Future<({int width, int height})> Function(

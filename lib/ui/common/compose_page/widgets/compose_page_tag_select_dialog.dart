@@ -8,7 +8,7 @@ class _TagSelectDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ChannelLoaded state =
-        BlocProvider.of<ChannelBloc>(context).state as ChannelLoaded;
+        BlocProvider.of<ChannelCubit>(context).state as ChannelLoaded;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

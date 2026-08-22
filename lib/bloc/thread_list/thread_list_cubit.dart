@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 
@@ -8,7 +7,7 @@ part 'thread_list_state.dart';
 class ThreadListCubit extends Cubit<ThreadListState> {
   ThreadListCubit({required HKGaldenApi api})
       : _api = api,
-        super(ThreadListInit());
+        super(ThreadListLoading());
 
   final HKGaldenApi _api;
 
@@ -18,9 +17,6 @@ class ThreadListCubit extends Cubit<ThreadListState> {
     bool isRefresh = false,
   }) async {
     if (page == 1 || isRefresh) {
-      final int generation = isRefresh && state is ThreadListLoaded
-          ? (state as ThreadListLoaded).generation + 1
-          : 0;
       if (!isRefresh || state is! ThreadListLoaded) {
         emit(ThreadListLoading());
       }
@@ -30,8 +26,7 @@ class ThreadListCubit extends Cubit<ThreadListState> {
         emit(ThreadListLoaded(
             threads: threads,
             currentChannelId: channelId,
-            currentPage: page,
-            generation: generation));
+            currentPage: page));
       } else {
         emit(ThreadListError());
       }
@@ -44,16 +39,14 @@ class ThreadListCubit extends Cubit<ThreadListState> {
       emit(ThreadListAppending(
           threads: previousState.threads,
           currentChannelId: previousState.currentChannelId,
-          currentPage: previousState.currentPage,
-          generation: previousState.generation));
+          currentPage: previousState.currentPage));
       final List<Thread>? threads =
           await _api.getThreadListQuery(channelId, page);
       if (threads != null) {
         emit(ThreadListLoaded(
             threads: previousState.threads.toList()..addAll(threads),
             currentChannelId: channelId,
-            currentPage: page,
-            generation: previousState.generation));
+            currentPage: page));
       } else {
         emit(previousState);
       }

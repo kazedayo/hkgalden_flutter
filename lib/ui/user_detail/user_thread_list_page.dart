@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hkgalden_flutter/bloc/user_thread_list/user_thread_list_cubit.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/ui/common/error_page.dart';
@@ -9,70 +8,95 @@ import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_loading_skeleto
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 
-class UserThreadListPage extends StatelessWidget {
+class UserThreadListPage extends StatefulWidget {
   final String userId;
 
   const UserThreadListPage({super.key, required this.userId});
 
   @override
+  State<UserThreadListPage> createState() => _UserThreadListPageState();
+}
+
+class _UserThreadListPageState extends State<UserThreadListPage> {
+  bool _loading = true;
+  bool _error = false;
+  List<Thread> _userThreadList = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = false;
+    });
+    final List<Thread>? userThreadList =
+        await RepositoryProvider.of<HKGaldenApi>(context)
+            .getUserThreadList(widget.userId, 1);
+    if (!mounted) {
+      return;
+    }
+    if (userThreadList != null) {
+      setState(() {
+        _loading = false;
+        _userThreadList = userThreadList;
+      });
+    } else {
+      setState(() {
+        _loading = false;
+        _error = true;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider<UserThreadListCubit>(
-        create: (context) {
-          final cubit = UserThreadListCubit(
-              api: RepositoryProvider.of<HKGaldenApi>(context));
-          cubit.load(userId: userId, page: 1);
-          return cubit;
-        },
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-              maxHeight: MediaQuery.sizeOf(context).height / 2),
-          child: BlocBuilder<UserThreadListCubit, UserThreadListState>(
-            builder: (context, state) {
-              if (state is UserThreadListLoading) {
-                return UserThreadListLoadingSkeleton();
-              }
-              if (state is UserThreadListError) {
-                return ErrorPage(
-                  message: '無法載入主題列表',
-                  onRetry: () => BlocProvider.of<UserThreadListCubit>(context)
-                      .load(userId: userId, page: 1),
-                );
-              }
-              final loaded = state as UserThreadListLoaded;
-              return ListView.builder(
-                padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).padding.bottom),
-                itemCount: loaded.userThreadList.length,
-                findChildIndexCallback: (Key key) {
-                  if (key is ValueKey<int>) {
-                    return loaded.userThreadList
-                        .indexWhere((thread) => thread.threadId == key.value);
-                  }
-                  return null;
-                },
-                itemBuilder: (context, index) => Column(
-                  key: ValueKey(loaded.userThreadList[index].threadId),
-                  children: <Widget>[
-                    ListTile(
-                      onTap: () =>
-                          _openUserThread(loaded.userThreadList[index]),
-                      title: Text(
-                        loaded.userThreadList[index].title,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      trailing: ThreadTagChip(
-                        label: loaded.userThreadList[index].tagName,
-                        backgroundColor:
-                            loaded.userThreadList[index].tagColor,
-                      ),
-                    ),
-                    const Divider(height: 1, thickness: 1, indent: 8),
-                  ],
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height / 2),
+      child: () {
+        if (_loading) {
+          return UserThreadListLoadingSkeleton();
+        }
+        if (_error) {
+          return ErrorPage(
+            message: '無法載入主題列表',
+            onRetry: _load,
+          );
+        }
+        return ListView.builder(
+          padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).padding.bottom),
+          itemCount: _userThreadList.length,
+          findChildIndexCallback: (Key key) {
+            if (key is ValueKey<int>) {
+              return _userThreadList
+                  .indexWhere((thread) => thread.threadId == key.value);
+            }
+            return null;
+          },
+          itemBuilder: (context, index) => Column(
+            key: ValueKey(_userThreadList[index].threadId),
+            children: <Widget>[
+              ListTile(
+                onTap: () => _openUserThread(_userThreadList[index]),
+                title: Text(
+                  _userThreadList[index].title,
+                  style: const TextStyle(color: Colors.white),
                 ),
-              );
-            },
+                trailing: ThreadTagChip(
+                  label: _userThreadList[index].tagName,
+                  backgroundColor: _userThreadList[index].tagColor,
+                ),
+              ),
+              const Divider(height: 1, thickness: 1, indent: 8),
+            ],
           ),
-        ),
+        );
+      }(),
     );
   }
 }

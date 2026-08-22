@@ -1,73 +1,99 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hkgalden_flutter/bloc/blocked_users/blocked_users_cubit.dart';
+import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/ui/common/blocked_user_cell.dart';
 import 'package:hkgalden_flutter/ui/common/error_page.dart';
 import 'package:hkgalden_flutter/ui/user_detail/blocked_users_loading_skeleton.dart';
 
-class BlockListPage extends StatelessWidget {
+class BlockListPage extends StatefulWidget {
   const BlockListPage({super.key});
 
   @override
+  State<BlockListPage> createState() => _BlockListPageState();
+}
+
+class _BlockListPageState extends State<BlockListPage> {
+  bool _loading = true;
+  bool _error = false;
+  List<User> _blockedUsers = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = false;
+    });
+    final List<User>? blockedUsers =
+        await RepositoryProvider.of<HKGaldenApi>(context).getBlockedUser();
+    if (!mounted) {
+      return;
+    }
+    if (blockedUsers != null) {
+      setState(() {
+        _loading = false;
+        _blockedUsers = blockedUsers;
+      });
+    } else {
+      setState(() {
+        _loading = false;
+        _error = true;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider<BlockedUsersCubit>(
-        create: (context) {
-          final cubit = BlockedUsersCubit(
-              api: RepositoryProvider.of<HKGaldenApi>(context));
-          cubit.load();
-          return cubit;
-        },
-        child: BlocBuilder<BlockedUsersCubit, BlockedUsersState>(
-          builder: (context, state) => Card(
-            margin: EdgeInsets.zero,
-            clipBehavior: Clip.hardEdge,
-            color: Theme.of(context).primaryColor,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10),
-                topRight: Radius.circular(10),
-              ),
-            ),
-            elevation: 6,
-            child: SizedBox(
-              height: MediaQuery.sizeOf(context).height / 2,
-              child: () {
-                if (state is BlockedUsersLoading) {
-                  return BlockedUsersLoadingSkeleton();
-                }
-                if (state is BlockedUsersError) {
-                  return ErrorPage(
-                    message: '無法載入封鎖名單',
-                    onRetry: () =>
-                        BlocProvider.of<BlockedUsersCubit>(context).load(),
-                  );
-                }
-                final loaded = state as BlockedUsersLoaded;
-                return ListView.builder(
-                  padding: EdgeInsets.only(
-                      top: 6,
-                      left: 12,
-                      right: 12,
-                      bottom: MediaQuery.of(context).padding.bottom),
-                  itemCount: loaded.blockedUsers.length,
-                  findChildIndexCallback: (Key key) {
-                    if (key is ValueKey<String>) {
-                      return loaded.blockedUsers
-                          .indexWhere((user) => user.userId == key.value);
-                    }
-                    return null;
-                  },
-                  itemBuilder: (context, index) {
-                    return BlockedUserCell(
-                        key: ValueKey(loaded.blockedUsers[index].userId),
-                        user: loaded.blockedUsers[index]);
-                  },
-                );
-              }(),
-            ),
-          ),
+    return Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.hardEdge,
+      color: Theme.of(context).primaryColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(10),
+          topRight: Radius.circular(10),
         ),
+      ),
+      elevation: 6,
+      child: SizedBox(
+        height: MediaQuery.sizeOf(context).height / 2,
+        child: () {
+          if (_loading) {
+            return BlockedUsersLoadingSkeleton();
+          }
+          if (_error) {
+            return ErrorPage(
+              message: '無法載入封鎖名單',
+              onRetry: _load,
+            );
+          }
+          return ListView.builder(
+            padding: EdgeInsets.only(
+                top: 6,
+                left: 12,
+                right: 12,
+                bottom: MediaQuery.of(context).padding.bottom),
+            itemCount: _blockedUsers.length,
+            findChildIndexCallback: (Key key) {
+              if (key is ValueKey<String>) {
+                return _blockedUsers
+                    .indexWhere((user) => user.userId == key.value);
+              }
+              return null;
+            },
+            itemBuilder: (context, index) {
+              return BlockedUserCell(
+                  key: ValueKey(_blockedUsers[index].userId),
+                  user: _blockedUsers[index]);
+            },
+          );
+        }(),
+      ),
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hkgalden_flutter/bloc/channel/channel_bloc.dart';
+import 'package:hkgalden_flutter/bloc/channel/channel_cubit.dart';
 import 'package:hkgalden_flutter/ui/home/drawer/channel_cell.dart';
 
 class HomeDrawer extends StatelessWidget {
@@ -8,7 +8,7 @@ class HomeDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ChannelBloc, ChannelState>(
+    return BlocBuilder<ChannelCubit, ChannelState>(
       builder: (context, state) {
         if (state is! ChannelLoaded) {
           return const SizedBox.shrink();

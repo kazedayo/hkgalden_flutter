@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hkgalden_flutter/bloc/session_user/session_user_bloc.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
@@ -23,7 +23,7 @@ void main() {
           ),
         ],
         child: BlocProvider(
-          create: (_) => SessionUserBloc(
+          create: (_) => SessionUserCubit(
             api: _FakeSessionUserApi(),
           ),
           child: MaterialApp(

@@ -18,13 +18,13 @@ Widget _buildFrontLayer(
         return prev != state;
       },
       builder: (context, state) {
-        final channelBloc = BlocProvider.of<ChannelBloc>(context);
+        final channelCubit = BlocProvider.of<ChannelCubit>(context);
 
         return RefreshIndicator(
           color: AppTheme.activeColor,
           strokeWidth: 2.5,
           onRefresh: () {
-            final channelState = channelBloc.state;
+            final channelState = channelCubit.state;
             if (channelState is! ChannelLoaded) {
               return Future<void>.value();
             }
@@ -37,7 +37,7 @@ Widget _buildFrontLayer(
                 (element is ThreadListLoaded &&
                     element is! ThreadListAppending));
           },
-          child: BlocBuilder<SessionUserBloc, SessionUserState>(
+          child: BlocBuilder<SessionUserCubit, SessionUserState>(
             buildWhen: (prev, next) =>
                 !_sameBlockedUsers(prev, next) ||
                 (prev is SessionUserLoaded) != (next is SessionUserLoaded),
@@ -46,7 +46,7 @@ Widget _buildFrontLayer(
                 context,
                 state,
                 sessionState,
-                channelBloc,
+                channelCubit,
                 scrollController,
                 loadThread,
                 jumpToPage,
@@ -98,7 +98,7 @@ Widget _frontLayerBody(
   BuildContext context,
   ThreadListState state,
   SessionUserState sessionState,
-  ChannelBloc channelBloc,
+  ChannelCubit channelCubit,
   ScrollController scrollController,
   Function(BuildContext, Thread) loadThread,
   Function(BuildContext, Thread) jumpToPage,
@@ -122,7 +122,7 @@ Widget _frontLayerBody(
     );
   }
   if (state is ThreadListError) {
-    final channelState = channelBloc.state;
+    final channelState = channelCubit.state;
     return ErrorPage(
       message: '無法載入主題列表',
       onRetry: () {

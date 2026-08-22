@@ -66,43 +66,6 @@ abstract final class XUrl {
     return null;
   }
 
-  static String? tryParseUsername(String? url) {
-    if (url == null) {
-      return null;
-    }
-    final trimmed = url.trim();
-    if (trimmed.isEmpty) {
-      return null;
-    }
-
-    final Uri uri;
-    try {
-      uri = Uri.parse(trimmed);
-    } on FormatException {
-      return null;
-    }
-
-    if (uri.scheme != 'http' && uri.scheme != 'https') {
-      return null;
-    }
-
-    final host = uri.host.toLowerCase();
-    if (!_hosts.contains(host)) {
-      return null;
-    }
-
-    final segments =
-        uri.pathSegments.where((s) => s.isNotEmpty).toList();
-    if (segments.length >= 3 && segments[1].toLowerCase() == 'status') {
-      final user = segments[0];
-      if (user.toLowerCase() == 'i') {
-        return null;
-      }
-      return user;
-    }
-    return null;
-  }
-
   static String? _validId(String? raw) {
     if (raw == null || raw.isEmpty) {
       return null;
@@ -113,8 +76,4 @@ abstract final class XUrl {
     }
     return null;
   }
-
-  /// Canonical URL for oEmbed (username is ignored by X when id is present).
-  static String canonicalStatusUrl(String statusId, {String user = 'i'}) =>
-      'https://x.com/$user/status/$statusId';
 }
