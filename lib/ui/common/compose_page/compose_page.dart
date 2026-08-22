@@ -41,11 +41,11 @@ Future<T?> showComposeSheet<T>({
   required BuildContext context,
   required WidgetBuilder builder,
 }) {
-  return showModalBottomSheet<T>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    builder: builder,
+  return Navigator.of(context).push<T>(
+    MaterialPageRoute(
+      fullscreenDialog: true,
+      builder: builder,
+    ),
   );
 }
 
@@ -161,7 +161,7 @@ class ComposePageState extends State<ComposePage> {
                     .titleMedium!
                     .copyWith(fontWeight: FontWeight.bold),
               ),
-              automaticallyImplyLeading: false,
+              leading: const CloseButton(),
               actions: <Widget>[
                 Visibility(
                   visible: isSending,

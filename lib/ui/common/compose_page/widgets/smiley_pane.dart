@@ -4,10 +4,8 @@ part of '../compose_page.dart';
 ///
 /// Shown only when invoked from the toolbar; sized like a soft keyboard.
 ///
-/// Scroll views use dedicated controllers with [primary] false so they do **not**
-/// attach to the modal [PrimaryScrollController] from
-/// [showModalBottomSheet]. That attachment made scrolling the pane drive the
-/// sheet dismiss gesture.
+/// Scroll views use dedicated controllers with [primary] false so they do
+/// not attach to an ambient [PrimaryScrollController].
 class _SmileyPane extends StatefulWidget {
   final QuillController controller;
   final List<SmileyPack> packs;

@@ -3,27 +3,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page/compose_page.dart';
 
 void main() {
-  testWidgets('compose sheet stays below top view padding', (tester) async {
-    const topInset = 59.0;
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1.0;
-    tester.view.padding = const FakeViewPadding(top: topInset, bottom: 34);
-    tester.view.viewPadding = const FakeViewPadding(top: topInset, bottom: 34);
-    addTearDown(tester.view.reset);
-
+  testWidgets('compose opens as a fullscreen dialog and closes on CloseButton',
+      (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
-          builder: (context) => TextButton(
-            onPressed: () => showComposeSheet(
-              context: context,
-              builder: (_) => const ColoredBox(
-                key: Key('compose-sheet-body'),
-                color: Colors.red,
-                child: SizedBox.expand(),
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () => showComposeSheet(
+                context: context,
+                builder: (_) => Scaffold(
+                  appBar: AppBar(leading: const CloseButton()),
+                  body: const Text('compose-body'),
+                ),
               ),
+              child: const Text('open'),
             ),
-            child: const Text('open'),
           ),
         ),
       ),
@@ -32,9 +27,16 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
 
-    expect(
-      tester.getTopLeft(find.byKey(const Key('compose-sheet-body'))).dy,
-      topInset,
+    final route = ModalRoute.of(
+      tester.element(find.text('compose-body')),
     );
+    expect(route?.fullscreenDialog, isTrue);
+    expect(find.byType(BottomSheet), findsNothing);
+
+    await tester.tap(find.byType(CloseButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('compose-body'), findsNothing);
+    expect(find.text('open'), findsOneWidget);
   });
 }
