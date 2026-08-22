@@ -75,19 +75,35 @@ void main() {
 
     expect(find.text('主題列表'), findsOneWidget);
     expect(find.text('封鎖名單'), findsOneWidget);
-    expect(find.text('t'), findsOneWidget);
+    expect(find.byType(PageView), findsOneWidget);
+    expect(find.text('t').hitTestable(), findsOneWidget);
 
     await tester.tap(find.text('封鎖名單'));
-    await tester.pump();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    expect(find.text('t'), findsNothing);
+    expect(
+      tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '封鎖名單')).selected,
+      isTrue,
+    );
+    expect(find.text('t').hitTestable(), findsNothing);
 
     await tester.tap(find.text('主題列表'));
-    await tester.pump();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    expect(find.text('t'), findsOneWidget);
+    expect(
+      tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '主題列表')).selected,
+      isTrue,
+    );
+    expect(find.text('t').hitTestable(), findsOneWidget);
+
+    await tester.fling(find.byType(PageView), const Offset(-400, 0), 1000);
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '主題列表')).selected,
+      isTrue,
+    );
+    expect(find.text('t').hitTestable(), findsOneWidget);
 
     final theme = Theme.of(tester.element(find.byType(UserPage)));
     final unselectedFill = AppTheme.linkPreviewBackground(theme.colorScheme);

@@ -19,11 +19,29 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> {
-  bool _blocked = false;
+  final PageController _pageController = PageController();
+  int _page = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   bool _isOwnProfile(SessionUserState session) {
     return session is SessionUserLoaded &&
         session.sessionUser.userId == widget.user.userId;
+  }
+
+  void _selectPage(int page) {
+    setState(() => _page = page);
+    if (_pageController.hasClients) {
+      _pageController.animateToPage(
+        page,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   void _blockUser(BuildContext context) {
@@ -78,7 +96,6 @@ class _UserPageState extends State<UserPage> {
     final session = context.watch<SessionUserCubit>().state;
     final theme = Theme.of(context);
     final ownProfile = _isOwnProfile(session);
-    final showBlocked = ownProfile && _blocked;
 
     return SizedBox.expand(
       child: Stack(
@@ -105,24 +122,31 @@ class _UserPageState extends State<UserPage> {
                       _chip(
                         theme: theme,
                         label: '主題列表',
-                        selected: !showBlocked,
-                        onSelected: () => setState(() => _blocked = false),
+                        selected: _page == 0,
+                        onSelected: () => _selectPage(0),
                       ),
                       if (ownProfile) ...[
                         const SizedBox(width: 8),
                         _chip(
                           theme: theme,
                           label: '封鎖名單',
-                          selected: showBlocked,
-                          onSelected: () => setState(() => _blocked = true),
+                          selected: _page == 1,
+                          onSelected: () => _selectPage(1),
                         ),
                       ],
                     ],
                   ),
                 ),
                 Expanded(
-                  child: showBlocked
-                      ? const BlockListPage()
+                  child: ownProfile
+                      ? PageView(
+                          controller: _pageController,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: [
+                            UserThreadListPage(userId: widget.user.userId),
+                            const BlockListPage(),
+                          ],
+                        )
                       : UserThreadListPage(userId: widget.user.userId),
                 ),
               ],

@@ -34,6 +34,25 @@ class SessionUserCubit extends Cubit<SessionUserState> {
     }
   }
 
+  Future<bool> removeUserFromBlockList(String userId) async {
+    if (state is! SessionUserLoaded) {
+      return false;
+    }
+    final isSuccess = await _api.unblockUser(userId);
+    if (isSuccess != true) {
+      return false;
+    }
+    final List<String> blockedUsers =
+        (state as SessionUserLoaded).sessionUser.blockedUsers.toList()
+          ..remove(userId);
+    emit(SessionUserLoaded(
+      sessionUser: (state as SessionUserLoaded)
+          .sessionUser
+          .copyWith(blockedUsers: blockedUsers),
+    ));
+    return true;
+  }
+
   void clearSessionUser() {
     emit(SessionUserUndefined());
   }

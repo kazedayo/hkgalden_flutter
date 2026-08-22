@@ -1,44 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/ui/common/user_avatar_image.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 
-class BlockedUserCell extends StatefulWidget {
+class BlockedUserCell extends StatelessWidget {
   final User user;
+  final VoidCallback? onUnblocked;
 
-  const BlockedUserCell({super.key, required this.user});
-
-  @override
-  State<BlockedUserCell> createState() => _BlockedUserCellState();
-}
-
-class _BlockedUserCellState extends State<BlockedUserCell> {
-  bool _unblocked = false;
+  const BlockedUserCell({
+    super.key,
+    required this.user,
+    this.onUnblocked,
+  });
 
   @override
-  Widget build(BuildContext context) => TextButton(
-        onPressed: () => setState(() => _unblocked = !_unblocked),
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(vertical: 8),
-          leading: UserAvatarImage(
-            avatarUrl: widget.user.avatar,
-            userGroup: widget.user.userGroup,
-            size: 30,
-          ),
-          title: Text(widget.user.nickName,
-              style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                  decoration: _unblocked
-                      ? TextDecoration.lineThrough
-                      : TextDecoration.none,
-                  decorationThickness: 2.5,
-                  decorationColor: Colors.white,
-                  color: widget.user.gender == 'M'
-                      ? Theme.of(context).colorScheme.brotherColor
-                      : Theme.of(context).colorScheme.sisterColor)),
-          trailing: Text(
-            widget.user.userId,
-            style: Theme.of(context).textTheme.bodySmall,
+  Widget build(BuildContext context) {
+    return Dismissible(
+      key: ValueKey(user.userId),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        color: Colors.redAccent,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: const Text(
+          '解除封鎖',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
           ),
         ),
-      );
+      ),
+      confirmDismiss: (_) => context
+          .read<SessionUserCubit>()
+          .removeUserFromBlockList(user.userId),
+      onDismissed: (_) => onUnblocked?.call(),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        leading: UserAvatarImage(
+          avatarUrl: user.avatar,
+          userGroup: user.userGroup,
+          size: 30,
+        ),
+        title: Text(
+          user.nickName,
+          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                color: user.gender == 'M'
+                    ? Theme.of(context).colorScheme.brotherColor
+                    : Theme.of(context).colorScheme.sisterColor,
+              ),
+        ),
+        trailing: Text(
+          user.userId,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ),
+    );
+  }
 }

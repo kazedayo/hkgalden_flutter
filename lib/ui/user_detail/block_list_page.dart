@@ -59,8 +59,6 @@ class _BlockListPageState extends State<BlockListPage> {
     return ListView.builder(
       padding: EdgeInsets.only(
         top: 6,
-        left: 12,
-        right: 12,
         bottom: MediaQuery.of(context).padding.bottom,
       ),
       itemCount: _blockedUsers.length,
@@ -71,9 +69,13 @@ class _BlockListPageState extends State<BlockListPage> {
         return null;
       },
       itemBuilder: (context, index) {
+        final user = _blockedUsers[index];
         return BlockedUserCell(
-          key: ValueKey(_blockedUsers[index].userId),
-          user: _blockedUsers[index],
+          key: ValueKey(user.userId),
+          user: user,
+          onUnblocked: () => setState(
+            () => _blockedUsers.removeWhere((u) => u.userId == user.userId),
+          ),
         );
       },
     );
