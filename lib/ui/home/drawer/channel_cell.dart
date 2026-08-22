@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_cubit.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
 import 'package:hkgalden_flutter/models/channel.dart';
+import 'package:hkgalden_flutter/utils/app_theme.dart';
 
 class ChannelCell extends StatelessWidget {
   final Channel channel;
@@ -21,7 +22,7 @@ class ChannelCell extends StatelessWidget {
         child: Material(
           clipBehavior: Clip.hardEdge,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMedium)),
           elevation:
               (state as ChannelLoaded).selectedChannelId == channel.channelId
                   ? 6
@@ -32,7 +33,7 @@ class ChannelCell extends StatelessWidget {
           child: TextButton(
             style: TextButton.styleFrom(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
               ),
             ),
             onPressed: state.selectedChannelId == channel.channelId

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:hkgalden_flutter/utils/app_theme.dart';
 
 class ThreadTagChip extends StatelessWidget {
   final String label;
   final Color backgroundColor;
 
-  static const BorderRadius _radius = BorderRadius.all(Radius.circular(6));
+  static const BorderRadius _radius =
+      BorderRadius.all(Radius.circular(AppTheme.radiusSmall));
 
   const ThreadTagChip({
     super.key,

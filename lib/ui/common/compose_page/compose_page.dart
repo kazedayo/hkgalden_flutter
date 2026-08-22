@@ -82,6 +82,7 @@ class ComposePageState extends State<ComposePage> {
 
   String? _cachedQuoteHtml;
   List<SmileyPack> _smileyPacks = const [];
+  bool _imageUploading = false;
 
   @override
   void initState() {
@@ -208,6 +209,21 @@ class ComposePageState extends State<ComposePage> {
             ),
             body: Column(
               children: <Widget>[
+                if (_imageUploading)
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    child: Row(
+                      children: [
+                        const ProgressSpinner(),
+                        const SizedBox(width: 8),
+                        Text(
+                          '圖片上載中...',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
                 if (widget.composeMode == ComposeMode.newPost)
                   Padding(
                     padding:
@@ -259,7 +275,8 @@ class ComposePageState extends State<ComposePage> {
                                     .withValues(alpha: 0.5),
                                 border: OutlineInputBorder(
                                     borderSide: BorderSide.none,
-                                    borderRadius: BorderRadius.circular(8)),
+                                    borderRadius: BorderRadius.circular(
+                                        AppTheme.radiusSmall)),
                                 hintText: '標題',
                                 contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 4, vertical: 10)),
@@ -317,28 +334,15 @@ class ComposePageState extends State<ComposePage> {
 
   Future<String> _onImagePickCallback(BuildContext context, File file) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    scaffoldMessenger.showSnackBar(
-      SnackBar(
-        duration: const Duration(days: 1),
-        content: Row(
-          children: const [
-            ProgressSpinner(),
-            SizedBox(
-              width: 8,
-            ),
-            Text('圖片上載中...')
-          ],
-        ),
-      ),
-    );
+    setState(() => _imageUploading = true);
     return ImageUploadApi().uploadImage(file.path).then((value) {
       if (mounted) {
-        scaffoldMessenger.hideCurrentSnackBar();
+        setState(() => _imageUploading = false);
       }
       return value;
     }).catchError((error) {
       if (mounted) {
-        scaffoldMessenger.hideCurrentSnackBar();
+        setState(() => _imageUploading = false);
         scaffoldMessenger.showSnackBar(
           const SnackBar(content: Text('圖片上載失敗')),
         );

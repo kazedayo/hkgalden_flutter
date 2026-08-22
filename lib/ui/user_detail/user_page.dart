@@ -6,6 +6,7 @@ import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/user_avatar_image.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_page.dart';
 import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
+import 'package:hkgalden_flutter/utils/app_theme.dart';
 
 class UserPage extends StatelessWidget {
   final User user;
@@ -48,8 +49,8 @@ class UserPage extends StatelessWidget {
           color: theme.primaryColor,
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(10))),
+                  topLeft: Radius.circular(AppTheme.radiusLarge),
+                  topRight: Radius.circular(AppTheme.radiusLarge))),
           elevation: 6,
           margin: const EdgeInsets.only(top: 40),
           child: Column(

@@ -4,10 +4,7 @@ part of '../home_page.dart';
 class _PopupMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final double deviceWidth = MediaQuery.sizeOf(context).width;
-    final double deviceHeight = MediaQuery.sizeOf(context).height;
     return PopupMenuButton(
-      offset: Offset(deviceWidth, -deviceHeight),
       itemBuilder: (context) => [
         const PopupMenuItem(
           value: _MenuItem.account,
@@ -98,7 +95,7 @@ class _PopupMenuButton extends StatelessWidget {
             );
         }
       },
-      icon: const Icon(Icons.apps_rounded),
+      icon: const Icon(Icons.more_vert_rounded),
     );
   }
 }

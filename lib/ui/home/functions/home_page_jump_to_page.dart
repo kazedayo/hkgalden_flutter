@@ -38,7 +38,7 @@ void _jumpToPage(BuildContext context, Thread thread) {
                 clipBehavior: Clip.hardEdge,
                 margin: const EdgeInsets.symmetric(horizontal: 8),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                 ),
                 child: SimpleDialogOption(
                   padding: const EdgeInsets.all(16.0),

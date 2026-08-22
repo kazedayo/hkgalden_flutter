@@ -17,6 +17,12 @@ class AppTheme {
   static const Color quoteLineColor = Color(0xFF4B5B53);
   static final Color skeletonColor = Colors.grey.withValues(alpha: 0.3);
 
+  /// Corner radius scale — small: chips/inputs/menus, medium: cards/dialogs,
+  /// large: modal sheets.
+  static const double radiusSmall = 8;
+  static const double radiusMedium = 12;
+  static const double radiusLarge = 16;
+
   /// Slightly lifted fill so link previews read as chips on comment cards.
   /// Solid color only — no elevation/shadows.
   static Color linkPreviewBackground(ColorScheme scheme) => Color.alphaBlend(
@@ -27,7 +33,8 @@ class AppTheme {
   static const BorderSide linkPreviewBorder =
       BorderSide(color: Color(0x28FFFFFF));
 
-  static const BorderRadius linkPreviewRadius = BorderRadius.all(Radius.circular(8));
+  static const BorderRadius linkPreviewRadius =
+      BorderRadius.all(Radius.circular(radiusSmall));
 
   static ThemeData generate(BuildContext context) {
     return ThemeData(
@@ -69,8 +76,8 @@ class AppTheme {
         backgroundColor: primaryColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(16),
-            topRight: Radius.circular(16),
+            topLeft: Radius.circular(radiusLarge),
+            topRight: Radius.circular(radiusLarge),
           ),
         ),
       ),
@@ -78,13 +85,14 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: primaryColor,
         elevation: 3,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radiusMedium)),
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       ),
 
       chipTheme: Theme.of(context).chipTheme.copyWith(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(radiusSmall)),
           ),
 
       cupertinoOverrideTheme: const CupertinoThemeData(
@@ -100,7 +108,8 @@ class AppTheme {
           fontWeight: FontWeight.w500,
         ),
         contentTextStyle: const TextStyle(color: Colors.white, fontSize: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radiusMedium)),
       ),
 
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
@@ -116,7 +125,19 @@ class AppTheme {
 
       popupMenuTheme: PopupMenuThemeData(
         color: backgroundColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radiusSmall)),
+      ),
+
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: primaryColor,
+        elevation: 6,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusMedium),
+        ),
+        contentTextStyle: const TextStyle(color: Colors.white),
+        actionTextColor: accentColor,
       ),
 
       textButtonTheme: TextButtonThemeData(

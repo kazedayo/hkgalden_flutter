@@ -5,6 +5,7 @@ import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/ui/common/blocked_user_cell.dart';
 import 'package:hkgalden_flutter/ui/common/error_page.dart';
 import 'package:hkgalden_flutter/ui/user_detail/blocked_users_loading_skeleton.dart';
+import 'package:hkgalden_flutter/utils/app_theme.dart';
 
 class BlockListPage extends StatefulWidget {
   const BlockListPage({super.key});
@@ -55,8 +56,8 @@ class _BlockListPageState extends State<BlockListPage> {
       color: Theme.of(context).primaryColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(10),
-          topRight: Radius.circular(10),
+          topLeft: Radius.circular(AppTheme.radiusLarge),
+          topRight: Radius.circular(AppTheme.radiusLarge),
         ),
       ),
       elevation: 6,
