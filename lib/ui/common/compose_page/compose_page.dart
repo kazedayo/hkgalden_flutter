@@ -9,7 +9,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_cubit.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
-import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/tag.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
@@ -25,9 +24,8 @@ import 'package:hkgalden_flutter/models/smiley.dart';
 import 'package:hkgalden_flutter/models/smiley_pack.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
-import 'package:hkgalden_flutter/utils/smiley_cdn.dart';
+import 'package:hkgalden_flutter/networking/image_upload_api.dart';
 import 'package:hkgalden_flutter/utils/smiley_embed.dart';
-import 'package:hkgalden_flutter/utils/smiley_pack_selection.dart';
 
 part 'widgets/compose_page_tag_select_dialog.dart';
 part 'widgets/toolbar_button.dart';
@@ -36,6 +34,12 @@ part 'widgets/image_insert_dialog.dart';
 part 'widgets/rich_text_toolbar.dart';
 part 'widgets/rich_text_editor.dart';
 part 'widgets/smiley_pane.dart';
+
+enum ComposeMode {
+  newPost,
+  reply,
+  quotedReply,
+}
 
 Future<T?> showComposeSheet<T>({
   required BuildContext context,
@@ -327,7 +331,7 @@ class ComposePageState extends State<ComposePage> {
         ),
       ),
     );
-    return context.read<ComposeCubit>().uploadImage(file.path).then((value) {
+    return ImageUploadApi().uploadImage(file.path).then((value) {
       if (mounted) {
         scaffoldMessenger.hideCurrentSnackBar();
       }

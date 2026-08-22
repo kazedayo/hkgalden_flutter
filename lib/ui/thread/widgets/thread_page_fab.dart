@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hkgalden_flutter/enums/compose_mode.dart';
+
 import 'package:hkgalden_flutter/ui/common/compose_page/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/galden_fab_hero.dart';

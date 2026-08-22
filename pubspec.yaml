@@ -22,7 +22,6 @@ environment:
 
 dependencies:
   backdrop: 
-  bloc:
   equatable: 
   flutter:
     sdk: flutter

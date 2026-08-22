@@ -11,7 +11,6 @@ import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_cubit.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
-import 'package:hkgalden_flutter/enums/compose_mode.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page/compose_page.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';

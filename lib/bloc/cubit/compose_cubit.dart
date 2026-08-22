@@ -1,23 +1,19 @@
 import 'dart:convert';
 
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/cubit/compose_state.dart';
-import 'package:hkgalden_flutter/networking/image_upload_api.dart';
 import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 
 class ComposeCubit extends Cubit<ComposeState> {
   ComposeCubit({
     required HKGaldenApi api,
-    ImageUploadApi? imageUploadApi,
     DeltaJsonParser? deltaJsonParser,
   })  : _api = api,
-        _imageUploadApi = imageUploadApi ?? ImageUploadApi(),
         _deltaJsonParser = deltaJsonParser ?? DeltaJsonParser(),
         super(ComposeInitial());
 
   final HKGaldenApi _api;
-  final ImageUploadApi _imageUploadApi;
   final DeltaJsonParser _deltaJsonParser;
 
   Future<void> createThread(
@@ -61,9 +57,5 @@ class ComposeCubit extends Cubit<ComposeState> {
     } catch (e) {
       emit(const ComposeFailure(message: '回覆發送失敗!'));
     }
-  }
-
-  Future<String> uploadImage(String filePath) {
-    return _imageUploadApi.uploadImage(filePath);
   }
 }

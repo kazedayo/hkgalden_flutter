@@ -85,8 +85,9 @@ class StartupScreenState extends State<StartupScreen>
       body: BlocListener<ThreadListCubit, ThreadListState>(
         listener: (context, state) {
           if (state is ThreadListLoaded) {
-            final SizeRoute route = SizeRoute(page: NestedNavigator());
-            Navigator.of(context).pushReplacement(route);
+            Navigator.of(context).pushReplacement(
+              SizeRoute(page: const NestedNavigator()),
+            );
           }
         },
         child: Center(

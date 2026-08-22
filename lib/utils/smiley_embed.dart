@@ -1,6 +1,25 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:hkgalden_flutter/models/smiley.dart';
+import 'package:hkgalden_flutter/models/smiley_pack.dart';
+
+const String kDefaultSmileyPackId = 'hkg';
+
+String smileyGifUrl({
+  required String packId,
+  required String smileyId,
+}) =>
+    'https://s.hkgalden.org/smilies/$packId/$smileyId.gif';
+
+String? selectDefaultSmileyPackId(List<SmileyPack> packs) {
+  if (packs.isEmpty) return null;
+  return (packs.where((p) => p.id == kDefaultSmileyPackId).firstOrNull ??
+          packs.first)
+      .id;
+}
+
+SmileyPack? findSmileyPackById(List<SmileyPack> packs, String? packId) =>
+    packId == null ? null : packs.where((p) => p.id == packId).firstOrNull;
 
 /// Quill embed type and payload for Galden smilies (matches web insert attrs).
 abstract final class SmileyEmbed {

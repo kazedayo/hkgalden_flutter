@@ -8,9 +8,7 @@ import 'package:hkgalden_flutter/models/smiley.dart';
 import 'package:hkgalden_flutter/models/smiley_pack.dart';
 import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
 import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
-import 'package:hkgalden_flutter/utils/smiley_cdn.dart';
 import 'package:hkgalden_flutter/utils/smiley_embed.dart';
-import 'package:hkgalden_flutter/utils/smiley_pack_selection.dart';
 
 /// Representative smiley matching models / web pack data shape.
 const _kSosad = Smiley(

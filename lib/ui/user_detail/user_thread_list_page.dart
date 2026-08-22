@@ -4,7 +4,7 @@ import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/ui/common/error_page.dart';
 import 'package:hkgalden_flutter/ui/common/thread_tag_chip.dart';
-import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_loading_skeleton.dart';
+import 'package:hkgalden_flutter/ui/home/skeletons/list_loading_skeleton.dart';
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
 
@@ -59,7 +59,7 @@ class _UserThreadListPageState extends State<UserThreadListPage> {
           maxHeight: MediaQuery.sizeOf(context).height / 2),
       child: () {
         if (_loading) {
-          return UserThreadListLoadingSkeleton();
+          return const ListLoadingSkeleton();
         }
         if (_error) {
           return ErrorPage(
