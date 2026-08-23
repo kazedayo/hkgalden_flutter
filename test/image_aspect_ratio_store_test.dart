@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:hive/hive.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ImageAspectRatioStore.isValidAspectRatio', () {

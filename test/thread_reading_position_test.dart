@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:hive/hive.dart';
 import 'package:hkgalden_flutter/models/thread_reading_position.dart';
 import 'package:hkgalden_flutter/utils/thread_reading_position_store.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('ThreadReadingPosition.pageForFloor', () {

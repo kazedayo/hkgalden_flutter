@@ -4,7 +4,7 @@ import 'package:hkgalden_flutter/utils/youtube_oembed_cache.dart';
 import 'package:hkgalden_flutter/utils/youtube_url.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('YoutubeUrl.tryParseVideoId', () {

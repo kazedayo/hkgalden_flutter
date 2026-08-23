@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class _WriteCountingMap extends MapBase<String, String> {
   final Map<String, String> _inner = {};

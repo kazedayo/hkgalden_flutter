@@ -2,7 +2,7 @@ import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 User _user(String id, {String nick = 'nick', List<String> blocked = const []}) {
   return User(

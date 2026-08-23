@@ -216,7 +216,7 @@ class HKGaldenApi {
             GraphQLClient(
               cache: GraphQLCache(),
               defaultPolicies: DefaultPolicies(
-                  query: Policies(fetch: FetchPolicy.cacheAndNetwork)),
+                  query: Policies(fetch: FetchPolicy.networkOnly)),
               link: _link,
             );
 
@@ -284,7 +284,6 @@ class HKGaldenApi {
         'id': threadId,
         'page': page,
       },
-      fetchPolicy: FetchPolicy.networkOnly,
       parse: (data) async {
         final Map<String, dynamic> result =
             data['thread'] as Map<String, dynamic>;
@@ -300,7 +299,6 @@ class HKGaldenApi {
         'channelId': channelId,
         'page': page,
       },
-      fetchPolicy: FetchPolicy.networkOnly,
       parse: (data) async {
         final List<dynamic> result =
             data['threadsByChannel'] as List<dynamic>;
@@ -326,7 +324,6 @@ class HKGaldenApi {
         'userId': userId,
         'page': page,
       },
-      fetchPolicy: FetchPolicy.networkOnly,
       parse: (data) async {
         final List<dynamic> result = data['threadsByUser'] as List<dynamic>;
         return compute(threadListFromJson, result);

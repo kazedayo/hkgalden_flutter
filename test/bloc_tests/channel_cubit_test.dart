@@ -2,8 +2,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:hkgalden_flutter/bloc/channel/channel_cubit.dart';
 import 'package:hkgalden_flutter/models/channel.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
-import 'package:test/fake.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class _FakeApi extends Fake implements HKGaldenApi {
   int getChannelsCalls = 0;

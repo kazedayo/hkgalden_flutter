@@ -3,8 +3,7 @@ import 'package:hkgalden_flutter/bloc/thread/thread_cubit.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
-import 'package:test/fake.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class _FakeThreadListApi extends Fake implements HKGaldenApi {
   _FakeThreadListApi(this._handler);

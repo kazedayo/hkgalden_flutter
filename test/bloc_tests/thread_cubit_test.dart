@@ -5,8 +5,7 @@ import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/models/user_group.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
-import 'package:test/fake.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class _FakeApi extends Fake implements HKGaldenApi {
   @override
