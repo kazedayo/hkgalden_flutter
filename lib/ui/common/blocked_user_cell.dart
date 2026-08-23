@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/models/user.dart';
@@ -20,6 +21,11 @@ class BlockedUserCell extends StatelessWidget {
     return Dismissible(
       key: ValueKey(user.userId),
       direction: DismissDirection.endToStart,
+      onUpdate: (details) {
+        if (details.reached && !details.previousReached) {
+          HapticFeedback.mediumImpact();
+        }
+      },
       background: Container(
         alignment: Alignment.centerRight,
         color: Colors.redAccent,
