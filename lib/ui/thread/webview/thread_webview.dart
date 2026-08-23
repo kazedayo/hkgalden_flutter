@@ -5,6 +5,7 @@ import 'package:hkgalden_flutter/bloc/thread/thread_cubit.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/ui/common/compose_page/compose_page.dart';
+import 'package:hkgalden_flutter/ui/common/compose_page/quote_preview_webview.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/full_screen_photo_view.dart';
 import 'package:hkgalden_flutter/ui/thread/previous_page_pull_controller.dart';
@@ -144,6 +145,9 @@ class _ThreadWebViewState extends State<ThreadWebView> {
       );
     _js.attach(_webViewController);
     _loadShell();
+    // Start loading the shared quote-preview WebView so the first
+    // quote reply skips native WebView startup.
+    QuotePreviewWebViewHost.instance.prewarm();
   }
 
   Future<void> _loadShell() async {
