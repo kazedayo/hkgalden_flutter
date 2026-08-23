@@ -26,7 +26,7 @@ void main() {
         nickName: 'nickName',
         avatar: 'avatar',
         userGroup: [
-          UserGroup(groupId: 'groupId', groupName: 'n'),
+          UserGroup(groupId: 'groupId'),
         ],
         blockedUsers: [],
       ),

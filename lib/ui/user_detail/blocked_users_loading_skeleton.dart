@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:hkgalden_flutter/ui/common/app_shimmer.dart';
 import 'package:hkgalden_flutter/ui/common/skeleton_block.dart';
+import 'package:shimmer/shimmer.dart';
 
 class BlockedUsersLoadingSkeleton extends StatelessWidget {
   const BlockedUsersLoadingSkeleton({super.key});
 
   @override
-  Widget build(BuildContext context) => AppShimmer(
+  Widget build(BuildContext context) => Shimmer.fromColors(
+        baseColor: Theme.of(context).scaffoldBackgroundColor,
+        highlightColor: Theme.of(context).primaryColor,
         child: ListView.builder(
           padding: EdgeInsets.zero,
           physics: const NeverScrollableScrollPhysics(),

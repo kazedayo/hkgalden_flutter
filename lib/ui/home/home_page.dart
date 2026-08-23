@@ -35,9 +35,7 @@ part 'widgets/home_page_front_layer.dart';
 part 'widgets/home_page_popup_menu_button.dart';
 
 class HomePage extends StatefulWidget {
-  final String? title;
-
-  const HomePage({super.key, this.title});
+  const HomePage({super.key});
 
   @override
   HomePageState createState() => HomePageState();

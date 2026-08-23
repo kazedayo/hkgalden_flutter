@@ -31,6 +31,14 @@ void main() {
     );
   });
 
+  test('accepts contentHeight', () {
+    final message = ThreadWebViewInbound.tryParse(
+      '{"type":"contentHeight","payload":{"height":80}}',
+    );
+    expect(message?.type, 'contentHeight');
+    expect(message?.integer('height'), 80);
+  });
+
   test('treats missing payload as empty map', () {
     final message = ThreadWebViewInbound.tryParse('{"type":"ready"}');
     expect(message, isNotNull);

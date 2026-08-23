@@ -14,7 +14,7 @@ import 'package:hkgalden_flutter/models/tag.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
-import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
+import 'package:hkgalden_flutter/ui/common/compose_page/quote_preview_webview.dart';
 import 'package:hkgalden_flutter/ui/common/thread_tag_chip.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
 
@@ -290,15 +290,13 @@ class ComposePageState extends State<ComposePage> {
                   const SizedBox(),
                 if (widget.composeMode == ComposeMode.quotedReply)
                   ConstrainedBox(
-                    constraints:
-                        BoxConstraints(
-                            maxHeight: MediaQuery.sizeOf(context).height / 4),
-                    child: SingleChildScrollView(
-                      reverse: true,
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.sizeOf(context).height / 4,
+                    ),
+                    child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 14),
-                      child: StyledHtmlView(
-                        htmlString: _quoteHtml(sessionUserCubit),
-                        floor: widget.parentReply!.floor,
+                      child: QuotePreviewWebView(
+                        html: _quoteHtml(sessionUserCubit),
                       ),
                     ),
                   )

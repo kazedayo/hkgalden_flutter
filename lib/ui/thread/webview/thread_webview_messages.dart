@@ -11,7 +11,7 @@ const Set<String> kThreadWebViewInboundTypes = {
   'pullPrevious',
   'refreshLastPage',
   'imageMetrics',
-  'log',
+  'contentHeight',
 };
 
 /// Parsed JS → Dart message. Unknown or malformed payloads are dropped.

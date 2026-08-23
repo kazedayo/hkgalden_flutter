@@ -146,9 +146,11 @@ void main() {
     });
 
     test(
-      'SmileyEmbed.toDeltaOp produces complete Galden smiley HTML',
+      'SmileyEmbed.payload produces complete Galden smiley HTML',
       () async {
-        final op = SmileyEmbed.toDeltaOp(_kPackId, _kSosad);
+        final op = {
+          'insert': {SmileyEmbed.type: SmileyEmbed.payload(_kPackId, _kSosad)},
+        };
         // Real controller path ends as JSON list of ops + trailing newline.
         final deltaJson = <dynamic>[
           op,

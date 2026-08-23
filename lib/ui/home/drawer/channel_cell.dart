@@ -56,7 +56,7 @@ class ChannelCell extends StatelessWidget {
                   const Spacer(),
                   Text(
                     channel.channelName,
-                    style: Theme.of(context).textTheme.titleSmall!.copyWith(),
+                    style: Theme.of(context).textTheme.titleSmall,
                   ),
                   const Spacer(flex: 3),
                   Container(

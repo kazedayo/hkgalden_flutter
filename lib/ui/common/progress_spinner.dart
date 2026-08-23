@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
 
 class ProgressSpinner extends StatelessWidget {
-  final double? value;
-  final double size;
-
-  const ProgressSpinner({super.key, this.value, this.size = 15});
+  const ProgressSpinner({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return UnconstrainedBox(
+    return const UnconstrainedBox(
       child: SizedBox.square(
-        dimension: size,
+        dimension: 15,
         child: CircularProgressIndicator.adaptive(
-          value: value,
           strokeWidth: 2,
         ),
       ),

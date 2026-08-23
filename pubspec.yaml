@@ -26,7 +26,6 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc:
-  flutter_html: 
   flutter_localizations:
     sdk: flutter
   flutter_quill: 

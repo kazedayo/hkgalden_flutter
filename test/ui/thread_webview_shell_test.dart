@@ -31,6 +31,18 @@ void main() {
     expect(out, isNot(contains('src="render.js"')));
   });
 
+  test('throws when a marker is missing', () {
+    expect(
+      () => inlineThreadWebViewShell(
+        html: '<html></html>',
+        css: 'x',
+        bridgeJs: 'y',
+        renderJs: 'z',
+      ),
+      throwsA(isA<StateError>()),
+    );
+  });
+
   test('inlines even when href has a leftover cache query', () {
     const html =
         '<link rel="stylesheet" href="thread.css?v=9"><script src="bridge.js?v=9"></script><script src="render.js?v=9"></script>';

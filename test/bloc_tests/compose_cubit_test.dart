@@ -47,7 +47,7 @@ void main() {
         userId: '1',
         nickName: 'nick',
         avatar: '',
-        userGroup: [UserGroup(groupId: 'g', groupName: 'n')],
+        userGroup: [UserGroup(groupId: 'g')],
         blockedUsers: [],
       ),
       authorNickname: 'nick',

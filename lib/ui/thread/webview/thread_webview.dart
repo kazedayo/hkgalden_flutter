@@ -315,10 +315,10 @@ class _ThreadWebViewState extends State<ThreadWebView> {
         'replies': [for (final dto in dtos) dto.toJson()],
       });
       _renderedPreviousCount = previous.length;
-      widget.previousPull.finishLoading();
+      widget.previousPull.clear();
       _hydratePreviews(dtos);
     } else if (widget.previousPull.loading) {
-      widget.previousPull.finishLoading();
+      widget.previousPull.clear();
       _js.send('resetPull');
     }
 

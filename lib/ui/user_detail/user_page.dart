@@ -6,7 +6,6 @@ import 'package:hkgalden_flutter/ui/common/custom_alert_dialog.dart';
 import 'package:hkgalden_flutter/ui/common/user_avatar_image.dart';
 import 'package:hkgalden_flutter/ui/user_detail/block_list_page.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_thread_list_page.dart';
-import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
 
 class UserPage extends StatefulWidget {
@@ -191,8 +190,8 @@ class _UserPageState extends State<UserPage> {
                         style: theme.textTheme.bodyLarge!.copyWith(
                           height: 1.2,
                           color: widget.user.gender == 'M'
-                              ? theme.colorScheme.brotherColor
-                              : theme.colorScheme.sisterColor,
+                              ? AppTheme.brotherColor
+                              : AppTheme.sisterColor,
                         ),
                       ),
                       const SizedBox(height: 8),

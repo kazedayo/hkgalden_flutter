@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/ui/common/user_avatar_image.dart';
-import 'package:hkgalden_flutter/utils/app_color_scheme.dart';
+import 'package:hkgalden_flutter/utils/app_theme.dart';
 
 class BlockedUserCell extends StatelessWidget {
   final User user;
@@ -55,8 +55,8 @@ class BlockedUserCell extends StatelessWidget {
           user.nickName,
           style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                 color: user.gender == 'M'
-                    ? Theme.of(context).colorScheme.brotherColor
-                    : Theme.of(context).colorScheme.sisterColor,
+                    ? AppTheme.brotherColor
+                    : AppTheme.sisterColor,
               ),
         ),
         trailing: Text(

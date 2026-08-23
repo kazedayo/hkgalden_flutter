@@ -4,7 +4,6 @@ Future<void> showCustomAlert({
   required BuildContext context,
   required String title,
   required String content,
-  String okLabel = 'OK',
 }) {
   return showAdaptiveDialog<void>(
     context: context,
@@ -14,7 +13,7 @@ Future<void> showCustomAlert({
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(okLabel),
+          child: const Text('OK'),
         ),
       ],
     ),

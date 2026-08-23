@@ -80,6 +80,39 @@ void main() {
     expect(html, contains('post'));
   });
 
+  test('leanPreview converts icons, skips previews, and replaces content images',
+      () {
+    final html = document.rewriteContentHtml(
+      '<p>hi<icon src="https://s.hkgalden.org/smilies/hkg/abc.gif"></icon>'
+      '<img src="https://cdn.example/photo.png" data-sx="800" data-sy="200">'
+      '<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">yt</a></p>',
+      leanPreview: true,
+    ).html;
+    expect(html, contains('class="smiley"'));
+    expect(html, contains('https://s.hkgalden.org/smilies/hkg/abc.gif'));
+    expect(html, isNot(contains('<icon')));
+    expect(html, contains('class="img-placeholder"'));
+    expect(html, contains(kQuotePreviewImagePlaceholder));
+    expect(html, isNot(contains('cdn.example')));
+    expect(html, isNot(contains('photo.png')));
+    expect(html, isNot(contains('aspect-ratio')));
+    expect(html, isNot(contains('data-preview')));
+    expect(html, isNot(contains('preview-chip')));
+    expect(html, contains('https://www.youtube.com/watch?v=dQw4w9WgXcQ'));
+    expect(html, contains('yt'));
+  });
+
+  test('leanPreview leaves smiley src when replacing sibling content images',
+      () {
+    final html = document.rewriteContentHtml(
+      '<icon src="https://s.hkgalden.org/smilies/hkg/abc.gif"></icon>'
+      '<img src="https://cdn.example/photo.png">',
+      leanPreview: true,
+    ).html;
+    expect(html, contains('src="https://s.hkgalden.org/smilies/hkg/abc.gif"'));
+    expect(html, isNot(contains('src="https://cdn.example/photo.png"')));
+  });
+
   test('serializeReply stores YouTube and X ids from the rewrite pass', () {
     final reply = Reply(
       replyId: 'r1',

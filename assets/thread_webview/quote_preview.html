@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>quote</title>
+  <link rel="stylesheet" href="thread.css">
+  <style>
+    html, body {
+      margin: 0;
+      background: var(--bg);
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    body {
+      overflow-x: hidden;
+      padding: 0;
+    }
+    #content {
+      padding: 15px 0;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    #content a {
+      pointer-events: none;
+    }
+    #content .img-placeholder {
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div id="content" class="comment-html"></div>
+  <script src="quote_preview.js"></script>
+  <script src="bridge.js"></script>
+</body>
+</html>

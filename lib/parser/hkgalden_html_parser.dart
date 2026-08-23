@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/parser/galden_node_types.dart';
@@ -165,12 +167,11 @@ class HKGaldenHtmlParser {
   }
 
   String _escapeHtml(String text) {
-    return text
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
+    return const HtmlEscape(HtmlEscapeMode(
+      escapeLtGt: true,
+      escapeQuot: true,
+      escapeApos: true,
+    )).convert(text);
   }
 
   String? _buildQuoteChain(

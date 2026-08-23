@@ -13,10 +13,6 @@ class PreviousPagePullController {
     loading = false;
   }
 
-  void finishLoading() {
-    loading = false;
-  }
-
   void handleJsPull({
     required String phase,
     required ThreadCubit threadCubit,

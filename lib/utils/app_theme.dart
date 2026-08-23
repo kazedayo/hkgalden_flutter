@@ -16,6 +16,8 @@ class AppTheme {
 
   static const Color quoteLineColor = Color(0xFF4B5B53);
   static final Color skeletonColor = Colors.grey.withValues(alpha: 0.3);
+  static const Color brotherColor = Color(0xff22c1fe);
+  static const Color sisterColor = Color(0xffff7aab);
 
   /// Corner radius scale — small: chips/inputs/menus, medium: cards/dialogs,
   /// large: modal sheets.
@@ -29,12 +31,6 @@ class AppTheme {
         Colors.white.withValues(alpha: 0.10),
         scheme.surface,
       );
-
-  static const BorderSide linkPreviewBorder =
-      BorderSide(color: Color(0x28FFFFFF));
-
-  static const BorderRadius linkPreviewRadius =
-      BorderRadius.all(Radius.circular(radiusSmall));
 
   static ThemeData generate(BuildContext context) {
     return ThemeData(

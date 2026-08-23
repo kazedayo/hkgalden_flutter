@@ -72,6 +72,8 @@ class ThreadWebViewReplyDto {
       };
 }
 
+const String kQuotePreviewImagePlaceholder = '[圖片]';
+
 class ThreadWebViewDocument {
   const ThreadWebViewDocument({this.aspectRatioFor});
 
@@ -110,7 +112,10 @@ class ThreadWebViewDocument {
     );
   }
 
-  RewrittenContentHtml rewriteContentHtml(String html) {
+  RewrittenContentHtml rewriteContentHtml(
+    String html, {
+    bool leanPreview = false,
+  }) {
     if (html.isEmpty) {
       return RewrittenContentHtml(html: html);
     }
@@ -122,10 +127,16 @@ class ThreadWebViewDocument {
       }
       _applyColors(root);
       _convertIcons(root);
-      _applyImageBoxes(root);
+      if (leanPreview) {
+        _replaceContentImagesWithPlaceholder(root);
+      } else {
+        _applyImageBoxes(root);
+      }
       final youtubeIds = <String>[];
       final xIds = <String>[];
-      _wrapLinkPreviews(root, youtubeIds: youtubeIds, xIds: xIds);
+      if (!leanPreview) {
+        _wrapLinkPreviews(root, youtubeIds: youtubeIds, xIds: xIds);
+      }
       return RewrittenContentHtml(
         html: root.innerHtml ?? html,
         youtubeIds: youtubeIds,
@@ -133,6 +144,19 @@ class ThreadWebViewDocument {
       );
     } catch (_) {
       return RewrittenContentHtml(html: html);
+    }
+  }
+
+  void _replaceContentImagesWithPlaceholder(Element root) {
+    for (final el in List<Element>.from(root.querySelectorAll('img'))) {
+      if (el.className.split(' ').contains('smiley')) {
+        continue;
+      }
+      el.replaceWith(
+        Element.span()
+          ..className = 'img-placeholder'
+          ..text = kQuotePreviewImagePlaceholder,
+      );
     }
   }
 

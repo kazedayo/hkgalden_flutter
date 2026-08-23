@@ -37,11 +37,6 @@ abstract final class SmileyEmbed {
   static Embeddable create(String packId, Smiley smiley) =>
       Embeddable(type, payload(packId, smiley));
 
-  /// Delta op shape produced by the real editor after [insertInto].
-  static Map<String, dynamic> toDeltaOp(String packId, Smiley smiley) => {
-        'insert': {type: payload(packId, smiley)},
-      };
-
   /// Inserts an inline smiley at the current selection via the Quill controller.
   static void insertInto(
     QuillController controller,

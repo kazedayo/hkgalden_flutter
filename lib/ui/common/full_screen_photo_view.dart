@@ -11,14 +11,12 @@ import 'package:share_plus/share_plus.dart';
 
 class FullScreenPhotoView extends StatefulWidget {
   final String? url;
-  final String? heroTag;
 
   final int? intrinsicWidth;
   final int? intrinsicHeight;
 
   const FullScreenPhotoView({
     super.key,
-    this.heroTag,
     this.url,
     this.intrinsicWidth,
     this.intrinsicHeight,
@@ -27,7 +25,6 @@ class FullScreenPhotoView extends StatefulWidget {
   static Future<void> open(
     BuildContext context, {
     required String url,
-    String? heroTag,
     int? intrinsicWidth,
     int? intrinsicHeight,
   }) {
@@ -35,7 +32,6 @@ class FullScreenPhotoView extends StatefulWidget {
       _PhotoViewRoute(
         builder: (context) => FullScreenPhotoView(
           url: url,
-          heroTag: heroTag,
           intrinsicWidth: intrinsicWidth,
           intrinsicHeight: intrinsicHeight,
         ),
@@ -468,22 +464,9 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
     };
   }
 
-  static Widget _heroPlaceholder(
-    BuildContext context,
-    Size heroSize,
-    Widget child,
-  ) {
-    return SizedBox(
-      width: heroSize.width,
-      height: heroSize.height,
-      child: Offstage(child: child),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final imageUrl = widget.url!;
-    final tag = widget.heroTag;
     final display = _displaySize(context);
     final maxW = MediaQuery.sizeOf(context).width;
     final maxH = MediaQuery.sizeOf(context).height;
@@ -538,18 +521,7 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
                     panEnabled: _isZoomed,
                     onInteractionStart: _onInteractionStart,
                     onInteractionEnd: _onInteractionEnd,
-                    child: Center(
-                      child: tag == null
-                          ? image
-                          : Hero(
-                              tag: tag,
-                              placeholderBuilder: _heroPlaceholder,
-                              child: Material(
-                                type: MaterialType.transparency,
-                                child: image,
-                              ),
-                            ),
-                    ),
+                    child: Center(child: image),
                   ),
                 ),
               ),
