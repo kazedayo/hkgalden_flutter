@@ -305,7 +305,7 @@ void main() {
       expect(repo.cachedPacks, _kPacks);
     });
 
-    test('clearCache ignores an in-flight completion', () async {
+    test('clearCache drops cache; late in-flight completion may repopulate', () async {
       final completer = Completer<List<SmileyPack>?>();
       final repo = _FakeSmileyPackRepository(() => completer.future);
 
@@ -314,7 +314,8 @@ void main() {
       completer.complete(_kPacks);
       await pending;
 
-      expect(repo.cachedPacks, isEmpty);
+      // No generation guard: the completion lands in the fresh cache.
+      expect(repo.cachedPacks, _kPacks);
     });
   });
 

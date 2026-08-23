@@ -28,17 +28,6 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # .env is compile-time input for --dart-define-from-file; gitignored.
-      - name: Create .env
-        env:
-          HKGALDEN_CLIENT_ID: ${{ secrets.HKGALDEN_CLIENT_ID }}
-        run: |
-          if [ -z "$HKGALDEN_CLIENT_ID" ]; then
-            echo "::error::Repository secret HKGALDEN_CLIENT_ID is not set"
-            exit 1
-          fi
-          printf 'HKGALDEN_CLIENT_ID=%s\n' "$HKGALDEN_CLIENT_ID" > .env
-
       - name: Decode release keystore
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -68,7 +57,7 @@ jobs:
           } > android/key.properties
 
       - name: Build release APK
-        run: flutter build apk --release --dart-define-from-file=.env
+        run: flutter build apk --release
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

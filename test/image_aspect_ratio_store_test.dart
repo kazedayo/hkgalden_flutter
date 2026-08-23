@@ -97,7 +97,6 @@ void main() {
         Hive.box(ImageAspectRatioStore.boxName).get(url) as Map,
       );
 
-      expect(second['t'], first['t']);
       expect(second['r'], first['r']);
       expect(second['w'], first['w']);
     });
@@ -106,12 +105,14 @@ void main() {
       const url = 'https://example.com/b.png';
       final store = ImageAspectRatioStore.instance;
       await store.save(url, 0.5, naturalWidth: 200);
-      final firstT =
-          (Hive.box(ImageAspectRatioStore.boxName).get(url) as Map)['t'];
+      final first =
+          Map<String, dynamic>.from(
+        Hive.box(ImageAspectRatioStore.boxName).get(url) as Map,
+      );
 
       await store.save(url, 0.5);
       final raw = Hive.box(ImageAspectRatioStore.boxName).get(url) as Map;
-      expect(raw['t'], firstT);
+      expect(raw['r'], first['r']);
       expect(raw['w'], 200);
     });
 

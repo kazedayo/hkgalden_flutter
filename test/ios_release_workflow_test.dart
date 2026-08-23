@@ -39,15 +39,12 @@ void main() {
     expect(workflow.contains('flutter pub get'), isTrue);
   });
 
-  test('materializes .env from HKGALDEN_CLIENT_ID secret with fail-fast', () {
-    expect(workflow.contains('HKGALDEN_CLIENT_ID'), isTrue);
-    expect(workflow.contains(r'${{ secrets.HKGALDEN_CLIENT_ID }}'), isTrue);
-    expect(workflow.contains('Create .env'), isTrue);
-    // Same spirit as android-release.yml: clear error when secret missing.
-    expect(
-      workflow.contains('Repository secret HKGALDEN_CLIENT_ID is not set'),
-      isTrue,
-    );
+  test('client id is compiled in, no .env materialization needed', () {
+    // OAuth client id is a public value hardcoded in HKGaldenApi; the
+    // workflow must not depend on a gitignored .env or dart-define.
+    expect(workflow.contains('HKGALDEN_CLIENT_ID'), isFalse);
+    expect(workflow.contains('dart-define'), isFalse);
+    expect(workflow.contains('Create .env'), isFalse);
   });
 
   test('installs code signing material from repository secrets', () {
@@ -171,7 +168,6 @@ void main() {
     expect(headerEnd, greaterThan(0), reason: 'workflow must declare name:');
     final header = workflow.substring(0, headerEnd);
     for (final name in [
-      'HKGALDEN_CLIENT_ID',
       'IOS_DISTRIBUTION_CERTIFICATE_BASE64',
       'IOS_DISTRIBUTION_CERTIFICATE_PASSWORD',
       'IOS_PROVISIONING_PROFILE_BASE64',
@@ -208,17 +204,13 @@ void main() {
     expect(plist.contains('R3W953ED69'), isTrue, reason: 'team id must match DEVELOPMENT_TEAM');
   });
 
-  test('aligns with android-release.yml patterns (checkout, Flutter, .env fail-fast)', () {
+  test('aligns with android-release.yml patterns (checkout, Flutter)', () {
     expect(androidWorkflow.existsSync(), isTrue);
     final android = androidWorkflow.readAsStringSync();
     expect(android.contains('actions/checkout@v4'), isTrue);
     expect(android.contains('subosito/flutter-action'), isTrue);
-    expect(android.contains('Create .env'), isTrue);
-    expect(android.contains('HKGALDEN_CLIENT_ID'), isTrue);
 
     expect(workflow.contains('actions/checkout@v4'), isTrue);
     expect(workflow.contains('subosito/flutter-action'), isTrue);
-    expect(workflow.contains('Create .env'), isTrue);
-    expect(workflow.contains('HKGALDEN_CLIENT_ID'), isTrue);
   });
 }

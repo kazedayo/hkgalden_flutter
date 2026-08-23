@@ -77,7 +77,6 @@ class ImageAspectRatioStore {
     }
     final map = <String, dynamic>{
       'r': aspectRatio,
-      't': DateTime.now().millisecondsSinceEpoch,
     };
     if (width != null && isValidNaturalWidth(width)) {
       map['w'] = width;
@@ -110,22 +109,9 @@ class ImageAspectRatioStore {
   }
 
   Future<void> _evictOldestIfNeeded() async {
-    if (_box.length <= maxEntries) {
-      return;
-    }
-    final entries = <MapEntry<dynamic, int>>[];
-    for (final key in _box.keys) {
-      final raw = _box.get(key);
-      final t = raw is Map ? (raw['t'] as num?)?.toInt() ?? 0 : 0;
-      entries.add(MapEntry(key, t));
-    }
-    entries.sort((a, b) => a.value.compareTo(b.value));
-    final overflow = entries.length - maxEntries;
-    if (overflow <= 0) {
-      return;
-    }
-    for (var i = 0; i < overflow; i++) {
-      await _box.delete(entries[i].key);
+    final overflow = _box.length - maxEntries;
+    if (overflow > 0) {
+      await _box.deleteAll(_box.keys.take(overflow));
     }
   }
 }

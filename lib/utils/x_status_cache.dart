@@ -61,25 +61,23 @@ class XStatusCache {
       return null;
     }
 
-    final statusRaw = decoded['status'] ?? decoded['tweet'];
+    final statusRaw = decoded['status'];
     if (statusRaw is! Map) {
       return null;
     }
     final status = Map<String, dynamic>.from(statusRaw);
 
-    Map<String, dynamic>? author;
-    final statusAuthor = status['author'];
-    if (statusAuthor is Map) {
-      author = Map<String, dynamic>.from(statusAuthor);
-    } else if (decoded['author'] is Map) {
-      author = Map<String, dynamic>.from(decoded['author'] as Map);
+    final authorRaw = status['author'];
+    if (authorRaw is! Map) {
+      return null;
     }
+    final author = Map<String, dynamic>.from(authorRaw);
 
-    final authorName = author?['name'];
+    final authorName = author['name'];
     final name = authorName is String && authorName.isNotEmpty
         ? authorName
-        : (author?['screen_name'] is String
-            ? author!['screen_name'] as String
+        : (author['screen_name'] is String
+            ? author['screen_name'] as String
             : null);
     if (name == null || name.isEmpty) {
       return null;
@@ -88,11 +86,11 @@ class XStatusCache {
     final textRaw = status['text'];
     final text = textRaw is String ? textRaw.trim() : '';
 
-    final screenName = author?['screen_name'] is String
-        ? author!['screen_name'] as String
+    final screenName = author['screen_name'] is String
+        ? author['screen_name'] as String
         : null;
-    final authorUrl = author?['url'] is String
-        ? author!['url'] as String
+    final authorUrl = author['url'] is String
+        ? author['url'] as String
         : (screenName != null ? 'https://x.com/$screenName' : null);
 
     return XStatusInfo(
@@ -111,49 +109,23 @@ class XStatusCache {
     }
     final media = Map<String, dynamic>.from(mediaRaw);
 
-    String? fromList(Object? list, {bool photosOnly = false}) {
-      if (list is! List) {
-        return null;
-      }
+    String? pick(Object? list, List<String> keys) {
+      if (list is! List) return null;
       for (final item in list) {
-        if (item is! Map) {
-          continue;
-        }
-        final entry = Map<String, dynamic>.from(item);
-        final type = entry['type'];
-        if (photosOnly && type != null && type != 'photo') {
-          continue;
-        }
-        if (type == 'photo' || photosOnly) {
-          final url = entry['url'];
-          if (url is String && url.isNotEmpty) {
-            return previewImageUrl(url);
-          }
-        }
-      }
-      // Thumbnails for video / gif / etc.
-      for (final item in list) {
-        if (item is! Map) {
-          continue;
-        }
-        final entry = Map<String, dynamic>.from(item);
-        for (final key in const [
-          'thumbnail_url',
-          'thumbnail',
-          'preview_image_url',
-        ]) {
-          final thumb = entry[key];
-          if (thumb is String && thumb.isNotEmpty) {
-            return previewImageUrl(thumb);
-          }
+        if (item is! Map) continue;
+        for (final key in keys) {
+          final url = item[key];
+          if (url is String && url.isNotEmpty) return previewImageUrl(url);
         }
       }
       return null;
     }
 
-    return fromList(media['photos'], photosOnly: true) ??
-        fromList(media['all']) ??
-        fromList(media['videos']);
+    const photoKeys = ['url'];
+    const thumbKeys = ['thumbnail_url', 'thumbnail', 'preview_image_url'];
+    return pick(media['photos'], photoKeys) ??
+        pick(media['all'], thumbKeys) ??
+        pick(media['videos'], thumbKeys);
   }
 
   /// Prefer a smaller pbs.twimg.com variant for list previews.

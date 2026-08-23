@@ -1,5 +1,5 @@
-import 'package:hkgalden_flutter/bloc/cubit/compose_cubit.dart';
-import 'package:hkgalden_flutter/bloc/cubit/compose_state.dart';
+import 'package:hkgalden_flutter/bloc/compose/compose_cubit.dart';
+import 'package:hkgalden_flutter/bloc/compose/compose_state.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';

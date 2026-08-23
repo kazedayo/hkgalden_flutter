@@ -18,8 +18,9 @@ import 'package:hkgalden_flutter/ui/common/styled_html_view.dart';
 import 'package:hkgalden_flutter/ui/common/thread_tag_chip.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
 
-import 'package:hkgalden_flutter/bloc/cubit/compose_cubit.dart';
-import 'package:hkgalden_flutter/bloc/cubit/compose_state.dart';
+import 'package:hkgalden_flutter/bloc/compose/compose_cubit.dart';
+import 'package:hkgalden_flutter/bloc/compose/compose_state.dart';
+import 'package:hkgalden_flutter/models/channel.dart';
 import 'package:hkgalden_flutter/models/smiley.dart';
 import 'package:hkgalden_flutter/models/smiley_pack.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
@@ -27,10 +28,6 @@ import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
 import 'package:hkgalden_flutter/networking/image_upload_api.dart';
 import 'package:hkgalden_flutter/utils/smiley_embed.dart';
 
-part 'widgets/compose_page_tag_select_dialog.dart';
-part 'widgets/toolbar_button.dart';
-part 'widgets/link_dialog.dart';
-part 'widgets/image_insert_dialog.dart';
 part 'widgets/rich_text_toolbar.dart';
 part 'widgets/rich_text_editor.dart';
 part 'widgets/smiley_pane.dart';
@@ -242,6 +239,10 @@ class ComposePageState extends State<ComposePage> {
                                   child: SizedBox(
                                 height: MediaQuery.sizeOf(context).height / 3,
                                 child: _TagSelectDialog(
+                                  channels: (BlocProvider.of<ChannelCubit>(
+                                              context)
+                                          .state as ChannelLoaded)
+                                      .channels,
                                   onTagSelect: (tag, channelId) {
                                     Navigator.of(context).pop();
                                     setState(() {
@@ -349,5 +350,60 @@ class ComposePageState extends State<ComposePage> {
       }
       return '';
     });
+  }
+}
+
+class _TagSelectDialog extends StatelessWidget {
+  final List<Channel> channels;
+  final Function(Tag, String) onTagSelect;
+
+  const _TagSelectDialog({required this.channels, required this.onTagSelect});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: channels
+            .map(
+              (channel) => Container(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(channel.channelName,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall!
+                            .copyWith(color: Colors.white60)),
+                    Wrap(
+                      spacing: 8,
+                      children: channel.tags
+                          .map(
+                            (tag) => InputChip(
+                              label: Text('#${tag.name}',
+                                  strutStyle: const StrutStyle(height: 1.25),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall!
+                                      .copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700)),
+                              backgroundColor: tag.color,
+                              side: BorderSide.none,
+                              onPressed: () {
+                                onTagSelect(tag, channel.channelId);
+                              },
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
+                ),
+              ),
+            )
+            .toList(),
+      ),
+    );
   }
 }

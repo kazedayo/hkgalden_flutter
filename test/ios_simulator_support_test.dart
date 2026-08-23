@@ -6,7 +6,6 @@ void main() {
   final root = Directory.current.path;
   final pbx = File('$root/ios/Runner.xcodeproj/project.pbxproj');
   final pubspec = File('$root/pubspec.yaml');
-  final env = File('$root/.env');
   final mainDart = File('$root/lib/main.dart');
 
   test('project.pbxproj exists and allows iphonesimulator', () {
@@ -56,12 +55,12 @@ void main() {
     }
   });
 
-  test('.env exists for --dart-define-from-file and is not a Flutter asset', () {
-    expect(env.existsSync(), isTrue,
-        reason: '.env required by --dart-define-from-file=.env');
-    final pub = pubspec.readAsStringSync();
-    expect(pub.contains('.env'), isFalse,
-        reason: 'client id is compile-time; do not bundle .env');
+  test('client id is compiled in; no .env needed', () {
+    final api = File('$root/lib/networking/hkgalden_api.dart').readAsStringSync();
+    expect(api.contains('String.fromEnvironment'), isFalse,
+        reason: 'client id must be a compile-time constant, no dart-define');
+    expect(File('$root/.env').existsSync(), isFalse,
+        reason: '.env is no longer an input; do not reintroduce it');
   });
 
   test('lib/main.dart is the Flutter entry point', () {

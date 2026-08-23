@@ -200,8 +200,8 @@ class _GqlFragments {
 }
 
 class HKGaldenApi {
-  static const String clientId =
-      String.fromEnvironment('HKGALDEN_CLIENT_ID');
+  // OAuth public client id — embedded in the shipped binary, not a secret.
+  static const String clientId = '15897154848030720.apis.hkgalden.org';
   static final HttpLink _api = HttpLink('https://hkgalden.org/_');
 
   static final AuthLink _bearerToken = AuthLink(getToken: () async {

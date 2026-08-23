@@ -2,9 +2,6 @@
 #
 # Required repository secrets (GitHub → Settings → Secrets and variables → Actions):
 #
-#   HKGALDEN_CLIENT_ID
-#     App client id compiled in via --dart-define-from-file=.env (same as Android).
-#
 #   IOS_DISTRIBUTION_CERTIFICATE_BASE64
 #     Base64-encoded Apple Distribution .p12 certificate
 #     (openssl base64 -A -in cert.p12 | pbcopy).
@@ -52,17 +49,6 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
-
-      # .env is compile-time input for --dart-define-from-file; gitignored.
-      - name: Create .env
-        env:
-          HKGALDEN_CLIENT_ID: ${{ secrets.HKGALDEN_CLIENT_ID }}
-        run: |
-          if [ -z "$HKGALDEN_CLIENT_ID" ]; then
-            echo "::error::Repository secret HKGALDEN_CLIENT_ID is not set"
-            exit 1
-          fi
-          printf 'HKGALDEN_CLIENT_ID=%s\n' "$HKGALDEN_CLIENT_ID" > .env
 
       - name: Verify required signing and App Store Connect secrets
         env:
@@ -175,7 +161,6 @@ jobs:
           # build number than the previous upload. It overrides the `+<build>` in
           # pubspec.yaml for the iOS build only; Android is unaffected.
           flutter build ipa --release \
-            --dart-define-from-file=.env \
             --build-number=$GITHUB_RUN_NUMBER \
             --export-options-plist=ios/ExportOptions.ci.plist
           # Fail clearly if no IPA was produced.

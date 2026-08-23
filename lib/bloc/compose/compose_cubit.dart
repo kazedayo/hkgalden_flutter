@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hkgalden_flutter/bloc/cubit/compose_state.dart';
+import 'package:hkgalden_flutter/bloc/compose/compose_state.dart';
 import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 

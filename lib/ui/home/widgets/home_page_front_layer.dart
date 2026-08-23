@@ -61,10 +61,10 @@ Widget _buildFrontLayer(
 
 bool _sameBlockedUsers(SessionUserState a, SessionUserState b) {
   List<String> ids(SessionUserState s) => s is SessionUserLoaded
-      ? List<String>.from(s.sessionUser.blockedUsers)
+      ? (List<String>.from(s.sessionUser.blockedUsers)..sort())
       : const <String>[];
-  final left = ids(a)..sort();
-  final right = ids(b)..sort();
+  final left = ids(a);
+  final right = ids(b);
   if (left.length != right.length) {
     return false;
   }
