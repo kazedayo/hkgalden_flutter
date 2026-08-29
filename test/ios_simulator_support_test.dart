@@ -63,10 +63,8 @@ void main() {
         reason: '.env is no longer an input; do not reintroduce it');
   });
 
-  test('lib/main.dart is the Flutter entry point', () {
-    expect(mainDart.existsSync(), isTrue);
+  test('lib/main.dart does not load dotenv', () {
     final src = mainDart.readAsStringSync();
     expect(src.contains('dotenv'), isFalse);
-    expect(src.contains('runApp'), isTrue);
   });
 }

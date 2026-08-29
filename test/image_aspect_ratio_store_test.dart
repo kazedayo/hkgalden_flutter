@@ -43,10 +43,8 @@ void main() {
   });
 
   group('ImageAspectRatioStore.fallbackAspectRatio', () {
-    test('is 3/4 so reserved height = maxWidth * 3/4', () {
+    test('is 3/4', () {
       expect(ImageAspectRatioStore.fallbackAspectRatio, 3 / 4);
-      const maxWidth = 400.0;
-      expect(maxWidth * ImageAspectRatioStore.fallbackAspectRatio, 300.0);
     });
   });
 
@@ -88,17 +86,13 @@ void main() {
       const url = 'https://example.com/a.png';
       final store = ImageAspectRatioStore.instance;
       await store.save(url, 0.75, naturalWidth: 400);
-      final first = Map<String, dynamic>.from(
-        Hive.box(ImageAspectRatioStore.boxName).get(url) as Map,
-      );
+      final stored = Hive.box(ImageAspectRatioStore.boxName).get(url);
 
       await store.save(url, 0.75, naturalWidth: 400);
-      final second = Map<String, dynamic>.from(
-        Hive.box(ImageAspectRatioStore.boxName).get(url) as Map,
+      expect(
+        identical(Hive.box(ImageAspectRatioStore.boxName).get(url), stored),
+        isTrue,
       );
-
-      expect(second['r'], first['r']);
-      expect(second['w'], first['w']);
     });
 
     test('skips rewrite when only ratio is sent and already matches', () async {

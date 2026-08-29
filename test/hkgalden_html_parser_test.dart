@@ -134,8 +134,7 @@ void main() {
     test('empty string parse does not throw', () {
       String? output;
       expect(() => output = parser.parse(''), returnsNormally);
-      expect(output, isNotNull);
-      expect(output, isA<String>());
+      expect(output, '');
     });
 
     test('malformed HTML still returns a string', () {
@@ -143,8 +142,10 @@ void main() {
           '<div><span data-nodetype="b"><i>unclosed and <<<<weird';
       String? output;
       expect(() => output = parser.parse(html), returnsNormally);
-      expect(output, isNotNull);
-      expect(output, isA<String>());
+      expect(output, contains('unclosed'));
+      expect(output, contains('<b>'));
+      expect(output, contains('</b>'));
+      expect(output, isNot(contains('data-nodetype')));
     });
 
     test('nested b+i+u styles work in single pass', () {

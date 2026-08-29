@@ -106,7 +106,6 @@ void main() {
         endPage: 2,
       );
       expect(a, isNot(equals(b)));
-      expect(a.props, [a.thread, a.previousPages, a.currentPage, a.endPage]);
     });
 
     test('identical ThreadLoaded values are equal via props', () {

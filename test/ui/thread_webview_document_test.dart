@@ -92,7 +92,7 @@ void main() {
     expect(html, contains('https://s.hkgalden.org/smilies/hkg/abc.gif'));
     expect(html, isNot(contains('<icon')));
     expect(html, contains('class="img-placeholder"'));
-    expect(html, contains(kQuotePreviewImagePlaceholder));
+    expect(html, contains('[圖片]'));
     expect(html, isNot(contains('cdn.example')));
     expect(html, isNot(contains('photo.png')));
     expect(html, isNot(contains('aspect-ratio')));

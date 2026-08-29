@@ -107,16 +107,8 @@ void main() {
 
         expect(html, contains('data-nodetype="img"'));
         expect(html, contains('data-src="$source"'));
-        expect(
-          html,
-          contains('data-sx="${DeltaJsonParser.defaultImageWidth}"'),
-        );
-        expect(
-          html,
-          contains('data-sy="${DeltaJsonParser.defaultImageHeight}"'),
-        );
-        expect(html, matches(RegExp(r'data-sx="\d+"')));
-        expect(html, matches(RegExp(r'data-sy="\d+"')));
+        expect(html, contains('data-sx="800"'));
+        expect(html, contains('data-sy="600"'));
       },
       timeout: const Timeout(Duration(seconds: 5)),
     );
@@ -138,14 +130,8 @@ void main() {
 
         expect(html, contains('data-nodetype="img"'));
         expect(html, contains('data-src="https://example.com/slow.png"'));
-        expect(
-          html,
-          contains('data-sx="${DeltaJsonParser.defaultImageWidth}"'),
-        );
-        expect(
-          html,
-          contains('data-sy="${DeltaJsonParser.defaultImageHeight}"'),
-        );
+        expect(html, contains('data-sx="800"'));
+        expect(html, contains('data-sy="600"'));
       },
       timeout: const Timeout(Duration(seconds: 10)),
     );

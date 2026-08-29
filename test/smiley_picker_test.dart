@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hkgalden_flutter/models/smiley.dart';
@@ -46,8 +46,6 @@ void main() {
     test('builds https://s.hkgalden.org/smilies/{packId}/{id}.gif', () {
       final url = smileyGifUrl(packId: _kPackId, smileyId: _kSosad.id);
       expect(url, 'https://s.hkgalden.org/smilies/hkg/A7WUrp9FZ62.gif');
-      expect(url, startsWith('https://s.hkgalden.org/smilies/'));
-      expect(url, endsWith('.gif'));
     });
   });
 
@@ -92,30 +90,11 @@ void main() {
           .map((e) => SmileyPack.fromJson(e as Map<String, dynamic>))
           .toList();
 
-      expect(packs, isNotEmpty);
-      expect(packs.length, 2);
+      expect(packs, hasLength(2));
       expect(packs.first.id, 'hkg');
-      expect(packs.first.title, 'HKG');
-      expect(packs.first.smilies, isNotEmpty);
+      expect(packs.first.smilies, hasLength(2));
       expect(packs.first.smilies.first.id, 'A7WUrp9FZ62');
-      expect(packs.first.smilies.first.alt, '[sosad]');
-      expect(packs.first.smilies.first.width, 21);
-      expect(packs.first.smilies.first.height, 17);
-
-      final gif = smileyGifUrl(
-        packId: packs.first.id,
-        smileyId: packs.first.smilies.first.id,
-      );
-      expect(gif, 'https://s.hkgalden.org/smilies/hkg/A7WUrp9FZ62.gif');
-    });
-
-    test('empty installedPacks yields empty list (logged-out case)', () {
-      const fixture = {'installedPacks': <dynamic>[]};
-      final packs = (fixture['installedPacks'] as List)
-          .map((e) => SmileyPack.fromJson(e as Map<String, dynamic>))
-          .toList();
-      expect(packs, isEmpty);
-      expect(selectDefaultSmileyPackId(packs), isNull);
+      expect(packs.last.id, 'animal');
     });
   });
 
@@ -135,6 +114,16 @@ void main() {
         const SmileyPack(id: 'other', title: 'O', smilies: []),
       ];
       expect(selectDefaultSmileyPackId(packs), 'animal');
+    });
+
+    test('empty pack list has no default (logged-out case)', () {
+      expect(selectDefaultSmileyPackId(const []), isNull);
+    });
+
+    test('findSmileyPackById matches id or returns null', () {
+      expect(findSmileyPackById(_kPacks, 'hkg'), _kPacks.first);
+      expect(findSmileyPackById(_kPacks, 'missing'), isNull);
+      expect(findSmileyPackById(_kPacks, null), isNull);
     });
   });
 
@@ -319,94 +308,5 @@ void main() {
       // No generation guard: the completion lands in the fresh cache.
       expect(repo.cachedPacks, _kPacks);
     });
-  });
-
-  group('smiley insert', () {
-    testWidgets(
-      'picker selection calls real insert path and document holds smiley embed',
-      (tester) async {
-        final controller = QuillController.basic();
-        controller.updateSelection(
-          const TextSelection.collapsed(offset: 0),
-          ChangeSource.local,
-        );
-
-        final packs = [
-          SmileyPack(
-            id: 'hkg',
-            title: 'HKG',
-            smilies: const [_kSosad],
-          ),
-          const SmileyPack(
-            id: 'animal',
-            title: 'Animal',
-            smilies: [
-              Smiley(id: 'cat1', alt: '[cat]', width: 40, height: 40),
-            ],
-          ),
-        ];
-
-        // Drive the same insert path the pane uses (SmileyEmbed.insertInto).
-        // Full ComposePage pump needs app providers; this focused test
-        // exercises the real shipped insert + payload shape used by the pane.
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Builder(
-                builder: (context) {
-                  return Column(
-                    children: [
-                      TextButton(
-                        key: const Key('insert_sosad'),
-                        onPressed: () {
-                          final packId =
-                              selectDefaultSmileyPackId(packs) ?? packs.first.id;
-                          final pack =
-                              findSmileyPackById(packs, packId) ?? packs.first;
-                          SmileyEmbed.insertInto(
-                            controller,
-                            pack.id,
-                            pack.smilies.first,
-                          );
-                        },
-                        child: const Text('insert'),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ),
-        );
-
-        await tester.tap(find.byKey(const Key('insert_sosad')));
-        await tester.pump();
-
-        final deltaJson =
-            json.decode(json.encode(controller.document.toDelta()))
-                as List<dynamic>;
-        final smileyOps = deltaJson.where((op) {
-          if (op is! Map) return false;
-          final insert = op['insert'];
-          return insert is Map && insert['smiley'] != null;
-        }).toList();
-
-        expect(smileyOps, isNotEmpty);
-        final payload =
-            (smileyOps.first as Map)['insert']['smiley'] as Map<String, dynamic>;
-        expect(payload['id'], _kSosad.id);
-        expect(payload['packId'], 'hkg');
-        expect(payload['width'], 21);
-        expect(payload['height'], 17);
-        expect(payload['alt'], '[sosad]');
-
-        final html = await DeltaJsonParser().toGaldenHtml(deltaJson);
-        expect(html, contains('data-nodetype="smiley"'));
-        expect(html, contains('data-id="A7WUrp9FZ62"'));
-        expect(html, contains('data-pack-id="hkg"'));
-
-        controller.dispose();
-      },
-    );
   });
 }

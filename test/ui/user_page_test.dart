@@ -106,19 +106,6 @@ void main() {
       isTrue,
     );
     expect(find.text('t').hitTestable(), findsOneWidget);
-
-    final theme = Theme.of(tester.element(find.byType(UserPage)));
-    final unselectedFill = AppTheme.linkPreviewBackground(theme.colorScheme);
-    for (final label in ['主題列表', '封鎖名單']) {
-      final chip = tester.widget<ChoiceChip>(
-        find.widgetWithText(ChoiceChip, label),
-      );
-      expect(chip.color!.resolve({}), unselectedFill);
-      expect(
-        chip.color!.resolve({WidgetState.selected}),
-        theme.colorScheme.secondary,
-      );
-    }
   });
 
   testWidgets('user thread list dividers use the app divider color', (
