@@ -85,23 +85,6 @@ class DeltaJsonParser {
       String text, Map<String, dynamic> attributes) async {
     String styled = _escapeHtmlText(text);
 
-    final embedValue = attributes['embed'];
-    if (embedValue is Map) {
-      final embed = Map<String, dynamic>.from(embedValue);
-      final embedType = embed['type'];
-      if (embedType == 'image' && embed['source'] is String) {
-        final source = embed['source'] as String;
-        final image = await _getImageDimension(source);
-        styled =
-            '<span ${GaldenNodeTypes.dataNodetype}="${GaldenNodeTypes.img}" ${GaldenNodeTypes.dataSrc}="${_escapeHtmlAttr(source)}" ${GaldenNodeTypes.dataSx}="${image.width}" ${GaldenNodeTypes.dataSy}="${image.height}"></span>';
-      } else if (embedType == 'smiley') {
-        final smileyHtml = _smileyEmbedToHtml(embed);
-        if (smileyHtml != null) {
-          styled = smileyHtml;
-        }
-      }
-    }
-
     if (attributes.containsKey(GaldenNodeTypes.s)) {
       styled =
           '<span ${GaldenNodeTypes.dataNodetype}="${GaldenNodeTypes.s}">$styled</span>';
@@ -160,24 +143,15 @@ class DeltaJsonParser {
   }
 
   String? _smileyEmbedToHtml(Map<String, dynamic> embed) {
-    final id = _readEmbedString(embed, const [
-      'id',
-      'data-id',
-      'smileyId',
-    ]);
-    final packId = _readEmbedString(embed, const [
-      'packId',
-      'pack-id',
-      'data-pack-id',
-    ]);
+    final id = _readEmbedString(embed, const ['id']);
+    final packId = _readEmbedString(embed, const ['packId']);
     if (id == null || packId == null) {
       return null;
     }
 
-    // Editor payload uses width/height; Zefyr/legacy and HTML use sx/sy.
-    final sx = _readEmbedString(embed, const ['sx', 'data-sx', 'width']);
-    final sy = _readEmbedString(embed, const ['sy', 'data-sy', 'height']);
-    final alt = _readEmbedString(embed, const ['alt', 'data-alt']);
+    final sx = _readEmbedString(embed, const ['width']);
+    final sy = _readEmbedString(embed, const ['height']);
+    final alt = _readEmbedString(embed, const ['alt']);
 
     final buffer = StringBuffer()
       ..write('<span ${GaldenNodeTypes.dataNodetype}="${GaldenNodeTypes.smiley}"')

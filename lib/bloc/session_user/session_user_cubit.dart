@@ -19,40 +19,26 @@ class SessionUserCubit extends Cubit<SessionUserState> {
     }
   }
 
-  Future<bool> appendUserToBlockList(String userId) async {
-    if (state is! SessionUserLoaded) {
-      return false;
-    }
-    final isSuccess = await _api.blockUser(userId);
-    if (isSuccess != true) {
-      return false;
-    }
-    final List<String> blockedUsers =
-        (state as SessionUserLoaded).sessionUser.blockedUsers.toList()
-          ..add(userId);
-    emit(SessionUserLoaded(
-      sessionUser: (state as SessionUserLoaded)
-          .sessionUser
-          .copyWith(blockedUsers: blockedUsers),
-    ));
-    return true;
-  }
+  Future<bool> appendUserToBlockList(String userId) =>
+      _setBlocked(userId, add: true);
 
-  Future<bool> removeUserFromBlockList(String userId) async {
+  Future<bool> removeUserFromBlockList(String userId) =>
+      _setBlocked(userId, add: false);
+
+  Future<bool> _setBlocked(String userId, {required bool add}) async {
     if (state is! SessionUserLoaded) {
       return false;
     }
-    final isSuccess = await _api.unblockUser(userId);
+    final isSuccess =
+        add ? await _api.blockUser(userId) : await _api.unblockUser(userId);
     if (isSuccess != true) {
       return false;
     }
-    final List<String> blockedUsers =
-        (state as SessionUserLoaded).sessionUser.blockedUsers.toList()
-          ..remove(userId);
+    final sessionUser = (state as SessionUserLoaded).sessionUser;
+    final List<String> blockedUsers = sessionUser.blockedUsers.toList();
+    add ? blockedUsers.add(userId) : blockedUsers.remove(userId);
     emit(SessionUserLoaded(
-      sessionUser: (state as SessionUserLoaded)
-          .sessionUser
-          .copyWith(blockedUsers: blockedUsers),
+      sessionUser: sessionUser.copyWith(blockedUsers: blockedUsers),
     ));
     return true;
   }

@@ -71,17 +71,13 @@ class HKGaldenHtmlParser {
       case GaldenNodeTypes.smiley:
         final packId = element.getAttribute(GaldenNodeTypes.dataPackId);
         final id = element.getAttribute(GaldenNodeTypes.dataId);
-        if (packId == null ||
-            packId.isEmpty ||
-            id == null ||
-            id.isEmpty) {
+        if (packId == null || packId.isEmpty || id == null || id.isEmpty) {
           return element;
         }
-        return Element.tag('icon')
-          ..setAttribute(
-            'src',
-            'https://s.hkgalden.org/smilies/$packId/$id.gif',
-          );
+        return Element.tag('icon')..setAttribute(
+          'src',
+          'https://s.hkgalden.org/smilies/$packId/$id.gif',
+        );
       case GaldenNodeTypes.img:
         final src = element.getAttribute(GaldenNodeTypes.dataSrc);
         if (src == null || src.isEmpty) {
@@ -89,11 +85,7 @@ class HKGaldenHtmlParser {
         }
         final sx = element.getAttribute(GaldenNodeTypes.dataSx);
         final sy = element.getAttribute(GaldenNodeTypes.dataSy);
-        final img = Element.img()
-          ..setAttribute(
-            'src',
-            src,
-          );
+        final img = Element.img()..setAttribute('src', src);
         if (sx != null && sx.isNotEmpty) {
           img.setAttribute(GaldenNodeTypes.dataSx, sx);
         }
@@ -106,11 +98,7 @@ class HKGaldenHtmlParser {
         if (href == null || href.isEmpty) {
           return element;
         }
-        final anchor = Element.a()
-          ..setAttribute(
-            'href',
-            href,
-          );
+        final anchor = Element.a()..setAttribute('href', href);
         if (element.hasChildNodes()) {
           _moveChildNodes(element, anchor);
         } else {
@@ -167,11 +155,9 @@ class HKGaldenHtmlParser {
   }
 
   String _escapeHtml(String text) {
-    return const HtmlEscape(HtmlEscapeMode(
-      escapeLtGt: true,
-      escapeQuot: true,
-      escapeApos: true,
-    )).convert(text);
+    return const HtmlEscape(
+      HtmlEscapeMode(escapeLtGt: true, escapeQuot: true, escapeApos: true),
+    ).convert(text);
   }
 
   String? _buildQuoteChain(
@@ -222,23 +208,14 @@ class HKGaldenHtmlParser {
     return buffer.toString();
   }
 
-  String? commentWithQuotes(Reply reply, SessionUserState state) {
-    if (state is SessionUserLoaded) {
-      return _buildQuoteChain(
+  String? commentWithQuotes(Reply reply, SessionUserState state) =>
+      _buildQuoteChain(
         reply,
         includeStartAsQuote: false,
-        isBlocked: (userId) =>
-            state.sessionUser.blockedUsers.contains(userId),
+        isBlocked: state is SessionUserLoaded
+            ? (userId) => state.sessionUser.blockedUsers.contains(userId)
+            : null,
       );
-    }
-    if (state is SessionUserUndefined) {
-      return _buildQuoteChain(
-        reply,
-        includeStartAsQuote: false,
-      );
-    }
-    return reply.content ?? '';
-  }
 
   String? replyWithQuotes(Reply reply, SessionUserLoaded state) {
     return _buildQuoteChain(

@@ -19,11 +19,7 @@ Widget buildThreadPageFab(
     child: FloatingActionButton(
       heroTag: null,
       onPressed: () => !pageUi.canReply.value
-          ? showCustomAlert(
-              context: context,
-              title: '未登入',
-              content: '請先登入',
-            )
+          ? showLoginRequired(context)
           : showComposeSheet(
               context: context,
               builder: (context) => ComposePage(

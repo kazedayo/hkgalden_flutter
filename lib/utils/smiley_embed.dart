@@ -5,10 +5,7 @@ import 'package:hkgalden_flutter/models/smiley_pack.dart';
 
 const String kDefaultSmileyPackId = 'hkg';
 
-String smileyGifUrl({
-  required String packId,
-  required String smileyId,
-}) =>
+String smileyGifUrl({required String packId, required String smileyId}) =>
     'https://s.hkgalden.org/smilies/$packId/$smileyId.gif';
 
 String? selectDefaultSmileyPackId(List<SmileyPack> packs) {
@@ -27,12 +24,12 @@ abstract final class SmileyEmbed {
 
   /// Payload stored under insert key [type] in the document delta.
   static Map<String, dynamic> payload(String packId, Smiley smiley) => {
-        'id': smiley.id,
-        'packId': packId,
-        'width': smiley.width,
-        'height': smiley.height,
-        'alt': smiley.alt,
-      };
+    'id': smiley.id,
+    'packId': packId,
+    'width': smiley.width,
+    'height': smiley.height,
+    'alt': smiley.alt,
+  };
 
   static Embeddable create(String packId, Smiley smiley) =>
       Embeddable(type, payload(packId, smiley));
@@ -47,12 +44,7 @@ abstract final class SmileyEmbed {
     final length = controller.selection.extentOffset - index;
     final safeIndex = index < 0 ? 0 : index;
     final safeLength = length < 0 ? 0 : length;
-    controller.replaceText(
-      safeIndex,
-      safeLength,
-      create(packId, smiley),
-      null,
-    );
+    controller.replaceText(safeIndex, safeLength, create(packId, smiley), null);
     controller.updateSelection(
       TextSelection.collapsed(offset: safeIndex + 1),
       ChangeSource.local,

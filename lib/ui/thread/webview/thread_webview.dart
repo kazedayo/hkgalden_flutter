@@ -216,13 +216,6 @@ class _ThreadWebViewState extends State<ThreadWebView> {
     }
   }
 
-  List<ThreadWebViewReplyDto> _dtoList(
-    Iterable<Reply> replies,
-    SessionUserState session,
-  ) {
-    return _document.serializeReplies(replies, session);
-  }
-
   void _pushThemeAndChrome(ThreadLoaded state, SessionUserState session) {
     final padding = MediaQuery.viewPaddingOf(context);
     _js.send('setTheme', threadWebViewThemeTokens());
@@ -268,8 +261,8 @@ class _ThreadWebViewState extends State<ThreadWebView> {
     _indexReplies(state.previousPages.replies);
     _indexReplies(state.thread.replies);
     _pushThemeAndChrome(state, session);
-    final previous = _dtoList(state.previousPages.replies, session);
-    final replies = _dtoList(state.thread.replies, session);
+    final previous = _document.serializeReplies(state.previousPages.replies, session);
+    final replies = _document.serializeReplies(state.thread.replies, session);
     await _js.send('renderThread', {
       'previous': [for (final dto in previous) dto.toJson()],
       'replies': [for (final dto in replies) dto.toJson()],
@@ -314,7 +307,7 @@ class _ThreadWebViewState extends State<ThreadWebView> {
         previous.length - _renderedPreviousCount,
       );
       _indexReplies(added);
-      final dtos = _dtoList(added, session);
+      final dtos = _document.serializeReplies(added, session);
       _js.send('prependReplies', {
         'replies': [for (final dto in dtos) dto.toJson()],
       });
@@ -336,7 +329,7 @@ class _ThreadWebViewState extends State<ThreadWebView> {
         final added = state.thread.replies.sublist(_renderedMainCount);
         if (added.isNotEmpty) {
           _indexReplies(added);
-          final dtos = _dtoList(added, session);
+          final dtos = _document.serializeReplies(added, session);
           _js.send('appendReplies', {
             'replies': [for (final dto in dtos) dto.toJson()],
           });
@@ -362,7 +355,7 @@ class _ThreadWebViewState extends State<ThreadWebView> {
 
   void _replaceMain(ThreadLoaded state, SessionUserState session) {
     _indexReplies(state.thread.replies);
-    final dtos = _dtoList(state.thread.replies, session);
+    final dtos = _document.serializeReplies(state.thread.replies, session);
     _js.send('replaceLastPage', {
       'replies': [for (final dto in dtos) dto.toJson()],
     });
@@ -562,11 +555,7 @@ class _ThreadWebViewState extends State<ThreadWebView> {
 
   void _quote(ThreadWebViewInbound message) {
     if (!widget.pageUi.canReply.value) {
-      showCustomAlert(
-        context: context,
-        title: '未登入',
-        content: '請先登入',
-      );
+      showLoginRequired(context);
       return;
     }
     final replyId = message.string('replyId');

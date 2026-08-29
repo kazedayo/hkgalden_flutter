@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:backdrop/backdrop.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
@@ -75,13 +76,7 @@ class HomePageState extends State<HomePage>
             data: Theme.of(context)
                 .copyWith(highlightColor: const Color(0xff373d3c)),
             child: RepaintBoundary(
-              child: _buildFrontLayer(
-                context,
-                threadListBloc,
-                _scrollController,
-                _loadThread,
-                _jumpToPage,
-              ),
+              child: _buildFrontLayer(context, threadListBloc),
             ),
           ),
           frontLayerScrim: Colors.black.withAlpha(177),

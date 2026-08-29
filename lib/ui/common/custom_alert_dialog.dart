@@ -19,3 +19,7 @@ Future<void> showCustomAlert({
     ),
   );
 }
+
+Future<void> showLoginRequired(BuildContext context) {
+  return showCustomAlert(context: context, title: '未登入', content: '請先登入');
+}

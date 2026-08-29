@@ -31,7 +31,6 @@ class _ThreadPageState extends State<ThreadPage> with WidgetsBindingObserver {
   double _safeBottom = 0;
   int? _restoreFloor;
   int? _threadId;
-  final GlobalKey _skeletonKey = GlobalKey();
 
   @override
   void initState() {
@@ -161,7 +160,6 @@ class _ThreadPageState extends State<ThreadPage> with WidgetsBindingObserver {
                         ),
                       if (!_webView.contentReady.value)
                         Positioned.fill(
-                          key: _skeletonKey,
                           child: ColoredBox(
                             color: Theme.of(context).scaffoldBackgroundColor,
                             child: const ThreadPageLoadingSkeleton(),

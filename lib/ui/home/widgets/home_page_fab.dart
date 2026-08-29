@@ -14,11 +14,7 @@ Widget _buildFab(BuildContext context, ThreadListCubit threadListBloc) {
                         threadListBloc.load(channelId: channelId, page: 1),
                   ),
                 )
-              : showCustomAlert(
-                  context: context,
-                  title: '未登入',
-                  content: '請先登入',
-                ),
+              : showLoginRequired(context),
       child: const Icon(Icons.create_rounded),
     ),
   );

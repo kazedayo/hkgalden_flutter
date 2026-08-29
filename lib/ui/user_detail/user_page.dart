@@ -47,7 +47,7 @@ class _UserPageState extends State<UserPage> {
   Future<void> _blockUser() async {
     final session = context.read<SessionUserCubit>();
     if (session.state is! SessionUserLoaded) {
-      showCustomAlert(context: context, title: '未登入', content: '請先登入');
+      showLoginRequired(context);
       return;
     }
     if (_blocking) {

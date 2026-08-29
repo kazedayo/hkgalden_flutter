@@ -1,13 +1,7 @@
 part of '../home_page.dart';
 
 /// List body under [ThreadListCubit] (chrome stays outside).
-Widget _buildFrontLayer(
-  BuildContext context,
-  ThreadListCubit threadListBloc,
-  ScrollController scrollController,
-  Function(BuildContext, Thread) loadThread,
-  Function(BuildContext, Thread) jumpToPage,
-) {
+Widget _buildFrontLayer(BuildContext context, ThreadListCubit threadListBloc) {
   return Material(
     color: Theme.of(context).primaryColor,
     child: BlocBuilder<ThreadListCubit, ThreadListState>(
@@ -47,9 +41,6 @@ Widget _buildFrontLayer(
                 state,
                 sessionState,
                 channelCubit,
-                scrollController,
-                loadThread,
-                jumpToPage,
               );
             },
           ),
@@ -63,29 +54,13 @@ bool _sameBlockedUsers(SessionUserState a, SessionUserState b) {
   List<String> ids(SessionUserState s) => s is SessionUserLoaded
       ? (List<String>.from(s.sessionUser.blockedUsers)..sort())
       : const <String>[];
-  final left = ids(a);
-  final right = ids(b);
-  if (left.length != right.length) {
-    return false;
-  }
-  for (var i = 0; i < left.length; i++) {
-    if (left[i] != right[i]) {
-      return false;
-    }
-  }
-  return true;
+  return listEquals(ids(a), ids(b));
 }
 
 List<Thread> _filterVisibleThreads(
   List<Thread> threads,
   Set<String> blockedUserIds,
 ) {
-  if (blockedUserIds.isEmpty) {
-    return [
-      for (final thread in threads)
-        if (thread.replies.isNotEmpty) thread,
-    ];
-  }
   return [
     for (final thread in threads)
       if (thread.replies.isNotEmpty &&
@@ -99,9 +74,6 @@ Widget _frontLayerBody(
   ThreadListState state,
   SessionUserState sessionState,
   ChannelCubit channelCubit,
-  ScrollController scrollController,
-  Function(BuildContext, Thread) loadThread,
-  Function(BuildContext, Thread) jumpToPage,
 ) {
   if (state is ThreadListLoading) {
     return ListLoadingSkeleton();
@@ -114,12 +86,7 @@ Widget _frontLayerBody(
     final visibleThreads =
         _filterVisibleThreads(state.threads, blockedUserIds);
 
-    return _ThreadListView(
-      threads: visibleThreads,
-      scrollController: scrollController,
-      loadThread: loadThread,
-      jumpToPage: jumpToPage,
-    );
+    return _ThreadListView(threads: visibleThreads);
   }
   if (state is ThreadListError) {
     final channelState = channelCubit.state;
@@ -141,16 +108,8 @@ Widget _frontLayerBody(
 
 class _ThreadListView extends StatefulWidget {
   final List<Thread> threads;
-  final ScrollController scrollController;
-  final void Function(BuildContext, Thread) loadThread;
-  final void Function(BuildContext, Thread) jumpToPage;
 
-  const _ThreadListView({
-    required this.threads,
-    required this.scrollController,
-    required this.loadThread,
-    required this.jumpToPage,
-  });
+  const _ThreadListView({required this.threads});
 
   @override
   State<_ThreadListView> createState() => _ThreadListViewState();
@@ -196,7 +155,7 @@ class _ThreadListViewState extends State<_ThreadListView> {
 
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 80),
-      controller: widget.scrollController,
+      controller: PrimaryScrollController.maybeOf(context),
       // ignore: deprecated_member_use — ScrollCacheExtent is not exported via material.dart
       cacheExtent: 250,
       addAutomaticKeepAlives: false,
@@ -235,8 +194,8 @@ class _ThreadListViewState extends State<_ThreadListView> {
         return ThreadCell(
           key: ValueKey(thread.threadId),
           thread: thread,
-          onTap: () => widget.loadThread(context, thread),
-          onLongPress: () => widget.jumpToPage(context, thread),
+          onTap: () => _loadThread(context, thread),
+          onLongPress: () => _jumpToPage(context, thread),
         );
       },
     );

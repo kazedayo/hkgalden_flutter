@@ -240,34 +240,12 @@ class HKGaldenApi {
 
   void clearPacksCache() => _packsCache.clear();
 
-  /// Returns null on failure. Prefer networkOnly — cache is keyed by thread id.
-  Future<T?> _query<T>(
-    DocumentNode document, {
-    Map<String, dynamic>? variables,
-    FetchPolicy? fetchPolicy,
+  /// Returns null on failure. Runs a query or mutation and parses its data.
+  Future<T?> _run<T>(
+    Future<QueryResult> Function() op, {
     required FutureOr<T> Function(Map<String, dynamic> data) parse,
   }) async {
-    final QueryResult result = await _client.query(QueryOptions(
-      document: document,
-      variables: variables ?? const {},
-      fetchPolicy: fetchPolicy,
-    ));
-    if (result.hasException || result.data == null) {
-      return null;
-    }
-    return parse(result.data!);
-  }
-
-  /// Returns null on failure.
-  Future<T?> _mutate<T>(
-    DocumentNode document, {
-    Map<String, dynamic>? variables,
-    required FutureOr<T> Function(Map<String, dynamic> data) parse,
-  }) async {
-    final QueryResult result = await _client.mutate(MutationOptions(
-      document: document,
-      variables: variables ?? const {},
-    ));
+    final QueryResult result = await op();
     if (result.hasException || result.data == null) {
       return null;
     }
@@ -275,8 +253,9 @@ class HKGaldenApi {
   }
 
   Future<List<Channel>?> getChannelsQuery() {
-    return _query(
-      _GqlFragments.getChannels,
+    return _run(
+      () => _client.query(
+          QueryOptions(document: _GqlFragments.getChannels)),
       parse: (data) async {
         final List<dynamic> result = data['channels'] as List<dynamic>;
         return compute(channelFromJson, result);
@@ -285,8 +264,9 @@ class HKGaldenApi {
   }
 
   Future<User?> getSessionUserQuery() {
-    return _query(
-      _GqlFragments.getSessionUser,
+    return _run(
+      () => _client.query(
+          QueryOptions(document: _GqlFragments.getSessionUser)),
       parse: (data) async {
         final Map<String, dynamic> result =
             data['sessionUser'] as Map<String, dynamic>;
@@ -296,12 +276,14 @@ class HKGaldenApi {
   }
 
   Future<Thread?> getThreadQuery(int threadId, int page) {
-    return _query(
-      _GqlFragments.getThread,
-      variables: <String, dynamic>{
-        'id': threadId,
-        'page': page,
-      },
+    return _run(
+      () => _client.query(QueryOptions(
+        document: _GqlFragments.getThread,
+        variables: <String, dynamic>{
+          'id': threadId,
+          'page': page,
+        },
+      )),
       parse: (data) async {
         final Map<String, dynamic> result =
             data['thread'] as Map<String, dynamic>;
@@ -311,12 +293,14 @@ class HKGaldenApi {
   }
 
   Future<List<Thread>?> getThreadListQuery(String channelId, int page) {
-    return _query(
-      _GqlFragments.getThreadList,
-      variables: <String, dynamic>{
-        'channelId': channelId,
-        'page': page,
-      },
+    return _run(
+      () => _client.query(QueryOptions(
+        document: _GqlFragments.getThreadList,
+        variables: <String, dynamic>{
+          'channelId': channelId,
+          'page': page,
+        },
+      )),
       parse: (data) async {
         final List<dynamic> result =
             data['threadsByChannel'] as List<dynamic>;
@@ -326,8 +310,9 @@ class HKGaldenApi {
   }
 
   Future<List<User>?> getBlockedUser() {
-    return _query(
-      _GqlFragments.getBlockedUser,
+    return _run(
+      () => _client.query(
+          QueryOptions(document: _GqlFragments.getBlockedUser)),
       parse: (data) async {
         final List<dynamic> result = data['blockedUsers'] as List<dynamic>;
         return compute(userListFromJson, result);
@@ -336,12 +321,14 @@ class HKGaldenApi {
   }
 
   Future<List<Thread>?> getUserThreadList(String userId, int page) {
-    return _query(
-      _GqlFragments.getUserThreadList,
-      variables: <String, dynamic>{
-        'userId': userId,
-        'page': page,
-      },
+    return _run(
+      () => _client.query(QueryOptions(
+        document: _GqlFragments.getUserThreadList,
+        variables: <String, dynamic>{
+          'userId': userId,
+          'page': page,
+        },
+      )),
       parse: (data) async {
         final List<dynamic> result = data['threadsByUser'] as List<dynamic>;
         return compute(threadListFromJson, result);
@@ -350,13 +337,15 @@ class HKGaldenApi {
   }
 
   Future<Reply?> sendReply(int threadId, String html, {String? parentId}) {
-    return _mutate(
-      _GqlFragments.sendReply,
-      variables: <String, dynamic>{
-        'threadId': threadId,
-        'parentId': parentId,
-        'html': html,
-      },
+    return _run(
+      () => _client.mutate(MutationOptions(
+        document: _GqlFragments.sendReply,
+        variables: <String, dynamic>{
+          'threadId': threadId,
+          'parentId': parentId,
+          'html': html,
+        },
+      )),
       parse: (data) async {
         final dynamic resultJson = data['replyThread'];
         return compute(replyFromJson, resultJson);
@@ -365,37 +354,44 @@ class HKGaldenApi {
   }
 
   Future<int?> createThread(String title, List<String> tags, String html) {
-    return _mutate(
-      _GqlFragments.createThread,
-      variables: <String, dynamic>{
-        'title': title,
-        'tags': tags,
-        'html': html,
-      },
+    return _run(
+      () => _client.mutate(MutationOptions(
+        document: _GqlFragments.createThread,
+        variables: <String, dynamic>{
+          'title': title,
+          'tags': tags,
+          'html': html,
+        },
+      )),
       parse: (data) => data['createThread'] as int,
     );
   }
 
   Future<bool?> unblockUser(String userId) {
-    return _mutate(
-      _GqlFragments.unblockUser,
-      variables: <String, dynamic>{'userId': userId},
+    return _run(
+      () => _client.mutate(MutationOptions(
+        document: _GqlFragments.unblockUser,
+        variables: <String, dynamic>{'userId': userId},
+      )),
       parse: (data) => data['unblockUser'] as bool,
     );
   }
 
   Future<bool?> blockUser(String userId) {
-    return _mutate(
-      _GqlFragments.blockUser,
-      variables: <String, dynamic>{'userId': userId},
+    return _run(
+      () => _client.mutate(MutationOptions(
+        document: _GqlFragments.blockUser,
+        variables: <String, dynamic>{'userId': userId},
+      )),
       parse: (data) => data['blockUser'] as bool,
     );
   }
 
   /// Returns installed smiley packs (empty list when unauthenticated).
   Future<List<SmileyPack>?> getInstalledPacksQuery() {
-    return _query(
-      _GqlFragments.getInstalledPacks,
+    return _run(
+      () => _client.query(
+          QueryOptions(document: _GqlFragments.getInstalledPacks)),
       parse: (data) {
         final List<dynamic> result =
             data['installedPacks'] as List<dynamic>? ?? const [];

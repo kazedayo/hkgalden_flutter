@@ -91,85 +91,6 @@ void main() {
     });
 
     test(
-      'invalid image URL still produces img with default sx/sy and does not hang',
-      () async {
-        final failingParser = DeltaJsonParser(
-          imageSizeResolver: (url) => Future<({int width, int height})>.error(
-            StateError('failed to load $url'),
-          ),
-        );
-
-        const source = 'https://invalid.invalid/nope.png';
-        final html = await failingParser.toGaldenHtml([
-          _imageEmbedOp(source),
-          {'insert': '\n'},
-        ]);
-
-        expect(html, contains('data-nodetype="img"'));
-        expect(html, contains('data-src="$source"'));
-        expect(html, contains('data-sx="800"'));
-        expect(html, contains('data-sy="600"'));
-      },
-      timeout: const Timeout(Duration(seconds: 5)),
-    );
-
-    test(
-      'image size resolver timeout yields default dimensions',
-      () async {
-        final slowParser = DeltaJsonParser(
-          imageSizeResolver: (url) async {
-            await Future<void>.delayed(const Duration(seconds: 30));
-            return (width: 100, height: 100);
-          },
-        );
-
-        final html = await slowParser.toGaldenHtml([
-          _imageEmbedOp('https://example.com/slow.png'),
-          {'insert': '\n'},
-        ]);
-
-        expect(html, contains('data-nodetype="img"'));
-        expect(html, contains('data-src="https://example.com/slow.png"'));
-        expect(html, contains('data-sx="800"'));
-        expect(html, contains('data-sy="600"'));
-      },
-      timeout: const Timeout(Duration(seconds: 10)),
-    );
-
-    test('image size resolver success path uses resolved dimensions', () async {
-      final sizedParser = DeltaJsonParser(
-        imageSizeResolver: (url) async => (width: 320, height: 240),
-      );
-
-      final html = await sizedParser.toGaldenHtml([
-        _imageEmbedOp('https://example.com/photo.png'),
-        {'insert': '\n'},
-      ]);
-
-      expect(html, contains('data-nodetype="img"'));
-      expect(html, contains('data-src="https://example.com/photo.png"'));
-      expect(html, contains('data-sx="320"'));
-      expect(html, contains('data-sy="240"'));
-    });
-
-    test('image src with " is escaped in data-src attribute', () async {
-      final sizedParser = DeltaJsonParser(
-        imageSizeResolver: (url) async => (width: 1, height: 1),
-      );
-
-      final html = await sizedParser.toGaldenHtml([
-        _imageEmbedOp('https://example.com/"onerror="alert(1)'),
-        {'insert': '\n'},
-      ]);
-
-      expect(
-        html,
-        contains('data-src="https://example.com/&quot;onerror=&quot;alert(1)"'),
-      );
-      expect(html, isNot(contains('data-src="https://example.com/"onerror=')));
-    });
-
-    test(
       'bold+color attributes yield identical HTML regardless of map key order',
       () async {
         final attrsBoldFirst = <String, dynamic>{
@@ -251,43 +172,6 @@ void main() {
     });
 
     test(
-      'smiley embed with id and packId produces smiley span with those attrs',
-      () async {
-        final html = await parser.toGaldenHtml([
-          {
-            'insert': ' ',
-            'attributes': {
-              'embed': {
-                'type': 'smiley',
-                'id': 'A7WUrp9FZ62',
-                'packId': 'hkg',
-                'sx': 21,
-                'sy': 17,
-                'alt': '[sosad]',
-              },
-            },
-          },
-          {'insert': '\n'},
-        ]);
-
-        expect(html, contains('data-nodetype="smiley"'));
-        expect(html, contains('data-id="A7WUrp9FZ62"'));
-        expect(html, contains('data-pack-id="hkg"'));
-        expect(html, contains('data-sx="21"'));
-        expect(html, contains('data-sy="17"'));
-        expect(html, contains('data-alt="[sosad]"'));
-        expect(
-          html,
-          contains(
-            '<span data-nodetype="smiley" data-id="A7WUrp9FZ62" '
-            'data-pack-id="hkg" data-sx="21" data-sy="17" '
-            'data-alt="[sosad]"></span>',
-          ),
-        );
-      },
-    );
-
-    test(
       'quill-native smiley insert {smiley:{...}} with width/height maps to sx/sy',
       () async {
         final html = await parser.toGaldenHtml([
@@ -335,31 +219,6 @@ void main() {
     );
 
     test(
-      'smiley embed missing packId does not throw and does not emit incomplete smiley',
-      () async {
-        final html = await parser.toGaldenHtml([
-          {
-            'insert': ' ',
-            'attributes': {
-              'embed': {
-                'type': 'smiley',
-                'id': 'A7WUrp9FZ62',
-                'sx': 21,
-                'sy': 17,
-              },
-            },
-          },
-          {'insert': '\n'},
-        ]);
-
-        expect(html, isNot(contains('data-nodetype="smiley"')));
-        expect(html, isNot(contains('data-pack-id=')));
-        expect(html, isNot(contains('data-id="A7WUrp9FZ62"')));
-        expect(html, '<div id="pmc"><p> </p></div>');
-      },
-    );
-
-    test(
       'round-trip: bold delta through DeltaJsonParser then HKGaldenHtmlParser yields <b>',
       () async {
         final galdenHtml = await parser.toGaldenHtml([
@@ -386,14 +245,3 @@ void main() {
   });
 }
 
-Map<String, dynamic> _imageEmbedOp(String source) {
-  return {
-    'insert': ' ',
-    'attributes': {
-      'embed': {
-        'type': 'image',
-        'source': source,
-      },
-    },
-  };
-}

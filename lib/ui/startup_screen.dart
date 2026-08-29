@@ -9,7 +9,6 @@ import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/nested_navigator.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
-import 'package:hkgalden_flutter/ui/page_transitions.dart';
 import 'package:hive/hive.dart';
 
 class StartupScreen extends StatefulWidget {
@@ -86,7 +85,15 @@ class StartupScreenState extends State<StartupScreen>
         listener: (context, state) {
           if (state is ThreadListLoaded || state is ThreadListError) {
             Navigator.of(context).pushReplacement(
-              SizeRoute(page: const NestedNavigator()),
+              PageRouteBuilder(
+                transitionDuration: const Duration(milliseconds: 650),
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const NestedNavigator(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) => Align(
+                  child: SizeTransition(sizeFactor: animation, child: child),
+                ),
+              ),
             );
           }
         },

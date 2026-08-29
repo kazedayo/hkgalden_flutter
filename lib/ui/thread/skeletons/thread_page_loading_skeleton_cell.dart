@@ -18,13 +18,8 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
         height: _contentHeight,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final width = constraints.maxWidth.isFinite
-                ? constraints.maxWidth
-                : MediaQuery.sizeOf(context).width;
-            return SizedBox(
-              width: width,
-              height: _contentHeight,
-              child: Column(
+            final width = constraints.maxWidth;
+            return Column(
                 children: <Widget>[
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,7 +53,6 @@ class ThreadPageLoadingSkeletonCell extends StatelessWidget {
                     ],
                   ),
                 ],
-              ),
             );
           },
         ),

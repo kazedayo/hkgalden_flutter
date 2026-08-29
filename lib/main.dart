@@ -27,10 +27,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiRepositoryProvider(
-      providers: [
-        RepositoryProvider(create: (context) => HKGaldenApi()),
-      ],
+    return RepositoryProvider(
+      create: (context) => HKGaldenApi(),
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
