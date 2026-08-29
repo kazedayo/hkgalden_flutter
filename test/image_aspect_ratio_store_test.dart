@@ -99,15 +99,13 @@ void main() {
       const url = 'https://example.com/b.png';
       final store = ImageAspectRatioStore.instance;
       await store.save(url, 0.5, naturalWidth: 200);
-      final first =
-          Map<String, dynamic>.from(
-        Hive.box(ImageAspectRatioStore.boxName).get(url) as Map,
-      );
+      final first = Hive.box(ImageAspectRatioStore.boxName).get(url);
 
       await store.save(url, 0.5);
-      final raw = Hive.box(ImageAspectRatioStore.boxName).get(url) as Map;
-      expect(raw['r'], first['r']);
-      expect(raw['w'], 200);
+      expect(
+        identical(Hive.box(ImageAspectRatioStore.boxName).get(url), first),
+        isTrue,
+      );
     });
 
     test('writes when width is new for the same ratio', () async {

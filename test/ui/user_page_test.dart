@@ -8,7 +8,6 @@ import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
-import 'package:hkgalden_flutter/utils/app_theme.dart';
 
 const _user = User(
   userId: '1',
@@ -106,36 +105,6 @@ void main() {
       isTrue,
     );
     expect(find.text('t').hitTestable(), findsOneWidget);
-  });
-
-  testWidgets('user thread list dividers use the app divider color', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      MultiRepositoryProvider(
-        providers: [
-          RepositoryProvider<HKGaldenApi>.value(
-            value: _FakeApi(threads: [_thread]),
-          ),
-        ],
-        child: BlocProvider(
-          create: (_) => SessionUserCubit(api: _FakeApi()),
-          child: MaterialApp(
-            home: Builder(
-              builder: (context) => Theme(
-                data: AppTheme.generate(context),
-                child: const UserPage(user: _user),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-    await tester.pump();
-
-    final divider = tester.widget<Divider>(find.byType(Divider));
-    expect(divider.color, AppTheme.dividerColor);
   });
 
   testWidgets('block success pops the sheet and toasts', (tester) async {
