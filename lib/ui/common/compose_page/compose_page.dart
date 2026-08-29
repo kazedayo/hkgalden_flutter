@@ -24,7 +24,6 @@ import 'package:hkgalden_flutter/models/channel.dart';
 import 'package:hkgalden_flutter/models/smiley.dart';
 import 'package:hkgalden_flutter/models/smiley_pack.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
-import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
 import 'package:hkgalden_flutter/networking/image_upload_api.dart';
 import 'package:hkgalden_flutter/utils/smiley_embed.dart';
 
@@ -90,14 +89,14 @@ class ComposePageState extends State<ComposePage> {
     _focusNode = FocusNode();
     _titleFocusNode = FocusNode();
     super.initState();
-    final repo = context.read<SmileyPackRepository>();
-    _smileyPacks = repo.cachedPacks;
-    _loadSmileyPacks(repo);
+    final api = context.read<HKGaldenApi>();
+    _smileyPacks = api.cachedPacks;
+    _loadSmileyPacks(api);
   }
 
-  Future<void> _loadSmileyPacks(SmileyPackRepository repo) async {
+  Future<void> _loadSmileyPacks(HKGaldenApi api) async {
     try {
-      final packs = await repo.getInstalledPacks();
+      final packs = await api.getInstalledPacks();
       if (!mounted || packs == null || identical(packs, _smileyPacks)) {
         return;
       }

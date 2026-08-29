@@ -7,23 +7,13 @@ import 'package:hkgalden_flutter/bloc/channel/channel_cubit.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
-import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
 import 'package:hkgalden_flutter/ui/startup_screen.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
 import 'package:hkgalden_flutter/utils/thread_reading_position_store.dart';
-import 'dart:io';
-import 'package:flutter_displaymode/flutter_displaymode.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  if (Platform.isAndroid) {
-    try {
-      await FlutterDisplayMode.setHighRefreshRate();
-    } catch (_) {
-    }
-  }
 
   await Hive.initFlutter();
   await Hive.openBox('token');
@@ -40,9 +30,6 @@ class MyApp extends StatelessWidget {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider(create: (context) => HKGaldenApi()),
-        RepositoryProvider(
-            create: (context) => SmileyPackRepository(
-                api: RepositoryProvider.of<HKGaldenApi>(context))),
       ],
       child: MultiBlocProvider(
         providers: [

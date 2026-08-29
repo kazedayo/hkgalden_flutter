@@ -8,6 +8,7 @@ import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/smiley_pack.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';
+import 'package:hkgalden_flutter/utils/inflight_cache.dart';
 import 'package:hive/hive.dart';
 
 class _GqlFragments {
@@ -221,6 +222,23 @@ class HKGaldenApi {
             );
 
   final GraphQLClient _client;
+
+  final InflightCache<int, List<SmileyPack>?> _packsCache = InflightCache();
+
+  /// Last successful fetch, or empty when nothing has been loaded yet.
+  List<SmileyPack> get cachedPacks => _packsCache.peek(0) ?? const [];
+
+  /// Returns cached packs when present; otherwise fetches (coalescing in-flight).
+  Future<List<SmileyPack>?> getInstalledPacks() {
+    return _packsCache.get(0, getInstalledPacksQuery, cacheNulls: false);
+  }
+
+  /// Fire-and-forget fetch so compose can read [cachedPacks] immediately.
+  void prewarm() {
+    getInstalledPacks();
+  }
+
+  void clearPacksCache() => _packsCache.clear();
 
   /// Returns null on failure. Prefer networkOnly — cache is keyed by thread id.
   Future<T?> _query<T>(

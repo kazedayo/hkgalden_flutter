@@ -71,7 +71,7 @@ class _PopupMenuButton extends StatelessWidget {
           case _MenuItem.logout:
             await Hive.box('token').put('token', '');
             if (!context.mounted) return;
-            context.read<SmileyPackRepository>().clearCache();
+            context.read<HKGaldenApi>().clearPacksCache();
             BlocProvider.of<SessionUserCubit>(context).clearSessionUser();
             BlocProvider.of<ThreadListCubit>(context).load(
               channelId:

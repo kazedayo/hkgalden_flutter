@@ -63,7 +63,7 @@ PreferredSize _buildAppBar() {
                 await Hive.box('token').put('token', token!);
                 if (!context.mounted) return;
                 BlocProvider.of<SessionUserCubit>(context).requestSessionUser();
-                context.read<SmileyPackRepository>().prewarm();
+                context.read<HKGaldenApi>().prewarm();
                 final channelState =
                     BlocProvider.of<ChannelCubit>(context).state;
                 if (channelState is ChannelLoaded) {

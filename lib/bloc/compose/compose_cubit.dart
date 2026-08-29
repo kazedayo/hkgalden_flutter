@@ -18,44 +18,39 @@ class ComposeCubit extends Cubit<ComposeState> {
 
   Future<void> createThread(
       String title, String tagId, String quillContentStr) async {
-    emit(ComposeSending());
-    try {
-      final htmlContent = await _deltaJsonParser
-          .toGaldenHtml(json.decode(quillContentStr) as List<dynamic>);
-
-      final threadId =
-          await _api.createThread(title, [tagId], htmlContent);
-
-      if (threadId != null) {
-        emit(ComposeSuccess(result: threadId));
-      } else {
-        emit(const ComposeFailure(message: '主題發表失敗!'));
-      }
-    } catch (e) {
-      emit(const ComposeFailure(message: '主題發表失敗!'));
-    }
+    await _compose(
+      quillContentStr,
+      '主題發表失敗!',
+      (htmlContent) => _api.createThread(title, [tagId], htmlContent),
+    );
   }
 
   Future<void> sendReply(int threadId, String quillContentStr,
       {String? parentId}) async {
+    await _compose(
+      quillContentStr,
+      '回覆發送失敗!',
+      (htmlContent) =>
+          _api.sendReply(threadId, htmlContent, parentId: parentId),
+    );
+  }
+
+  Future<void> _compose<T>(String quillContentStr, String failureMessage,
+      Future<T?> Function(String htmlContent) action) async {
     emit(ComposeSending());
     try {
       final htmlContent = await _deltaJsonParser
           .toGaldenHtml(json.decode(quillContentStr) as List<dynamic>);
 
-      final sentReply = await _api.sendReply(
-        threadId,
-        htmlContent,
-        parentId: parentId,
-      );
+      final result = await action(htmlContent);
 
-      if (sentReply != null) {
-        emit(ComposeSuccess(result: sentReply));
+      if (result != null) {
+        emit(ComposeSuccess(result: result));
       } else {
-        emit(const ComposeFailure(message: '回覆發送失敗!'));
+        emit(ComposeFailure(message: failureMessage));
       }
     } catch (e) {
-      emit(const ComposeFailure(message: '回覆發送失敗!'));
+      emit(ComposeFailure(message: failureMessage));
     }
   }
 }

@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final root = Directory.current.path;
   final pbx = File('$root/ios/Runner.xcodeproj/project.pbxproj');
-  final pubspec = File('$root/pubspec.yaml');
   final mainDart = File('$root/lib/main.dart');
 
   test('project.pbxproj exists and allows iphonesimulator', () {

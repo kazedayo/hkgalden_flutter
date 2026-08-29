@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hkgalden_flutter/models/smiley.dart';
 import 'package:hkgalden_flutter/models/smiley_pack.dart';
 import 'package:hkgalden_flutter/parser/delta_json.parser.dart';
-import 'package:hkgalden_flutter/repository/smiley_pack_repository.dart';
+import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/utils/smiley_embed.dart';
 
 /// Representative smiley matching models / web pack data shape.
@@ -28,14 +28,14 @@ final _kPacks = [
   ),
 ];
 
-class _FakeSmileyPackRepository extends SmileyPackRepository {
-  _FakeSmileyPackRepository(this._handler);
+class _FakeApi extends HKGaldenApi {
+  _FakeApi(this._handler);
 
   final Future<List<SmileyPack>?> Function() _handler;
   int fetchCount = 0;
 
   @override
-  Future<List<SmileyPack>?> fetchInstalledPacks() {
+  Future<List<SmileyPack>?> getInstalledPacksQuery() {
     fetchCount++;
     return _handler();
   }
@@ -229,84 +229,84 @@ void main() {
     );
   });
 
-  group('SmileyPackRepository cache / prewarm', () {
+  group('HKGaldenApi smiley pack cache / prewarm', () {
     test('first fetch is cached for later getInstalledPacks / cachedPacks',
         () async {
-      final repo = _FakeSmileyPackRepository(() async => _kPacks);
+      final api = _FakeApi(() async => _kPacks);
 
-      final first = await repo.getInstalledPacks();
-      final second = await repo.getInstalledPacks();
+      final first = await api.getInstalledPacks();
+      final second = await api.getInstalledPacks();
 
       expect(first, _kPacks);
       expect(identical(first, second), isTrue);
-      expect(identical(repo.cachedPacks, _kPacks), isTrue);
-      expect(repo.fetchCount, 1);
+      expect(identical(api.cachedPacks, _kPacks), isTrue);
+      expect(api.fetchCount, 1);
     });
 
     test('concurrent getInstalledPacks share one in-flight fetch', () async {
       final completer = Completer<List<SmileyPack>?>();
-      final repo = _FakeSmileyPackRepository(() => completer.future);
+      final api = _FakeApi(() => completer.future);
 
-      final first = repo.getInstalledPacks();
-      final second = repo.getInstalledPacks();
-      expect(repo.fetchCount, 1);
+      final first = api.getInstalledPacks();
+      final second = api.getInstalledPacks();
+      expect(api.fetchCount, 1);
 
       completer.complete(_kPacks);
       expect(await first, _kPacks);
       expect(await second, _kPacks);
-      expect(repo.fetchCount, 1);
+      expect(api.fetchCount, 1);
     });
 
     test('prewarm populates cachedPacks without awaiting', () async {
-      final repo = _FakeSmileyPackRepository(() async => _kPacks);
-      expect(repo.cachedPacks, isEmpty);
+      final api = _FakeApi(() async => _kPacks);
+      expect(api.cachedPacks, isEmpty);
 
-      repo.prewarm();
-      expect(repo.fetchCount, 1);
-      expect(repo.cachedPacks, isEmpty);
+      api.prewarm();
+      expect(api.fetchCount, 1);
+      expect(api.cachedPacks, isEmpty);
 
-      await repo.getInstalledPacks();
-      expect(repo.cachedPacks, _kPacks);
-      expect(repo.fetchCount, 1);
+      await api.getInstalledPacks();
+      expect(api.cachedPacks, _kPacks);
+      expect(api.fetchCount, 1);
     });
 
     test('null fetch is not cached so a later call retries', () async {
       var calls = 0;
-      final repo = _FakeSmileyPackRepository(() async {
+      final api = _FakeApi(() async {
         calls++;
         if (calls == 1) return null;
         return _kPacks;
       });
 
-      expect(await repo.getInstalledPacks(), isNull);
-      expect(repo.cachedPacks, isEmpty);
-      expect(await repo.getInstalledPacks(), _kPacks);
-      expect(repo.cachedPacks, _kPacks);
-      expect(repo.fetchCount, 2);
+      expect(await api.getInstalledPacks(), isNull);
+      expect(api.cachedPacks, isEmpty);
+      expect(await api.getInstalledPacks(), _kPacks);
+      expect(api.cachedPacks, _kPacks);
+      expect(api.fetchCount, 2);
     });
 
     test('clearCache drops cached packs so the next call refetches', () async {
-      final repo = _FakeSmileyPackRepository(() async => _kPacks);
-      await repo.getInstalledPacks();
-      repo.clearCache();
-      expect(repo.cachedPacks, isEmpty);
+      final api = _FakeApi(() async => _kPacks);
+      await api.getInstalledPacks();
+      api.clearPacksCache();
+      expect(api.cachedPacks, isEmpty);
 
-      await repo.getInstalledPacks();
-      expect(repo.fetchCount, 2);
-      expect(repo.cachedPacks, _kPacks);
+      await api.getInstalledPacks();
+      expect(api.fetchCount, 2);
+      expect(api.cachedPacks, _kPacks);
     });
 
     test('clearCache drops cache; late in-flight completion may repopulate', () async {
       final completer = Completer<List<SmileyPack>?>();
-      final repo = _FakeSmileyPackRepository(() => completer.future);
+      final api = _FakeApi(() => completer.future);
 
-      final pending = repo.getInstalledPacks();
-      repo.clearCache();
+      final pending = api.getInstalledPacks();
+      api.clearPacksCache();
       completer.complete(_kPacks);
       await pending;
 
       // No generation guard: the completion lands in the fresh cache.
-      expect(repo.cachedPacks, _kPacks);
+      expect(api.cachedPacks, _kPacks);
     });
   });
 }

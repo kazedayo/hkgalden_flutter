@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
@@ -66,9 +65,6 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
   Offset? _doubleTapPosition;
   double _scale = 1.0;
   double _dismissOffset = 0;
-  int _activePointers = 0;
-  Offset? _dismissPointerStart;
-  VelocityTracker? _dismissVelocityTracker;
   bool _sharing = false;
 
   @override
@@ -134,8 +130,8 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
       return Matrix4.identity();
     }
     return Matrix4.identity()
-      ..translate(-tap.dx * (scale - 1), -tap.dy * (scale - 1))
-      ..scale(scale);
+      ..translateByDouble(-tap.dx * (scale - 1), -tap.dy * (scale - 1), 0, 1)
+      ..scaleByDouble(scale, scale, 1, 1);
   }
 
   void _toggleZoom() {
@@ -168,24 +164,20 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
     setState(() => _scale = next);
   }
 
+  // InteractiveViewer reports interactions even when panEnabled is false,
+  // so swipe-to-dismiss rides on its callbacks instead of raw listeners.
   void _onInteractionStart(ScaleStartDetails details) {
     _zoomController.stop();
+    if (details.pointerCount > 1) {
+      _snapDismissBack();
+      return;
+    }
+    _dismissController.stop();
   }
 
-  void _onInteractionEnd(ScaleEndDetails details) {
-    _syncScaleFromTransform();
-  }
-
-  bool _canSwipeDismiss(BuildContext context) {
-    return Theme.of(context).platform == TargetPlatform.iOS && !_isZoomed;
-  }
-
-  void _onPointerDown(PointerDownEvent event) {
-    _activePointers++;
-    if (_activePointers > 1) {
-      _dismissPointerStart = null;
-      _dismissVelocityTracker = null;
-      if (_dismissOffset != 0) {
+  void _onInteractionUpdate(ScaleUpdateDetails details) {
+    if (details.pointerCount > 1) {
+      if (_dismissOffset != 0 && !_dismissController.isAnimating) {
         _snapDismissBack();
       }
       return;
@@ -193,50 +185,17 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
     if (!_canSwipeDismiss(context)) {
       return;
     }
-    _dismissController.stop();
-    _dismissPointerStart = event.position;
-    _dismissVelocityTracker = VelocityTracker.withKind(event.kind)
-      ..addPosition(event.timeStamp, event.position);
-  }
-
-  void _onPointerMove(PointerMoveEvent event) {
-    final start = _dismissPointerStart;
-    final tracker = _dismissVelocityTracker;
-    if (start == null || tracker == null || _activePointers != 1) {
-      return;
-    }
-    if (!_canSwipeDismiss(context)) {
-      return;
-    }
-    tracker.addPosition(event.timeStamp, event.position);
     setState(() {
-      _dismissOffset = math.max(0, event.position.dy - start.dy);
+      _dismissOffset = math.max(0, _dismissOffset + details.focalPointDelta.dy);
     });
   }
 
-  void _onPointerUp(PointerUpEvent event) {
-    _activePointers = math.max(0, _activePointers - 1);
-    if (_activePointers != 0) {
-      return;
-    }
-    _finishDismissGesture();
-  }
-
-  void _onPointerCancel(PointerCancelEvent event) {
-    _activePointers = math.max(0, _activePointers - 1);
-    if (_activePointers == 0) {
-      _finishDismissGesture();
-    }
-  }
-
-  void _finishDismissGesture() {
-    _dismissPointerStart = null;
-    final velocity =
-        _dismissVelocityTracker?.getVelocity().pixelsPerSecond.dy ?? 0;
-    _dismissVelocityTracker = null;
+  void _onInteractionEnd(ScaleEndDetails details) {
+    _syncScaleFromTransform();
     if (_dismissOffset == 0) {
       return;
     }
+    final velocity = details.velocity.pixelsPerSecond.dy;
     if (_dismissOffset >= _dismissDistance || velocity >= _dismissVelocity) {
       _commitDismiss();
       return;
@@ -244,9 +203,11 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
     _snapDismissBack();
   }
 
+  bool _canSwipeDismiss(BuildContext context) {
+    return Theme.of(context).platform == TargetPlatform.iOS && !_isZoomed;
+  }
+
   void _commitDismiss() {
-    _dismissPointerStart = null;
-    _dismissVelocityTracker = null;
     _dismissController.stop();
     final end = MediaQuery.sizeOf(context).height;
     if (end - _dismissOffset < 1) {
@@ -264,8 +225,6 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
   }
 
   void _snapDismissBack() {
-    _dismissPointerStart = null;
-    _dismissVelocityTracker = null;
     if (_dismissOffset == 0) {
       return;
     }
@@ -503,26 +462,21 @@ class _FullScreenPhotoViewState extends State<FullScreenPhotoView>
             constraints: BoxConstraints.expand(
               height: MediaQuery.sizeOf(context).height,
             ),
-            child: Listener(
-              onPointerDown: _onPointerDown,
-              onPointerMove: _onPointerMove,
-              onPointerUp: _onPointerUp,
-              onPointerCancel: _onPointerCancel,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onDoubleTapDown: _onDoubleTapDown,
-                onDoubleTap: _toggleZoom,
-                child: Transform.translate(
-                  offset: Offset(0, _dismissOffset),
-                  child: InteractiveViewer(
-                    transformationController: _transformationController,
-                    maxScale: _maxScale,
-                    minScale: _minScale,
-                    panEnabled: _isZoomed,
-                    onInteractionStart: _onInteractionStart,
-                    onInteractionEnd: _onInteractionEnd,
-                    child: Center(child: image),
-                  ),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onDoubleTapDown: _onDoubleTapDown,
+              onDoubleTap: _toggleZoom,
+              child: Transform.translate(
+                offset: Offset(0, _dismissOffset),
+                child: InteractiveViewer(
+                  transformationController: _transformationController,
+                  maxScale: _maxScale,
+                  minScale: _minScale,
+                  panEnabled: _isZoomed,
+                  onInteractionStart: _onInteractionStart,
+                  onInteractionUpdate: _onInteractionUpdate,
+                  onInteractionEnd: _onInteractionEnd,
+                  child: Center(child: image),
                 ),
               ),
             ),
