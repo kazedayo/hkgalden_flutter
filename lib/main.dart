@@ -7,6 +7,7 @@ import 'package:hkgalden_flutter/bloc/channel/channel_cubit.dart';
 import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
+import 'package:hkgalden_flutter/ui/common/stop_scroll_on_inactive.dart';
 import 'package:hkgalden_flutter/ui/startup_screen.dart';
 import 'package:hkgalden_flutter/utils/app_theme.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
@@ -42,6 +43,8 @@ class MyApp extends StatelessWidget {
                   api: RepositoryProvider.of<HKGaldenApi>(context)))
         ],
         child: MaterialApp(
+          builder: (context, child) =>
+              StopScrollOnInactive(child: child ?? const SizedBox.shrink()),
           home: StartupScreen(),
           color: const Color(0xff1b1f1e),
           theme: AppTheme.generate(context),
