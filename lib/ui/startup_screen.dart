@@ -9,7 +9,7 @@ import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:hkgalden_flutter/nested_navigator.dart';
 import 'package:hkgalden_flutter/ui/common/progress_spinner.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class StartupScreen extends StatefulWidget {
   const StartupScreen({super.key});

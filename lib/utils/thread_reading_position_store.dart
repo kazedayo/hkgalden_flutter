@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hkgalden_flutter/models/thread_reading_position.dart';
 import 'package:flutter/foundation.dart';
 

@@ -24,7 +24,7 @@ import 'package:hkgalden_flutter/ui/user_detail/user_page.dart';
 
 import 'package:hkgalden_flutter/utils/keys.dart';
 import 'package:hkgalden_flutter/utils/route_arguments.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 part 'functions/home_page_jump_to_page.dart';

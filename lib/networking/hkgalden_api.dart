@@ -8,7 +8,7 @@ import 'package:hkgalden_flutter/models/smiley_pack.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';
 import 'package:hkgalden_flutter/utils/inflight_cache.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class _GqlFragments {
   static const commentFields = r'''

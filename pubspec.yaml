@@ -33,7 +33,6 @@ dependencies:
   flutter_web_auth_2: 
   http:
   graphql: 
-  hive:
   hive_flutter:
   package_info_plus: 
   path_provider:

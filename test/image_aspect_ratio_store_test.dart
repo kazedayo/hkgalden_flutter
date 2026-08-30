@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 
