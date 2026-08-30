@@ -32,15 +32,13 @@ dependencies:
   flutter_svg: 
   flutter_web_auth_2: 
   http:
-  gql: ^1.0.1
   graphql: 
-  meta: ^1.19.0
   hive:
   hive_flutter:
   package_info_plus: 
   path_provider:
   shimmer: 
-  universal_html: 
+  html:
   url_launcher: 
   image_picker: ^1.2.1
   webview_flutter: ^4.14.1

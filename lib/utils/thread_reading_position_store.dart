@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:hive/hive.dart';
 import 'package:hkgalden_flutter/models/thread_reading_position.dart';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 /// Last-seen page/floor per thread (Hive).
 class ThreadReadingPositionStore {
