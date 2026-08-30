@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hkgalden_flutter/ui/thread/webview/quote_preview_shell.dart';
+import 'package:hkgalden_flutter/ui/thread/webview/thread_webview_shell.dart';
 
 void main() {
   test('inlines css and scripts and strips external asset urls', () {
@@ -17,11 +17,13 @@ void main() {
 </body>
 </html>
 ''';
-    final out = inlineQuotePreviewShell(
+    final out = inlineWebViewShell(
       html: html,
       css: 'body{color:red}',
-      bridgeJs: 'var a=1;',
-      previewJs: 'var b=2;',
+      scripts: {
+        'quote_preview.js': 'var b=2;',
+        'bridge.js': 'var a=1;',
+      },
     );
     expect(out, contains('<style>\nbody{color:red}\n</style>'));
     expect(out, contains('<script>\nvar a=1;\n</script>'));
@@ -38,11 +40,13 @@ void main() {
     final bridgeJs = File('assets/thread_webview/bridge.js').readAsStringSync();
     final previewJs =
         File('assets/thread_webview/quote_preview.js').readAsStringSync();
-    final out = inlineQuotePreviewShell(
+    final out = inlineWebViewShell(
       html: html,
       css: css,
-      bridgeJs: bridgeJs,
-      previewJs: previewJs,
+      scripts: {
+        'quote_preview.js': previewJs,
+        'bridge.js': bridgeJs,
+      },
     );
     expect(out, contains('<style>'));
     expect(out, contains('<script>'));
