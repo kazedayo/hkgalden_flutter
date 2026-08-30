@@ -333,7 +333,7 @@ class ComposePageState extends State<ComposePage> {
   Future<String> _onImagePickCallback(BuildContext context, File file) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     setState(() => _imageUploading = true);
-    return ImageUploadApi().uploadImage(file.path).then((value) {
+    return uploadImage(file.path).then((value) {
       if (mounted) {
         setState(() => _imageUploading = false);
       }
