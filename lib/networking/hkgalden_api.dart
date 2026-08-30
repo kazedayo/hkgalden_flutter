@@ -207,16 +207,14 @@ class HKGaldenApi {
 
   static final Link _link = _bearerToken.concat(_api);
 
-  HKGaldenApi({GraphQLClient? client})
-      : _client = client ??
-            GraphQLClient(
-              cache: GraphQLCache(),
-              defaultPolicies: DefaultPolicies(
-                  query: Policies(fetch: FetchPolicy.networkOnly)),
-              link: _link,
-            );
+  HKGaldenApi();
 
-  final GraphQLClient _client;
+  final GraphQLClient _client = GraphQLClient(
+    cache: GraphQLCache(),
+    defaultPolicies: DefaultPolicies(
+        query: Policies(fetch: FetchPolicy.networkOnly)),
+    link: _link,
+  );
 
   final InflightCache<int, List<SmileyPack>?> _packsCache = InflightCache();
 

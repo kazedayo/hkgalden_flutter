@@ -125,7 +125,6 @@ class _ThreadPageState extends State<ThreadPage> with WidgetsBindingObserver {
             handleThreadPageCubitState(
               state: state,
               pageUi: _pageUi,
-              sessionState: BlocProvider.of<SessionUserCubit>(context).state,
               previousPull: _previousPull,
             );
           },

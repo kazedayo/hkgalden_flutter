@@ -46,7 +46,7 @@ class DeltaJsonParser {
         for (int i = 0; i < parts.length; i++) {
           final part = parts[i];
           if (part.isNotEmpty) {
-            final styled = await _applyAttributes(part, attributes);
+            final styled = _applyAttributes(part, attributes);
             currentRow.write(styled);
           }
 
@@ -62,15 +62,10 @@ class DeltaJsonParser {
         );
         if (embedHtml != null) {
           currentRow.write(embedHtml);
-        } else if (attributes.isNotEmpty) {
-          final styled = await _applyAttributes('', attributes);
-          currentRow.write(styled);
         }
-      } else if (insert != null) {
-        if (attributes.isNotEmpty) {
-          final styled = await _applyAttributes('', attributes);
-          currentRow.write(styled);
-        }
+      } else if (attributes.isNotEmpty) {
+        final styled = _applyAttributes('', attributes);
+        currentRow.write(styled);
       }
     }
 
@@ -81,8 +76,7 @@ class DeltaJsonParser {
     return '<div id="pmc">${result.toString().replaceAll('<p></p>', '')}</div>';
   }
 
-  Future<String> _applyAttributes(
-      String text, Map<String, dynamic> attributes) async {
+  String _applyAttributes(String text, Map<String, dynamic> attributes) {
     String styled = _escapeHtmlText(text);
 
     if (attributes.containsKey(GaldenNodeTypes.s)) {
@@ -143,15 +137,15 @@ class DeltaJsonParser {
   }
 
   String? _smileyEmbedToHtml(Map<String, dynamic> embed) {
-    final id = _readEmbedString(embed, const ['id']);
-    final packId = _readEmbedString(embed, const ['packId']);
+    final id = _readEmbedString(embed, 'id');
+    final packId = _readEmbedString(embed, 'packId');
     if (id == null || packId == null) {
       return null;
     }
 
-    final sx = _readEmbedString(embed, const ['width']);
-    final sy = _readEmbedString(embed, const ['height']);
-    final alt = _readEmbedString(embed, const ['alt']);
+    final sx = _readEmbedString(embed, 'width');
+    final sy = _readEmbedString(embed, 'height');
+    final alt = _readEmbedString(embed, 'alt');
 
     final buffer = StringBuffer()
       ..write('<span ${GaldenNodeTypes.dataNodetype}="${GaldenNodeTypes.smiley}"')
@@ -172,18 +166,13 @@ class DeltaJsonParser {
     return buffer.toString();
   }
 
-  static String? _readEmbedString(
-    Map<String, dynamic> embed,
-    List<String> keys,
-  ) {
-    for (final key in keys) {
-      final value = embed[key];
-      if (value is String && value.isNotEmpty) {
-        return value;
-      }
-      if (value is num) {
-        return value.toString();
-      }
+  static String? _readEmbedString(Map<String, dynamic> embed, String key) {
+    final value = embed[key];
+    if (value is String && value.isNotEmpty) {
+      return value;
+    }
+    if (value is num) {
+      return value.toString();
     }
     return null;
   }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:hkgalden_flutter/bloc/compose/compose_cubit.dart';
 import 'package:hkgalden_flutter/bloc/compose/compose_state.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
@@ -36,8 +38,9 @@ class _FakeApi extends Fake implements HKGaldenApi {
 
 void main() {
   group('ComposeCubit', () {
-    const galdenDeltaJson =
-        '[{"insert":"hello","attributes":{"b":true}},{"insert":"\\n"}]';
+    final galdenDeltaJson = jsonDecode(
+      '[{"insert":"hello","attributes":{"b":true}},{"insert":"\\n"}]',
+    ) as List<dynamic>;
 
     final sampleReply = Reply(
       floor: 2,

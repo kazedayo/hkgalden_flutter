@@ -67,10 +67,6 @@ class _SmileyPaneState extends State<_SmileyPane> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.packs.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
     final borderColor =
         Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12);
     final surface = Theme.of(context).scaffoldBackgroundColor;

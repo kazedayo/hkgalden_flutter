@@ -162,8 +162,8 @@ class HKGaldenHtmlParser {
     Reply reply, {
     required bool includeStartAsQuote,
     bool Function(String userId)? isBlocked,
-    int maxDepth = 3,
   }) {
+    const int maxDepth = 3;
     final List<Reply> chain = <Reply>[];
 
     if (includeStartAsQuote) {

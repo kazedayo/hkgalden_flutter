@@ -54,7 +54,6 @@ class XStatusCache {
     }
   }
 
-  /// Visible for tests.
   static XStatusInfo? parseResponse(Map<String, dynamic> decoded) {
     final code = decoded['code'];
     if (code is int && code != 200) {

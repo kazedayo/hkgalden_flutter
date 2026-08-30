@@ -1,4 +1,3 @@
-import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/bloc/thread/thread_cubit.dart';
 import 'package:hkgalden_flutter/ui/thread/previous_page_pull_controller.dart';
 import 'package:hkgalden_flutter/ui/thread/thread_page_ui.dart';
@@ -6,7 +5,6 @@ import 'package:hkgalden_flutter/ui/thread/thread_page_ui.dart';
 void handleThreadPageCubitState({
   required ThreadState state,
   required ThreadPageUi pageUi,
-  required SessionUserState sessionState,
   required PreviousPagePullController previousPull,
 }) {
   if (state is ThreadLoaded) {

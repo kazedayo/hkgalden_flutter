@@ -119,7 +119,7 @@ class _ColorPickerPopup extends StatelessWidget {
 
 class _RichTextToolbar extends StatefulWidget {
   final QuillController controller;
-  final Future<String> Function(File)? imagePickCallback;
+  final Future<String> Function(File) imagePickCallback;
   final bool showSmileyButton;
   final bool isSmileyKeyboardOpen;
   final VoidCallback? onToggleSmileyKeyboard;
@@ -127,7 +127,7 @@ class _RichTextToolbar extends StatefulWidget {
 
   const _RichTextToolbar({
     required this.controller,
-    this.imagePickCallback,
+    required this.imagePickCallback,
     this.showSmileyButton = false,
     this.isSmileyKeyboardOpen = false,
     this.onToggleSmileyKeyboard,
@@ -649,9 +649,9 @@ class _LinkDialogState extends State<_LinkDialog> {
 }
 
 class _ImageInsertDialog extends StatefulWidget {
-  final Future<String> Function(File)? imagePickCallback;
+  final Future<String> Function(File) imagePickCallback;
 
-  const _ImageInsertDialog({this.imagePickCallback});
+  const _ImageInsertDialog({required this.imagePickCallback});
 
   @override
   State<_ImageInsertDialog> createState() => _ImageInsertDialogState();
@@ -685,8 +685,6 @@ class _ImageInsertDialogState extends State<_ImageInsertDialog> {
   }
 
   Future<void> _pickAndUploadImage() async {
-    if (widget.imagePickCallback == null) return;
-
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(
       source: ImageSource.gallery,
@@ -701,7 +699,7 @@ class _ImageInsertDialogState extends State<_ImageInsertDialog> {
 
     try {
       final file = File(pickedFile.path);
-      final imageUrl = await widget.imagePickCallback!(file);
+      final imageUrl = await widget.imagePickCallback(file);
       if (mounted && imageUrl.isNotEmpty) {
         Navigator.of(context).pop(imageUrl);
       }
@@ -739,32 +737,30 @@ class _ImageInsertDialogState extends State<_ImageInsertDialog> {
               ),
               enabled: !_isUploading,
             ),
-            if (widget.imagePickCallback != null) ...[
-              const SizedBox(height: 16),
-              const Text('或'),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.selectionColor,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+            const SizedBox(height: 16),
+            const Text('或'),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.selectionColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  onPressed: _isUploading ? null : _pickAndUploadImage,
-                  icon: _isUploading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.upload_file),
-                  label: Text(_isUploading ? '上載中...' : '從裝置上載'),
                 ),
+                onPressed: _isUploading ? null : _pickAndUploadImage,
+                icon: _isUploading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.upload_file),
+                label: Text(_isUploading ? '上載中...' : '從裝置上載'),
               ),
-            ],
+            ),
           ],
         ),
       ),

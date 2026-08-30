@@ -3,13 +3,13 @@ part of '../compose_page.dart';
 class _RichTextEditor extends StatefulWidget {
   final QuillController controller;
   final FocusNode focusNode;
-  final Future<String> Function(File)? imagePickCallback;
+  final Future<String> Function(File) imagePickCallback;
   final List<SmileyPack> smileyPacks;
 
   const _RichTextEditor({
     required this.controller,
     required this.focusNode,
-    this.imagePickCallback,
+    required this.imagePickCallback,
     this.smileyPacks = const [],
   });
 

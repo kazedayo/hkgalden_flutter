@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -180,7 +179,7 @@ class ComposePageState extends State<ComposePage> {
                             if (widget.composeMode == ComposeMode.newPost) {
                               final title = _titleFieldController.text;
                               if (title.isEmpty ||
-                                  _controller.document.toString() == '/n') {
+                                  _controller.document.toString() == '\n') {
                                 showCustomAlert(
                                   context: context,
                                   title: '注意!',
@@ -189,10 +188,13 @@ class ComposePageState extends State<ComposePage> {
                                 return;
                               }
                               context.read<ComposeCubit>().createThread(
-                                  title, _tag.id!, _getZefyrEditorContent());
+                                  title,
+                                  _tag.id!,
+                                  _controller.document.toDelta().toJson());
                             } else {
                               context.read<ComposeCubit>().sendReply(
-                                  widget.threadId!, _getZefyrEditorContent(),
+                                  widget.threadId!,
+                                  _controller.document.toDelta().toJson(),
                                   parentId: widget.composeMode ==
                                           ComposeMode.quotedReply
                                       ? widget.parentReply!.replyId
@@ -284,9 +286,7 @@ class ComposePageState extends State<ComposePage> {
                         )
                       ],
                     ),
-                  )
-                else
-                  const SizedBox(),
+                  ),
                 if (widget.composeMode == ComposeMode.quotedReply)
                   ConstrainedBox(
                     constraints: BoxConstraints(
@@ -298,9 +298,7 @@ class ComposePageState extends State<ComposePage> {
                         html: _quoteHtml(sessionUserCubit),
                       ),
                     ),
-                  )
-                else
-                  const SizedBox(),
+                  ),
                 Expanded(
                   child: Builder(builder: (builderContext) {
                     return _RichTextEditor(
@@ -323,11 +321,6 @@ class ComposePageState extends State<ComposePage> {
   String _quoteHtml(SessionUserCubit sessionUserCubit) {
     return _cachedQuoteHtml ??= HKGaldenHtmlParser().replyWithQuotes(
         widget.parentReply!, sessionUserCubit.state as SessionUserLoaded)!;
-  }
-
-  String _getZefyrEditorContent() {
-    final content = _controller.document.toDelta();
-    return json.encode(content);
   }
 
   Future<String> _onImagePickCallback(BuildContext context, File file) async {

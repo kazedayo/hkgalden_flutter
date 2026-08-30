@@ -42,23 +42,15 @@ class Thread extends Equatable {
     );
   }
 
-  Thread copyWith({
-    int? threadId,
-    String? title,
-    String? status,
-    List<Reply>? replies,
-    int? totalReplies,
-    String? tagName,
-    Color? tagColor,
-  }) {
+  Thread copyWith({List<Reply>? replies}) {
     return Thread(
-      threadId: threadId ?? this.threadId,
-      title: title ?? this.title,
-      status: status ?? this.status,
+      threadId: threadId,
+      title: title,
+      status: status,
       replies: replies ?? this.replies,
-      totalReplies: totalReplies ?? this.totalReplies,
-      tagName: tagName ?? this.tagName,
-      tagColor: tagColor ?? this.tagColor,
+      totalReplies: totalReplies,
+      tagName: tagName,
+      tagColor: tagColor,
     );
   }
 
