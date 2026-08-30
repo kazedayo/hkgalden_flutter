@@ -1,9 +1,20 @@
 import 'package:bloc_test/bloc_test.dart';
+import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/bloc/thread/thread_cubit.dart';
 import 'package:hkgalden_flutter/bloc/thread_list/thread_list_cubit.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+const _emptyThread = Thread(
+  threadId: 0,
+  title: '',
+  status: '',
+  replies: [],
+  totalReplies: 0,
+  tagName: '',
+  tagColor: Colors.white,
+);
 
 class _FakeThreadListApi extends Fake implements HKGaldenApi {
   _FakeThreadListApi(this._handler);
@@ -61,7 +72,7 @@ void main() {
       build: () {
         final api = _FakeThreadApi((id, page) async {
           if (page == 1) {
-            return Thread.initial();
+            return _emptyThread;
           }
           return null;
         });
@@ -74,15 +85,15 @@ void main() {
       expect: () => [
         isA<ThreadLoading>(),
         ThreadLoaded(
-          thread: Thread.initial(),
-          previousPages: Thread.initial(),
+          thread: _emptyThread,
+          previousReplies: const [],
           currentPage: 1,
           endPage: 1,
         ),
         isA<ThreadAppending>(),
         ThreadLoaded(
-          thread: Thread.initial(),
-          previousPages: Thread.initial(),
+          thread: _emptyThread,
+          previousReplies: const [],
           currentPage: 1,
           endPage: 1,
         ),
@@ -94,14 +105,14 @@ void main() {
   group('ThreadLoaded.props', () {
     test('two ThreadLoaded with different pages are not equal', () {
       final a = ThreadLoaded(
-        thread: Thread.initial(),
-        previousPages: Thread.initial(),
+        thread: _emptyThread,
+        previousReplies: const [],
         currentPage: 1,
         endPage: 1,
       );
       final b = ThreadLoaded(
-        thread: Thread.initial(),
-        previousPages: Thread.initial(),
+        thread: _emptyThread,
+        previousReplies: const [],
         currentPage: 2,
         endPage: 2,
       );
@@ -110,14 +121,14 @@ void main() {
 
     test('identical ThreadLoaded values are equal via props', () {
       final a = ThreadLoaded(
-        thread: Thread.initial(),
-        previousPages: Thread.initial(),
+        thread: _emptyThread,
+        previousReplies: const [],
         currentPage: 1,
         endPage: 1,
       );
       final b = ThreadLoaded(
-        thread: Thread.initial(),
-        previousPages: Thread.initial(),
+        thread: _emptyThread,
+        previousReplies: const [],
         currentPage: 1,
         endPage: 1,
       );

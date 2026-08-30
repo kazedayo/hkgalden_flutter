@@ -15,16 +15,16 @@ class ThreadAppending extends ThreadState {}
 
 class ThreadLoaded extends ThreadState {
   final Thread thread;
-  final Thread previousPages;
+  final List<Reply> previousReplies;
   final int currentPage;
   final int endPage;
 
   const ThreadLoaded(
       {required this.thread,
-      required this.previousPages,
+      required this.previousReplies,
       required this.currentPage,
       required this.endPage});
 
   @override
-  List<Object> get props => [thread, previousPages, currentPage, endPage];
+  List<Object> get props => [thread, previousReplies, currentPage, endPage];
 }

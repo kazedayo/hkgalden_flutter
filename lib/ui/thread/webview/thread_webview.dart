@@ -258,10 +258,10 @@ class _ThreadWebViewState extends State<ThreadWebView> {
     SessionUserState session,
   ) async {
     widget.controller.threadId = state.thread.threadId;
-    _indexReplies(state.previousPages.replies);
+    _indexReplies(state.previousReplies);
     _indexReplies(state.thread.replies);
     _pushThemeAndChrome(state, session);
-    final previous = _document.serializeReplies(state.previousPages.replies, session);
+    final previous = _document.serializeReplies(state.previousReplies, session);
     final replies = _document.serializeReplies(state.thread.replies, session);
     await _js.send('renderThread', {
       'previous': [for (final dto in previous) dto.toJson()],
@@ -271,7 +271,7 @@ class _ThreadWebViewState extends State<ThreadWebView> {
     });
     _didInitialRender = true;
     widget.controller.hasRendered = true;
-    _renderedPreviousCount = state.previousPages.replies.length;
+    _renderedPreviousCount = state.previousReplies.length;
     _renderedMainCount = state.thread.replies.length;
     _renderedEndPage = state.endPage;
     _markContentReady();
@@ -300,7 +300,7 @@ class _ThreadWebViewState extends State<ThreadWebView> {
 
     _js.send('setFlags', _flags(state));
 
-    final previous = state.previousPages.replies;
+    final previous = state.previousReplies;
     if (previous.length > _renderedPreviousCount) {
       final added = previous.sublist(
         0,

@@ -42,16 +42,6 @@ class Thread extends Equatable {
     );
   }
 
-  factory Thread.initial() => const Thread(
-        threadId: 0,
-        title: '',
-        status: '',
-        replies: [],
-        totalReplies: 0,
-        tagName: '',
-        tagColor: Colors.white,
-      );
-
   Thread copyWith({
     int? threadId,
     String? title,
