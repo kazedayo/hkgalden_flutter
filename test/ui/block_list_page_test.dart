@@ -10,7 +10,6 @@ const _session = User(
   userId: 'me',
   nickName: 'me',
   avatar: '',
-  userGroup: [],
   blockedUsers: ['blocked'],
 );
 
@@ -18,7 +17,6 @@ const _blocked = User(
   userId: 'blocked',
   nickName: 'BlockedNick',
   avatar: '',
-  userGroup: [],
   gender: 'M',
   blockedUsers: [],
 );

@@ -3,7 +3,6 @@ import 'package:hkgalden_flutter/bloc/compose/compose_state.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
 import 'package:hkgalden_flutter/models/user.dart';
-import 'package:hkgalden_flutter/models/user_group.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -46,7 +45,7 @@ void main() {
         userId: '1',
         nickName: 'nick',
         avatar: '',
-        userGroup: [UserGroup(groupId: 'g')],
+        groupId: 'g',
         blockedUsers: [],
       ),
       authorNickname: 'nick',

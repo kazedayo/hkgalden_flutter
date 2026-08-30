@@ -54,7 +54,7 @@ class BlockedUserCell extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         leading: UserAvatarImage(
           avatarUrl: user.avatar,
-          userGroup: user.userGroup,
+          groupId: user.groupId,
           size: 30,
         ),
         title: Text(

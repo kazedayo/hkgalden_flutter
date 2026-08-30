@@ -63,7 +63,7 @@ class ChannelCell extends StatelessWidget {
                     width: 10,
                     height: 10,
                     decoration: BoxDecoration(
-                      color: channel.channelColor,
+                      color: channel.tags.first.color,
                       shape: BoxShape.circle,
                     ),
                   ),

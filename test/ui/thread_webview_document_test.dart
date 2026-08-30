@@ -123,7 +123,6 @@ void main() {
         userId: 'u1',
         nickName: 'nick',
         avatar: '',
-        userGroup: [],
         blockedUsers: [],
       ),
       authorNickname: 'nick',

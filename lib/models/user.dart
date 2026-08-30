@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:hkgalden_flutter/models/user_group.dart';
 
 List<User> userListFromJson(List<dynamic> json) =>
     json.map((user) => User.fromJson(user as Map<String, dynamic>)).toList();
@@ -12,7 +11,7 @@ class User extends Equatable {
   final String userId;
   final String nickName;
   final String avatar;
-  final List<UserGroup> userGroup;
+  final String? groupId;
   final String? gender;
   final List<String> blockedUsers;
 
@@ -20,7 +19,7 @@ class User extends Equatable {
     required this.userId,
     required this.nickName,
     required this.avatar,
-    required this.userGroup,
+    this.groupId,
     this.gender,
     required this.blockedUsers,
   });
@@ -29,12 +28,9 @@ class User extends Equatable {
         userId: json['id'] as String,
         nickName: json['nickname'] as String,
         avatar: json['avatar'] == null ? '' : json['avatar'] as String,
-        userGroup: json['groups'] == null
-            ? []
-            : (json['groups'] as List<dynamic>)
-                .map((group) =>
-                    UserGroup.fromJson(group as Map<String, dynamic>))
-                .toList(),
+        groupId: json['groups'] is List && (json['groups'] as List).isNotEmpty
+            ? (json['groups'] as List).first['id'] as String?
+            : null,
         gender: json['gender'] as String?,
         blockedUsers: json['blockedUserIds'] == null
             ? []
@@ -47,7 +43,7 @@ class User extends Equatable {
     String? userId,
     String? nickName,
     String? avatar,
-    List<UserGroup>? userGroup,
+    String? groupId,
     String? gender,
     List<String>? blockedUsers,
   }) =>
@@ -55,11 +51,11 @@ class User extends Equatable {
           userId: userId ?? this.userId,
           nickName: nickName ?? this.nickName,
           avatar: avatar ?? this.avatar,
-          userGroup: userGroup ?? this.userGroup,
+          groupId: groupId ?? this.groupId,
           gender: gender ?? this.gender,
           blockedUsers: blockedUsers ?? this.blockedUsers);
 
   @override
   List<Object?> get props =>
-      [userId, nickName, avatar, userGroup, gender, blockedUsers];
+      [userId, nickName, avatar, groupId, gender, blockedUsers];
 }

@@ -23,7 +23,6 @@ class _GqlFragments {
         gender
         groups {
           id
-          name
         }
       }
       authorNickname
@@ -58,7 +57,6 @@ class _GqlFragments {
         avatar
         groups {
           id
-          name
         }
       }
       authorNickname
@@ -94,7 +92,6 @@ class _GqlFragments {
           gender
           groups {
             id
-            name
           }
           blockedUserIds
         }
@@ -140,7 +137,6 @@ class _GqlFragments {
           avatar
           groups {
             id
-            name
           }
         }
       }
