@@ -24,7 +24,7 @@ class ThreadCubit extends Cubit<ThreadState> {
       if (thread != null) {
         emit(ThreadLoaded(
             thread: thread,
-            previousPages: Thread.initial(),
+            previousReplies: const [],
             currentPage: page,
             endPage: page));
       } else {
@@ -42,10 +42,10 @@ class ThreadCubit extends Cubit<ThreadState> {
         if (page < previousState.currentPage) {
           emit(ThreadLoaded(
               thread: previousState.thread,
-              previousPages: thread.copyWith(
-                  replies: thread.replies.toList()
-                    ..addAll(previousState.previousPages.replies),
-                  totalReplies: thread.totalReplies),
+              previousReplies: [
+                ...thread.replies,
+                ...previousState.previousReplies,
+              ],
               currentPage: page,
               endPage: previousState.endPage));
         } else if (page > previousState.endPage) {
@@ -53,14 +53,14 @@ class ThreadCubit extends Cubit<ThreadState> {
               thread: previousState.thread.copyWith(
                   replies: previousState.thread.replies.toList()
                     ..addAll(thread.replies)),
-              previousPages: previousState.previousPages,
+              previousReplies: previousState.previousReplies,
               currentPage: previousState.currentPage,
               endPage: page));
         } else if (page == previousState.endPage &&
             previousState.currentPage == previousState.endPage) {
           emit(ThreadLoaded(
               thread: previousState.thread.copyWith(replies: thread.replies),
-              previousPages: previousState.previousPages,
+              previousReplies: previousState.previousReplies,
               currentPage: previousState.currentPage,
               endPage: previousState.endPage));
         } else {
@@ -80,7 +80,7 @@ class ThreadCubit extends Cubit<ThreadState> {
       replies.add(reply);
       emit(ThreadLoaded(
           thread: previousState.thread.copyWith(replies: replies),
-          previousPages: previousState.previousPages,
+          previousReplies: previousState.previousReplies,
           currentPage: previousState.currentPage,
           endPage: previousState.endPage));
     }

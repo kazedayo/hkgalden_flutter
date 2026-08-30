@@ -1,4 +1,5 @@
 import 'package:bloc_test/bloc_test.dart';
+import 'package:flutter/material.dart';
 import 'package:hkgalden_flutter/bloc/thread/thread_cubit.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/models/thread.dart';
@@ -7,10 +8,19 @@ import 'package:hkgalden_flutter/models/user_group.dart';
 import 'package:hkgalden_flutter/networking/hkgalden_api.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+const _emptyThread = Thread(
+  threadId: 0,
+  title: '',
+  status: '',
+  replies: [],
+  totalReplies: 0,
+  tagName: '',
+  tagColor: Colors.white,
+);
+
 class _FakeApi extends Fake implements HKGaldenApi {
   @override
-  Future<Thread?> getThreadQuery(int threadId, int page) async =>
-      Thread.initial();
+  Future<Thread?> getThreadQuery(int threadId, int page) async => _emptyThread;
 }
 
 void main() {
@@ -62,15 +72,15 @@ void main() {
       expect: () => [
         ThreadLoading(),
         ThreadLoaded(
-          thread: Thread.initial(),
-          previousPages: Thread.initial(),
+          thread: _emptyThread,
+          previousReplies: const [],
           currentPage: 1,
           endPage: 1,
         ),
         ThreadAppending(),
         ThreadLoaded(
-          thread: Thread.initial(),
-          previousPages: Thread.initial(),
+          thread: _emptyThread,
+          previousReplies: const [],
           currentPage: 1,
           endPage: 2,
         ),
@@ -87,15 +97,15 @@ void main() {
       expect: () => [
         ThreadLoading(),
         ThreadLoaded(
-          thread: Thread.initial(),
-          previousPages: Thread.initial(),
+          thread: _emptyThread,
+          previousReplies: const [],
           currentPage: 1,
           endPage: 1,
         ),
         ThreadAppending(),
         ThreadLoaded(
-          thread: Thread.initial().copyWith(replies: [sampleReply]),
-          previousPages: Thread.initial(),
+          thread: _emptyThread.copyWith(replies: [sampleReply]),
+          previousReplies: const [],
           currentPage: 1,
           endPage: 1,
         ),

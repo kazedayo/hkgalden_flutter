@@ -19,7 +19,7 @@ void handleThreadPageCubitState({
     ParsedCommentHtmlCache.instance.prewarm(
       [
         ...state.thread.replies,
-        ...state.previousPages.replies,
+        ...state.previousReplies,
       ],
       sessionState,
     );
