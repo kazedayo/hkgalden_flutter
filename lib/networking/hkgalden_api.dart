@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:gql/ast.dart';
 import 'package:graphql/client.dart';
 import 'package:hkgalden_flutter/models/channel.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
@@ -70,7 +69,7 @@ class _GqlFragments {
     }
   ''';
 
-  static final DocumentNode getChannels = gql('''
+  static final getChannels = gql('''
       query GetChannels {
         channels {
           id
@@ -83,7 +82,7 @@ class _GqlFragments {
       }
     ''');
 
-  static final DocumentNode getSessionUser = gql('''
+  static final getSessionUser = gql('''
       query GetSessionUser {
         sessionUser {
           id
@@ -98,7 +97,7 @@ class _GqlFragments {
       }
     ''');
 
-  static final DocumentNode getThread = gql(r'''
+  static final getThread = gql(r'''
       query GetThreadContent($id: Int!, $page: Int!) {
         thread(id: $id,sorting: date_asc,page: $page) {
           id
@@ -118,7 +117,7 @@ class _GqlFragments {
       '${_GqlFragments.commentsRecursive}'
       '${_GqlFragments.commentFields}');
 
-  static final DocumentNode getThreadList = gql(r'''
+  static final getThreadList = gql(r'''
       query GetThreadListQuery($channelId: String!, $page: Int!) {
         threadsByChannel(channelId: $channelId, page: $page) {
     '''
@@ -128,7 +127,7 @@ class _GqlFragments {
       }
     ''');
 
-  static final DocumentNode getBlockedUser = gql('''
+  static final getBlockedUser = gql('''
       query GetBlockedUser {
         blockedUsers {
           id
@@ -142,7 +141,7 @@ class _GqlFragments {
       }
     ''');
 
-  static final DocumentNode getUserThreadList = gql(r'''
+  static final getUserThreadList = gql(r'''
       query GetUserThreadList($userId: String!, $page: Int!) {
         threadsByUser(userId: $userId, page: $page) {
     '''
@@ -152,7 +151,7 @@ class _GqlFragments {
       }
     ''');
 
-  static final DocumentNode sendReply = gql(r'''
+  static final sendReply = gql(r'''
       mutation SendReply($threadId: Int!, $parentId: String, $html: String!) {
         replyThread(threadId: $threadId, parentId: $parentId, html: $html) {
           ...CommentsRecursive
@@ -162,25 +161,25 @@ class _GqlFragments {
       '${_GqlFragments.commentsRecursive}'
       '${_GqlFragments.commentFields}');
 
-  static final DocumentNode createThread = gql(r'''
+  static final createThread = gql(r'''
       mutation CreateThread($title: String!, $tags: [String!]!, $html: String!) {
         createThread(title: $title, tags: $tags, html: $html)
       }
     ''');
 
-  static final DocumentNode unblockUser = gql(r'''
+  static final unblockUser = gql(r'''
       mutation UnblockUser($userId: String!) {
         unblockUser(id: $userId)
       }
     ''');
 
-  static final DocumentNode blockUser = gql(r'''
+  static final blockUser = gql(r'''
       mutation BlockUser($userId: String!) {
         blockUser(id: $userId)
       }
     ''');
 
-  static final DocumentNode getInstalledPacks = gql('''
+  static final getInstalledPacks = gql('''
       query GetInstalledPacks {
         installedPacks {
           id

@@ -4,8 +4,8 @@ import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
 import 'package:hkgalden_flutter/utils/parsed_comment_html_cache.dart';
 import 'package:hkgalden_flutter/utils/x_url.dart';
 import 'package:hkgalden_flutter/utils/youtube_url.dart';
-import 'package:universal_html/html.dart';
-import 'package:universal_html/parsing.dart';
+import 'package:html/dom.dart';
+import 'package:html/parser.dart' show parse;
 
 final RegExp _hexColor = RegExp(r'^#?[0-9a-fA-F]{3,8}$');
 
@@ -118,7 +118,7 @@ class ThreadWebViewDocument {
       return RewrittenContentHtml(html: html);
     }
     try {
-      final document = parseHtmlDocument('<div id="__root">$html</div>');
+      final document = parse('<div id="__root">$html</div>');
       final root = document.getElementById('__root');
       if (root == null) {
         return RewrittenContentHtml(html: html);
@@ -136,7 +136,7 @@ class ThreadWebViewDocument {
         _wrapLinkPreviews(root, youtubeIds: youtubeIds, xIds: xIds);
       }
       return RewrittenContentHtml(
-        html: root.innerHtml ?? html,
+        html: root.innerHtml,
         youtubeIds: youtubeIds,
         xIds: xIds,
       );
@@ -151,7 +151,7 @@ class ThreadWebViewDocument {
         continue;
       }
       el.replaceWith(
-        Element.span()
+        Element.tag('span')
           ..className = 'img-placeholder'
           ..text = kQuotePreviewImagePlaceholder,
       );
@@ -160,28 +160,25 @@ class ThreadWebViewDocument {
 
   void _applyColors(Element root) {
     for (final el in List<Element>.from(root.querySelectorAll('span.color'))) {
-      final hex = el.getAttribute('hex');
+      final hex = el.attributes['hex'];
       if (hex == null || !_hexColor.hasMatch(hex)) {
         continue;
       }
       final normalized = hex.startsWith('#') ? hex : '#$hex';
-      final existing = el.getAttribute('style');
-      el.setAttribute(
-        'style',
-        existing == null || existing.isEmpty
-            ? 'color:$normalized'
-            : '$existing;color:$normalized',
-      );
+      final existing = el.attributes['style'];
+      el.attributes['style'] = existing == null || existing.isEmpty
+          ? 'color:$normalized'
+          : '$existing;color:$normalized';
     }
   }
 
   void _convertIcons(Element root) {
     for (final el in List<Element>.from(root.querySelectorAll('icon'))) {
-      final src = el.getAttribute('src') ?? '';
-      final img = Element.img()
+      final src = el.attributes['src'] ?? '';
+      final img = Element.tag('img')
         ..className = 'smiley'
-        ..setAttribute('src', src)
-        ..setAttribute('alt', '');
+        ..attributes['src'] = src
+        ..attributes['alt'] = '';
       el.replaceWith(img);
     }
   }
@@ -193,11 +190,11 @@ class ThreadWebViewDocument {
       }
       final classes = el.className.trim();
       el.className = classes.isEmpty ? 'content-img' : '$classes content-img';
-      el.setAttribute('loading', 'lazy');
+      el.attributes['loading'] = 'lazy';
 
-      final src = el.getAttribute('src') ?? '';
-      final sx = int.tryParse(el.getAttribute('data-sx') ?? '');
-      final sy = int.tryParse(el.getAttribute('data-sy') ?? '');
+      final src = el.attributes['src'] ?? '';
+      final sx = int.tryParse(el.attributes['data-sx'] ?? '');
+      final sy = int.tryParse(el.attributes['data-sy'] ?? '');
       final styles = <String>[];
       if (sx != null && sx > 0) {
         styles.add('width:min(100%,${sx}px)');
@@ -213,11 +210,11 @@ class ThreadWebViewDocument {
           styles.add('aspect-ratio:4 / 3');
         }
       }
-      final existing = el.getAttribute('style');
+      final existing = el.attributes['style'];
       if (existing != null && existing.isNotEmpty) {
         styles.insert(0, existing);
       }
-      el.setAttribute('style', styles.join(';'));
+      el.attributes['style'] = styles.join(';');
     }
   }
 
@@ -230,7 +227,7 @@ class ThreadWebViewDocument {
       if (_closestClass(anchor, 'link-preview') != null) {
         continue;
       }
-      final href = anchor.getAttribute('href');
+      final href = anchor.attributes['href'];
       if (href == null || href.isEmpty) {
         continue;
       }
@@ -269,19 +266,19 @@ class ThreadWebViewDocument {
     String? thumbUrl,
     required String subtitle,
   }) {
-    final wrap = Element.div()
+    final wrap = Element.tag('div')
       ..className = 'link-preview'
-      ..setAttribute('data-preview', kind)
-      ..setAttribute('data-id', id)
-      ..setAttribute('data-href', href);
+      ..attributes['data-preview'] = kind
+      ..attributes['data-id'] = id
+      ..attributes['data-href'] = href;
 
     anchor.replaceWith(wrap);
     wrap.append(anchor);
 
     final chip = Element.tag('button')
       ..className = 'preview-chip'
-      ..setAttribute('type', 'button')
-      ..setAttribute('data-href', href);
+      ..attributes['type'] = 'button'
+      ..attributes['data-href'] = href;
 
     final thumbClasses = StringBuffer('preview-thumb');
     if (thumbUrl != null) {
@@ -289,25 +286,23 @@ class ThreadWebViewDocument {
     } else if (kind == 'x') {
       thumbClasses.write(' preview-accent');
     }
-    final thumb = Element.div()..className = thumbClasses.toString();
+    final thumb = Element.tag('div')..className = thumbClasses.toString();
     if (thumbUrl != null) {
-      thumb.setAttribute(
-        'style',
-        "background-image:url('${thumbUrl.replaceAll("'", '%27')}')",
-      );
+      thumb.attributes['style'] =
+          "background-image:url('${thumbUrl.replaceAll("'", '%27')}')";
     }
     if (kind == 'youtube') {
-      thumb.append(Element.div()..className = 'preview-play');
+      thumb.append(Element.tag('div')..className = 'preview-play');
     }
 
-    final body = Element.div()..className = 'preview-body';
-    body.append(Element.div()
+    final body = Element.tag('div')..className = 'preview-body';
+    body.append(Element.tag('div')
       ..className = 'preview-title'
       ..text = 'Loading…');
     if (kind == 'x') {
-      body.append(Element.div()..className = 'preview-text');
+      body.append(Element.tag('div')..className = 'preview-text');
     }
-    body.append(Element.div()
+    body.append(Element.tag('div')
       ..className = 'preview-sub'
       ..text = subtitle);
 
