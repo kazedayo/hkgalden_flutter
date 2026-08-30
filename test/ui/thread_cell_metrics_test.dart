@@ -11,7 +11,6 @@ void main() {
     userId: '1',
     nickName: 'nick',
     avatar: '',
-    userGroup: [],
     blockedUsers: [],
   );
 

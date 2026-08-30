@@ -104,9 +104,7 @@ class ThreadWebViewDocument {
       nickname: reply.authorNickname,
       avatar: reply.author.avatar,
       gender: reply.author.gender,
-      groupId: reply.author.userGroup.isEmpty
-          ? null
-          : reply.author.userGroup.first.groupId,
+      groupId: reply.author.groupId,
       youtubeIds: rewritten.youtubeIds,
       xIds: rewritten.xIds,
     );

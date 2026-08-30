@@ -9,7 +9,6 @@ User _user(String id, {String nick = 'nick', List<String> blocked = const []}) {
     userId: id,
     nickName: nick,
     avatar: '',
-    userGroup: const [],
     blockedUsers: blocked,
   );
 }

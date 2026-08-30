@@ -175,7 +175,7 @@ class _UserPageState extends State<UserPage> {
               children: [
                 UserAvatarImage(
                   avatarUrl: widget.user.avatar,
-                  userGroup: widget.user.userGroup,
+                  groupId: widget.user.groupId,
                 ),
                 const SizedBox(width: 8),
                 Expanded(

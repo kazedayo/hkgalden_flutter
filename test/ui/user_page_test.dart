@@ -13,7 +13,6 @@ const _user = User(
   userId: '1',
   nickName: 'tester',
   avatar: '',
-  userGroup: [],
   gender: 'M',
   blockedUsers: [],
 );
@@ -22,7 +21,6 @@ const _other = User(
   userId: '2',
   nickName: 'other',
   avatar: '',
-  userGroup: [],
   gender: 'M',
   blockedUsers: [],
 );

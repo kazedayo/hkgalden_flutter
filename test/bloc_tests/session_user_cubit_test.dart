@@ -37,7 +37,6 @@ void main() {
     userId: 'me',
     nickName: 'me',
     avatar: '',
-    userGroup: [],
     blockedUsers: ['blocked'],
   );
 

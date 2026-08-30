@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:hkgalden_flutter/models/user_group.dart';
 
 class UserAvatarImage extends StatelessWidget {
   final String avatarUrl;
-  final List<UserGroup> userGroup;
+  final String? groupId;
   final double size;
 
   const UserAvatarImage({
     super.key,
     required this.avatarUrl,
-    required this.userGroup,
+    this.groupId,
     this.size = 25,
   });
 
@@ -51,17 +50,17 @@ class UserAvatarImage extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Theme.of(context).colorScheme.surfaceContainerHigh,
-          gradient: userGroup.isEmpty
+          gradient: groupId == null
               ? null
               : LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    if (userGroup.first.groupId == 'ADMIN')
+                    if (groupId == 'ADMIN')
                       const Color(0xff7435a0)
                     else
                       const Color(0xffe0561d),
-                    if (userGroup.first.groupId == 'ADMIN')
+                    if (groupId == 'ADMIN')
                       const Color(0xff4a72d3)
                     else
                       const Color(0xffd8529a)
