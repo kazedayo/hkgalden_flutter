@@ -151,28 +151,10 @@ class AppTheme {
         selectionHandleColor: accentColor,
       ),
 
-      textTheme: _buildTextTheme(const TextTheme()),
-    );
-  }
-
-  static TextTheme _buildTextTheme(TextTheme base) {
-    const whiteTextStyle = TextStyle(color: Colors.white);
-    return base.copyWith(
-      displayLarge: whiteTextStyle,
-      displayMedium: whiteTextStyle,
-      displaySmall: whiteTextStyle,
-      headlineLarge: whiteTextStyle,
-      headlineMedium: whiteTextStyle,
-      headlineSmall: whiteTextStyle,
-      titleLarge: whiteTextStyle,
-      titleMedium: whiteTextStyle,
-      titleSmall: whiteTextStyle,
-      bodyLarge: whiteTextStyle,
-      bodyMedium: whiteTextStyle,
-      bodySmall: whiteTextStyle,
-      labelLarge: whiteTextStyle,
-      labelMedium: whiteTextStyle,
-      labelSmall: whiteTextStyle,
+      textTheme: Typography.whiteMountainView.apply(
+        bodyColor: Colors.white,
+        displayColor: Colors.white,
+      ),
     );
   }
 }
