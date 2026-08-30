@@ -139,18 +139,7 @@ class _RichTextToolbar extends StatefulWidget {
 }
 
 class _RichTextToolbarState extends State<_RichTextToolbar> {
-  bool _isBold = false;
-  bool _isItalic = false;
-  bool _isUnderline = false;
-  bool _isStrikethrough = false;
-
-  bool _isCenterAlign = false;
-  bool _isRightAlign = false;
-  bool _isH1 = false;
-  bool _isH2 = false;
-  bool _isH3 = false;
-
-  Color? _activeColor;
+  late _ToolbarSelection _selection;
 
   OverlayEntry? _colorOverlay;
   final GlobalKey _colorBtnKey = GlobalKey();
@@ -158,6 +147,18 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
   @override
   void initState() {
     super.initState();
+    _selection = (
+      bold: false,
+      italic: false,
+      underline: false,
+      strike: false,
+      center: false,
+      right: false,
+      h1: false,
+      h2: false,
+      h3: false,
+      color: null,
+    );
     widget.controller.addListener(_onSelectionChanged);
   }
 
@@ -188,37 +189,23 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
     final isItalic = attrs.containsKey(Attribute.italic.key);
     final isUnderline = attrs.containsKey(Attribute.underline.key);
     final isStrikethrough = attrs.containsKey(Attribute.strikeThrough.key);
-    final isCenterAlign = align?.value == 'center';
-    final isRightAlign = align?.value == 'right';
-    final isH1 = attrs[Attribute.font.key]?.value == 'h1';
-    final isH2 = attrs[Attribute.font.key]?.value == 'h2';
-    final isH3 = attrs[Attribute.font.key]?.value == 'h3';
 
-    if (isBold == _isBold &&
-        isItalic == _isItalic &&
-        isUnderline == _isUnderline &&
-        isStrikethrough == _isStrikethrough &&
-        isCenterAlign == _isCenterAlign &&
-        isRightAlign == _isRightAlign &&
-        isH1 == _isH1 &&
-        isH2 == _isH2 &&
-        isH3 == _isH3 &&
-        parsedColor == _activeColor) {
-      return;
-    }
+    final newSelection = (
+      bold: isBold,
+      italic: isItalic,
+      underline: isUnderline,
+      strike: isStrikethrough,
+      center: align?.value == 'center',
+      right: align?.value == 'right',
+      h1: attrs[Attribute.font.key]?.value == 'h1',
+      h2: attrs[Attribute.font.key]?.value == 'h2',
+      h3: attrs[Attribute.font.key]?.value == 'h3',
+      color: parsedColor,
+    );
 
-    setState(() {
-      _isBold = isBold;
-      _isItalic = isItalic;
-      _isUnderline = isUnderline;
-      _isStrikethrough = isStrikethrough;
-      _isCenterAlign = isCenterAlign;
-      _isRightAlign = isRightAlign;
-      _isH1 = isH1;
-      _isH2 = isH2;
-      _isH3 = isH3;
-      _activeColor = parsedColor;
-    });
+    if (newSelection == _selection) return;
+
+    setState(() => _selection = newSelection);
   }
 
 
@@ -310,7 +297,7 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
                 child: GestureDetector(
                   onTap: () {}, // prevent taps inside from dismissing
                   child: _ColorPickerPopup(
-                    activeColor: _activeColor,
+                    activeColor: _selection.color,
                     onColorSelected: (color) {
                       _applyColor(color);
                       _dismissColorPicker();
@@ -372,10 +359,11 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
             ),
             const SizedBox(width: 3),
           ],
-          _ColorButton(
+          _ToolbarButton(
             key: _colorBtnKey,
-            activeColor: _activeColor,
-            isPickerOpen: isColorPickerOpen,
+            icon: Icons.format_paint_rounded,
+            isActive: isColorPickerOpen,
+            iconColor: _selection.color,
             onPressed: _toggleColorPicker,
           ),
 
@@ -383,63 +371,63 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
 
           _ToolbarButton(
             icon: Icons.format_bold_rounded,
-            isActive: _isBold,
-            onPressed: () => _toggle(Attribute.bold, _isBold),
+            isActive: _selection.bold,
+            onPressed: () => _toggle(Attribute.bold, _selection.bold),
           ),
           const SizedBox(width: 3),
           _ToolbarButton(
             icon: Icons.format_italic_rounded,
-            isActive: _isItalic,
-            onPressed: () => _toggle(Attribute.italic, _isItalic),
+            isActive: _selection.italic,
+            onPressed: () => _toggle(Attribute.italic, _selection.italic),
           ),
           const SizedBox(width: 3),
           _ToolbarButton(
             icon: Icons.format_underlined_rounded,
-            isActive: _isUnderline,
-            onPressed: () => _toggle(Attribute.underline, _isUnderline),
+            isActive: _selection.underline,
+            onPressed: () => _toggle(Attribute.underline, _selection.underline),
           ),
           const SizedBox(width: 3),
           _ToolbarButton(
             icon: Icons.format_strikethrough_rounded,
-            isActive: _isStrikethrough,
+            isActive: _selection.strike,
             onPressed: () =>
-                _toggle(Attribute.strikeThrough, _isStrikethrough),
+                _toggle(Attribute.strikeThrough, _selection.strike),
           ),
 
           _buildDivider(dividerColor),
 
           _ToolbarButton(
             icon: Icons.format_align_center_rounded,
-            isActive: _isCenterAlign,
-            onPressed: () =>
-                _toggleAlignment(Attribute.centerAlignment, _isCenterAlign),
+            isActive: _selection.center,
+            onPressed: () => _toggleAlignment(
+                Attribute.centerAlignment, _selection.center),
           ),
           const SizedBox(width: 3),
           _ToolbarButton(
             icon: Icons.format_align_right_rounded,
-            isActive: _isRightAlign,
+            isActive: _selection.right,
             onPressed: () =>
-                _toggleAlignment(Attribute.rightAlignment, _isRightAlign),
+                _toggleAlignment(Attribute.rightAlignment, _selection.right),
           ),
 
           _buildDivider(dividerColor),
 
           _ToolbarButton(
             label: 'H1',
-            isActive: _isH1,
-            onPressed: () => _toggleSize('h1', _isH1),
+            isActive: _selection.h1,
+            onPressed: () => _toggleSize('h1', _selection.h1),
           ),
           const SizedBox(width: 3),
           _ToolbarButton(
             label: 'H2',
-            isActive: _isH2,
-            onPressed: () => _toggleSize('h2', _isH2),
+            isActive: _selection.h2,
+            onPressed: () => _toggleSize('h2', _selection.h2),
           ),
           const SizedBox(width: 3),
           _ToolbarButton(
             label: 'H3',
-            isActive: _isH3,
-            onPressed: () => _toggleSize('h3', _isH3),
+            isActive: _selection.h3,
+            onPressed: () => _toggleSize('h3', _selection.h3),
           ),
 
           _buildDivider(dividerColor),
@@ -478,64 +466,22 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
 }
 
 
-class _ColorButton extends StatelessWidget {
-  final Color? activeColor;
-  final bool isPickerOpen;
-  final VoidCallback onPressed;
-
-  const _ColorButton({
-    super.key,
-    required this.activeColor,
-    required this.isPickerOpen,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final inactiveColor =
-        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.45);
-    final iconColor =
-        isPickerOpen ? Colors.white : activeColor ?? inactiveColor;
-
-    return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(8),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        canRequestFocus: false,
-        onTap: onPressed,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: isPickerOpen ? AppTheme.primaryColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            Icons.format_paint_rounded,
-            size: 20,
-            color: iconColor,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _ToolbarButton extends StatelessWidget {
   final bool isActive;
   final VoidCallback onPressed;
 
   final IconData? icon;
   final String? label;
+  final Color? iconColor;
 
   const _ToolbarButton({
+    super.key,
     required this.isActive,
     required this.onPressed,
     this.icon,
     this.label,
-  }) : assert(
-            icon != null || label != null, 'Provide either an icon or a label');
+    this.iconColor,
+  }) : assert(icon != null || label != null, 'Provide either an icon or a label');
 
   static const _activeBackground = AppTheme.primaryColor;
   static const _activeForeground = Colors.white;
@@ -563,7 +509,7 @@ class _ToolbarButton extends StatelessWidget {
               ? Icon(
                   icon,
                   size: 20,
-                  color: isActive ? _activeForeground : inactiveColor,
+                  color: isActive ? _activeForeground : iconColor ?? inactiveColor,
                 )
               : Text(
                   label!,
@@ -578,6 +524,19 @@ class _ToolbarButton extends StatelessWidget {
     );
   }
 }
+
+typedef _ToolbarSelection = ({
+  bool bold,
+  bool italic,
+  bool underline,
+  bool strike,
+  bool center,
+  bool right,
+  bool h1,
+  bool h2,
+  bool h3,
+  Color? color,
+});
 
 class _LinkDialog extends StatefulWidget {
   const _LinkDialog();

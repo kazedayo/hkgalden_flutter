@@ -143,28 +143,25 @@ class StaggerAnimation extends StatelessWidget {
   final Animation<double> size;
 
   Widget _buildAnimation(BuildContext context, Widget? child) {
-    // ignore: avoid_unnecessary_containers
-    return Container(
-      child: Column(
-        children: <Widget>[
-          const Spacer(),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: SizedBox(
-              width: size.value,
-              height: size.value,
-              child: Hero(
-                  tag: 'logo',
-                  child: SvgPicture.asset('assets/icon-hkgalden.svg')),
-            ),
+    return Column(
+      children: <Widget>[
+        const Spacer(),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: SizedBox(
+            width: size.value,
+            height: size.value,
+            child: Hero(
+                tag: 'logo',
+                child: SvgPicture.asset('assets/icon-hkgalden.svg')),
           ),
-          FadeTransition(
-            opacity: opacity,
-            child: const ProgressSpinner(),
-          ),
-          const Spacer(),
-        ],
-      ),
+        ),
+        FadeTransition(
+          opacity: opacity,
+          child: const ProgressSpinner(),
+        ),
+        const Spacer(),
+      ],
     );
   }
 

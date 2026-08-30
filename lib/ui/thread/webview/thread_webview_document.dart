@@ -1,6 +1,7 @@
 import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
+import 'package:hkgalden_flutter/models/thread_reading_position.dart';
 import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/utils/x_url.dart';
 import 'package:hkgalden_flutter/utils/youtube_url.dart';
@@ -99,7 +100,7 @@ class ThreadWebViewDocument {
       floor: reply.floor,
       html: rewritten.html,
       dateText: _formatReplyDate(reply.date),
-      isPageStart: reply.floor % 50 == 1,
+      isPageStart: reply.floor % kRepliesPerPage == 1,
       authorUserId: reply.author.userId,
       nickname: reply.authorNickname,
       avatar: reply.author.avatar,

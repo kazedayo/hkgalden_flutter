@@ -172,7 +172,6 @@ void main() {
 
       expect(first?.authorName, 'US Department of the Interior');
       expect(first?.authorScreenName, 'Interior');
-      expect(first?.authorUrl, 'https://x.com/Interior');
       expect(first?.text, contains('Sunsets'));
       expect(
         first?.imageUrl,

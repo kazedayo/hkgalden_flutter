@@ -1,3 +1,6 @@
+/// Floors per page. Keep in sync with assets/thread_webview/render.js (~line 131).
+const int kRepliesPerPage = 50;
+
 class ThreadReadingPosition {
   final int page;
 
@@ -15,7 +18,7 @@ class ThreadReadingPosition {
     if (floor < 1) {
       return 1;
     }
-    return ((floor - 1) ~/ 50) + 1;
+    return ((floor - 1) ~/ kRepliesPerPage) + 1;
   }
 
   /// Mid-list: viewport top. Trailing edge: furthest visible/loaded floor.

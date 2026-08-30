@@ -6,14 +6,12 @@ import 'package:hkgalden_flutter/utils/inflight_cache.dart';
 class XStatusInfo {
   final String authorName;
   final String? authorScreenName;
-  final String? authorUrl;
   final String text;
   final String? imageUrl;
 
   const XStatusInfo({
     required this.authorName,
     this.authorScreenName,
-    this.authorUrl,
     required this.text,
     this.imageUrl,
   });
@@ -88,14 +86,10 @@ class XStatusCache {
     final screenName = author['screen_name'] is String
         ? author['screen_name'] as String
         : null;
-    final authorUrl = author['url'] is String
-        ? author['url'] as String
-        : (screenName != null ? 'https://x.com/$screenName' : null);
 
     return XStatusInfo(
       authorName: name,
       authorScreenName: screenName,
-      authorUrl: authorUrl,
       text: text,
       imageUrl: firstMediaImageUrl(status['media']),
     );
