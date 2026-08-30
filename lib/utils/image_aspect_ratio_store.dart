@@ -35,9 +35,7 @@ class ImageAspectRatioStore {
     final raw = _box.get(url);
     if (raw is Map) {
       final r = (raw['r'] as num?)?.toDouble();
-      if (r != null && isValidAspectRatio(r)) {
-        return r;
-      }
+      return r;
     }
     return null;
   }
@@ -49,9 +47,7 @@ class ImageAspectRatioStore {
     final raw = _box.get(url);
     if (raw is Map) {
       final w = (raw['w'] as num?)?.toDouble();
-      if (w != null && isValidNaturalWidth(w)) {
-        return w;
-      }
+      return w;
     }
     return null;
   }

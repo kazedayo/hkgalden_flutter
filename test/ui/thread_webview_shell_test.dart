@@ -17,11 +17,13 @@ void main() {
 </body>
 </html>
 ''';
-    final out = inlineThreadWebViewShell(
+    final out = inlineWebViewShell(
       html: html,
       css: 'body{color:red}',
-      bridgeJs: 'var a=1;',
-      renderJs: 'var b=2;',
+      scripts: const {
+        'bridge.js': 'var a=1;',
+        'render.js': 'var b=2;',
+      },
     );
     expect(out, contains('<style>\nbody{color:red}\n</style>'));
     expect(out, contains('<script>\nvar a=1;\n</script>'));
@@ -33,11 +35,13 @@ void main() {
 
   test('throws when a marker is missing', () {
     expect(
-      () => inlineThreadWebViewShell(
+      () => inlineWebViewShell(
         html: '<html></html>',
         css: 'x',
-        bridgeJs: 'y',
-        renderJs: 'z',
+        scripts: const {
+          'bridge.js': 'y',
+          'render.js': 'z',
+        },
       ),
       throwsA(isA<StateError>()),
     );
@@ -46,11 +50,13 @@ void main() {
   test('inlines even when href has a leftover cache query', () {
     const html =
         '<link rel="stylesheet" href="thread.css?v=9"><script src="bridge.js?v=9"></script><script src="render.js?v=9"></script>';
-    final out = inlineThreadWebViewShell(
+    final out = inlineWebViewShell(
       html: html,
       css: 'x',
-      bridgeJs: 'y',
-      renderJs: 'z',
+      scripts: const {
+        'bridge.js': 'y',
+        'render.js': 'z',
+      },
     );
     expect(out, contains('<style>\nx\n</style>'));
     expect(out, isNot(contains('?v=')));

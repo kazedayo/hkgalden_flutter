@@ -47,12 +47,11 @@ String _replaceRequired(
   return result;
 }
 
-String inlineThreadWebViewShell({
-  required String html,
-  required String css,
-  required String bridgeJs,
-  required String renderJs,
-}) {
+Future<String> loadThreadWebViewShell() async {
+  final html = await rootBundle.loadString(kThreadWebViewHtmlAsset);
+  final css = await rootBundle.loadString(kThreadWebViewCssAsset);
+  final bridgeJs = await rootBundle.loadString(kThreadWebViewBridgeAsset);
+  final renderJs = await rootBundle.loadString(kThreadWebViewRenderAsset);
   return inlineWebViewShell(
     html: html,
     css: css,
@@ -60,18 +59,5 @@ String inlineThreadWebViewShell({
       'bridge.js': bridgeJs,
       'render.js': renderJs,
     },
-  );
-}
-
-Future<String> loadThreadWebViewShell() async {
-  final html = await rootBundle.loadString(kThreadWebViewHtmlAsset);
-  final css = await rootBundle.loadString(kThreadWebViewCssAsset);
-  final bridgeJs = await rootBundle.loadString(kThreadWebViewBridgeAsset);
-  final renderJs = await rootBundle.loadString(kThreadWebViewRenderAsset);
-  return inlineThreadWebViewShell(
-    html: html,
-    css: css,
-    bridgeJs: bridgeJs,
-    renderJs: renderJs,
   );
 }

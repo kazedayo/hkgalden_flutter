@@ -1,7 +1,7 @@
 import 'package:hkgalden_flutter/bloc/session_user/session_user_cubit.dart';
 import 'package:hkgalden_flutter/models/reply.dart';
 import 'package:hkgalden_flutter/utils/image_aspect_ratio_store.dart';
-import 'package:hkgalden_flutter/utils/parsed_comment_html_cache.dart';
+import 'package:hkgalden_flutter/parser/hkgalden_html_parser.dart';
 import 'package:hkgalden_flutter/utils/x_url.dart';
 import 'package:hkgalden_flutter/utils/youtube_url.dart';
 import 'package:html/dom.dart';
@@ -92,7 +92,7 @@ class ThreadWebViewDocument {
     Reply reply,
     SessionUserState sessionState,
   ) {
-    final raw = ParsedCommentHtmlCache.instance.getOrParse(reply, sessionState);
+    final raw = HKGaldenHtmlParser().commentWithQuotes(reply, sessionState) ?? '';
     final rewritten = rewriteContentHtml(raw);
     return ThreadWebViewReplyDto(
       replyId: reply.replyId,

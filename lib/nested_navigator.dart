@@ -21,18 +21,16 @@ class NestedNavigator extends StatelessWidget {
         key: navigatorKey,
         observers: [HeroController()],
         onGenerateRoute: (settings) {
-          late WidgetBuilder builder;
           switch (settings.name) {
             case '/':
-              builder = (context) => const HomePage();
-              break;
+              return MaterialPageRoute(
+                  builder: (context) => const HomePage(), settings: settings);
             case '/Thread':
-              builder = (context) => ThreadPage();
-              break;
+              return MaterialPageRoute(
+                  builder: (context) => ThreadPage(), settings: settings);
             default:
-              break;
+              return null;
           }
-          return MaterialPageRoute(builder: builder, settings: settings);
         },
       ));
 }
