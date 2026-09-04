@@ -26,6 +26,8 @@ class StartupScreenState extends State<StartupScreen>
   @override
   void initState() {
     super.initState();
+    // Workaround for displaying emoji properly (flutter/flutter#42586):
+    // force-loads the emoji typeface before the first frame.
     final ParagraphBuilder pb = ParagraphBuilder(
         ParagraphStyle(locale: PlatformDispatcher.instance.locale));
     pb.addText('\ud83d\ude01'); // smiley face emoji

@@ -19,8 +19,8 @@ class ThreadPageArguments {
 
   factory ThreadPageArguments.fromThread(Thread thread) {
     final saved = ThreadReadingPositionStore.instance.get(thread.threadId);
-    final maxPage =
-        (thread.totalReplies.toDouble() / kRepliesPerPage).ceil().clamp(1, 0x7fffffff);
+    final maxPage = ThreadReadingPosition.pageCountFor(thread.totalReplies)
+        .clamp(1, 0x7fffffff);
     var page = saved?.page ?? 1;
     var floor = saved?.floor;
     if (page > maxPage) {

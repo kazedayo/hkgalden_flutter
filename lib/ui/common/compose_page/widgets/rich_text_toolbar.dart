@@ -232,7 +232,7 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
   Future<void> _insertLink(BuildContext context) async {
     final url = await showDialog<String>(
       context: context,
-      builder: (_) => const _LinkDialog(),
+      builder: (_) => const _UrlDialog(),
     );
     if (url == null || url.isEmpty) return;
     final selection = widget.controller.selection;
@@ -248,9 +248,8 @@ class _RichTextToolbarState extends State<_RichTextToolbar> {
   Future<void> _insertImage(BuildContext context) async {
     final imageUrl = await showDialog<String>(
       context: context,
-      builder: (_) => _ImageInsertDialog(
-        imagePickCallback: widget.imagePickCallback,
-      ),
+      builder: (_) =>
+          _UrlDialog(imagePickCallback: widget.imagePickCallback),
     );
     if (imageUrl == null || imageUrl.isEmpty) return;
 
@@ -538,17 +537,24 @@ typedef _ToolbarSelection = ({
   Color? color,
 });
 
-class _LinkDialog extends StatefulWidget {
-  const _LinkDialog();
+/// URL input dialog for inserting links and images. Image mode
+/// ([imagePickCallback] set) adds the gallery-upload path.
+class _UrlDialog extends StatefulWidget {
+  final Future<String> Function(File)? imagePickCallback;
+
+  const _UrlDialog({this.imagePickCallback});
 
   @override
-  State<_LinkDialog> createState() => _LinkDialogState();
+  State<_UrlDialog> createState() => _UrlDialogState();
 }
 
-class _LinkDialogState extends State<_LinkDialog> {
+class _UrlDialogState extends State<_UrlDialog> {
   final TextEditingController _urlController = TextEditingController();
   bool _isValidUrl = false;
   bool _isUrlDirty = false;
+  bool _isUploading = false;
+
+  bool get _isImageMode => widget.imagePickCallback != null;
 
   @override
   void dispose() {
@@ -571,78 +577,6 @@ class _LinkDialogState extends State<_LinkDialog> {
     Navigator.of(context).pop(url);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('插入連結'),
-      content: SizedBox(
-        width: MediaQuery.sizeOf(context).width,
-        child: TextField(
-          controller: _urlController,
-          autofocus: true,
-          keyboardType: TextInputType.url,
-          textInputAction: TextInputAction.done,
-          onChanged: _onUrlChanged,
-          onSubmitted: (_) => _submit(),
-          decoration: InputDecoration(
-            hintText: 'https://',
-            labelText: 'URL',
-            errorText: (!_isValidUrl && _isUrlDirty)
-                ? '請輸入有效的連結 (例如: https://...)'
-                : null,
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(null),
-          child: const Text('取消'),
-        ),
-        TextButton(
-          onPressed: _isValidUrl ? _submit : null,
-          child: const Text('確定'),
-        ),
-      ],
-    );
-  }
-}
-
-class _ImageInsertDialog extends StatefulWidget {
-  final Future<String> Function(File) imagePickCallback;
-
-  const _ImageInsertDialog({required this.imagePickCallback});
-
-  @override
-  State<_ImageInsertDialog> createState() => _ImageInsertDialogState();
-}
-
-class _ImageInsertDialogState extends State<_ImageInsertDialog> {
-  final TextEditingController _urlController = TextEditingController();
-  bool _isUploading = false;
-  bool _isValidUrl = false;
-  bool _isUrlDirty = false;
-
-  @override
-  void dispose() {
-    _urlController.dispose();
-    super.dispose();
-  }
-
-  void _onUrlChanged(String text) {
-    final trimmed = text.trim();
-    setState(() {
-      _isUrlDirty = trimmed.isNotEmpty;
-      _isValidUrl = Uri.tryParse(trimmed)?.hasAbsolutePath ?? false;
-    });
-  }
-
-  void _submitUrl() {
-    if (!_isValidUrl) return;
-    final url = _urlController.text.trim();
-    if (url.isEmpty) return;
-    Navigator.of(context).pop(url);
-  }
-
   Future<void> _pickAndUploadImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(
@@ -658,7 +592,7 @@ class _ImageInsertDialogState extends State<_ImageInsertDialog> {
 
     try {
       final file = File(pickedFile.path);
-      final imageUrl = await widget.imagePickCallback(file);
+      final imageUrl = await widget.imagePickCallback!(file);
       if (mounted && imageUrl.isNotEmpty) {
         Navigator.of(context).pop(imageUrl);
       }
@@ -674,7 +608,7 @@ class _ImageInsertDialogState extends State<_ImageInsertDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('插入圖片'),
+      title: Text(_isImageMode ? '插入圖片' : '插入連結'),
       content: SizedBox(
         width: MediaQuery.sizeOf(context).width,
         child: Column(
@@ -686,50 +620,55 @@ class _ImageInsertDialogState extends State<_ImageInsertDialog> {
               keyboardType: TextInputType.url,
               textInputAction: TextInputAction.done,
               onChanged: _onUrlChanged,
-              onSubmitted: (_) => _submitUrl(),
+              onSubmitted: (_) => _submit(),
+              enabled: !_isUploading,
               decoration: InputDecoration(
                 hintText: 'https://',
-                labelText: '圖片 URL',
+                labelText: _isImageMode ? '圖片 URL' : 'URL',
                 errorText: (!_isValidUrl && _isUrlDirty)
-                    ? '請輸入有效的圖片連結 (例如: https://...)'
+                    ? (_isImageMode
+                        ? '請輸入有效的圖片連結 (例如: https://...)'
+                        : '請輸入有效的連結 (例如: https://...)')
                     : null,
               ),
-              enabled: !_isUploading,
             ),
-            const SizedBox(height: 16),
-            const Text('或'),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.selectionColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+            if (_isImageMode) ...[
+              const SizedBox(height: 16),
+              const Text('或'),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.selectionColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
+                  onPressed: _isUploading ? null : _pickAndUploadImage,
+                  icon: _isUploading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.upload_file),
+                  label: Text(_isUploading ? '上載中...' : '從裝置上載'),
                 ),
-                onPressed: _isUploading ? null : _pickAndUploadImage,
-                icon: _isUploading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.upload_file),
-                label: Text(_isUploading ? '上載中...' : '從裝置上載'),
               ),
-            ),
+            ],
           ],
         ),
       ),
       actions: [
         TextButton(
-          onPressed: _isUploading ? null : () => Navigator.of(context).pop(null),
+          onPressed:
+              _isUploading ? null : () => Navigator.of(context).pop(null),
           child: const Text('取消'),
         ),
         TextButton(
-          onPressed: (_isUploading || !_isValidUrl) ? null : _submitUrl,
+          onPressed: (_isUploading || !_isValidUrl) ? null : _submit,
           child: const Text('確定'),
         ),
       ],

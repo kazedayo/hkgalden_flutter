@@ -132,7 +132,4 @@ class XStatusCache {
     return uri.replace(queryParameters: params).toString();
   }
 
-  void clear() {
-    _cache.clear();
-  }
 }

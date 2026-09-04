@@ -30,7 +30,8 @@ void _jumpToPage(BuildContext context, Thread thread) {
               padding: EdgeInsets.only(
                 bottom: MediaQuery.paddingOf(context).bottom,
               ),
-              itemCount: (thread.replies.last.floor.toDouble() / kRepliesPerPage).ceil(),
+              itemCount:
+                  ThreadReadingPosition.pageForFloor(thread.replies.last.floor),
               itemBuilder: (context, index) => Card(
                 color: Colors.transparent,
                 elevation: 0,

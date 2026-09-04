@@ -9,8 +9,9 @@ void handleThreadPageCubitState({
   required PreviousPagePullController previousPull,
 }) {
   if (state is ThreadLoaded) {
-    final onLastPage =
-        (state.thread.totalReplies.toDouble() / kRepliesPerPage).ceil() <= state.endPage;
+    final onLastPage = ThreadReadingPosition.pageCountFor(
+            state.thread.totalReplies) <=
+        state.endPage;
     pageUi.onLastPage.value = onLastPage;
   } else if (state is ThreadError) {
     previousPull.clear();

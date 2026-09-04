@@ -21,6 +21,10 @@ class ThreadReadingPosition {
     return ((floor - 1) ~/ kRepliesPerPage) + 1;
   }
 
+  /// Page count for [totalReplies] replies (≥1: every thread has the OP page).
+  /// Equals `pageForFloor` since floors are 1-based and dense.
+  static int pageCountFor(int totalReplies) => pageForFloor(totalReplies);
+
   /// Mid-list: viewport top. Trailing edge: furthest visible/loaded floor.
   static int? resolveFloorForPersistence({
     required int? viewportTopFloor,

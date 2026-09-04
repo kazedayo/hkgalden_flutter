@@ -65,7 +65,4 @@ class YoutubeOEmbedCache {
     }
   }
 
-  void clear() {
-    _cache.clear();
-  }
 }
